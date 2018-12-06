@@ -1,8 +1,8 @@
 '''
 Change Log:
  * 0.9
-  - Initial version, after a long evening of adapting X3_Customizer for X4.
-  - Added first transform, Adjust_Job_Count.
+   - Initial version, after a long evening of adapting X3_Customizer for X4.
+   - Added first transform, Adjust_Job_Count.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.
