@@ -5,7 +5,8 @@
     <ProjectGuid>f321f45f-39ee-4cc8-91e7-bfec28462c97</ProjectGuid>
     <ProjectHome>.</ProjectHome>
     <StartupFile>Main.py</StartupFile>
-    <SearchPath></SearchPath>
+    <SearchPath>
+    </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>X4_Customizer</Name>

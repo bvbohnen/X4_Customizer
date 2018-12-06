@@ -26,7 +26,7 @@ def Run(*args):
     
     # Set up command line arguments.
     argparser = argparse.ArgumentParser(
-        description='Main function for running X3 Customizer version {}.'.format(
+        description='Main function for running X4 Customizer version {}.'.format(
             X4_Customizer.Change_Log.Get_Version()
             ),
         # Special setting to add default values to help messages.
@@ -99,10 +99,10 @@ def Run(*args):
     argparser.add_argument(
         '-allow_path_error', 
         action='store_true',
-        help =  'Allows the customizer to attempt to run if the x3/addon'
+        help =  'Allows the customizer to attempt to run if the x4/addon'
                 ' path appears incorrect; may be used if the source folder'
                 ' contains all needed files, though generated files'
-                ' need to be moved manually to the x3 directory.')
+                ' need to be moved manually to the x4 directory.')
     
     # TODO: maybe update this; currently scipy is default enabled, but
     # could be force disabled for users with scipy installed but who don't
@@ -249,7 +249,7 @@ def Run(*args):
         X4_Customizer.File_Manager.Cleanup()
         
         # Everything should now be done.
-        # Can open most output files in X3 Editor to verify results.
+        # Can open most output files in X4 Editor to verify results.
         X4_Customizer.File_Manager.Write_Files()
     else:
         print('Skipping file writes.')

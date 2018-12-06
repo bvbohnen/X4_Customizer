@@ -31,10 +31,10 @@ Make_Patch = X4_Customizer.File_Manager.File_Patcher.Make_Patch
 def Make(*args):
 
     X4_Customizer.Set_Path(
-        # This can point to any x3 installation which will have the
+        # This can point to any x4 installation which will have the
         #  unmodified base files to be patched.
         # Modified versions of these files should exist in patches.
-        path_to_addon_folder = r'D:\Steam\SteamApps\common\x3 terran conflict\addon',
+        path_to_addon_folder = r'D:\Steam\SteamApps\common\x4 terran conflict\addon',
         source_folder = 'patch_source'
     )
 

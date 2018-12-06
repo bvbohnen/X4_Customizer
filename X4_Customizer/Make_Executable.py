@@ -83,7 +83,7 @@ def Make(*args):
     
     # Set up command line arguments.
     argparser = argparse.ArgumentParser(
-        description='Generate an executable from the X3 Customizer source'
+        description='Generate an executable from the X4 Customizer source'
                     ' python code, using pyinstaller.',
         )
     
@@ -145,7 +145,7 @@ def Make(*args):
     #  file needs to be kept in the main dir and cleaned up at the end.
     spec_file_path = 'X4_Customizer.spec'
     # Hook file probably works like the spec file.
-    hook_file_path = 'pyinstaller_x3c_hook.py'
+    hook_file_path = 'pyinstaller_x4c_hook.py'
 
 
     # Change the working directory to here.

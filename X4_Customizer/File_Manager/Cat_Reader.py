@@ -2,7 +2,7 @@
 Support for unpacking files from cat/dat pairself.
 
 In Rebirth and X4, these files are no longer obfuscated like they
-were in X3, and can be read directly without any magic XORs or similar.
+were in X4, and can be read directly without any magic XORs or similar.
 
 
 The format of cat files, each line:

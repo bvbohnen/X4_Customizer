@@ -35,18 +35,19 @@ class Game_File:
       - Bool, if True then this file should be treated as modified,
         to be written out.
       - Files only read should leave this flag False.
-      - Pending development; defaults True for now.
+      - Pending development; defaults False for now.
     '''
     def __init__(
             self,
             virtual_path,
             file_source_path = None,
+            modified = False,
         ):
         # Pick out the name from the end of the virtual path.
         self.name = virtual_path.split('/')[-1]
         self.virtual_path = virtual_path
         self.file_source_path = file_source_path
-        self.modified = False
+        self.modified = modified
 
 
     # TODO: maybe merge this into usage locations.
@@ -181,12 +182,25 @@ class XML_File(Game_File):
         return
 
 
+    # Note: xml only needs diffing if it originates from somewhere else,
+    #  and isn't new.
+    # TODO: set up a flag for new, non-diff xml files. For now, all need
+    #  a diff.
     def Get_Diff(self):
         '''
         Generates an xml tree holding a diff patch, will convert from
         the original tree to the modified tree.
         '''
-        raise Exception('TODO')
+        # Set up a diff node as root.
+        new_root = ET.Element('diff')
+
+        # Replace the original root node, eg. <jobs>.
+        # (TODO: would '/[0]' also work?)
+        node = ET.Element('replace', attrib = {'sel':'/'+self.original_tree.tag})
+        new_root.append(node)
+        node.append(self.modified_tree)
+        
+        return new_root
 
 
     def Get_Binary(self):
@@ -195,7 +209,8 @@ class XML_File(Game_File):
         TODO: swap to diff patch output.
         '''
         # Pack into an ElementTree, to get full header.
-        etree = ET.ElementTree(self.modified_tree)
+        #etree = ET.ElementTree(self.modified_tree)
+        etree = ET.ElementTree(self.Get_Diff())        
         # Pretty print it. This returns bytes.
         binary = ET.tostring(etree, encoding = 'utf-8', pretty_print = True)
         # To be safe, add a newline at the end if there.

@@ -22,7 +22,7 @@ github, and the main documentation just because:
  this level of indent unless code blocking is intentional.
 
  -Indentation is built into some docstrings, though the only one that
- should matter for the markdown version is x3_customizer. That one needs
+ should matter for the markdown version is x4_customizer. That one needs
  to be carefully adjusted to avoid 4-space chains, including across
  newlines.
 
@@ -192,8 +192,8 @@ def Make(*args):
     # Grab the main docstring.
     # Add in the version number.
     main_doc = X4_Customizer.__doc__.replace(
-        'X3 Customizer', 
-        'X3 Customizer {}'.format(X4_Customizer.Change_Log.Get_Version()),
+        'X4 Customizer', 
+        'X4 Customizer {}'.format(X4_Customizer.Change_Log.Get_Version()),
         # Only change the first spot, the title line.
         1)
     # TODO: figure out how to split off the example tree.
@@ -532,7 +532,7 @@ def Get_BB_Text(line_list):
             
         # Special cases:
         # Hype up the main heading.
-        elif line.startswith('X3 Customizer'):
+        elif line.startswith('X4 Customizer'):
             # Note: tag order is somewhat strict (though in examples it
             #  shouldn't be).
             # Innermost is text size, then color, then bold.

@@ -42,7 +42,7 @@ class Log:
     * file_paths_renamed_dict
       - Dict of strings, paths to files renamed by the customizer, keyed
         by the original path and holding the new path.
-      - Generally, these will be suffixed with '.x3c.bak' or similar,
+      - Generally, these will be suffixed with '.x4c.bak' or similar,
         to sideline non-customizer files to make room for the
         customized versions.
       - When from an older run, these files should be considered as sources,

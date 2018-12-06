@@ -74,7 +74,7 @@ def Transform_Wrapper(
                 func._category = func._category.replace('T_','')
 
             # Drop the ending 's' if there was one (which was mostly present to
-            #  mimic the X3 source file names, eg. 'tships').
+            #  mimic the X4 source file names, eg. 'tships').
             if func._category[-1] == 's':
                 func._category = func._category[0:-1]
             # Special fix for 'Factorie' (after 's' removal).

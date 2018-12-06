@@ -1,6 +1,7 @@
 '''
 X4 Customizer
 -----------------
+Note: work in progress.
 
 This tool will read in source files from X4, modify on them based on
 user selected transforms, and write the results back to the game directory.
