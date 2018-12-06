@@ -69,8 +69,11 @@ Example input file:
         path_to_x4_folder = r'C:\Steam\SteamApps\common\X4 Foundations',
     )
     
-    # TODO: fill in examples.
-    Adjust_Job_Count()
+    # Reduce mass traffic and increase military jobs.
+    Adjust_Job_Count(
+        ('id','masstraffic', 0.5),
+        ('tag','military', 2)
+        )
 
 
 ***

@@ -80,10 +80,10 @@ def Run(*args):
                ' general message log.')
     
     argparser.add_argument(
-        '-no_catalog', 
+        '-use_catalog', 
         action='store_true',
-        help =  'Disables generation of a catalog file; modified files'
-                ' will be placed in loose folders.')
+        help =  'Enabled generation of a catalog file instead of writing'
+                ' modifications to loose files.')
     
     argparser.add_argument(
         '-dev', 
@@ -185,10 +185,10 @@ def Run(*args):
             print('Enabling developer mode.')
         Settings.developer = True
 
-    if args.no_catalog:
+    if args.use_catalog:
         if not args.quiet:
-            print('Disabling catalog generation.')
-        Settings.output_to_catalog = False
+            print('Enabling catalog generation.')
+        Settings.output_to_catalog = True
         
     if args.quiet:
         # No status message here, since being quiet.

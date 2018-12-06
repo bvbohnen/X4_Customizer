@@ -23,10 +23,13 @@ b)  Run Clean_X4_Customizer.bat.
 # Import all transform functions.
 from X4_Customizer import *
 
-Set_Path(
-    # Set the path to the X4 installation folder.
-    path_to_x4_folder = r'C:\Steam\SteamApps\common\X4 Foundations',
-)
+# Set the path to the X4 installation folder.
+Set_Path( path_to_x4_folder = r'C:\Steam\SteamApps\common\X4 Foundations' )
 
-# TODO: fill in commented out examples.
-Adjust_Job_Count()
+# Fill in transforms below.
+
+## Reduce mass traffic and increase military jobs.
+#Adjust_Job_Count(
+#    ('id','masstraffic', 0.5),
+#    ('tag','military', 2)
+#    )
