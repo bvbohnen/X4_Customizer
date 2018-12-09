@@ -136,7 +136,9 @@ def Make(*args):
     #  can be down one folder, and the python down another folder).
     dist_folder = os.path.normpath(os.path.join(This_dir, '..', 'bin'))
     # Subfolder to shove misc exe support files into.
-    exe_support_folder = os.path.join(dist_folder, 'support')
+    # Update: the new pyinstaller with python 3.7 doesn't like moving
+    # these files away from the exe.
+    exe_support_folder = os.path.join(dist_folder)#, 'support')
     
     program_name = 'X4_Customizer'
     # Note: it would be nice to put the spec file in a subfolder, but

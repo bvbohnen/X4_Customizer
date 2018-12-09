@@ -142,9 +142,11 @@ def Make(*args):
     def Record_Func(function, 
                     indent_level = 0, 
                     end_with_empty_line = True,
-                    include_in_simple = False):
+                    include_in_simple = False,
+                    include_name = True):
         '''
-        Adds lines for a function name with docstring and requirements.
+        Adds lines for a function (or class) name with docstring
+        and requirements.
         If include_in_simple == True, the simple file is skipped entirely.
         Otherwise, the simple file will get a truncated name with the initial
         part of the docstring, and no requirement list.
@@ -152,10 +154,10 @@ def Make(*args):
 
         # Get the name as-is.
         # Put an asterix in front for markdown.
-        name_line = '* ' + function.__name__
-        
-        Add_Line(name_line, indent_level, 
-                  include_in_simple = include_in_simple)
+        if include_name:
+            name_line = '* ' + function.__name__        
+            Add_Line(name_line, indent_level, 
+                      include_in_simple = include_in_simple)
 
         # If there are required files, print them.
         if hasattr(function, '_file_names'):
@@ -187,6 +189,7 @@ def Make(*args):
 
         if end_with_empty_line:
             Add_Line('')
+        return
 
 
     # Grab the main docstring.
@@ -217,15 +220,15 @@ def Make(*args):
         Add_Lines(file.read(), indent_level = 4)
 
 
-    # Grab any setup methods.
+    # Grab the Settings documentation.
     # Skip this for the simple summary.
     Make_Horizontal_Line(include_in_simple = False)
-    Add_Line('Setup methods:', include_in_simple = False)
+    Add_Line('Settings:', include_in_simple = False)
     Add_Line('', include_in_simple = False)
-    # For now, just the Set_Path method.
-    Record_Func(X4_Customizer.Set_Path, indent_level = 2,
-                include_in_simple = False)
-    # TODO: full settings.
+    Record_Func(X4_Customizer.Settings, indent_level = 2,
+                include_in_simple = False,
+                # Name isn't needed.
+                include_name = False)
     
 
     # Grab the various transform functions.

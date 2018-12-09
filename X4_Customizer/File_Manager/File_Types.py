@@ -2,13 +2,15 @@
 Classes to represent game files.
 '''
 import os
-from .. import Common
-Settings = Common.Settings
-from collections import OrderedDict, defaultdict
 #import xml.etree.ElementTree as ET
 #from xml.dom import minidom
 from lxml import etree as ET
 from copy import deepcopy
+from collections import OrderedDict, defaultdict
+
+from .. import Common
+Settings = Common.Settings
+from . import XML_Diff
 
 class Game_File:
     '''
@@ -36,18 +38,24 @@ class Game_File:
         to be written out.
       - Files only read should leave this flag False.
       - Pending development; defaults False for now.
+    * from_source
+      - Bool, if True then this file originates from some source
+        which was possibly modified, else it is completely new.
+      - Has some impact on write format, eg. xml diff patching.
     '''
     def __init__(
             self,
             virtual_path,
             file_source_path = None,
             modified = False,
+            from_source = False,
         ):
         # Pick out the name from the end of the virtual path.
         self.name = virtual_path.split('/')[-1]
         self.virtual_path = virtual_path
         self.file_source_path = file_source_path
         self.modified = modified
+        self.from_source = from_source
 
 
     # TODO: maybe merge this into usage locations.
@@ -77,14 +85,14 @@ class XML_File(Game_File):
       - List of strings, original header lines from the xml text,
         including the encoding declaration and the stylesheet
         declaration.
-    * original_tree
+    * original_root
       - Element holding the original parsed xml, pre-transforms,
         possibly with prior diff patches applied.
-    * modified_tree
+    * modified_root
       - Element holding transformed xml, suitable for generating
         new diff patches.
     '''
-    def __init__(self, file_binary, **kwargs):
+    def __init__(self, file_binary, modifies_existing_xml = False, **kwargs):
         super().__init__(**kwargs)
         
         # Get the encoding to use, since xml files are sensitive to this.
@@ -100,10 +108,13 @@ class XML_File(Game_File):
         self._text = file_binary.decode(self.encoding).replace('\r\n','\n')
 
         # Process into an xml tree.
-        self.original_tree = ET.XML(file_binary)
+        # Strip out blank text here, so that prettyprint works later.
+        self.original_root = ET.XML(
+            file_binary,
+            parser = ET.XMLParser(remove_blank_text=True))
         # Set the initial modified tree to a deep copy of the above,
         #  so it can be freely modified.
-        self.modified_tree = deepcopy(self.original_tree)        
+        self.modified_root = None
         return
     
 
@@ -161,24 +172,31 @@ class XML_File(Game_File):
         return
 
 
-    def Get_Tree(self):
+    def Get_Root(self):
         '''
-        Return an ElementTree object with the current modified xml.
+        Return an Element object with a copy of the current modified xml.
+        The first call of this should occur after all initial patching is
+        complete.
         '''
-        return self.modified_tree
+        if self.modified_root == None:
+            # Set the initial modified tree to a deep copy of the original.
+            self.modified_root = deepcopy(self.original_root)
+        # Return a deepcopy of the modified_root, so that a transform
+        #  can edit it safely, even if it exceptions out and doesn't
+        #  complete.
+        return deepcopy(self.modified_root)
 
 
-    def Update_Tree(self, element_root):
+    def Update_Root(self, element_root):
         '''
-        Update the current text from an xml node, either Element
-        or ElementTree.
+        Update the current modified xml from an xml node, either Element
+        or ElementTree. Flags this file as modified. Requires the root
+        element type be unchanged.
         '''
+        assert element_root.tag == self.modified_root.tag
         # Assume the xml changed from the original.
         self.modified = True
-        # Normalize to be the root Element (TODO: is this needed?).
-        if isinstance(element_root, ET._ElementTree):
-            element_root = element_root.getroot()
-        self.modified_tree = element_root
+        self.modified_root = element_root
         return
 
 
@@ -191,26 +209,25 @@ class XML_File(Game_File):
         Generates an xml tree holding a diff patch, will convert from
         the original tree to the modified tree.
         '''
-        # Set up a diff node as root.
-        new_root = ET.Element('diff')
-
-        # Replace the original root node, eg. <jobs>.
-        # (TODO: would '/[0]' also work?)
-        node = ET.Element('replace', attrib = {'sel':'/'+self.original_tree.tag})
-        new_root.append(node)
-        node.append(self.modified_tree)
-        
-        return new_root
+        patch_node = XML_Diff.Make_Patch(
+            original_node = self.original_root, 
+            modified_node = self.Get_Root())
+        return patch_node
 
 
     def Get_Binary(self):
         '''
-        Returns a bytearray with the full modified_tree.
+        Returns a bytearray with the full modified_root.
         TODO: swap to diff patch output.
         '''
         # Pack into an ElementTree, to get full header.
-        #etree = ET.ElementTree(self.modified_tree)
-        etree = ET.ElementTree(self.Get_Diff())        
+        # Modified source files will form a diff patch, others
+        # just record full xml.
+        if self.from_source:
+            etree = ET.ElementTree(self.Get_Diff())
+        else:
+            etree = ET.ElementTree(self.Get_Root())
+
         # Pretty print it. This returns bytes.
         binary = ET.tostring(etree, encoding = 'utf-8', pretty_print = True)
         # To be safe, add a newline at the end if there.
@@ -228,6 +245,23 @@ class XML_File(Game_File):
             file.write(self.Get_Binary())                      
         return
 
+
+    def Patch(self, other_xml_file):
+        '''
+        Merge another xml_file into this one.
+        Changes the original_root, and does not flag this file as modified.
+        '''
+        # Diff patches have a series of add, remove, replace nodes.
+        # These will operate on the original tree, not the original root,
+        # (allowing direct removal/replacement of the root), so first
+        # set up proper trees.
+        modified_node = XML_Diff.Apply_Patch(
+            original_node = self.original_root, 
+            patch_node    = other_xml_file.original_root )
+        
+        # Record this as the new original root.
+        self.original_root = modified_node
+        return
 
 
 # TODO: split this into separate text and binary versions.

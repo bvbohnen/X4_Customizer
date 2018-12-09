@@ -83,7 +83,7 @@ class Cat_Writer:
 
         # Convert the cat to utf-8 binary.
         # TODO: x4 cats appear to be ansi with unix newlines; look into
-        # if this is needed (assuming bugs occur with utf8).
+        # if this is needed (if bugs occur with utf8).
         cat_str = '\n'.join(cat_lines)
         cat_binary = bytes(cat_str, encoding = 'utf-8')
         

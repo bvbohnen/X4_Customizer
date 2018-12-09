@@ -9,169 +9,190 @@ from pathlib import Path
 
 class Settings_class:
     '''
-    Container for general settings, including system paths.
-    Primarily used for organization convenience.
-    Paths tend to be filled in by a call to Set_Paths; some other
-    flags are initialized from command line arguments.
+    This holds general settings and paths to control the customizer.
+    Adjust these settings as needed prior to running the first transform,
+    using direct writes to attributes.
+
+    Settings may be updated directly individually, or as arguments to
+    a call of the Settings object.
+    Examples:
+        Settings.path_to_x4_folder   = 'C:\...'
+        Settings.path_to_user_folder = 'C:\...'
+        Settings(
+            path_to_x4_folder = 'C:\...',
+            path_to_user_folder = 'C:\...')
 
     Attributes:
     * path_to_x4_folder
-      - String, the path to the main x4 folder.
-      - Converted to a full path if a relative path was given.
-    * path_to_output_folder
-      - String, the path to where files should be written.
-      - If None, defaults to the path_to_x4_folder, so that files can
-        be immediately recognized by the game.
-      - Primary for use when testing generated outputs without risk
-        of overwriting game files.
+      - Path to the main x4 folder.
+      - Defaults to HOMEDRIVE/"Steam/steamapps/common/X4 Foundations"
+    * path_to_user_folder
+      - Path to the folder where user files are located.
+      - Should include config.xml, content.xml, etc.
+      - Defaults to HOMEPATH/"Documents/Egosoft/X4" or a subfolder
+        with an 8-digit name.
+    * extension_name
+      - String, name of the extension being generated.
+      - Defaults to 'X4_Customizer'
+    * output_to_user_extensions
+      - Bool, if True then the generated extension holding output files
+        will be under <path_to_user_folder/extensions>.
+      - Defaults to False, writing to <path_to_x4_folder/extensions>
     * path_to_source_folder
-      - String, the path to the source folder, either a full path or relative
-        to the calling location.
-      - Constructed from path_to_addon_folder and source_folder.
-      - None if no source folder specified.
-    * message_file_name
-      - String, name a file to write detailed output messages to.
-    * log_file_name
-      - String, name a file to write json log output to.
+      - Optional path to a source folder that holds high priority source
+        files, which will be used instead of reading the x4 cat/dat files.
+      - For use when running transforms on manually edited files.
+      - Defaults to None
+    * prefer_single_files
+      - Bool, if True then loose files will be used before those in cat/dat
+        files, otherwise cat/dat takes precedence.
+      - Only applies within a single search location, eg. within an
+        extension, within the source folder, or within the base X4 folder;
+        a loose file in the source folder will still be used over those
+        in the X4 folder regardless of setting.
+      - Defaults to False
+    * ignore_extensions
+      - Bool, if True then extensions will be ignored, and files are
+        only sourced from the source_folder or x4_folder.
+      - Defaults to False
+    * transform_log_file_name
+      - String, name a text file to write transform output messages to;
+        content depends on transforms run.
+      - File is located in the output extension folder.
+      - Defaults to 'transform_log.txt'
+    * customizer_log_file_name
+      - String, name a json file to write customizer log information to,
+        including a list of files written.
+      - File is located in the output extension folder.
+      - Defaults to 'customizer_log.json'
     * disable_cleanup_and_writeback
-      - Bool, if True then cleanup from a prior run as well as any final
+      - Bool, if True then cleanup from a prior run and any final
         writes will be skipped.
-    * write_file_source_paths_to_message_log
+      - For use when testing transforms without modifying files.
+      - Defaults to False
+    * log_source_paths
       - Bool, if True then the path for any source files read will be
-        printed in the message log.
+        printed in the transform log.
+      - Defaults to False
     * skip_all_transforms
       - Bool, if True all transforms will be skipped.
       - For use during cleaning mode.
-    * ignore_loose_files
-      - Bool, if True then any files loose in the game folders (outside
-        the user source folder or a cat/dat pair) will be ignored, as
-        if they were produced by the customizer on a prior run.
+      - Defaults to False
     * use_scipy_for_scaling_equations
       - Bool, if True then scipy will be used to optimize scaling
         equations, for smoother curves between the boundaries.
       - If False or scipy is not found, then a simple linear scaling
         will be used instead.
+      - Defaults to True
     * show_scaling_plots
       - Bool, if True and matplotlib and numpy are available, any
         generated scaling equations will be plotted (and their
         x and y vectors printed for reference). Close the plot window
         manually to continue transform processing.
+      - Primarily for development use.
+      - Defaults to False
     * developer
       - Bool, if True then enable some behavior meant just for development,
-        such as leaving exceptions uncaught or letting file patchers do
-        the best job they can when hitting problems.
+        such as leaving exceptions uncaught.
+      - Defaults to False
     * verbose
-      - Bool, if True some extra status messages may be printed.
+      - Bool, if True some extra status messages may be printed to the
+        console.
+      - Defaults to False
     * allow_path_error
       - Bool, if True then if the x4 path looks wrong, the customizer
         will still attempt to run.
+      - Defaults to False
     * output_to_catalog
       - Bool, if True then the modified files will be written to a single
-        cat/dat pair, incrementally numbered above existing catalogs.
-      - Scripts will be kept as loose files.
+        cat/dat pair, otherwise they are written as loose files.
+      - Defaults to False
+    '''
+    '''
+    TODO:
+    * generate_content_xml
+      - Bool, when True a new content.xml will be generated for the
+        extension, overwriting any that already exists.
+      - Set False if wishing to reuse a custom content.xml, eg. one with
+        custom description. The existing file may be modified to
+        fill in dependencies.
+      - Defaults True.
     '''
     # TODO: language selection for modifying t files.
     def __init__(self):
-        self.path_to_x4_folder = None
-        self.path_to_output_folder = None
+
+        # For the path lookups, use os.environ to look up some windows
+        # path terms, but in case they aren't found just use '.' so
+        # this doesn't error out here.
+        self.path_to_x4_folder   = (Path(os.environ.get('HOMEDRIVE','.')) 
+                                    / 'Steam/steamapps/common/X4 Foundations')
+        self.path_to_user_folder = (Path(os.environ.get('HOMEPATH','.'))  
+                                    / 'Documents/Egosoft/X4')
+        
+        # If the user folder exists but has no content, check an id folder.
+        if (self.path_to_user_folder.exists() 
+        and not (self.path_to_user_folder / 'content.xml').exists()):
+            # Iterate through all files and dirs.
+            for dir in self.path_to_user_folder.iterdir():
+                # Skip non-dirs.
+                if not dir.is_dir():
+                    continue
+                # Check for the content.xml.
+                # Probably don't need to check folder name for digits;
+                # common case just has one folder.
+                if (dir / 'content.xml').exists():
+                    # Record it and stop looping.
+                    self.path_to_user_folder = dir
+                    break
+                
+
+        self.extension_name = 'X4_Customizer'
+        self.output_to_user_extensions = False
         self.path_to_source_folder = None
-        self.message_file_name = None
-        self.log_file_name = None
-        # Temp entry for relative source folder.
-        self._relative_source_folder = None
+        self.prefer_single_files = False
+        self.ignore_extensions = False
+        self.transform_log_file_name = 'transform_log.txt'
+        self.customizer_log_file_name = 'customizer_log.json'
         self.disable_cleanup_and_writeback = False
-        self.write_file_source_paths_to_message_log = False
+        self.log_source_paths = False
         self.skip_all_transforms = False
-        self.ignore_loose_files = False
         self.use_scipy_for_scaling_equations = True
         self.show_scaling_plots = False
         self.developer = False
         self.verbose = True
         self.allow_path_error = False
-        self.target_base_tc = False
-        self.output_to_catalog = True
+        self.output_to_catalog = False
+
+        return
         
 
-    def Set_X4_Folder(self, path):
+    def __call__(self, *args, **kwargs):
         '''
-        Sets the addon folder and x4 folder paths, from the X4 folder
-        initial path. Updates the path_to_source_folder if needed.
+        Convenience function for applying settings by calling
+        the settings object with fields to set.
         '''
-        self.path_to_x4_folder = Path(path).resolve()
-        # Update the full source path.
-        self.Update_Source_Folder_Path()
+        # Ignore args; just grab kwargs.
+        for name, value in kwargs.items():
+            # Warn on unexpected names.
+            if not hasattr(self, name):
+                print('Warning: setting "{}" not recognized'.format(name))
+            else:
+                setattr(self, name, value)
+        return
 
 
-    def Set_Output_Folder(self, path):
+    def Finalize_Setup(self):
         '''
-        Sets the folder to output generated game files to, as if it
-        were the x4 folder.
+        Checks the current paths for errors (not existing, etc.), converts
+        them to Path objects, creates the output extension folder, etc.
         '''
-        # Convert to a Path without resolving.
-        path = Path(path)
-        # Check if it was an absolute path.
-        if path.is_absolute():
-            # Record directly; resolve to be extra safe.
-            self.path_to_output_folder = path.resolve()
-        else:
-            # It was relative, so join to the x4 folder.
-            # (TODO: or possibly the working directory?)
-            self.path_to_output_folder = self.path_to_x4_folder / path
+        # Start with conversions to full Paths, since the user
+        # may have written these with strings.
+        self.path_to_x4_folder     = Path(self.path_to_x4_folder).resolve()
+        self.path_to_user_folder   = Path(self.path_to_user_folder).resolve()
+        if self.path_to_source_folder != None:
+            self.path_to_source_folder = Path(self.path_to_source_folder).resolve()
 
-
-    def Set_Source_Folder(self, path):
-        '''
-        Sets the source folder path relative to the x4 folder, and
-        updates its absolute path if the x4 folder is known and the
-        given path is not absolute.
-        '''
-        # Convert to a Path without resolving.
-        path = Path(path)
-        # Check if it was an absolute path.
-        if path.is_absolute():
-            # Record directly; resolve to be extra safe.
-            self.path_to_source_folder = path.resolve()
-        else:
-            # Relative paths get stored, and may be updated to a full
-            #  path right away if the addon folder is known.
-            self._relative_source_folder = path
-            # Update the full source path.
-            self.Update_Source_Folder_Path()
-
-
-    def Update_Source_Folder_Path(self):
-        '''
-        Update the full source path if x4 and source folders specified
-        and source is relative.
-        '''
-        # If the x4 and relative source folders are available.
-        if (self.path_to_x4_folder != None 
-        and self._relative_source_folder != None):
-            # Add to the x4 path.
-            self.path_to_source_folder = (self.path_to_x4_folder 
-                                        / self._relative_source_folder)
-            
-
-    def Set_Message_File(self, file_name):
-        '''
-        Sets the file name to use for any transform messages.
-        '''
-        self.message_file_name = file_name
-
-
-    def Set_Log_File(self, file_name):
-        '''
-        Sets the file name to use for the json log.
-        '''
-        self.log_file_name = file_name
-
-
-    def Verify_Setup(self):
-        '''
-        Checks the current paths for errors (not existing, etc.).
-        Some situations may just throw warnings.
-        Creates the source folder if it does not exist.
-        '''
         # Verify the X4 path looks correct.
         if not self.path_to_x4_folder.exists():
             raise Exception(
@@ -186,144 +207,64 @@ class Settings_class:
         if not (self.path_to_x4_folder / '01.cat').exists():
             if self.allow_path_error:
                 print(  
-                    'Warning: Path to the X4 folder appears wrong.\n'
-                    'Generated files may need manual moving to the correct folder.\n'
-                    'Automated source file extraction may fail.'
-                    +'\n (x4 path: {})'.format(self.path_to_x4_folder)
-                    )
+                    'Warning: Path to the X4 folder appears incorrect.'
+                    +'\n (x4 path: {})'.format(self.path_to_x4_folder))
             else:
                 # Hard error.
                 raise Exception(
                     'Path does not appear correct for the X4 folder.'
-                    +'\n (x4 path: {})'.format(self.path_to_x4_folder)
-                    )
+                    +'\n (x4 path: {})'.format(self.path_to_x4_folder))
 
-        # Set the output folder to 'extensions/X4_Customizer'
-        #  under the x4 folder.
-        # TODO: option to place this in user documents instead.
-        # Note: an extensions subfolder is added afterward.
-        # TODO: should 'extensions' be added here, or even
-        #  'extensions/X4_Customizer'?
-        if self.path_to_output_folder == None:
-            self.path_to_output_folder = self.path_to_x4_folder / 'extensions'/'X4_Customizer'
 
+        # Check the user folder for content.xml.
+        if not self.Get_User_Content_XML_Path().exists():
+            raise Exception(
+                'Path to the user folder appears incorrect, lacking content.xml.'
+                +'\n (path: {})'.format(self.path_to_user_folder))
+        
         # Create the output folder if it does not exist.
-        if not self.path_to_output_folder.exists():
+        if not self.Get_Output_Folder().exists():
             # Add any needed parents as well.
-            self.path_to_output_folder.mkdir(parents = True)
+            self.Get_Output_Folder().mkdir(parents = True)
 
         return
 
 
-    def Get_X4_Folder(self, extra_path = None):
-        '''
-        Returns the path to the X4 base folder, optionally with some
-        extra relative path applied.
-        '''
-        if extra_path != None:
-            return self.path_to_x4_folder / Path(extra_path)
+    def Get_X4_Folder(self):
+        'Returns the path to the X4 base folder.'
         return self.path_to_x4_folder
+    
+    def Get_User_Folder(self):
+        'Returns the path to the user folder.'
+        return self.path_to_user_folder
 
+    def Get_Output_Folder(self):
+        'Returns the path to the output extension folder.'
+        # Pick the user or x4 folder.
+        if self.output_to_user_extensions:
+            path = self.path_to_user_folder
+        else:
+            path = self.path_to_x4_folder
+        # Offset to the extension.
+        return path / 'extensions' / self.extension_name
 
-    def Get_Output_Folder(self, extra_path = None):
-        '''
-        Returns the path to the output folder, optionally with some
-        extra relative path applied.
-        '''
-        if extra_path != None:
-            return self.path_to_output_folder / Path(extra_path)
-        return self.path_to_output_folder
-
-
-    def Get_Source_Folder(self, extra_path = None):
-        '''
-        Returns the path to the Source folder, optionally with some
-        extra relative path applied.
-        '''
-        if extra_path != None:
-            return self.path_to_source_folder / Path(extra_path)
+    def Get_Source_Folder(self):
+        'Returns the path to the Source folder.'
         return self.path_to_source_folder
 
+    def Get_Transform_Log_Path(self):
+        'Returns the path to the transform log file.'
+        return self.Get_Output_Folder() / self.transform_log_file_name
 
-    def Get_Message_File_Path(self):
-        '''
-        Returns the path to the message file, including file name.
-        '''
-        return self.path_to_output_folder / self.message_file_name
-
-
-    def Get_Log_File_Path(self):
-        '''
-        Returns the path to the log file, including file name.
-        '''
-        return self.path_to_output_folder / self.log_file_name
+    def Get_Customizer_Log_Path(self):
+        'Returns the path to the customizer log file.'
+        return self.Get_Output_Folder() / self.customizer_log_file_name
+    
+    def Get_User_Content_XML_Path(self):
+        'Returns the path to the user content.xml file.'
+        return self.path_to_user_folder / 'content.xml'
 
 
 # General settings object, to be referenced by any place so interested.
 Settings = Settings_class()
 
-
-# This is the main access function input scripts are expected to use.
-# This docstring will be included in documentation.
-def Set_Path(
-        # Force args to be kwargs, since that is safer if args are
-        #  added/removed in the future.
-        *,
-        path_to_x4_folder = None,
-        path_to_output_folder = None,
-        path_to_source_folder = None,
-        # TODO: path to user documents to read content.xml.
-        summary_file = 'summary.txt',
-        log_file = 'log.json',
-    ):
-    '''
-    Sets the paths to be used for file loading and writing.
-
-    * path_to_x4_folder
-      - Path to the X4 base folder, where the executable is located.
-    * path_to_output_folder
-      - Optional, path to a folder to place output files in.
-      - Defaults to match path_to_x4_folder, so that outputs are
-        directly readable by the game.
-    * path_to_source_folder
-      - Optional, alternate folder which contains source files to be modified.
-      - Maybe be given as a relative path to the "addon" directory,
-        or as an absolute path.
-      - Files located here should have the same directory structure
-        as standard games files, eg. 'source_folder/types/Jobs.txt'.
-    * summary_file
-      - Name for where a summary file will be written, with
-        any transform results, relative to the output folder.
-      - Defaults to 'summary.txt'.
-    * log_file
-      - Name for where a json log file will be written,
-        including a summary of files written.
-      - This is also the file which will be read for any log from
-        a prior run.
-      - Defaults to 'log.json'.
-    '''
-    # Hide these behind None checks, to be extra safe; the Settings 
-    #  verification should catch problems.
-    # TODO: maybe trim Nones from here if checked in the Settings methods.
-    if path_to_x4_folder != None:
-        Settings.Set_X4_Folder(path_to_x4_folder)
-    if path_to_source_folder != None:
-        Settings.Set_Source_Folder(path_to_source_folder)
-    if path_to_output_folder != None:
-        Settings.Set_Output_Folder(path_to_output_folder)
-    if summary_file != None:
-        Settings.Set_Message_File(summary_file)
-    if log_file != None:
-        Settings.Set_Log_File(log_file)
-
-    # Note: verification is done at the first transform, not here,
-    #  so that any settings overwrites can be done after (or without)
-    #  the Set_Path call.
-    # Note: skipping Init until later isn't entirely safe if no
-    #  transforms were run (eg. if a new user runs the template file,
-    #  where all transforms are commented out).  Ensure Init gets run
-    #  at some late point if needed to complete path checks, since
-    #  old transform files may still need to be cleaned out using these
-    #  paths.
-
-    return

@@ -1,7 +1,7 @@
 '''
 Transforms to jobs.
 '''
-from ..File_Manager import Transform_Wrapper
+from ..Common import Transform_Wrapper
 from ..File_Manager import Load_File
 
 
@@ -38,19 +38,23 @@ def Adjust_Job_Count(
         ('faction','argon', 1.2),
         ('*', 1.1) )
     '''
+    assert isinstance(job_factors, (list, tuple))
     #-Removed, don't worry about this for now.
     ## If the call happened to be unnamed but packed in a list, it may
     ##  now be double-wrapped, so unwrap once.
-    assert isinstance(job_factors, (list, tuple))
     #if len(job_factors) == 1 and isinstance(job_factors[0], list):
     #    job_factors = job_factors[0]
 
+    # Quick test of something.
+    bla = Load_File('libraries/parameters.xml')
+
     jobs_game_file = Load_File('libraries/jobs.xml')
-    xml_tree = jobs_game_file.Get_Tree()
+    xml_root = jobs_game_file.Get_Root()
     
 
+
     # Loop over the jobs.
-    for job in xml_tree.findall('./job'):
+    for job in xml_root.findall('./job'):
         # For convenience, break out the category node.
         # (May not be present.)
         category = job.find('category')
@@ -103,5 +107,5 @@ def Adjust_Job_Count(
                 new_value = 1
             quota.set(name, str(new_value))
             
-    jobs_game_file.Update_Tree(xml_tree)
+    jobs_game_file.Update_Root(xml_root)
     return

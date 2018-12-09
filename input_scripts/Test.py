@@ -6,11 +6,11 @@ Place to test individual transforms.
 import X4_Customizer
 from X4_Customizer import *
 
-Set_Path(
+Settings(
     path_to_x4_folder = r'C:\Steam\SteamApps\common\X4 Foundations',
-)
+    )
 
-Adjust_Job_Count()
+#Adjust_Job_Count()
 
 ## Test: open up a cat file, the one with text pages.
 #cat09 = X4_Customizer.File_Manager.Cat_Reader.Cat_Reader(
@@ -36,3 +36,14 @@ Adjust_Job_Count()
 #cat_writer.Add_File(t44_game_file)
 #cat_writer.Write()
 
+
+# Run diff patch test on whatever xml.
+jobs_game_file = Load_File('libraries/jobs.xml')
+X4_Customizer.File_Manager.XML_Diff.Unit_Test(
+    test_node      = jobs_game_file.Get_Root(), 
+    num_tests      = 100, 
+    edits_per_test = 5,
+    rand_seed      = 1,
+    )
+
+print('Test done')

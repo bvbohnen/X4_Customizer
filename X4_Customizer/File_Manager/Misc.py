@@ -4,22 +4,17 @@ out when finished.
 
 TODO: rename this to be different than the package.
 '''
-
-import os
 from pathlib import Path
-from collections import OrderedDict
-import inspect
-import shutil
 
-from .. import Common
-Settings = Common.Settings
-from . import Source_Reader
-Source_Reader = Source_Reader.Source_Reader
-from . import Cat_Writer
-from .File_Types import *
-from . import Logs
-Log_New = Logs.Log_New
-Log_Old = Logs.Log_Old
+from .Source_Reader import Source_Reader_class
+from .Cat_Writer import Cat_Writer
+from .File_Types import Misc_File
+from ..Common import Settings
+from ..Common import File_Missing_Exception
+from ..Common import Customizer_Log_class
+# Copy of a prior run's log file.
+Old_Log = Customizer_Log_class()
+Source_Reader = Source_Reader_class()
     
 
 # On the first call to Load_File from any transform, do some extra
@@ -34,21 +29,14 @@ def Init():
     First_call = False
 
     # The file paths should be defined at this point. Error if not.
-    Settings.Verify_Setup()
+    Settings.Finalize_Setup()
 
     # Read any old log file.
-    Log_Old.Load()
+    Old_Log.Load(Settings.Get_Customizer_Log_Path())
 
-    # Initialize the file system, now that paths are set in settings.
-    Source_Reader.Init()
+    # Initialize the source reader, now that paths are set in settings.
+    Source_Reader.Init_From_Settings()
     
-    #-Removed for now.
-    ## Generate an initial dummy file for all page text overrides.
-    #game_file = Page_Text_File(
-    #    virtual_path = Settings.Get_Page_Text_File_Path(),
-    #    )
-    #Add_File(game_file)
-
     return
 
 
@@ -91,6 +79,9 @@ def Load_File(file_name,
       - Bool, if True and the file is not found, raises an exception,
         else returns None.
     '''
+    # Verify Init was called.
+    Init()
+
     # If the file is not loaded, handle loading.
     if file_name not in File_dict:
 
@@ -103,7 +94,7 @@ def Load_File(file_name,
         # Problem if the file isn't found.
         if game_file == None:
             if error_if_not_found:
-                raise Common.File_Missing_Exception(
+                raise File_Missing_Exception(
                     'Could not find file {}, or file was empty'.format(file_name))
             return None
         
@@ -139,41 +130,45 @@ def Cleanup():
     # Find all files generated on a prior run, that still appear to be
     #  from that run (eg. were not changed externally), and remove
     #  them.
-    for path in Log_Old.Get_File_Paths_From_Last_Run():
-        if os.path.exists(path):
-            os.remove(path)            
+    for path in Old_Log.Get_File_Paths_From_Last_Run():
+        if path.exists():
+            path.unlink()            
     return
             
 
 def Add_Source_Folder_Copies():
     '''
     Adds Misc_File objects which copy files from the user source
-     folders to the game folders.
+    folders to the game folders.
     This should only be called after transforms have been completed,
-     to avoid adding a copy of a file that was already loaded and
-     edited.
+    to avoid adding a copy of a file that was already loaded and
+    edited.
+    All source folder files, loaded here or earlier, will be flagged
+    as modified.
     '''
     # Some loose files may be present in the user source folder which
     #  are intended to be moved into the main folders, whether transformed
     #  or not, in keeping with behavior of older versions of the customizer.
     # These will do direct copies.
-    for virtual_path, sys_path in Source_Reader.source_file_path_dict.items():
-        # Skip files already written.
-        if virtual_path in File_dict:
-            continue
-
+    for virtual_path, sys_path in Source_Reader.Get_All_Loose_Source_Files().items():
         # TODO:
         # Skip files which do not match anything in the game cat files,
         #  to avoid copying any misc stuff (backed up files, notes, etc.).
         # This will need a function created to search cat files without
         #  loading from them.
 
-        # Read the binary.
-        with open(sys_path, 'rb') as file:
-            binary = file.read()
+        # Check for files not loaded yet.
+        if virtual_path not in File_dict:
+            # Read the binary.
+            with open(sys_path, 'rb') as file:
+                binary = file.read()
 
-        # Create the game file.
-        Add_File(Misc_File(binary = binary, virtual_path = virtual_path))
+            # Create the game file.
+            Add_File(Misc_File(binary = binary, 
+                               virtual_path = virtual_path))
+
+        # Set as modified to force writeout.
+        File_dict['virtual_path'].modified = True
     return
 
                 
@@ -195,13 +190,16 @@ def Write_Files():
     # Maybe could do it Clang style with gibberish extensions, then once
     #  all files, written, rename then properly.
 
+    # Record the output folder in the log.
+    log = Customizer_Log_class()
+
     # Pick the path to the catalog folder and file.
     cat_path = Settings.Get_Output_Folder() / 'ext_01.cat'
 
     # Note: this path may be the same as used in a prior run, but
     #  the prior cat file should have been removed by cleanup.
     assert not cat_path.exists()
-    cat_writer = Cat_Writer.Cat_Writer(cat_path)
+    cat_writer = Cat_Writer(cat_path)
 
     # Set up the content.xml file.
     Add_File(Misc_File(text = Get_Content_Text(), 
@@ -230,11 +228,11 @@ def Write_Files():
             file_object.Write_File(file_path)
 
             # Add this to the log, post-write for correct hash.
-            Log_New.Record_File_Path_Written(file_path)
+            log.Record_File_Path_Written(file_path)
 
             # Refresh the log file, in case a crash happens during file
             #  writes, so this last write was captured.
-            Log_New.Store()
+            log.Store()
 
         else:
             # Add to the catalog writer.
@@ -246,23 +244,23 @@ def Write_Files():
         cat_writer.Write()
 
         # Log both the cat and dat files as written.
-        Log_New.Record_File_Path_Written(cat_writer.cat_path)
-        Log_New.Record_File_Path_Written(cat_writer.dat_path)
+        log.Record_File_Path_Written(cat_writer.cat_path)
+        log.Record_File_Path_Written(cat_writer.dat_path)
 
         # Refresh the log file.
-        Log_New.Store()
+        log.Store()
 
     return
 
 
-# Preset the directory where the customizer resides, which
-#  is one level up from here.
+# Set the directory where the customizer resides, which is one
+#  level up from here.
 # Note: pyinstaller can change directories around, and needs special
-#  handling here.
+#  handling.
 # See https://stackoverflow.com/questions/404744/determining-application-path-in-a-python-exe-generated-by-pyinstaller
 # In short, a 'frozen' attribute is added to sys by pyinstaller,
-#  so can be checked for a post-installer format.
-# Further, _MEIPASS will be given the app base folder.
+#  which can be checked to know if this is running in post-installer mode,
+#  in which case _MEIPASS will hold the app base folder.
 import sys
 if getattr(sys, 'frozen', False):
     # This appears to be the launch folder, so no extra pathing needed.
@@ -298,8 +296,9 @@ def Copy_File(
         source_binary = file.read()
 
     # Create a generic game object for this, using the dest path.
-    Add_File(Misc_File(virtual_path = dest_virtual_path, 
-                       binary = source_binary))
+    Add_File( Misc_File(
+        virtual_path = dest_virtual_path, 
+        binary = source_binary))
 
     return
 
@@ -331,6 +330,11 @@ def Get_Content_Text():
         lines.append(
         '  <text language="{}"  name="X4_Customizer" description=""/>'.format(lang_id)
             )
+
+    # TODO: add in dependencies to existing extensions.
+    # These should be limited to only those extensions which sourced
+    # any of the files which were modified. -Needs framework development
+    # to track this.
 
     lines.append('</content>')
     

@@ -1,7 +1,7 @@
 
 from .. import Common
 Settings = Common.Settings
-from .Misc import Init
+from ..File_Manager.Misc import Init
 
 # Record a set of all transforms.
 # This is filled in by the decorator at startup.
@@ -20,8 +20,6 @@ def Transform_Was_Run_Before(transform_name):
     Returns True if the named transform has been run.
     '''
     return transform_name in Transforms_names_run
-
-
 
 '''
 Decorator function for transforms to check if their required

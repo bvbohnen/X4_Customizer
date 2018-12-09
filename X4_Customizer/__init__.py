@@ -2,88 +2,67 @@
 X4 Customizer
 -----------------
 
-Note: work in progress.
+Current status: functional, most features in place, but still in beta testing.
 
-This tool will read in source files from X4, modify on them based on
-user selected transforms, and write the results back to the game directory.
-Transforms will often perform complex or repetitive tasks succinctly,
-avoiding the need for hand editing of source files. Many transforms
-will also do analysis of game files, to intelligently select appropriate
-edits to perform.  Some transforms carry out binary code edits, allowing
-for options not found elsewhere.
+This tool will programatically apply a variety of user selected transforms
+to X4 game files, optionally pre-modded. Features include:
 
-Source files will generally support any prior modding. Most transforms 
-support input arguments to set parameters and adjust behavior, according 
-to user preferences. Most transforms will work on an existing save.
+ * Integrated catalog read/write support.
+ * Basic XML diff patch support.
+ * Automatic detection and loading of enabled extensions.
+ * Framework for developing modular, customizable transforms of
+   varying complexity.
+ * Transforms can dynamically read and alter game files, instead of being
+   limited to static changes like standard extensions.
+ * Transforms operate on a user's unique mixture of mods, and can
+   easily be rerun after game patches or mod updates.
+ * Changes are written to a new or specified extension.
 
-This tool is written in Python, and tested on version 3.7.
+This tool is available as platform portable Python source code (tested on
+3.7 with the lxml package) or as a compiled executable for 64-bit Windows.
 
-Usage for Releases:
+The control script:
 
- * "Launch_X4_Customizer.bat [path to user_transform_module.py]"
-   - Call from the command line for full options, or run directly
-     for default options.
-   - Runs the customizer, using the provided python user_transform_module
-     which will specify the path to the X4 directory and the
-     transforms to be run.
-   - By default, attempts to run User_Transforms.py in the input_scripts
-     folder.
-   - Call with '-h' to see any additional arguments.
- * "Clean_X4_Customizer.bat [path to user_transform_module.py]"
-   - Similar to Launch_X4_Customizer, except appends the "-clean" flag,
-     which will undo any transforms from a prior run.
+  * This tool works by executing a user supplied python script specifying any
+    system paths, settings, and desired transforms to run.
 
-Usage for the Python source code:
-
- * "X4_Customizer\Main.py [path to user_transform_module.py]"
-   - This is the primary entry function for the python source code.
-   - Does not fill in a default transform file unless the -default_script
-     option is used.
-   - Supports general python imports in the user_transform_module.
-   - If the scipy package is available, this supports smoother curve fits
-     for some transforms, which were omitted from the Release due to
-     file size.
- * "X4_Customizer\Make_Documentation.py"
-   - Generates updated documentation for this project, as markdown
-     formatted files README.md and Documentation.md.
- * "X4_Customizer\Make_Executable.py"
-   - Generates a standalone executable and support files, placed
-     in the bin folder. Requires the PyInstaller package be available.
-     The executable will be created for the system it was generated on.
- * "X4_Customizer\Make_Patches.py"
-   - Generates patch files for this project from some select modified
-     game scripts. Requires the modified scripts be present in the
-     patches folder; these scripts are not included in the repository.
- * "X4_Customizer\Make_Release.py"
-   - Generates a zip file with all necessary binaries and source files
-     for general release.
-
-Setup and behavior:
-
-  * Source files will be read from the X4 cat/dat files automatically,
-  with mods applied according to those selected in the user's content.xml
-  and possibly any loose files under the X4 directory.
-
-  * The user controls the customizer using a command script which will
-  set the path to the X4 installation to customize (using the Set_Path
-  function), and will call the desired transforms with any necessary
-  parameters. This script is written using Python code, which will be
-  executed by the customizer.
-  
-  * The key command script sections are:
+  * The key control script sections are:
     - "from X4_Customizer import *" to make all transform functions available.
-    - Call Set_Path to specify the X4 directory, along with some
-      other path options. See documentation for parameters.
-    - Call a series of transform functions, as desired.
-  
-  * The quickest way to set up the command script is to copy and edit
-  the "input_scripts/User_Transforms_template.py" file, renaming
-  it to "User_Transforms.py" for recognition by Launch_X4_Customizer.bat.
-  Included in the repository is Authors_Transforms, the author's
-  personal set of transforms, which can be checked for futher examples.
+    - Call Settings() to change paths and set non-default options.
+    - Call a series of transforms.
+    
+  * The quickest way to set up the control script is to copy and edit
+    the "input_scripts/User_Transforms_template.py" file, renaming
+    it to "User_Transforms.py" for recognition by Launch_X4_Customizer.bat.
 
-  * Transformed output files will be generated to a new extension
-  folder, as loose files or packged in a cat/dat pair.
+Usage for compiled releases:
+
+  * "Launch_X4_Customizer.bat <optional path to control script>"
+    - Call from the command line for full options (-h for help), or run
+      directly to execute the default script at
+      "input_scripts/User_Transforms.py".
+  * "Clean_X4_Customizer.bat <optional path to control script>"
+    - Removes files generated in a prior run of the given or default3
+      control script.
+
+Usage for Python source code:
+
+  * "python X4_Customizer\Main.py <optional path to control script>"
+    - This is the primary entry function for the python source code.
+    - Add the "-default_script" option to behave like the bat launcher.
+    - Control scripts may freely use any python packages, instead of being
+      limited to those included with the release.
+  * "python X4_Customizer\Make_Documentation.py"
+    - Generates updated documentation for this project, as markdown
+      formatted files README.md and Documentation.md.
+  * "python X4_Customizer\Make_Executable.py"
+    - Generates a standalone executable and support files, placed
+      in the bin folder. Requires the PyInstaller package be available.
+      The executable will be created for the system it was generated on.
+  * "python X4_Customizer\Make_Release.py"
+    - Generates a zip file with all necessary binaries, source files,
+      and example scripts for general release.
+
 
 '''
 # Note: the above comment gets printed to the markdown file, so avoid
@@ -109,6 +88,7 @@ from . import Change_Log
 
 # Convenience items for input scripts to import.
 from .Transforms import *
-from .Common.Settings import Set_Path
+#from .Common.Settings import Set_Path
 from .Common.Settings import Settings
+from .File_Manager import Load_File
 

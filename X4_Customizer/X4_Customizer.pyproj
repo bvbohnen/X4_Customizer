@@ -45,9 +45,6 @@
     <Compile Include="File_Manager\Cat_Writer.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="File_Manager\Logs.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="File_Manager\Cat_Reader.py">
       <SubType>Code</SubType>
     </Compile>
@@ -58,7 +55,11 @@
     <Compile Include="File_Manager\File_Types.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="File_Manager\Transform_Manager.py">
+    <Compile Include="Common\Logs.py" />
+    <Compile Include="Common\Transform_Manager.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="File_Manager\XML_Diff.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="File_Manager\__init__.py" />
@@ -82,9 +83,6 @@
     </Compile>
     <Compile Include="Common\Scaling_Equations.py" />
     <Compile Include="Common\Settings.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Transforms\Director\Bug_Fixes.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Transforms\Director\Support.py">

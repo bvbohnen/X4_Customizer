@@ -9,6 +9,7 @@ from ... import File_Manager
 from ...Common import Flags
 
 
+
 def Make_Director_Shell(cue_name, body_text = None, file_name = None):
     '''
     Support function to make a director shell file, setting up a queue
@@ -17,6 +18,7 @@ def Make_Director_Shell(cue_name, body_text = None, file_name = None):
     Optionally, delete any old file previously generated instead of
     creating one.
     '''
+    raise Exception('TODO: update for X4.')
     #  Set the default file name.
     if not file_name:
         file_name = cue_name + '.xml'

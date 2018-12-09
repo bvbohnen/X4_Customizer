@@ -1,8 +1,11 @@
+'''
+XML helper functions, for use by transforms.
+'''
+#import xml.etree.ElementTree as ET
+#from xml.dom import minidom
 
-import xml.etree.ElementTree as ET
-from xml.dom import minidom
 
-def XML_Find_All_Matches(base_node, match_node):
+def Find_All_Matches(base_node, match_node):
     '''
     Searches an xml node's contents to find a match to a given reference
     node. Will match node type, all attributes, and all children
@@ -49,7 +52,7 @@ def XML_Find_All_Matches(base_node, match_node):
     return found_nodes
 
 
-def XML_Find_Match(base_node, match_node):
+def Find_Match(base_node, match_node):
     '''
     Searches an xml node's contents to find a match to a given reference
     node. Will match node type, all attributes, and all children
@@ -122,7 +125,7 @@ def XML_To_Unformatted_String(node):
     return text
 
 
-def XML_Replace_Node(parent_node, old_node, new_node):
+def Replace_Node(parent_node, old_node, new_node):
     '''
     Replace a child node of the parent.
     '''
@@ -131,7 +134,7 @@ def XML_Replace_Node(parent_node, old_node, new_node):
     parent_node.insert(index, new_node)
     return
 
-def XML_Insert_After(parent_node, old_node, new_node):
+def Insert_After(parent_node, old_node, new_node):
     '''
     Insert a new node after an old child node under the parent.
     '''

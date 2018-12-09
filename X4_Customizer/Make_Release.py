@@ -4,20 +4,19 @@ Included should be documentation, binaries, and necessary game
 files.
 '''
 import os
+from pathlib import Path # TODO: switch over from os.
 import sys
 import zipfile
 import Make_Documentation
 import Make_Executable
-import Make_Patches
+#import Make_Patches
 import Change_Log
 import argparse
 
 This_dir = os.path.join(os.path.dirname(__file__))
 Top_dir = os.path.normpath(os.path.join(This_dir, '..'))
 
-def Make(*args):
-
-    
+def Make(*args):    
     # Set up command line arguments.
     argparser = argparse.ArgumentParser(
         description='Prepare a release of this project, zipping the'
@@ -39,11 +38,11 @@ def Make(*args):
         action='store_true',
         help = 'Regenerates executable and support files before release.')
     
-    argparser.add_argument(
-        '-patch_refresh', 
-        action='store_true',
-        help = 'Regenerates patch files before release. This should be'
-               ' rarely needed.')
+    #argparser.add_argument(
+    #    '-patch_refresh', 
+    #    action='store_true',
+    #    help = 'Regenerates patch files before release. This should be'
+    #           ' rarely needed.')
         
     # Run the parser on the input args.
     parsed_args = argparser.parse_args(args)
@@ -56,9 +55,9 @@ def Make(*args):
     if parsed_args.exe_refresh or parsed_args.refresh:
         print('Refreshing executable.')
         Make_Executable.Make()
-    if parsed_args.patch_refresh:
-        print('Refreshing patches.')
-        Make_Patches.Make()
+    #if parsed_args.patch_refresh:
+    #    print('Refreshing patches.')
+    #    Make_Patches.Make()
 
     # Get a list of all file paths to add to the release.
     # These will be absolute paths.
@@ -77,20 +76,20 @@ def Make(*args):
     #  part of the actual repository, and not leftover work files (like
     #  modified scripts).
     # For now, some hand selected filters will be used.
-    for folder in ['bin','game_files','patches', 'input_scripts']:
+    for folder in ['bin', 'input_scripts']: #,'game_files','patches'
         for dir_path, _, file_names in os.walk(os.path.join(Top_dir, folder)):
 
             # Check each file name individually.
             for file_name in file_names:
 
-                # Skip patches that don't end in .patch.
-                if folder == 'patches' and not file_name.endswith('.patch'):
-                    continue
-
-                # Skip game files that end in .bak, leftovers from
-                #  the script editor.
-                if folder == 'game_files' and file_name.endswith('.bak'):
-                    continue
+                ## Skip patches that don't end in .patch.
+                #if folder == 'patches' and not file_name.endswith('.patch'):
+                #    continue
+                #
+                ## Skip game files that end in .bak, leftovers from
+                ##  the script editor.
+                #if folder == 'game_files' and file_name.endswith('.bak'):
+                #    continue
 
                 file_paths.append(os.path.join(folder, dir_path, file_name))
                 

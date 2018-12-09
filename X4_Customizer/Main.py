@@ -99,10 +99,9 @@ def Run(*args):
     argparser.add_argument(
         '-allow_path_error', 
         action='store_true',
-        help =  'Allows the customizer to attempt to run if the x4/addon'
+        help =  'Allows the customizer to attempt to run if the x4'
                 ' path appears incorrect; may be used if the source folder'
-                ' contains all needed files, though generated files'
-                ' need to be moved manually to the x4 directory.')
+                ' contains all needed files.')
     
     # TODO: maybe update this; currently scipy is default enabled, but
     # could be force disabled for users with scipy installed but who don't
@@ -178,7 +177,7 @@ def Run(*args):
     if args.write_source_paths:
         if not args.quiet:
             print('Adding source paths to the message log.')
-        Settings.write_file_source_paths_to_message_log = True
+        Settings.log_source_paths = True
 
     if args.dev:
         if not args.quiet:

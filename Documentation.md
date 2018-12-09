@@ -1,54 +1,51 @@
-X4 Customizer 0.9
+X4 Customizer 0.9.1
 -----------------
 
-Note: work in progress.
+Current status: functional, most features in place, but still in beta testing.
 
-This tool will read in source files from X4, modify on them based on user selected transforms, and write the results back to the game directory. Transforms will often perform complex or repetitive tasks succinctly, avoiding the need for hand editing of source files. Many transforms will also do analysis of game files, to intelligently select appropriate edits to perform.  Some transforms carry out binary code edits, allowing for options not found elsewhere.
+This tool will programatically apply a variety of user selected transforms to X4 game files, optionally pre-modded. Features include:
 
-Source files will generally support any prior modding. Most transforms support input arguments to set parameters and adjust behavior, according to user preferences. Most transforms will work on an existing save.
+ * Integrated catalog read/write support.
+ * Basic XML diff patch support.
+ * Automatic detection and loading of enabled extensions.
+ * Framework for developing modular, customizable transforms of varying complexity.
+ * Transforms can dynamically read and alter game files, instead of being limited to static changes like standard extensions.
+ * Transforms operate on a user's unique mixture of mods, and can easily be rerun after game patches or mod updates.
+ * Changes are written to a new or specified extension.
 
-This tool is written in Python, and tested on version 3.7.
+This tool is available as platform portable Python source code (tested on 3.7 with the lxml package) or as a compiled executable for 64-bit Windows.
 
-Usage for Releases:
+The control script:
 
- * "Launch_X4_Customizer.bat [path to user_transform_module.py]"
-   - Call from the command line for full options, or run directly for default options.
-   - Runs the customizer, using the provided python user_transform_module which will specify the path to the X4 directory and the transforms to be run.
-   - By default, attempts to run User_Transforms.py in the input_scripts folder.
-   - Call with '-h' to see any additional arguments.
- * "Clean_X4_Customizer.bat [path to user_transform_module.py]"
-   - Similar to Launch_X4_Customizer, except appends the "-clean" flag, which will undo any transforms from a prior run.
+  * This tool works by executing a user supplied python script specifying any system paths, settings, and desired transforms to run.
 
-Usage for the Python source code:
-
- * "X4_Customizer\Main.py [path to user_transform_module.py]"
-   - This is the primary entry function for the python source code.
-   - Does not fill in a default transform file unless the -default_script option is used.
-   - Supports general python imports in the user_transform_module.
-   - If the scipy package is available, this supports smoother curve fits for some transforms, which were omitted from the Release due to file size.
- * "X4_Customizer\Make_Documentation.py"
-   - Generates updated documentation for this project, as markdown formatted files README.md and Documentation.md.
- * "X4_Customizer\Make_Executable.py"
-   - Generates a standalone executable and support files, placed in the bin folder. Requires the PyInstaller package be available. The executable will be created for the system it was generated on.
- * "X4_Customizer\Make_Patches.py"
-   - Generates patch files for this project from some select modified game scripts. Requires the modified scripts be present in the patches folder; these scripts are not included in the repository.
- * "X4_Customizer\Make_Release.py"
-   - Generates a zip file with all necessary binaries and source files for general release.
-
-Setup and behavior:
-
-  * Source files will be read from the X4 cat/dat files automatically, with mods applied according to those selected in the user's content.xml and possibly any loose files under the X4 directory.
-
-  * The user controls the customizer using a command script which will set the path to the X4 installation to customize (using the Set_Path function), and will call the desired transforms with any necessary parameters. This script is written using Python code, which will be executed by the customizer.
-  
-  * The key command script sections are:
+  * The key control script sections are:
     - "from X4_Customizer import *" to make all transform functions available.
-    - Call Set_Path to specify the X4 directory, along with some other path options. See documentation for parameters.
-    - Call a series of transform functions, as desired.
-  
-  * The quickest way to set up the command script is to copy and edit the "input_scripts/User_Transforms_template.py" file, renaming it to "User_Transforms.py" for recognition by Launch_X4_Customizer.bat. Included in the repository is Authors_Transforms, the author's personal set of transforms, which can be checked for futher examples.
+    - Call Settings() to change paths and set non-default options.
+    - Call a series of transforms.
+    
+  * The quickest way to set up the control script is to copy and edit the "input_scripts/User_Transforms_template.py" file, renaming it to "User_Transforms.py" for recognition by Launch_X4_Customizer.bat.
 
-  * Transformed output files will be generated to a new extension folder, as loose files or packged in a cat/dat pair.
+Usage for compiled releases:
+
+  * "Launch_X4_Customizer.bat <optional path to control script>"
+    - Call from the command line for full options (-h for help), or run directly to execute the default script at "input_scripts/User_Transforms.py".
+  * "Clean_X4_Customizer.bat <optional path to control script>"
+    - Removes files generated in a prior run of the given or default3 control script.
+
+Usage for Python source code:
+
+  * "python X4_Customizer\Main.py <optional path to control script>"
+    - This is the primary entry function for the python source code.
+    - Add the "-default_script" option to behave like the bat launcher.
+    - Control scripts may freely use any python packages, instead of being limited to those included with the release.
+  * "python X4_Customizer\Make_Documentation.py"
+    - Generates updated documentation for this project, as markdown formatted files README.md and Documentation.md.
+  * "python X4_Customizer\Make_Executable.py"
+    - Generates a standalone executable and support files, placed in the bin folder. Requires the PyInstaller package be available. The executable will be created for the system it was generated on.
+  * "python X4_Customizer\Make_Release.py"
+    - Generates a zip file with all necessary binaries, source files, and example scripts for general release.
+
 
 ***
 
@@ -62,10 +59,14 @@ Example input file:
     # Import all transform functions.
     from X4_Customizer import *
     
-    Set_Path(
+    Settings(
         # Set the path to the X4 installation folder.
-        path_to_x4_folder = r'C:\Steam\SteamApps\common\X4 Foundations',
-    )
+        path_to_x4_folder   = r'C:\Steam\SteamApps\common\X4 Foundations',
+        # Set the path to the user documents folder.
+        path_to_user_folder = r'C:\Users\charname\Documents\Egosoft\X4\12345678',
+        # Switch output to be in the user documents folder.
+        output_to_user_extensions = True,
+        )
     
     # Reduce mass traffic and increase military jobs.
     Adjust_Job_Count(
@@ -75,28 +76,77 @@ Example input file:
 
 ***
 
-Setup methods:
+Settings:
 
-  * Set_Path
 
-       Sets the paths to be used for file loading and writing.
+       This holds general settings and paths to control the customizer. Adjust these settings as needed prior to running the first transform, using direct writes to attributes.
    
+       Settings may be updated directly individually, or as arguments to a call of the Settings object. Examples: Settings.path_to_x4_folder   = 'C:\...' Settings.path_to_user_folder = 'C:\...' Settings( path_to_x4_folder = 'C:\...', path_to_user_folder = 'C:\...')
+   
+       Attributes:
        * path_to_x4_folder
-         - Path to the X4 base folder, where the executable is located.
-       * path_to_output_folder
-         - Optional, path to a folder to place output files in.
-         - Defaults to match path_to_x4_folder, so that outputs are directly readable by the game.
+         - Path to the main x4 folder.
+         - Defaults to HOMEDRIVE/"Steam/steamapps/common/X4 Foundations"
+       * path_to_user_folder
+         - Path to the folder where user files are located.
+         - Should include config.xml, content.xml, etc.
+         - Defaults to HOMEPATH/"Documents/Egosoft/X4" or a subfolder with an 8-digit name.
+       * extension_name
+         - String, name of the extension being generated.
+         - Defaults to 'X4_Customizer'
+       * output_to_user_extensions
+         - Bool, if True then the generated extension holding output files will be under <path_to_user_folder/extensions>.
+         - Defaults to False, writing to <path_to_x4_folder/extensions>
        * path_to_source_folder
-         - Optional, alternate folder which contains source files to be modified.
-         - Maybe be given as a relative path to the "addon" directory, or as an absolute path.
-         - Files located here should have the same directory structure as standard games files, eg. 'source_folder/types/Jobs.txt'.
-       * summary_file
-         - Name for where a summary file will be written, with any transform results, relative to the output folder.
-         - Defaults to 'summary.txt'.
-       * log_file
-         - Name for where a json log file will be written, including a summary of files written.
-         - This is also the file which will be read for any log from a prior run.
-         - Defaults to 'log.json'.
+         - Optional path to a source folder that holds high priority source files, which will be used instead of reading the x4 cat/dat files.
+         - For use when running transforms on manually edited files.
+         - Defaults to None
+       * prefer_single_files
+         - Bool, if True then loose files will be used before those in cat/dat files, otherwise cat/dat takes precedence.
+         - Only applies within a single search location, eg. within an extension, within the source folder, or within the base X4 folder; a loose file in the source folder will still be used over those in the X4 folder regardless of setting.
+         - Defaults to False
+       * ignore_extensions
+         - Bool, if True then extensions will be ignored, and files are only sourced from the source_folder or x4_folder.
+         - Defaults to False
+       * transform_log_file_name
+         - String, name a text file to write transform output messages to; content depends on transforms run.
+         - File is located in the output extension folder.
+         - Defaults to 'transform_log.txt'
+       * customizer_log_file_name
+         - String, name a json file to write customizer log information to, including a list of files written.
+         - File is located in the output extension folder.
+         - Defaults to 'customizer_log.json'
+       * disable_cleanup_and_writeback
+         - Bool, if True then cleanup from a prior run and any final writes will be skipped.
+         - For use when testing transforms without modifying files.
+         - Defaults to False
+       * log_source_paths
+         - Bool, if True then the path for any source files read will be printed in the transform log.
+         - Defaults to False
+       * skip_all_transforms
+         - Bool, if True all transforms will be skipped.
+         - For use during cleaning mode.
+         - Defaults to False
+       * use_scipy_for_scaling_equations
+         - Bool, if True then scipy will be used to optimize scaling equations, for smoother curves between the boundaries.
+         - If False or scipy is not found, then a simple linear scaling will be used instead.
+         - Defaults to True
+       * show_scaling_plots
+         - Bool, if True and matplotlib and numpy are available, any generated scaling equations will be plotted (and their x and y vectors printed for reference). Close the plot window manually to continue transform processing.
+         - Primarily for development use.
+         - Defaults to False
+       * developer
+         - Bool, if True then enable some behavior meant just for development, such as leaving exceptions uncaught.
+         - Defaults to False
+       * verbose
+         - Bool, if True some extra status messages may be printed to the console.
+         - Defaults to False
+       * allow_path_error
+         - Bool, if True then if the x4 path looks wrong, the customizer will still attempt to run.
+         - Defaults to False
+       * output_to_catalog
+         - Bool, if True then the modified files will be written to a single cat/dat pair, otherwise they are written as loose files.
+         - Defaults to False
        
 
 
@@ -130,3 +180,8 @@ Change Log:
  * 0.9
    - Initial version, after a long evening of adapting X3_Customizer for X4.
    - Added first transform, Adjust_Job_Count.
+ * 0.9.1
+   - Major framework development.
+   - Settings overhauled for X4.
+   - Source_Reader overhauled, now finds and pulls from extensions.
+   - Xml diff patch support added for common operations, merging extensions and base files prior to transforms. Pending further debug.

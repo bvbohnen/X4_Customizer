@@ -3,6 +3,12 @@ Change Log:
  * 0.9
    - Initial version, after a long evening of adapting X3_Customizer for X4.
    - Added first transform, Adjust_Job_Count.
+ * 0.9.1
+   - Major framework development.
+   - Settings overhauled for X4.
+   - Source_Reader overhauled, now finds and pulls from extensions.
+   - Xml diff patch support added for common operations, merging extensions
+     and base files prior to transforms. Pending further debug.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.
