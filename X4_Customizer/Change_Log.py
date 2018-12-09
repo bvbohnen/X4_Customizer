@@ -9,6 +9,8 @@ Change Log:
    - Source_Reader overhauled, now finds and pulls from extensions.
    - Xml diff patch support added for common operations, merging extensions
      and base files prior to transforms. Pending further debug.
+ * 0.9.2
+   - Fix for when the user content.xml isn't present.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

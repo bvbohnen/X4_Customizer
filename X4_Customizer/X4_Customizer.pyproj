@@ -75,9 +75,6 @@
     <Compile Include="Make_Executable.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Make_Patches.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Make_Release.py">
       <SubType>Code</SubType>
     </Compile>

@@ -265,21 +265,23 @@ class Source_Reader_class:
 
 
         # Extension lookup will be somewhat more complicated.
-        # Figure out which extensions the user has enabled.
-        # The user content.xml file should always be present, since it
-        # was verified elsewhere.
+        # Need to figure out which extensions the user has enabled.
+        # The user content.xml, if it exists (which it may not), will
+        #  hold details on custom extension enable/disable settings.
         # Note: by observation, the content.xml appears to not be a complete
         #  list, and may only record cases where the enable/disable selection
         #  differs from the extension default.
         user_extensions_enabled  = {}
-        # (lxml parser needs a string path.)
-        content_root = ET.parse(str(Settings.Get_User_Content_XML_Path())).getroot()
-        for extension_node in content_root.findall('extension'):
-            name = extension_node.get('id')
-            if extension_node.get('enabled') == 'true':
-                user_extensions_enabled[name] = True
-            else:
-                user_extensions_enabled[name] = False
+        content_xml_path = Settings.Get_User_Content_XML_Path()
+        if content_xml_path.exists():
+            # (lxml parser needs a string path.)
+            content_root = ET.parse(str(content_xml_path)).getroot()
+            for extension_node in content_root.findall('extension'):
+                name = extension_node.get('id')
+                if extension_node.get('enabled') == 'true':
+                    user_extensions_enabled[name] = True
+                else:
+                    user_extensions_enabled[name] = False
                 
 
         # Find where these extensions are located, and record details.

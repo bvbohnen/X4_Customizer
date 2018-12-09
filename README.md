@@ -1,4 +1,4 @@
-X4 Customizer 0.9.1
+X4 Customizer 0.9.2
 -----------------
 
 Current status: functional, most features in place, but still in beta testing.
@@ -97,3 +97,5 @@ Change Log:
    - Settings overhauled for X4.
    - Source_Reader overhauled, now finds and pulls from extensions.
    - Xml diff patch support added for common operations, merging extensions and base files prior to transforms. Pending further debug.
+ * 0.9.2
+   - Fix for when the user content.xml isn't present.

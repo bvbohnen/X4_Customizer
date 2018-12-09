@@ -1,4 +1,4 @@
-X4 Customizer 0.9.1
+X4 Customizer 0.9.2
 -----------------
 
 Current status: functional, most features in place, but still in beta testing.
@@ -142,7 +142,7 @@ Settings:
          - Bool, if True some extra status messages may be printed to the console.
          - Defaults to False
        * allow_path_error
-         - Bool, if True then if the x4 path looks wrong, the customizer will still attempt to run.
+         - Bool, if True and the x4 or user folder path looks wrong, the customizer will still attempt to run (with a warning).
          - Defaults to False
        * output_to_catalog
          - Bool, if True then the modified files will be written to a single cat/dat pair, otherwise they are written as loose files.
@@ -185,3 +185,5 @@ Change Log:
    - Settings overhauled for X4.
    - Source_Reader overhauled, now finds and pulls from extensions.
    - Xml diff patch support added for common operations, merging extensions and base files prior to transforms. Pending further debug.
+ * 0.9.2
+   - Fix for when the user content.xml isn't present.

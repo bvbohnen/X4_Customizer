@@ -100,8 +100,8 @@ class Settings_class:
         console.
       - Defaults to False
     * allow_path_error
-      - Bool, if True then if the x4 path looks wrong, the customizer
-        will still attempt to run.
+      - Bool, if True and the x4 or user folder path looks wrong, the
+        customizer will still attempt to run (with a warning).
       - Defaults to False
     * output_to_catalog
       - Bool, if True then the modified files will be written to a single
@@ -129,18 +129,21 @@ class Settings_class:
         self.path_to_user_folder = (Path(os.environ.get('HOMEPATH','.'))  
                                     / 'Documents/Egosoft/X4')
         
-        # If the user folder exists but has no content, check an id folder.
+        # If the user folder exists but has no config.xml, check an id folder.
+        # Note: while content.xml is wanted, it apparently not always
+        # created (maybe only made the first time a mod gets enabled/disabled
+        # in the menu?).
         if (self.path_to_user_folder.exists() 
-        and not (self.path_to_user_folder / 'content.xml').exists()):
+        and not (self.path_to_user_folder / 'config.xml').exists()):
             # Iterate through all files and dirs.
             for dir in self.path_to_user_folder.iterdir():
                 # Skip non-dirs.
                 if not dir.is_dir():
                     continue
-                # Check for the content.xml.
+                # Check for the config.xml.
                 # Probably don't need to check folder name for digits;
                 # common case just has one folder.
-                if (dir / 'content.xml').exists():
+                if (dir / 'config.xml').exists():
                     # Record it and stop looping.
                     self.path_to_user_folder = dir
                     break
@@ -205,23 +208,25 @@ class Settings_class:
         #  may wish to have this tool generate files to a separate
         #  directory first.
         if not (self.path_to_x4_folder / '01.cat').exists():
+            message = ('Warning: Path to the X4 folder appears incorrect.'
+                    '\n (x4 path: {})').format(self.path_to_x4_folder)
             if self.allow_path_error:
-                print(  
-                    'Warning: Path to the X4 folder appears incorrect.'
-                    +'\n (x4 path: {})'.format(self.path_to_x4_folder))
+                print(message)
             else:
                 # Hard error.
-                raise Exception(
-                    'Path does not appear correct for the X4 folder.'
-                    +'\n (x4 path: {})'.format(self.path_to_x4_folder))
+                raise Exception(message)
 
 
-        # Check the user folder for content.xml.
-        if not self.Get_User_Content_XML_Path().exists():
-            raise Exception(
-                'Path to the user folder appears incorrect, lacking content.xml.'
-                +'\n (path: {})'.format(self.path_to_user_folder))
-        
+        # Check the user folder for config.xml.
+        if not (self.path_to_user_folder / 'config.xml').exists():
+            message = ('Path to the user folder appears incorrect, lacking'
+                    ' config.xml.\n (path: {})').format(self.path_to_user_folder)
+            if self.allow_path_error:
+                print(message)
+            else:
+                # Hard error.
+                raise Exception(message)
+
         # Create the output folder if it does not exist.
         if not self.Get_Output_Folder().exists():
             # Add any needed parents as well.
