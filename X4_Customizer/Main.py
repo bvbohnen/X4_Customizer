@@ -224,15 +224,9 @@ def Run(*args):
         if ex_text:
             print(ex_text)
             
-        # For version 3.5, the 'from Transforms import *' input
-        #  format has changed to 'from X4_Customizer import *'.
-        # Check for that here to give a nice message.
-        with open(user_module_name, 'r') as file:
-            for line in file.read().splitlines():
-                if line.strip() == 'from Transforms import *':
-                    print(  'Please update "from Transforms import *"'
-                            ' to "from X4_Customizer import *".')
-
+        # Close the transform log safetly (in case of raising another
+        #  exception).
+        X4_Customizer.Common.Logs.Transform_Log.Close()
 
         # In dev mode, reraise the exception.
         if Settings.developer:

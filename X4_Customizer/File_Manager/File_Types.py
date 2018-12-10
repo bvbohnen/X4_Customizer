@@ -176,10 +176,15 @@ class XML_File(Game_File):
         '''
         Return an Element object with a copy of the current modified xml.
         The first call of this should occur after all initial patching is
-        complete.
+        complete, as that is when the original_root is first annotated
+        and copied.
         '''
         if self.modified_root == None:
-            # Set the initial modified tree to a deep copy of the original.
+            # Annotate the original_root with node ids, since it is no
+            #  longer changing.
+            XML_Diff.Fill_Node_IDs(self.original_root)
+            # Set the initial modified tree to a deep copy of the original;
+            #  this will keep node_ids intact.
             self.modified_root = deepcopy(self.original_root)
         # Return a deepcopy of the modified_root, so that a transform
         #  can edit it safely, even if it exceptions out and doesn't
@@ -211,7 +216,9 @@ class XML_File(Game_File):
         '''
         patch_node = XML_Diff.Make_Patch(
             original_node = self.original_root, 
-            modified_node = self.Get_Root())
+            modified_node = self.Get_Root(),
+            maximal = Settings.make_maximal_diffs,
+            verify = True)
         return patch_node
 
 
@@ -224,12 +231,12 @@ class XML_File(Game_File):
         # Modified source files will form a diff patch, others
         # just record full xml.
         if self.from_source:
-            etree = ET.ElementTree(self.Get_Diff())
+            tree = ET.ElementTree(self.Get_Diff())
         else:
-            etree = ET.ElementTree(self.Get_Root())
+            tree = ET.ElementTree(self.Get_Root())
 
         # Pretty print it. This returns bytes.
-        binary = ET.tostring(etree, encoding = 'utf-8', pretty_print = True)
+        binary = XML_Diff.Print(tree, encoding = 'utf-8')
         # To be safe, add a newline at the end if there.
         if not binary.endswith(b'\n'):
             binary += '\n'.encode(encoding = 'utf-8')

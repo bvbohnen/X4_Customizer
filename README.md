@@ -1,4 +1,4 @@
-X4 Customizer 0.9.2
+X4 Customizer 0.9.3
 -----------------
 
 Current status: functional, most features in place, but still in beta testing.
@@ -99,3 +99,6 @@ Change Log:
    - Xml diff patch support added for common operations, merging extensions and base files prior to transforms. Pending further debug.
  * 0.9.2
    - Fix for when the user content.xml isn't present.
+ * 0.9.3
+   - Major development of diff patch generation, now using close to minimal patch size instead of full tree replacement, plus related debug of the patch application code.
+   - Framework largely feature complete, except for further debug.

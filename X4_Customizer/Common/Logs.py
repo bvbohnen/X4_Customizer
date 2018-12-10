@@ -22,7 +22,7 @@ class Transform_Log_class:
     def __init__(self):
         self.log_file = None
 
-    def Print(self, line, newline = False):
+    def Print(self, line, newline = True):
         '''
         Write a line to the summary file.
         A newline is inserted automatically unless newline == False.
@@ -30,7 +30,19 @@ class Transform_Log_class:
         # Open the file if needed.
         if self.log_file == None:
             self.log_file = open(Settings.Get_Transform_Log_Path(), 'w')
-        self.log_file.write(line + '\n' if newline else '')
+        self.log_file.write(line)
+        if newline:
+            self.log_file.write('\n')
+        # Flush out to be a little safer against crashes.
+        self.log_file.flush()
+        return
+
+    def Close(self):
+        'Close the log file safely; the next Print will overwrite it.'
+        if self.log_file != None:
+            self.log_file.close()
+        self.log_file = None
+        return
 
 # Static log object.
 Transform_Log = Transform_Log_class()

@@ -1,4 +1,4 @@
-X4 Customizer 0.9.2
+X4 Customizer 0.9.3
 -----------------
 
 Current status: functional, most features in place, but still in beta testing.
@@ -108,6 +108,10 @@ Settings:
        * ignore_extensions
          - Bool, if True then extensions will be ignored, and files are only sourced from the source_folder or x4_folder.
          - Defaults to False
+       * make_maximal_diffs
+         - Bool, if True then generated xml diff patches will do the maximum full tree replacement instead of using the algorithm to find and patch only edited nodes.
+         - Turn on to more easily view xml changes.
+         - Defaults to False.
        * transform_log_file_name
          - String, name a text file to write transform output messages to; content depends on transforms run.
          - File is located in the output extension folder.
@@ -187,3 +191,6 @@ Change Log:
    - Xml diff patch support added for common operations, merging extensions and base files prior to transforms. Pending further debug.
  * 0.9.2
    - Fix for when the user content.xml isn't present.
+ * 0.9.3
+   - Major development of diff patch generation, now using close to minimal patch size instead of full tree replacement, plus related debug of the patch application code.
+   - Framework largely feature complete, except for further debug.

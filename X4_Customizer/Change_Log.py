@@ -11,6 +11,11 @@ Change Log:
      and base files prior to transforms. Pending further debug.
  * 0.9.2
    - Fix for when the user content.xml isn't present.
+ * 0.9.3
+   - Major development of diff patch generation, now using close to
+     minimal patch size instead of full tree replacement, plus
+     related debug of the patch application code.
+   - Framework largely feature complete, except for further debug.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

@@ -55,6 +55,12 @@ class Settings_class:
       - Bool, if True then extensions will be ignored, and files are
         only sourced from the source_folder or x4_folder.
       - Defaults to False
+    * make_maximal_diffs
+      - Bool, if True then generated xml diff patches will do the
+        maximum full tree replacement instead of using the algorithm
+        to find and patch only edited nodes.
+      - Turn on to more easily view xml changes.
+      - Defaults to False.
     * transform_log_file_name
       - String, name a text file to write transform output messages to;
         content depends on transforms run.
@@ -154,6 +160,7 @@ class Settings_class:
         self.path_to_source_folder = None
         self.prefer_single_files = False
         self.ignore_extensions = False
+        self.make_maximal_diffs = False
         self.transform_log_file_name = 'transform_log.txt'
         self.customizer_log_file_name = 'customizer_log.json'
         self.disable_cleanup_and_writeback = False
