@@ -12,7 +12,8 @@ def Adjust_Job_Count(
     ):
     '''
     Adjusts job ship counts using a multiplier, affecting all quota fields.
-    Caller provided matching rules determine which jobs get adjusted.
+    Input is a list of matching rules, determining which jobs get adjusted.
+
     Resulting non-integer job counts are rounded, with a minimum of 1 unless
     the multiplier or original count were 0.
 
@@ -24,19 +25,20 @@ def Adjust_Job_Count(
       - Multiplier is an int or float, how much to adjust the job count by.
       - If a job matches multiple entries, the first match is used.
       - Supported keys:
-        - 'faction': The name of the category/faction.
-        - 'tag'    : A possible value in the category/tags list.
-        - 'id'     : Name of the job entry, partial matches supported.
-        - '*'      : Wildcard, always matches, takes no match_value.
-        - 'masstraffic' : Mass traffic ship, takes no match_value.
+        - 'faction' : The name of the category/faction.
+        - 'tag'     : A possible value in the category/tags list.
+        - 'id'      : Name of the job entry, partial matches supported.
+        - '*'       : Wildcard, always matches, takes no match_value.
 
     Example:
-    Adjust_Job_Count(
-        ('id','masstraffic', 0.5),
-        ('tag','military', 2),
-        ('tag','miner', 1.5),
-        ('faction','argon', 1.2),
-        ('*', 1.1) )
+    <code>
+        Adjust_Job_Count(
+            ('id','masstraffic', 0.5),
+            ('tag','military', 2),
+            ('tag','miner', 1.5),
+            ('faction','argon', 1.2),
+            ('*', 1.1) )
+    </code>
     '''
     assert isinstance(job_factors, (list, tuple))
     #-Removed, don't worry about this for now.
@@ -44,15 +46,10 @@ def Adjust_Job_Count(
     ##  now be double-wrapped, so unwrap once.
     #if len(job_factors) == 1 and isinstance(job_factors[0], list):
     #    job_factors = job_factors[0]
-
-    # Quick test of something.
-    bla = Load_File('libraries/parameters.xml')
-
+    
     jobs_game_file = Load_File('libraries/jobs.xml')
     xml_root = jobs_game_file.Get_Root()
-    
-
-
+        
     # Loop over the jobs.
     for job in xml_root.findall('./job'):
         # For convenience, break out the category node.
@@ -93,7 +90,6 @@ def Adjust_Job_Count(
         # Early skip if not changing counts.
         if factor == 1:
             continue
-
 
         # Apply the factor to all fields of the quota node.
         # The only quota that might be skipped is 'variation', but

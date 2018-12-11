@@ -1,17 +1,17 @@
-X4 Customizer 0.9.3
+X4 Customizer 0.9.4
 -----------------
 
-Current status: functional, most features in place, but still in beta testing.
+Current status: functional, framework tentatively complete, applying polish.
 
 This tool will programatically apply a variety of user selected transforms to X4 game files, optionally pre-modded. Features include:
 
- * Integrated catalog read/write support.
- * Basic XML diff patch support.
- * Automatic detection and loading of enabled extensions.
- * Framework for developing modular, customizable transforms of varying complexity.
- * Transforms can dynamically read and alter game files, instead of being limited to static changes like standard extensions.
- * Transforms operate on a user's unique mixture of mods, and can easily be rerun after game patches or mod updates.
- * Changes are written to a new or specified extension.
+  * Integrated catalog read/write support.
+  * Basic XML diff patch support.
+  * Automatic detection and loading of enabled extensions.
+  * Framework for developing modular, customizable transforms of varying complexity.
+  * Transforms can dynamically read and alter game files, instead of being limited to static changes like standard extensions.
+  * Transforms operate on a user's unique mixture of mods, and can easily be rerun after game patches or mod updates.
+  * Changes are written to a new or specified extension.
 
 This tool is available as platform portable Python source code (tested on 3.7 with the lxml package) or as a compiled executable for 64-bit Windows.
 
@@ -46,8 +46,7 @@ Usage for Python source code:
   * "python X4_Customizer\Make_Release.py"
     - Generates a zip file with all necessary binaries, source files, and example scripts for general release.
 
-
-Full documentation found in Documentation.md.
+Full documentation found in Documentation.md, describing settings and transform parameters.
 
 ***
 
@@ -81,9 +80,9 @@ Example input file:
 
 Job Transforms:
 
- * Adjust_Job_Count
+  * Adjust_Job_Count
 
-      Adjusts job ship counts using a multiplier, affecting all quota fields. Caller provided matching rules determine which jobs get adjusted. Resulting non-integer job counts are rounded, with a minimum of 1 unless the multiplier or original count were 0.
+    Adjusts job ship counts using a multiplier, affecting all quota fields. Input is a list of matching rules, determining which jobs get adjusted.
 
 
 ***
@@ -102,3 +101,6 @@ Change Log:
  * 0.9.3
    - Major development of diff patch generation, now using close to minimal patch size instead of full tree replacement, plus related debug of the patch application code.
    - Framework largely feature complete, except for further debug.
+ * 0.9.4
+   - Applied various polish: documentation touchup, gathered misc file_manager functions into a class, etc.
+   - Added dependency nodes to the output extension.

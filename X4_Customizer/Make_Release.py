@@ -7,11 +7,16 @@ import os
 from pathlib import Path # TODO: switch over from os.
 import sys
 import zipfile
+import argparse
+
 import Make_Documentation
 import Make_Executable
 #import Make_Patches
-import Change_Log
-import argparse
+
+parent_dir = Path(__file__).resolve().parent.parent
+if str(parent_dir) not in sys.path:
+    sys.path.append(str(parent_dir))
+import X4_Customizer
 
 This_dir = os.path.join(os.path.dirname(__file__))
 Top_dir = os.path.normpath(os.path.join(This_dir, '..'))
@@ -91,12 +96,18 @@ def Make(*args):
                 #if folder == 'game_files' and file_name.endswith('.bak'):
                 #    continue
 
+                # Only include select input scripts.
+                if folder == 'input_scripts':
+                    if file_name not in ['User_Transforms_template',
+                                         'Authors_Transforms']:
+                        continue
+
                 file_paths.append(os.path.join(folder, dir_path, file_name))
                 
                 
     # Create a new zip file.
     # Put this in the top level directory.
-    zip_name = 'X4_Customizer_v{}.zip'.format(Change_Log.Get_Version())
+    zip_name = 'X4_Customizer_v{}.zip'.format(X4_Customizer.Change_Log.Get_Version())
     zip_path = os.path.normpath(os.path.join(This_dir, '..', zip_name))
     zip_file = zipfile.ZipFile(zip_path, 'w')
 

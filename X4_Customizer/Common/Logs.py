@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 import json
 from ..Common.Settings import Settings
-import Change_Log
+from ..Common import Change_Log
 
 
 class Transform_Log_class:

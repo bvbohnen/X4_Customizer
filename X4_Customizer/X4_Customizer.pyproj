@@ -48,10 +48,13 @@
     <Compile Include="File_Manager\Cat_Reader.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Change_Log.py">
+    <Compile Include="Common\Change_Log.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Common\__init__.py" />
+    <Compile Include="File_Manager\File_System.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="File_Manager\File_Types.py">
       <SubType>Code</SubType>
     </Compile>
@@ -88,23 +91,23 @@
     <Compile Include="Transforms\Director\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Transforms\Weapons\Damage.py">
+    <Compile Include="Transforms\Weapon\Damage.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Transforms\Weapons\__init__.py" />
+    <Compile Include="Transforms\Weapon\__init__.py" />
     <Compile Include="Transforms\__init__.py" />
     <Compile Include="Transforms\Director\Misc.py" />
-    <Compile Include="Transforms\Factories.py">
+    <Compile Include="Transforms\Factory.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Transforms\Globals.py" />
-    <Compile Include="Transforms\Jobs.py" />
-    <Compile Include="Transforms\Missiles.py" />
-    <Compile Include="Transforms\Shields.py">
+    <Compile Include="Transforms\Global.py" />
+    <Compile Include="Transforms\Job.py" />
+    <Compile Include="Transforms\Missile.py" />
+    <Compile Include="Transforms\Shield.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Transforms\Ships.py" />
-    <Compile Include="Transforms\Sounds.py">
+    <Compile Include="Transforms\Ship.py" />
+    <Compile Include="Transforms\Sound.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Main.py" />
@@ -117,7 +120,7 @@
     <Folder Include="File_Manager\" />
     <Folder Include="Transforms\" />
     <Folder Include="Transforms\Director\" />
-    <Folder Include="Transforms\Weapons\" />
+    <Folder Include="Transforms\Weapon\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

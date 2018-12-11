@@ -2,21 +2,21 @@
 X4 Customizer
 -----------------
 
-Current status: functional, most features in place, but still in beta testing.
+Current status: functional, framework tentatively complete, applying polish.
 
 This tool will programatically apply a variety of user selected transforms
 to X4 game files, optionally pre-modded. Features include:
 
- * Integrated catalog read/write support.
- * Basic XML diff patch support.
- * Automatic detection and loading of enabled extensions.
- * Framework for developing modular, customizable transforms of
-   varying complexity.
- * Transforms can dynamically read and alter game files, instead of being
-   limited to static changes like standard extensions.
- * Transforms operate on a user's unique mixture of mods, and can
-   easily be rerun after game patches or mod updates.
- * Changes are written to a new or specified extension.
+  * Integrated catalog read/write support.
+  * Basic XML diff patch support.
+  * Automatic detection and loading of enabled extensions.
+  * Framework for developing modular, customizable transforms of
+    varying complexity.
+  * Transforms can dynamically read and alter game files, instead of being
+    limited to static changes like standard extensions.
+  * Transforms operate on a user's unique mixture of mods, and can
+    easily be rerun after game patches or mod updates.
+  * Changes are written to a new or specified extension.
 
 This tool is available as platform portable Python source code (tested on
 3.7 with the lxml package) or as a compiled executable for 64-bit Windows.
@@ -62,9 +62,10 @@ Usage for Python source code:
   * "python X4_Customizer\Make_Release.py"
     - Generates a zip file with all necessary binaries, source files,
       and example scripts for general release.
-
-
 '''
+# TODO: maybe add in examples of usage (perhaps tagged to put them
+#  in the full documenation and not the readme).
+
 # Note: the above comment gets printed to the markdown file, so avoid
 #  having a 4-space indent because text will get code blocked.
 # -Need to also avoid this 4-space group across newlines, annoyingly.
@@ -82,9 +83,9 @@ Usage for Python source code:
 
 # Subpackages/modules.
 from . import Common
+from .Common import Change_Log
 from . import Transforms
 from . import File_Manager
-from . import Change_Log
 
 # Convenience items for input scripts to import.
 from .Transforms import *

@@ -13,16 +13,16 @@ class Settings_class:
     Adjust these settings as needed prior to running the first transform,
     using direct writes to attributes.
 
-    Settings may be updated directly individually, or as arguments to
-    a call of the Settings object.
+    Settings may be updated individually, or as arguments of
+    a call to Settings.
     Examples:
-        Settings.path_to_x4_folder   = 'C:\...'
-        Settings.path_to_user_folder = 'C:\...'
-        Settings(
-            path_to_x4_folder = 'C:\...',
-            path_to_user_folder = 'C:\...')
+    * Settings.path_to_x4_folder   = 'C:\...'
+    * Settings.path_to_user_folder = 'C:\...'
+    * Settings(
+         path_to_x4_folder = 'C:\...',
+         path_to_user_folder = 'C:\...')
 
-    Attributes:
+    Paths:
     * path_to_x4_folder
       - Path to the main x4 folder.
       - Defaults to HOMEDRIVE/"Steam/steamapps/common/X4 Foundations"
@@ -31,18 +31,17 @@ class Settings_class:
       - Should include config.xml, content.xml, etc.
       - Defaults to HOMEPATH/"Documents/Egosoft/X4" or a subfolder
         with an 8-digit name.
-    * extension_name
-      - String, name of the extension being generated.
-      - Defaults to 'X4_Customizer'
-    * output_to_user_extensions
-      - Bool, if True then the generated extension holding output files
-        will be under <path_to_user_folder/extensions>.
-      - Defaults to False, writing to <path_to_x4_folder/extensions>
     * path_to_source_folder
       - Optional path to a source folder that holds high priority source
         files, which will be used instead of reading the x4 cat/dat files.
       - For use when running transforms on manually edited files.
       - Defaults to None
+    * allow_path_error
+      - Bool, if True and the x4 or user folder path looks wrong, the
+        customizer will still attempt to run (with a warning).
+      - Defaults to False
+      
+    Input:
     * prefer_single_files
       - Bool, if True then loose files will be used before those in cat/dat
         files, otherwise cat/dat takes precedence.
@@ -55,12 +54,28 @@ class Settings_class:
       - Bool, if True then extensions will be ignored, and files are
         only sourced from the source_folder or x4_folder.
       - Defaults to False
+
+    Output:
+    * extension_name
+      - String, name of the extension being generated.
+      - Spaces will be replaced with underscores for the extension id.
+      - Defaults to 'X4_Customizer'
+    * output_to_user_extensions
+      - Bool, if True then the generated extension holding output files
+        will be under <path_to_user_folder/extensions>.
+      - Defaults to False, writing to <path_to_x4_folder/extensions>
+    * output_to_catalog
+      - Bool, if True then the modified files will be written to a single
+        cat/dat pair, otherwise they are written as loose files.
+      - Defaults to False
     * make_maximal_diffs
       - Bool, if True then generated xml diff patches will do the
         maximum full tree replacement instead of using the algorithm
         to find and patch only edited nodes.
       - Turn on to more easily view xml changes.
       - Defaults to False.
+
+    Logging:
     * transform_log_file_name
       - String, name a text file to write transform output messages to;
         content depends on transforms run.
@@ -71,18 +86,28 @@ class Settings_class:
         including a list of files written.
       - File is located in the output extension folder.
       - Defaults to 'customizer_log.json'
+    * log_source_paths
+      - Bool, if True then the path for any source files read will be
+        printed in the transform log.
+      - Defaults to False
+    * verbose
+      - Bool, if True some extra status messages may be printed to the
+        console.
+      - Defaults to False
+
+    Behavior:
     * disable_cleanup_and_writeback
       - Bool, if True then cleanup from a prior run and any final
         writes will be skipped.
       - For use when testing transforms without modifying files.
       - Defaults to False
-    * log_source_paths
-      - Bool, if True then the path for any source files read will be
-        printed in the transform log.
-      - Defaults to False
     * skip_all_transforms
       - Bool, if True all transforms will be skipped.
       - For use during cleaning mode.
+      - Defaults to False
+    * developer
+      - Bool, if True then enable some behavior meant just for development,
+        such as leaving exceptions uncaught.
       - Defaults to False
     * use_scipy_for_scaling_equations
       - Bool, if True then scipy will be used to optimize scaling
@@ -96,22 +121,6 @@ class Settings_class:
         x and y vectors printed for reference). Close the plot window
         manually to continue transform processing.
       - Primarily for development use.
-      - Defaults to False
-    * developer
-      - Bool, if True then enable some behavior meant just for development,
-        such as leaving exceptions uncaught.
-      - Defaults to False
-    * verbose
-      - Bool, if True some extra status messages may be printed to the
-        console.
-      - Defaults to False
-    * allow_path_error
-      - Bool, if True and the x4 or user folder path looks wrong, the
-        customizer will still attempt to run (with a warning).
-      - Defaults to False
-    * output_to_catalog
-      - Bool, if True then the modified files will be written to a single
-        cat/dat pair, otherwise they are written as loose files.
       - Defaults to False
     '''
     '''
@@ -173,6 +182,8 @@ class Settings_class:
         self.allow_path_error = False
         self.output_to_catalog = False
 
+        # Flag to track if delayed init has completed.
+        self._init_complete = False
         return
         
 
@@ -191,11 +202,17 @@ class Settings_class:
         return
 
 
-    def Finalize_Setup(self):
+    def Delayed_Init(self):
         '''
         Checks the current paths for errors (not existing, etc.), converts
         them to Path objects, creates the output extension folder, etc.
         '''
+        # Limit to running just once, though this might get called
+        # on every transform.
+        if self._init_complete:
+            return
+        self._init_complete = True
+
         # Start with conversions to full Paths, since the user
         # may have written these with strings.
         self.path_to_x4_folder     = Path(self.path_to_x4_folder).resolve()
@@ -222,8 +239,7 @@ class Settings_class:
             else:
                 # Hard error.
                 raise Exception(message)
-
-
+            
         # Check the user folder for config.xml.
         if not (self.path_to_user_folder / 'config.xml').exists():
             message = ('Path to the user folder appears incorrect, lacking'
@@ -234,7 +250,8 @@ class Settings_class:
                 # Hard error.
                 raise Exception(message)
 
-        # Create the output folder if it does not exist.
+        # Create the output folder if it does not exist,
+        #  so that runtime logging can go here.
         if not self.Get_Output_Folder().exists():
             # Add any needed parents as well.
             self.Get_Output_Folder().mkdir(parents = True)

@@ -16,6 +16,10 @@ Change Log:
      minimal patch size instead of full tree replacement, plus
      related debug of the patch application code.
    - Framework largely feature complete, except for further debug.
+ * 0.9.4
+   - Applied various polish: documentation touchup, gathered misc
+     file_manager functions into a class, etc.
+   - Added dependency nodes to the output extension.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

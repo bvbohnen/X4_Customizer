@@ -11,8 +11,10 @@ import argparse
 parent_dir = Path(__file__).resolve().parent.parent
 if str(parent_dir) not in sys.path:
     sys.path.append(str(parent_dir))
-
 import X4_Customizer
+
+# TODO: add the input_scripts folder to the search path, so
+#  scripts can import each other easily.
 
 def Run(*args):
     '''
@@ -224,7 +226,7 @@ def Run(*args):
         if ex_text:
             print(ex_text)
             
-        # Close the transform log safetly (in case of raising another
+        # Close the transform log safely (in case of raising another
         #  exception).
         X4_Customizer.Common.Logs.Transform_Log.Close()
 
@@ -239,11 +241,11 @@ def Run(*args):
     # These are mainly disabled by the patch builder.
     if not Settings.disable_cleanup_and_writeback:
         # Run any needed cleanup.
-        X4_Customizer.File_Manager.Cleanup()
+        X4_Customizer.File_Manager.File_System.Cleanup()
         
         # Everything should now be done.
         # Can open most output files in X4 Editor to verify results.
-        X4_Customizer.File_Manager.Write_Files()
+        X4_Customizer.File_Manager.File_System.Write_Files()
     else:
         print('Skipping file writes.')
 

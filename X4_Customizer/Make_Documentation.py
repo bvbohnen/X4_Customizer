@@ -64,10 +64,11 @@ def Make(*args):
     #  generate that, although one directory up.
     doc_short_lines = []
 
-    # Set the indent type. A single spaces for now.
-    # Avoid indenting by 4 unless wanting a code block, for the simple
-    #  file that gets markdowned.
-    indent = ' '
+    # Set the indent type. Use double space, since markdown likes
+    #  that as a unit.
+    # Avoid indenting by 4 spaces (from previous text) unless wanting a 
+    #  code block in markdown.
+    indent = '  '
 
     def Make_Horizontal_Line(include_in_simple = True):
         'Adds a horizontal line, with extra newline before and after.'
@@ -151,7 +152,6 @@ def Make(*args):
         Otherwise, the simple file will get a truncated name with the initial
         part of the docstring, and no requirement list.
         '''
-
         # Get the name as-is.
         # Put an asterix in front for markdown.
         if include_name:
@@ -159,24 +159,6 @@ def Make(*args):
             Add_Line(name_line, indent_level, 
                       include_in_simple = include_in_simple)
 
-        # If there are required files, print them.
-        if hasattr(function, '_file_names'):
-
-            # For markdown, don't want this attached to the file name,
-            #  but also don't want it causing an extra list indent on
-            #  the docstring. An extra newline and a healthy indent
-            #  seems to work.
-            Add_Line('', include_in_simple = False)
-            Add_Line('{}Requires: {}'.format(
-                    indent * (indent_level + 1),
-                    # Join the required file names with commas if
-                    #  there are any, else print None.
-                    ', '.join(function._file_names) 
-                    if function._file_names else 'None'),
-                indent_level +1,
-                include_in_simple = False
-                )
-            
         # Stick another newline, then the function docstring, maybe
         #  truncated for the simple file.
         Add_Line('', include_in_simple = include_in_simple)
@@ -203,7 +185,9 @@ def Make(*args):
     Add_Lines(main_doc, merge_lines = True)
     
     # Add a note for the simple documentation to point to the full one.
-    doc_short_lines.append('\nFull documentation found in Documentation.md.')
+    doc_short_lines.append(
+        '\nFull documentation found in Documentation.md,'
+        ' describing settings and transform parameters.')
 
     
     # Print out the example module early, to be less scary.
@@ -217,15 +201,15 @@ def Make(*args):
     with open(os.path.join(this_dir,'..','input_scripts',
                            'Example_Transforms.py'), 'r') as file:
         # Put in 4 indents to make a code block.
-        Add_Lines(file.read(), indent_level = 4)
+        Add_Lines(file.read(), indent_level = 2)
 
 
     # Grab the Settings documentation.
     # Skip this for the simple summary.
     Make_Horizontal_Line(include_in_simple = False)
-    Add_Line('Settings:', include_in_simple = False)
+    Add_Line('* Settings:', include_in_simple = False)
     Add_Line('', include_in_simple = False)
-    Record_Func(X4_Customizer.Settings, indent_level = 2,
+    Record_Func(X4_Customizer.Settings, indent_level = 1,
                 include_in_simple = False,
                 # Name isn't needed.
                 include_name = False)
@@ -288,7 +272,7 @@ def Make(*args):
         '[url]https://github.com/bvbohnen/X4_Customizer[/url]',
         'Compiled release (64-bit Windows):',
         '[url]https://github.com/bvbohnen/X4_Customizer/releases[/url]',
-        'Full documentation:',
+        'Full documentation (describing settings and transform parameters):',
         '[url]https://github.com/bvbohnen/X4_Customizer/blob/master/Documentation.md[/url]',
         '',
         '',
@@ -325,15 +309,41 @@ def Merge_Lines(text_block):
     This should not be called on code blocks.
     This will also look for and remove <code></code> tags, a temporary
     way to specify in docstrings sections not to be line merged.
+    Since much of the text comes from indented doc strings, this will
+    also remove the uniform indentation.
     '''
+    # Convert the input to a list.
+    line_list = [x for x in text_block.splitlines()]
+
+    # Start by finding the global indent level and removing it.
+    min_indent = None
+    for line in line_list:
+        # Skip empty lines.
+        if not line.strip():
+            continue
+        indent = len(line) - len(line.lstrip(' '))
+        if min_indent == None or indent < min_indent:
+            min_indent = indent
+    # Do removal only if a min_indent was found, and is not 0.
+    if min_indent:
+        for index, line in enumerate(line_list):
+            # Skip empty lines.
+            if not line.strip():
+                continue
+            # Cut off the start of each line.
+            line_list[index] = line[min_indent : ]
+
+
+    # Next, want to collect a list of line indices where merges
+    # are wanted, and trim out some tags that were used to
+    # help determine this.
+
     # List of lines to merge with previous.
     merge_line_list = []
     # Note if the prior line had text.
     prior_line_had_text = False
     # Note if a code block appears active.
     code_block_active = False
-    # Convert the input to a list.
-    line_list = [x for x in text_block.splitlines()]
 
     for line_number, line in enumerate(line_list):
         # Get rid of indent spacing.
@@ -383,7 +393,7 @@ def Merge_Lines(text_block):
         prior_line_had_text = len(strip_line) > 0
 
 
-    # Second pass will do the merges.
+    # Final pass will do the merges.
     # This will aim to remove indentation, and replace with a single space.
     # This will delete lines as going, requiring the merge_line numbers to be
     #  adjusted by the lines removed prior. This can be captured with an

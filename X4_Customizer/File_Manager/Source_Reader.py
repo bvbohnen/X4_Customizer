@@ -25,9 +25,8 @@ class Location_Source_Reader:
     Attributes:
     * location
       - Path to the location being sourced from.
-    * is_extension
-      - Bool, True when sourcing from an extension, which will have an
-        additional prefix on cat/dat files.
+    * extension_name
+      - String, name of the extension, if an extension, else None.
     * catalog_file_dict
       - OrderedDict of Cat_Reader objects, keyed by file path, organized
         by priority, where the first entry is the highest priority cat.
@@ -38,10 +37,10 @@ class Location_Source_Reader:
         for where the file is located, for files in the source folder
         specified in the Settings.
     '''
-    def __init__(self, location, is_extension = False):
+    def __init__(self, location, extension_name = None):
         self.location = location
         self.catalog_file_dict = OrderedDict()
-        self.is_extension = is_extension
+        self.extension_name = extension_name
         
         # Search for cat files the game will recognize.
         # These start at 01.cat, and count up as 2-digit values until
@@ -50,7 +49,7 @@ class Location_Source_Reader:
         #  their cat/dat files. Unclear on priority between those two,
         #  so just pick one to go first.
         prefixes = ['']
-        if self.is_extension:
+        if self.extension_name:
             prefixes = ['ext_','subst_']
 
         # For convenience, the first pass will fill in a list with low
@@ -201,6 +200,7 @@ class Location_Source_Reader:
             virtual_path = virtual_path,
             file_source_path = source_path,
             from_source = True,
+            extension_name = self.extension_name,
             )
         
         # Debug print the read location.
@@ -253,15 +253,13 @@ class Source_Reader_class:
         '''
         # Set up the base X4 folder.
         self.base_x4_source_reader = Location_Source_Reader(
-            location = Settings.Get_X4_Folder(),
-            is_extension = False )
+            location = Settings.Get_X4_Folder())
 
         # Check if a loose source folder was requested.
         source_folder = Settings.Get_Source_Folder()
         if source_folder != None:
             self.loose_source_reader = Location_Source_Reader(
-                location = source_folder,
-                is_extension = False )
+                location = source_folder)
 
 
         # Extension lookup will be somewhat more complicated.
@@ -301,18 +299,22 @@ class Source_Reader_class:
             if Settings.ignore_extensions:
                 continue
 
+            # Note the path to the target output extension content.xml,
+            #  so it can be skipped.
+            output_content_path = Settings.Get_Output_Folder() / 'content.xml'
+
             # Use glob to pick out all of the extension content.xml files.
             for content_xml_path in extensions_path.glob('*/content.xml'):
+
+                # Skip the current output extension target, since its contents
+                #  are the ones being updated this run.
+                if content_xml_path == output_content_path:
+                    continue
 
                 # Load it and pick out the id.
                 content_root = ET.parse(str(content_xml_path)).getroot()
                 name = content_root.get('id')
                 
-                # Skip the current output extension target, since its contents
-                #  are the ones being updated this run.
-                if name == Settings.extension_name:
-                    continue
-
                 # Determine if this is enabled or disabled.
                 # If it is in user content.xml, use that flag, else use the
                 #  flag in the extension.
@@ -392,7 +394,7 @@ class Source_Reader_class:
                 continue
             self.extension_source_readers.append( Location_Source_Reader(
                 location = ext_summary.path,
-                is_extension = True ))
+                extension_name = ext_name ))
             
         return
     
@@ -480,6 +482,7 @@ class Source_Reader_class:
                             virtual_path,
                             game_file.file_source_path,
                             extension_game_file.file_source_path))
+                    # Call the patcher.
                     game_file.Patch(extension_game_file)
             
 

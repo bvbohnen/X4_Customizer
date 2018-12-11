@@ -42,6 +42,10 @@ class Game_File:
       - Bool, if True then this file originates from some source
         which was possibly modified, else it is completely new.
       - Has some impact on write format, eg. xml diff patching.
+      - Should be False (default) for any original files.
+    * source_extension_names
+      - List of strings, the names of the extensions that contributed
+        to this file's contents, either directly or through patching.
     '''
     def __init__(
             self,
@@ -49,6 +53,8 @@ class Game_File:
             file_source_path = None,
             modified = False,
             from_source = False,
+            # Can supply an initial extension name.
+            extension_name = None,
         ):
         # Pick out the name from the end of the virtual path.
         self.name = virtual_path.split('/')[-1]
@@ -56,6 +62,10 @@ class Game_File:
         self.file_source_path = file_source_path
         self.modified = modified
         self.from_source = from_source
+        self.source_extension_names = []
+        if extension_name:
+            self.source_extension_names.append(extension_name)
+        return
 
 
     # TODO: maybe merge this into usage locations.
@@ -73,18 +83,19 @@ class Game_File:
 #  for these cases, though always output again in utf8.
 class XML_File(Game_File):
     '''
-    Simple XML file contents holder.
+    XML file contents. This will keep a record of the original xml
+    intitialized with, returns a copy of it for editing, and interfaces
+    with the diff patch module for both applying and creating patches.
+
+    Parameters:
+    * file_binary
+      - Bytes object holding the xml text binary.
+      - Optional if xml_root given.
+    * xml_root
+      - Element holding the root node.
+      - Optional if file_binary given.
 
     Attributes:
-    * encoding
-      - String indicating the encoding type of the xml.
-    * _text
-      - Raw text for this file. Do not access directly, as this may be
-        changed in the future to store only xml nodes.
-    * xml_header_lines
-      - List of strings, original header lines from the xml text,
-        including the encoding declaration and the stylesheet
-        declaration.
     * original_root
       - Element holding the original parsed xml, pre-transforms,
         possibly with prior diff patches applied.
@@ -92,85 +103,32 @@ class XML_File(Game_File):
       - Element holding transformed xml, suitable for generating
         new diff patches.
     '''
-    def __init__(self, file_binary, modifies_existing_xml = False, **kwargs):
+    def __init__(
+            self, 
+            file_binary = None, 
+            xml_root = None,
+            **kwargs):
         super().__init__(**kwargs)
+
+        # Should receive either the binary or the xml itself.
+        assert file_binary != None or xml_root != None
         
-        # Get the encoding to use, since xml files are sensitive to this.
-        self.encoding = self.Find_Encoding(file_binary)
+        if file_binary != None:
+            # Process into an xml tree.
+            # Strip out blank text here, so that prettyprint works later.
+            self.original_root = ET.XML(
+                file_binary,
+                parser = ET.XMLParser(remove_blank_text=True))
 
-        # Translate to text with this encoding.
-        # Note: when using 'open()' to read a file, python will convert
-        #  line endings to \n even if they were \r\n. Python strings also
-        #  use a bare \n, so doing string searches on file contents
-        #  requires the file be normalized to \n. When using bytes.decode,
-        #  it does not do newline conversion, so that is done explicitly
-        #  here.
-        self._text = file_binary.decode(self.encoding).replace('\r\n','\n')
+        elif xml_root != None:
+            assert isinstance(xml_root, ET._Element)
+            self.original_root = xml_root
 
-        # Process into an xml tree.
-        # Strip out blank text here, so that prettyprint works later.
-        self.original_root = ET.XML(
-            file_binary,
-            parser = ET.XMLParser(remove_blank_text=True))
         # Set the initial modified tree to a deep copy of the above,
         #  so it can be freely modified.
         self.modified_root = None
         return
     
-
-    @staticmethod
-    def Find_Encoding(file_binary):
-        '''
-        Tries to determine the encoding to use for reading or writing an
-        xml file.
-        Returns a string name of the encoding.
-        '''
-        # Codec is found on the first line. Examples:
-        #  <?xml version="1.0" encoding="ISO-8859-1" ?>
-        #  <?xml version="1.0" encoding="UTF-8" ?>
-        # Getting the encoding right is important for special character
-        #  handling, and also ensuring other programs that load any written
-        #  file based on the xml declared encoding will be using the right one
-        #  (eg. utf-8 wasn't used to write an xml file declared as iso-8859
-        #   or similar).
-
-        # Convert binary to text; always treating as utf-8 (since this
-        #  seems to be the most reliable, and is generally the default).
-        file_text = file_binary.decode('utf-8').replace('\r\n','\n')
-
-        # Get the first line by using split lines in a loop, and break early.
-        for line in file_text.splitlines():
-            # If there is no encoding specified on the first line, as with
-            #  script files, just assume utf-8.
-            if not 'encoding' in line:
-                return 'utf-8'
-
-            # Just do some quick splits to get to the code string.
-            # Split on 'encoding'
-            subline = line.partition('encoding')[2]
-
-            # This should now have '="ISO-8859-1"...'.
-            # Remove the '='.
-            subline = subline.replace('=','')
-
-            # Split on all quotes.
-            # This will create a an empty string for text before
-            #  the first quote.
-            split_line = subline.split('"')
-
-            # There should be at least 3 entries,
-            #  [empty string, encoding string, other stuff].
-            assert len(split_line) >= 3
-
-            # The second entry should be the encoding.
-            encoding = split_line[1]
-            # Send it back.
-            return encoding
-            
-        # Shouldn't be here.
-        assert False
-        return
-
 
     def Get_Root(self):
         '''
@@ -260,14 +218,24 @@ class XML_File(Game_File):
         '''
         # Diff patches have a series of add, remove, replace nodes.
         # These will operate on the original tree, not the original root,
-        # (allowing direct removal/replacement of the root), so first
-        # set up proper trees.
+        #  (allowing direct removal/replacement of the root), so first
+        #  set up proper trees.
         modified_node = XML_Diff.Apply_Patch(
             original_node = self.original_root, 
             patch_node    = other_xml_file.original_root )
-        
+                
         # Record this as the new original root.
         self.original_root = modified_node
+
+        # Record the extension holding the patch, as a source for
+        #  this file.
+        self.source_extension_names.extend(other_xml_file.source_extension_names)        
+        # TODO: for extension dependencies, maybe also track which
+        #  nodes were modified by the extension (so that if they are
+        #  further modified by transforms then that extension can be
+        #  set as a final dependency). Think about how to do this
+        #  in detail. For now, other extensions always create dependencies
+        #  on any file modification.
         return
 
 
