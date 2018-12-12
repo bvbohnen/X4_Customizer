@@ -84,6 +84,10 @@ def Make(*args):
     for folder in ['bin', 'Scripts', 'Plugins']: #,'game_files','patches'
         for dir_path, _, file_names in os.walk(os.path.join(Top_dir, folder)):
 
+            # Skip the pycache folder.
+            if 'pycache' in dir_path:
+                continue
+
             # Check each file name individually.
             for file_name in file_names:
 
