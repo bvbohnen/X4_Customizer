@@ -1,4 +1,4 @@
-X4 Customizer 0.9.5
+X4 Customizer 0.10
 -----------------
 
 Current status: functional, framework being refined.
@@ -143,6 +143,7 @@ Change Log:
  * 0.9.4
    - Applied various polish: documentation touchup, gathered misc file_manager functions into a class, etc.
    - Added dependency nodes to the output extension.
- * 0.9.5
-   - Broke transforms out of the main module, set up an Plugins package that holds runtime script imports.
+ * 0.10
+   - Major reorganization, moving transforms into a separate Plugins package that holds runtime script imports.
    - Added utilities for simple cat operations.
+   - Added Print_Weapon_Stats.
