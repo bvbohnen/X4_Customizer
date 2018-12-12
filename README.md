@@ -1,49 +1,54 @@
-X4 Customizer 0.9.4
+X4 Customizer 0.9.5
 -----------------
 
-Current status: functional, framework tentatively complete, applying polish.
+Current status: functional, framework being refined.
 
-This tool will programatically apply a variety of user selected transforms to X4 game files, optionally pre-modded. Features include:
+This tool offers a framework for modding the X4 and extension game files programatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
 
   * Integrated catalog read/write support.
-  * Basic XML diff patch support.
+  * XML diff patch read/write support.
   * Automatic detection and loading of enabled extensions.
-  * Framework for developing modular, customizable transforms of varying complexity.
+  * Three layer design: framework, plugins, and control script.
+  * Framework handles the file system, plugin management, etc.
+  * Plugins include analysis, transforms, and utilities.
+  * Plugins operate on a user's unique mixture of mods, and can easily be rerun after game patches or mod updates.
   * Transforms can dynamically read and alter game files, instead of being limited to static changes like standard extensions.
-  * Transforms operate on a user's unique mixture of mods, and can easily be rerun after game patches or mod updates.
-  * Changes are written to a new or specified extension.
+  * Transforms are parameterized, to adjust their behavior.
+  * Analyses can generate customized documentation.
+  * Transformed files are written to a new or specified X4 extension.
 
 This tool is available as platform portable Python source code (tested on 3.7 with the lxml package) or as a compiled executable for 64-bit Windows.
 
 The control script:
 
-  * This tool works by executing a user supplied python script specifying any system paths, settings, and desired transforms to run.
+  * This tool works by executing a user supplied python script specifying any system paths, settings, and desired plugins to run.
 
   * The key control script sections are:
-    - "from X4_Customizer import *" to make all transform functions available.
+    - "from Plugins import *" to make all major functions available.
     - Call Settings() to change paths and set non-default options.
-    - Call a series of transforms.
+    - Call a series of plugins with desired input parameters.
+    - Call to Write_Extension() to write any modified files if transforms were used.
     
-  * The quickest way to set up the control script is to copy and edit the "input_scripts/User_Transforms_template.py" file, renaming it to "User_Transforms.py" for recognition by Launch_X4_Customizer.bat.
+  * The quickest way to set up the control script is to copy and edit the "Scripts/User_Transforms_template.py" file, renaming it to "User_Transforms.py" for recognition by Launch_X4_Customizer.bat.
 
 Usage for compiled releases:
 
   * "Launch_X4_Customizer.bat <optional path to control script>"
-    - Call from the command line for full options (-h for help), or run directly to execute the default script at "input_scripts/User_Transforms.py".
+    - Call from the command line for full options (-h for help), or run directly to execute the default script at "Scripts/User_Transforms.py".
   * "Clean_X4_Customizer.bat <optional path to control script>"
     - Removes files generated in a prior run of the given or default3 control script.
 
 Usage for Python source code:
 
-  * "python X4_Customizer\Main.py <optional path to control script>"
+  * "python Framework\Main.py <optional path to control script>"
     - This is the primary entry function for the python source code.
     - Add the "-default_script" option to behave like the bat launcher.
     - Control scripts may freely use any python packages, instead of being limited to those included with the release.
-  * "python X4_Customizer\Make_Documentation.py"
+  * "python Framework\Make_Documentation.py"
     - Generates updated documentation for this project, as markdown formatted files README.md and Documentation.md.
-  * "python X4_Customizer\Make_Executable.py"
+  * "python Framework\Make_Executable.py"
     - Generates a standalone executable and support files, placed in the bin folder. Requires the PyInstaller package be available. The executable will be created for the system it was generated on.
-  * "python X4_Customizer\Make_Release.py"
+  * "python Framework\Make_Release.py"
     - Generates a zip file with all necessary binaries, source files, and example scripts for general release.
 
 Full documentation found in Documentation.md, describing settings and transform parameters.
@@ -74,6 +79,18 @@ Example input file:
         ('id','masstraffic', 0.5),
         ('tag','military', 2)
         )
+    
+    # Write modified files.
+    Write_To_Extension()
+
+
+***
+
+Analyses:
+
+  * Print_Weapon_Stats
+
+    Gather up all weapon statistics, and print them out. Currently only supports csv output. Will include changes from enabled extensions.
 
 
 ***
@@ -83,6 +100,28 @@ Job Transforms:
   * Adjust_Job_Count
 
     Adjusts job ship counts using a multiplier, affecting all quota fields. Input is a list of matching rules, determining which jobs get adjusted.
+
+
+***
+
+Catalog Utilities:
+
+  * Cat_Pack
+
+    Packs all files in subdirectories of the given directory into a new catalog file.  Only subdirectories matching those used in the X4 file system are considered.
+
+  * Cat_Unpack
+
+    Unpack a single catalog file, or a group if a folder given. When a file is in multiple catalogs, the latest one in the list will be used. If a file is already present at the destination, it is compared to the catalog version and skipped if the same.
+
+
+***
+
+Write_To_Extension Utilities:
+
+  * Write_To_Extension
+
+    Write all currently modified game files to the extension folder. Existing files at the location written on a prior call will be cleared out. Content.xml will have dependencies added for files modified from existing extensions.
 
 
 ***
@@ -104,3 +143,6 @@ Change Log:
  * 0.9.4
    - Applied various polish: documentation touchup, gathered misc file_manager functions into a class, etc.
    - Added dependency nodes to the output extension.
+ * 0.9.5
+   - Broke transforms out of the main module, set up an Plugins package that holds runtime script imports.
+   - Added utilities for simple cat operations.

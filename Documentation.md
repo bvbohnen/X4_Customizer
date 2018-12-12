@@ -1,49 +1,54 @@
-X4 Customizer 0.9.4
+X4 Customizer 0.9.5
 -----------------
 
-Current status: functional, framework tentatively complete, applying polish.
+Current status: functional, framework being refined.
 
-This tool will programatically apply a variety of user selected transforms to X4 game files, optionally pre-modded. Features include:
+This tool offers a framework for modding the X4 and extension game files programatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
 
   * Integrated catalog read/write support.
-  * Basic XML diff patch support.
+  * XML diff patch read/write support.
   * Automatic detection and loading of enabled extensions.
-  * Framework for developing modular, customizable transforms of varying complexity.
+  * Three layer design: framework, plugins, and control script.
+  * Framework handles the file system, plugin management, etc.
+  * Plugins include analysis, transforms, and utilities.
+  * Plugins operate on a user's unique mixture of mods, and can easily be rerun after game patches or mod updates.
   * Transforms can dynamically read and alter game files, instead of being limited to static changes like standard extensions.
-  * Transforms operate on a user's unique mixture of mods, and can easily be rerun after game patches or mod updates.
-  * Changes are written to a new or specified extension.
+  * Transforms are parameterized, to adjust their behavior.
+  * Analyses can generate customized documentation.
+  * Transformed files are written to a new or specified X4 extension.
 
 This tool is available as platform portable Python source code (tested on 3.7 with the lxml package) or as a compiled executable for 64-bit Windows.
 
 The control script:
 
-  * This tool works by executing a user supplied python script specifying any system paths, settings, and desired transforms to run.
+  * This tool works by executing a user supplied python script specifying any system paths, settings, and desired plugins to run.
 
   * The key control script sections are:
-    - "from X4_Customizer import *" to make all transform functions available.
+    - "from Plugins import *" to make all major functions available.
     - Call Settings() to change paths and set non-default options.
-    - Call a series of transforms.
+    - Call a series of plugins with desired input parameters.
+    - Call to Write_Extension() to write any modified files if transforms were used.
     
-  * The quickest way to set up the control script is to copy and edit the "input_scripts/User_Transforms_template.py" file, renaming it to "User_Transforms.py" for recognition by Launch_X4_Customizer.bat.
+  * The quickest way to set up the control script is to copy and edit the "Scripts/User_Transforms_template.py" file, renaming it to "User_Transforms.py" for recognition by Launch_X4_Customizer.bat.
 
 Usage for compiled releases:
 
   * "Launch_X4_Customizer.bat <optional path to control script>"
-    - Call from the command line for full options (-h for help), or run directly to execute the default script at "input_scripts/User_Transforms.py".
+    - Call from the command line for full options (-h for help), or run directly to execute the default script at "Scripts/User_Transforms.py".
   * "Clean_X4_Customizer.bat <optional path to control script>"
     - Removes files generated in a prior run of the given or default3 control script.
 
 Usage for Python source code:
 
-  * "python X4_Customizer\Main.py <optional path to control script>"
+  * "python Framework\Main.py <optional path to control script>"
     - This is the primary entry function for the python source code.
     - Add the "-default_script" option to behave like the bat launcher.
     - Control scripts may freely use any python packages, instead of being limited to those included with the release.
-  * "python X4_Customizer\Make_Documentation.py"
+  * "python Framework\Make_Documentation.py"
     - Generates updated documentation for this project, as markdown formatted files README.md and Documentation.md.
-  * "python X4_Customizer\Make_Executable.py"
+  * "python Framework\Make_Executable.py"
     - Generates a standalone executable and support files, placed in the bin folder. Requires the PyInstaller package be available. The executable will be created for the system it was generated on.
-  * "python X4_Customizer\Make_Release.py"
+  * "python Framework\Make_Release.py"
     - Generates a zip file with all necessary binaries, source files, and example scripts for general release.
 
 ***
@@ -72,13 +77,16 @@ Example input file:
         ('id','masstraffic', 0.5),
         ('tag','military', 2)
         )
+    
+    # Write modified files.
+    Write_To_Extension()
 
 ***
 
 * Settings:
 
 
-    This holds general settings and paths to control the customizer. Adjust these settings as needed prior to running the first transform, using direct writes to attributes.
+    This holds general settings and paths to control the customizer. Adjust these settings as needed prior to running the first plugin, using direct writes to attributes.
     
     Settings may be updated individually, or as arguments of a call to Settings. Examples:
     * Settings.path_to_x4_folder   = 'C:\...'
@@ -95,7 +103,7 @@ Example input file:
       - Defaults to HOMEPATH/"Documents/Egosoft/X4" or a subfolder with an 8-digit name.
     * path_to_source_folder
       - Optional path to a source folder that holds high priority source files, which will be used instead of reading the x4 cat/dat files.
-      - For use when running transforms on manually edited files.
+      - For use when running plugins on manually edited files.
       - Defaults to None
     * allow_path_error
       - Bool, if True and the x4 or user folder path looks wrong, the customizer will still attempt to run (with a warning).
@@ -127,16 +135,16 @@ Example input file:
       - Defaults to False.
     
     Logging:
-    * transform_log_file_name
-      - String, name a text file to write transform output messages to; content depends on transforms run.
+    * plugin_log_file_name
+      - String, name a text file to write plugin output messages to; content depends on plugins run.
       - File is located in the output extension folder.
-      - Defaults to 'transform_log.txt'
+      - Defaults to 'plugin_log.txt'
     * customizer_log_file_name
       - String, name a json file to write customizer log information to, including a list of files written.
       - File is located in the output extension folder.
       - Defaults to 'customizer_log.json'
     * log_source_paths
-      - Bool, if True then the path for any source files read will be printed in the transform log.
+      - Bool, if True then the path for any source files read will be printed in the plugin log.
       - Defaults to False
     * verbose
       - Bool, if True some extra status messages may be printed to the console.
@@ -145,10 +153,10 @@ Example input file:
     Behavior:
     * disable_cleanup_and_writeback
       - Bool, if True then cleanup from a prior run and any final writes will be skipped.
-      - For use when testing transforms without modifying files.
+      - For use when testing plugins without modifying files.
       - Defaults to False
-    * skip_all_transforms
-      - Bool, if True all transforms will be skipped.
+    * skip_all_plugins
+      - Bool, if True all plugins will be skipped.
       - For use during cleaning mode.
       - Defaults to False
     * developer
@@ -159,9 +167,19 @@ Example input file:
       - If False or scipy is not found, then a simple linear scaling will be used instead.
       - Defaults to True
     * show_scaling_plots
-      - Bool, if True and matplotlib and numpy are available, any generated scaling equations will be plotted (and their x and y vectors printed for reference). Close the plot window manually to continue transform processing.
+      - Bool, if True and matplotlib and numpy are available, any generated scaling equations will be plotted (and their x and y vectors printed for reference). Close the plot window manually to continue plugin processing.
       - Primarily for development use.
       - Defaults to False
+        
+
+
+***
+
+Analyses:
+
+  * Print_Weapon_Stats
+
+    Gather up all weapon statistics, and print them out. Currently only supports csv output. Will include changes from enabled extensions.
         
 
 
@@ -200,6 +218,62 @@ Job Transforms:
 
 ***
 
+Catalog Utilities:
+
+  * Cat_Pack
+
+    Packs all files in subdirectories of the given directory into a new catalog file.  Only subdirectories matching those used in the X4 file system are considered.
+    
+    * source_dir_path
+      - Path to the directory holding subdirectories to pack.
+      - Subdirectories are expected to match typical X4 folder names, eg. 'aiscripts','md', etc.
+    * dest_cat_path
+      - Path and name for the catalog file being generated.
+      - Prefix the cat file name with 'ext_' when patching game files, or 'subst_' when overwriting game files.
+    * include_pattern
+      - String or list of strings, optional, wildcard patterns for file names to include in the unpacked output.
+      - Eg. "*.xml" to unpack only xml files, "md/*" to  unpack only mission director files, etc.
+      - Case is ignored.
+    * exclude_pattern
+      - String or list of strings, optional, wildcard patterns for file names to include in the unpacked output.
+      - Eg. "['*.lua','*.dae']" to skip lua and dae files.
+        
+
+  * Cat_Unpack
+
+    Unpack a single catalog file, or a group if a folder given. When a file is in multiple catalogs, the latest one in the list will be used. If a file is already present at the destination, it is compared to the catalog version and skipped if the same.
+    
+    * source_cat_path
+      - Path to the catalog file, or to a folder.
+      - When a folder given, catalogs are read in X4 priority order according to its expected names.
+    * dest_dir_path
+      - Path to the folder to place unpacked files.
+    * include_pattern
+      - String or list of strings, optional, wildcard patterns for file names to include in the unpacked output.
+      - Eg. "*.xml" to unpack only xml files, "md/*" to  unpack only mission director files, etc.
+      - Case is ignored.
+    * exclude_pattern
+      - String or list of strings, optional, wildcard patterns for file names to include in the unpacked output.
+      - Eg. "['*.lua','*.dae']" to skip lua and dae files.
+        
+
+
+***
+
+Write_To_Extension Utilities:
+
+  * Write_To_Extension
+
+    Write all currently modified game files to the extension folder. Existing files at the location written on a prior call will be cleared out. Content.xml will have dependencies added for files modified from existing extensions.
+    
+    * skip_content
+      - Bool, if True then the content.xml file will not be written.
+      - Defaults to False.
+        
+
+
+***
+
 Change Log:
  * 0.9
    - Initial version, after a long evening of adapting X3_Customizer for X4.
@@ -217,3 +291,6 @@ Change Log:
  * 0.9.4
    - Applied various polish: documentation touchup, gathered misc file_manager functions into a class, etc.
    - Added dependency nodes to the output extension.
+ * 0.9.5
+   - Broke transforms out of the main module, set up an Plugins package that holds runtime script imports.
+   - Added utilities for simple cat operations.
