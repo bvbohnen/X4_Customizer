@@ -3,8 +3,8 @@ Place to test individual transforms.
 '''
 
 # Import all transform functions.
-import X4_Customizer
-from X4_Customizer import *
+import Framework
+from Plugins import *
 
 Settings(
     path_to_x4_folder = r'C:\Steam\SteamApps\common\X4 Foundations',
@@ -39,7 +39,7 @@ Settings(
 
 # Run diff patch test on whatever xml.
 jobs_game_file = Load_File('libraries/jobs.xml')
-X4_Customizer.File_Manager.XML_Diff.Unit_Test(
+Framework.File_Manager.XML_Diff.Unit_Test(
     test_node      = jobs_game_file.Get_Root(), 
     num_tests      = 100, 
     edits_per_test = 5,

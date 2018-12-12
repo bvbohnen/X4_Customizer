@@ -4,7 +4,7 @@ the X4 directory and running some simple transforms.
 '''
 
 # Import all transform functions.
-from X4_Customizer import *
+from Plugins import *
 
 Settings(
     # Set the path to the X4 installation folder.

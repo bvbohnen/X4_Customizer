@@ -3,7 +3,7 @@ X4 Customizer 0.10
 
 Current status: functional, framework being refined.
 
-This tool offers a framework for modding the X4 and extension game files programatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
+This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
 
   * Integrated catalog read/write support.
   * XML diff patch read/write support.
@@ -61,7 +61,7 @@ Example input file:
     '''
     
     # Import all transform functions.
-    from X4_Customizer import *
+    from Plugins import *
     
     Settings(
         # Set the path to the X4 installation folder.

@@ -23,7 +23,7 @@ c)  Using the python source, run
 '''
 
 # Import all transform functions.
-from X4_Customizer import *
+from Plugins import *
 
 Settings(
     # Set the path to the X4 installation folder.

@@ -5,7 +5,7 @@ X4 Customizer
 Current status: functional, framework being refined.
 
 This tool offers a framework for modding the X4 and extension game files
-programatically, guided by user selected plugins (analyses, transforms,
+programmatically, guided by user selected plugins (analyses, transforms,
 utilities). Features include:
 
   * Integrated catalog read/write support.
