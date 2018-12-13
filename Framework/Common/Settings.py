@@ -184,7 +184,7 @@ class Settings_class:
         self.use_scipy_for_scaling_equations = True
         self.show_scaling_plots = False
         self.developer = False
-        self.verbose = True
+        self.verbose = False
         self.allow_path_error = False
         self.output_to_catalog = False
 

@@ -21,9 +21,16 @@ from ..Common import Plugin_Log
 # Set a list of subfolders that are standard for x4 files.
 # Other folders can generally be ignored.
 valid_virtual_path_prefixes =  (
-    'aiscripts/','assets/','index/','libraries/',
-    'maps/','md/','t/','ui/' )
-    
+        'aiscripts/','assets/',
+        'cutscenes/','index/',
+        'libraries/','maps/',
+        'md/','music/',
+        'particles/','sfx/',
+        'shadergl/','t/',
+        'textures/',
+        'ui/','voice-L044/',
+        'voice-L049/','vulkan/',
+        )    
 
 class Location_Source_Reader:
     '''

@@ -24,7 +24,7 @@ from pathlib import Path
 import hashlib
 from collections import namedtuple
 
-from ..Common import Cat_Hash_Exception
+from ..Common import Cat_Hash_Exception, Settings
 
 # Use a named tuple to track cat entries.
 # Values are integers unless suffixed otherwise.
@@ -167,7 +167,7 @@ class Cat_Reader:
             pass
         else:
             # Handle the error message.
-            message = 'File {} in cat {} failed an md5 hash check'.format(
+            message = 'File {} in cat {} failed the md5 hash check'.format(
                     cat_path, self.cat_path)
             if not Settings.allow_cat_md5_errors:
                 raise Cat_Hash_Exception(message)

@@ -13,6 +13,7 @@ from Framework import Utility_Wrapper, File_Manager
 def Cat_Unpack(
         source_cat_path,
         dest_dir_path,
+        is_extension = False,
         include_pattern = None,
         exclude_pattern = None
     ):
@@ -28,6 +29,10 @@ def Cat_Unpack(
         according to its expected names.
     * dest_dir_path
       - Path to the folder to place unpacked files.
+    * is_extension
+      - Bool, if True then extension style catalog naming (eg. 'ext_01.cat')
+        will be searched for when source_cat_path is a directory.
+      - Defaults to False.
     * include_pattern
       - String or list of strings, optional, wildcard patterns for file
         names to include in the unpacked output.
@@ -65,7 +70,11 @@ def Cat_Unpack(
     if source_cat_path.is_dir():
         # Set up a reader for the source location.
         source_reader = File_Manager.Source_Reader.Location_Source_Reader(
-            location = source_cat_path)
+            location = source_cat_path,
+            extension_name = None if not is_extension else source_cat_path.name)
+        # Print how many catalogs were found.
+        print(('{} catalog files found using standard naming convention.'
+               ).format(len(source_reader.catalog_file_dict)))
     else:
         # Set up an empty reader.
         source_reader = File_Manager.Source_Reader.Location_Source_Reader(
@@ -100,8 +109,7 @@ def Cat_Unpack(
                 continue
 
         # Make a folder for the dest if needed.
-        dest_dir = dest_path.parent
-        dest_dir.mkdir(parents = True, exist_ok = True)
+        dest_dir_path.parent.mkdir(parents = True, exist_ok = True)
 
         # Get the file binary.
         cat_path, file_binary = source_reader.Read_Catalog_File(virtual_path)
@@ -185,9 +193,7 @@ def Cat_Pack(
         location = source_dir_path)
 
     # Pick out the subfolders to be included.
-    subfolder_names =  (
-        'aiscripts/','assets/','index/','libraries/',
-        'maps/','md/','t/','ui/' )
+    subfolder_names = File_Manager.Source_Reader.valid_virtual_path_prefixes
     
     num_writes        = 0
     num_pattern_skips = 0

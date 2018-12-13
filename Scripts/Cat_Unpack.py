@@ -23,6 +23,7 @@ exclude_pattern = None
 Cat_Unpack(
     source_cat_path = cat_dir,
     dest_dir_path   = cat_dir / dest_dir_path,
+    is_extension    = False,
     include_pattern = include_pattern,
     exclude_pattern = exclude_pattern
     )
