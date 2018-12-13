@@ -22,11 +22,17 @@ class Text_Patch_Exception(Exception):
     
 class Gzip_Exception(Exception):
     '''
-    Exception raise when gzip runs into a problem decompressing a file.
+    Exception raised when gzip runs into a problem decompressing a file.
     '''    
     
 class XML_Patch_Exception(Exception):
     '''
-    Exception raise when failing during verification of a generated
+    Exception raised when failing during verification of a generated
     xml patch.
+    '''
+
+class Cat_Hash_Exception(Exception):
+    '''
+    Exception raised when a catalog being unpacked fails to verify
+    an md5 hash.
     '''

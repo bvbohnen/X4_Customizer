@@ -7,6 +7,8 @@ from fnmatch import fnmatch
 
 from Framework import Utility_Wrapper, File_Manager
 
+# TODO: add an extension flag, to change the catalog search criteria
+# when a directory is given.
 @Utility_Wrapper(uses_paths_from_settings = False)
 def Cat_Unpack(
         source_cat_path,
@@ -85,10 +87,7 @@ def Cat_Unpack(
             num_pattern_skips += 1
             continue
 
-        # Make a folder for the dest if needed.
         dest_path = dest_dir_path / virtual_path
-        dest_dir = dest_path.parent
-        dest_dir.mkdir(parents = True, exist_ok = True)
 
         # To save some effort, check if the file already exists at
         #  the dest, and if so, get its md5 hash.
@@ -99,6 +98,10 @@ def Cat_Unpack(
             if dest_hash == cat_entry.hash_str:
                 num_hash_skips += 1
                 continue
+
+        # Make a folder for the dest if needed.
+        dest_dir = dest_path.parent
+        dest_dir.mkdir(parents = True, exist_ok = True)
 
         # Get the file binary.
         cat_path, file_binary = source_reader.Read_Catalog_File(virtual_path)

@@ -9,8 +9,10 @@ The format of cat files, each line:
 <cat_path  byte_count  date_stamp  hash?>
 
 Date stamps are 10-byte, time since epoch (1,54x,xxx,xxx).
-The Hashes are 128-bit MD5 codes for non-assets (based on observation),
- but not sure about assets.
+The Hashes are 128-bit MD5 codes, mostly.
+    Note: egosoft catalogs are buggy regarding empty files, which have
+    a hash of 0 in the cat even though md5 should return a hash
+    of d41d8cd98f00b204e9800998ecf8427e for empty input.
 
 The corresponding dat file contains the contents indicated by the catalog
 file, in order. The start position of the data is based on the sum of
@@ -22,6 +24,8 @@ from pathlib import Path
 import hashlib
 from collections import namedtuple
 
+from ..Common import Cat_Hash_Exception
+
 # Use a named tuple to track cat entries.
 # Values are integers unless suffixed otherwise.
 Cat_Entry = namedtuple(
@@ -31,7 +35,7 @@ Cat_Entry = namedtuple(
 
 def Get_Hash_String(binary):
     '''
-    Returns a 128-bit hash as a hex string for the given binary.
+    Returns a 128-bit md5 hash as a hex string for the given binary.
     '''
     # Get the binary hash.
     hash = hashlib.md5()
@@ -75,15 +79,15 @@ class Cat_Reader:
         with open(self.cat_path, 'r') as file:
             text = file.read()
             
-        # Loop over the lineself.
-        # Also track a running offset for packed file start locationself.
+        # Loop over the lines.
+        # Also track a running offset for packed file start locations.
         dat_start_offset = 0
         for line in text.splitlines():
 
             # Get the packed file's name and size.
             # Note: the file name may include spaces, and the name is
             #  separated from the size/time/hash by spaces, so this will need
-            #  to only split on the last 3 spaceself.
+            #  to only split on the last 3 spaces.
             cat_path, size_str, timestamp_str, hash_str = line.rsplit(' ', 3)
             num_bytes = int(size_str)
 
@@ -147,13 +151,28 @@ class Cat_Reader:
             # Grab the byte range.
             binary = file.read(self.cat_entries[cat_path].num_bytes)
 
+
         # Verify the hash.
-        hash_str = Get_Hash_String(binary)
-        dat_hash_str = self.cat_entries[cat_path].hash_str
-        if hash_str != dat_hash_str:
-            raise Exception('File {} in cat {} failed a hash check'.format(
-                cat_path, 
-                self.cat_path))
+        binary_hash_str = Get_Hash_String(binary)
+        cat_hash_str = self.cat_entries[cat_path].hash_str
+
+        # Note: egosoft cats are buggy and can have a 0 for the hash
+        # of empty files, so also check that, but keep the normal
+        # check incase proper empty file hashes show up sometimes.
+        if (cat_hash_str == binary_hash_str):
+            # Hash match.
+            pass
+        elif not binary and cat_hash_str == '00000000000000000000000000000000':
+            # Alt hash match for empty file.
+            pass
+        else:
+            # Handle the error message.
+            message = 'File {} in cat {} failed an md5 hash check'.format(
+                    cat_path, self.cat_path)
+            if not Settings.allow_cat_md5_errors:
+                raise Cat_Hash_Exception(message)
+            elif Settings.verbose:
+                print(message)
 
         return binary
 

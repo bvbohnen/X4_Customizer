@@ -540,8 +540,15 @@ def Get_BB_Text(line_list):
         strip_line = line.strip()
 
         # Empty lines get handled first.
+        # Skip newlines while lists are active; the egosoft
+        #  forums always hide the later newlines in a list entry,
+        #  which just makes earlier ones awkward.
+        # This assumes there are no newlines in the middle of
+        #  transform description text, which there shouldn't be
+        #  for simple documentation.
         if not strip_line:
-            Record('')
+            if not list_active:
+                Record('')
         
         # At every '***', any active list or code is closed.
         elif strip_line == '***':
@@ -597,8 +604,9 @@ def Get_BB_Text(line_list):
             if strip_line == 'Change Log:':
                 changelog_active = True
 
-            # Note when in a transform section, to add formatting.
-            if 'Transforms' in strip_line:
+            # Note when in a transform or other plugin section,
+            #  to add formatting.
+            if any(x in strip_line for x in ['Transforms','Analyses','Utilities']):
                 transform_active = True
 
 

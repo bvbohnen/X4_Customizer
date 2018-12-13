@@ -8,6 +8,7 @@ from .Exceptions import Obj_Patch_Exception
 from .Exceptions import Text_Patch_Exception
 from .Exceptions import Gzip_Exception
 from .Exceptions import XML_Patch_Exception
+from .Exceptions import Cat_Hash_Exception
 
 from . import Change_Log
 from .Settings import Settings

@@ -145,8 +145,8 @@ def _Plugin_Wrapper(
 # Wrappers on the wrapper, filling in the plugin_type conveniently.
 def Transform_Wrapper(**kwargs):
     return _Plugin_Wrapper(plugin_type = 'Transform', **kwargs)
+# Don't sub-categorize analyses or utilities for now.
 def Utility_Wrapper(**kwargs):
-    return _Plugin_Wrapper(plugin_type = 'Utility', **kwargs)
-# Don't sub-categorize analyses for now.
+    return _Plugin_Wrapper(plugin_type = 'Utility', category = '', **kwargs)
 def Analysis_Wrapper(**kwargs):
     return _Plugin_Wrapper(plugin_type = 'Analysis', category = '', **kwargs)

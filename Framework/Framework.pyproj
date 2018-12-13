@@ -13,7 +13,7 @@
     <Name>Framework</Name>
     <RootNamespace>Framework</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>..\Scripts\Make_Documentation.py  -dev</CommandLineArguments>
+    <CommandLineArguments>..\Scripts\Cat_Unpack.py  -dev</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

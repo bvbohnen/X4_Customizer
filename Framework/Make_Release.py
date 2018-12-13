@@ -73,6 +73,9 @@ def Make(*args):
         # Loop over extensions to include.
         # This will be somewhat blind for the moment.
         for extension in ['.md','.txt','.bat']:
+            # Ignore the 'for egosoft forums' file.
+            if 'for_egosoft_forum.txt' in file_name:
+                continue
             if file_name.endswith(extension):
                 file_paths.append(os.path.join(Top_dir, file_name))
 
@@ -84,7 +87,7 @@ def Make(*args):
     for folder in ['bin', 'Scripts', 'Plugins']: #,'game_files','patches'
         for dir_path, _, file_names in os.walk(os.path.join(Top_dir, folder)):
 
-            # Skip the pycache folder.
+            # Skip the pycache folders.
             if 'pycache' in dir_path:
                 continue
 
@@ -99,6 +102,10 @@ def Make(*args):
                 ##  the script editor.
                 #if folder == 'game_files' and file_name.endswith('.bak'):
                 #    continue
+
+                # Skip anything in scripts or plugins that isn't .py.
+                if folder in ['Scripts','Plugins'] and not file_name.endswith('.py'):
+                    continue
 
                 # Omit some input scripts.
                 if folder == 'Scripts' and file_name in [

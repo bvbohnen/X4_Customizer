@@ -1,4 +1,4 @@
-X4 Customizer 0.10
+X4 Customizer 0.10.1
 -----------------
 
 Current status: functional, framework being refined.
@@ -117,6 +117,9 @@ Example input file:
     * ignore_extensions
       - Bool, if True then extensions will be ignored, and files are only sourced from the source_folder or x4_folder.
       - Defaults to False
+    * allow_cat_md5_errors
+      - Bool, if True then when files extracted from cat/dat fail to verify their md5 hash, no exception will be thrown.
+      - Defaults to False; consider setting True if needing to unpack incorrectly assembled catalogs.
     
     Output:
     * extension_name
@@ -218,7 +221,7 @@ Job Transforms:
 
 ***
 
-Catalog Utilities:
+Utilities:
 
   * Cat_Pack
 
@@ -257,11 +260,6 @@ Catalog Utilities:
       - Eg. "['*.lua','*.dae']" to skip lua and dae files.
         
 
-
-***
-
-Write_To_Extension Utilities:
-
   * Write_To_Extension
 
     Write all currently modified game files to the extension folder. Existing files at the location written on a prior call will be cleared out. Content.xml will have dependencies added for files modified from existing extensions.
@@ -295,3 +293,5 @@ Change Log:
    - Major reorganization, moving transforms into a separate Plugins package that holds runtime script imports.
    - Added utilities for simple cat operations.
    - Added Print_Weapon_Stats.
+ * 0.10.1
+   - Added workaround for a bug in x4 catalogs that sometimes use an incorrect empty file hash; also added an optional setting to allow hash mismatches to support otherwise problematic catalogs.

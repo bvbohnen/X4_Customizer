@@ -54,6 +54,11 @@ class Settings_class:
       - Bool, if True then extensions will be ignored, and files are
         only sourced from the source_folder or x4_folder.
       - Defaults to False
+    * allow_cat_md5_errors
+      - Bool, if True then when files extracted from cat/dat fail
+        to verify their md5 hash, no exception will be thrown.
+      - Defaults to False; consider setting True if needing to
+        unpack incorrectly assembled catalogs.
 
     Output:
     * extension_name
@@ -169,6 +174,7 @@ class Settings_class:
         self.path_to_source_folder = None
         self.prefer_single_files = False
         self.ignore_extensions = False
+        self.allow_cat_md5_errors = False
         self.make_maximal_diffs = False
         self.plugin_log_file_name = 'plugin_log.txt'
         self.customizer_log_file_name = 'customizer_log.json'
