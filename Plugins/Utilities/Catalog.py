@@ -109,7 +109,7 @@ def Cat_Unpack(
                 continue
 
         # Make a folder for the dest if needed.
-        dest_dir_path.parent.mkdir(parents = True, exist_ok = True)
+        dest_path.parent.mkdir(parents = True, exist_ok = True)
 
         # Get the file binary.
         cat_path, file_binary = source_reader.Read_Catalog_File(virtual_path)
