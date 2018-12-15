@@ -16,7 +16,7 @@ cat_dir = Path(r'C:\Steam\SteamApps\common\X4 Foundations')
 dest_dir_path = 'extracted'
 
 # Optional wildcard pattern to use for matching.
-include_pattern = ['*.xml','*.xsd']
+include_pattern = ['*.xml','*.xsd','*.lua'] #,'*.xpl']
 exclude_pattern = None
 
 # Call the unpacker.

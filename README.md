@@ -1,4 +1,4 @@
-X4 Customizer 0.10.1
+X4 Customizer 0.10.2
 -----------------
 
 Current status: functional, framework being refined.
@@ -144,3 +144,5 @@ Change Log:
    - Added Print_Weapon_Stats.
  * 0.10.1
    - Added workaround for a bug in x4 catalogs that sometimes use an incorrect empty file hash; also added an optional setting to allow hash mismatches to support otherwise problematic catalogs.
+ * 0.10.2
+   - Bug fix in cat unpacker.

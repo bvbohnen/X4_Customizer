@@ -1,4 +1,4 @@
-X4 Customizer 0.10.1
+X4 Customizer 0.10.2
 -----------------
 
 Current status: functional, framework being refined.
@@ -251,6 +251,9 @@ Utilities:
       - When a folder given, catalogs are read in X4 priority order according to its expected names.
     * dest_dir_path
       - Path to the folder to place unpacked files.
+    * is_extension
+      - Bool, if True then extension style catalog naming (eg. 'ext_01.cat') will be searched for when source_cat_path is a directory.
+      - Defaults to False.
     * include_pattern
       - String or list of strings, optional, wildcard patterns for file names to include in the unpacked output.
       - Eg. "*.xml" to unpack only xml files, "md/*" to  unpack only mission director files, etc.
@@ -295,3 +298,5 @@ Change Log:
    - Added Print_Weapon_Stats.
  * 0.10.1
    - Added workaround for a bug in x4 catalogs that sometimes use an incorrect empty file hash; also added an optional setting to allow hash mismatches to support otherwise problematic catalogs.
+ * 0.10.2
+   - Bug fix in cat unpacker.

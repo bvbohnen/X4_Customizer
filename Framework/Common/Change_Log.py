@@ -29,6 +29,8 @@ Change Log:
    - Added workaround for a bug in x4 catalogs that sometimes use
      an incorrect empty file hash; also added an optional setting to
      allow hash mismatches to support otherwise problematic catalogs.
+ * 0.10.2
+   - Bug fix in cat unpacker.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.
