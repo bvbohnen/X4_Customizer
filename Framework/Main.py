@@ -130,7 +130,7 @@ def Run(*args):
 
 
     # Convenience flag for when the default script is in use.
-    using_default_script = args.control_script == 'Default_Script.py'
+    using_default_script = args.control_script == 'Default_Script'
 
     # Convert the script to a Path, for convenience.
     args.control_script = Path(args.control_script)
