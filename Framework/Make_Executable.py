@@ -359,31 +359,47 @@ def Make(*args):
         if os.path.exists(build_folder):
             shutil.rmtree(build_folder)
 
-    # Create a bat file for launching the exe from the top
-    #  level directory.
-    with open(os.path.join(This_dir, '..', 'Launch_X4_Customizer.bat'), 'w') as file:
-        file.write('\n'.join([
-            # Disable the echo of the command.
-            '@echo off',
-            # Use '%*' to pass all command line args.
-            # Add the '-default_script' arg, in case this is launched without
-            #  a specified user script.
-            os.path.join('bin', program_name + '.exe') + ' %* -default_script',
-            # Wait for user input, so they can read messages.
-            'pause',
-            ]))
 
-    # Create an alternate version for cleaning out changes by
-    #  setting the -clean flag.
-    with open(os.path.join(This_dir, '..', 'Clean_X4_Customizer.bat'), 'w') as file:
-        file.write('\n'.join([
+    # Set up bat files for easier launching.
+    bat_file_details_list = [
+        {
+            'name' : 'Launch_X4_Customizer',
+            # Use '%*' to pass all command line args.
+            'cmd'  : os.path.join('bin', program_name + '.exe') + ' %*',
+            },
+        {
+            'name' : 'Clean_X4_Customizer',
+            'cmd'  : os.path.join('bin', program_name + '.exe') + ' %* -clean',
+            },
+        {
+            'name' : 'Cat_Unpack',
+            # Set to pass extra command line args.
+            'cmd'  : os.path.join('bin', program_name + '.exe') + ' Cat_Unpack -argpass %*',
+            },
+        {
+            'name' : 'Cat_Pack',
+            # Set to pass extra command line args.
+            'cmd'  : os.path.join('bin', program_name + '.exe') + ' Cat_Pack -argpass %*',
+            },
+        {
+            'name' : 'Check_Extensions',
+            # Set to pass extra command line args.
+            'cmd'  : os.path.join('bin', program_name + '.exe') + ' Check_Extensions -argpass %*',
+            },
+        ]
+
+    # Create a bat file for launching the exe from the top level directory.
+    for bat_file_details in bat_file_details_list:
+        file_name = os.path.join(This_dir, '..', bat_file_details['name'] + '.bat')
+        lines = [
             # Disable the echo of the command.
             '@echo off',
-            # Use '%*' to pass all command line args.
-            os.path.join('bin', program_name + '.exe') + ' %* -default_script -clean',
+            bat_file_details['cmd'],
             # Wait for user input, so they can read messages.
             'pause',
-            ]))
+            ]
+        with open(file_name, 'w') as file:
+            file.write('\n'.join(lines))
 
     # Restory any original workind directory, in case this function
     #  was called from somewhere else.

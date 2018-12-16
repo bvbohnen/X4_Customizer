@@ -5,17 +5,16 @@ from pathlib import Path
 #import re
 from fnmatch import fnmatch
 
-from Framework import Utility_Wrapper, File_Manager
+from Framework import Utility_Wrapper, File_Manager, Cat_Hash_Exception
 
-# TODO: add an extension flag, to change the catalog search criteria
-# when a directory is given.
+
 @Utility_Wrapper(uses_paths_from_settings = False)
 def Cat_Unpack(
         source_cat_path,
         dest_dir_path,
-        is_extension = False,
-        include_pattern = None,
-        exclude_pattern = None
+        include_pattern  = None,
+        exclude_pattern  = None,
+        allow_md5_errors = False
     ):
     '''
     Unpack a single catalog file, or a group if a folder given.
@@ -28,11 +27,7 @@ def Cat_Unpack(
       - When a folder given, catalogs are read in X4 priority order
         according to its expected names.
     * dest_dir_path
-      - Path to the folder to place unpacked files.
-    * is_extension
-      - Bool, if True then extension style catalog naming (eg. 'ext_01.cat')
-        will be searched for when source_cat_path is a directory.
-      - Defaults to False.
+      - Path to the folder where unpacked files are written.
     * include_pattern
       - String or list of strings, optional, wildcard patterns for file
         names to include in the unpacked output.
@@ -43,6 +38,10 @@ def Cat_Unpack(
       - String or list of strings, optional, wildcard patterns for file
         names to include in the unpacked output.
       - Eg. "['*.lua','*.dae']" to skip lua and dae files.
+    * allow_md5_errors
+      - Bool, if True then files with md5 errors will be unpacked, otherwise
+        they are skipped.
+      - Such errors may arise from poorly constructed catalog files.
     '''
     # Do some error checking on the paths.
     try:
@@ -70,8 +69,7 @@ def Cat_Unpack(
     if source_cat_path.is_dir():
         # Set up a reader for the source location.
         source_reader = File_Manager.Source_Reader.Location_Source_Reader(
-            location = source_cat_path,
-            extension_name = None if not is_extension else source_cat_path.name)
+            location = source_cat_path)
         # Print how many catalogs were found.
         print(('{} catalog files found using standard naming convention.'
                ).format(len(source_reader.catalog_file_dict)))
@@ -83,9 +81,11 @@ def Cat_Unpack(
         source_reader.Add_Catalog(source_cat_path)
 
 
+    # Some counts for printout at the end.
     num_writes        = 0
     num_pattern_skips = 0
     num_hash_skips    = 0
+    num_md5_skips     = 0    
 
     # Loop over the Cat_Entry objects; the reader takes care of
     #  cat priorities.
@@ -111,8 +111,15 @@ def Cat_Unpack(
         # Make a folder for the dest if needed.
         dest_path.parent.mkdir(parents = True, exist_ok = True)
 
-        # Get the file binary.
-        cat_path, file_binary = source_reader.Read_Catalog_File(virtual_path)
+        # Get the file binary, catching any md5 error.
+        # This will only throw the exception if allow_md5_errors is False.
+        try:
+            cat_path, file_binary = source_reader.Read_Catalog_File(
+                virtual_path,
+                allow_md5_error = allow_md5_errors)
+        except Cat_Hash_Exception:
+            num_md5_skips += 1
+            continue
         
         # Write it back out to the destination.
         with open(dest_path, 'wb') as file:
@@ -126,6 +133,7 @@ def Cat_Unpack(
     print('Files written                    : {}'.format(num_writes))
     print('Files skipped (pattern mismatch) : {}'.format(num_pattern_skips))
     print('Files skipped (hash match)       : {}'.format(num_hash_skips))
+    print('Files skipped (md5 hash failure) : {}'.format(num_md5_skips))    
 
     return
 
@@ -167,14 +175,18 @@ def Cat_Pack(
         source_dir_path = Path(source_dir_path)
         assert source_dir_path.exists()
     except:
-        raise Exception('Error in the source path ({})'.format(source_dir_path))
+        raise AssertionError('Error in the source path ({})'.format(source_dir_path))
 
     try:
         dest_cat_path = Path(dest_cat_path)
+        # Error if it an existing folder (and not a file).
+        assert not dest_cat_path.is_dir()
+        # Error if it doesn't end in '.cat'.
+        assert dest_cat_path.suffix == '.cat'
         # Make the dest dir if needed.
         dest_cat_path.parent.mkdir(parents = True, exist_ok = True)
     except:
-        raise Exception('Error in the dest path ({})'.format(dest_cat_path))
+        raise AssertionError('Error in the dest path ({})'.format(dest_cat_path))
     
 
     # Pack up the patterns given to always be lists or None.

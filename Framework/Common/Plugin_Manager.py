@@ -125,9 +125,10 @@ def _Plugin_Wrapper(
                 # When set to catch exceptions, just print a nice message.
                 if not Settings.developer:
                     # Give the exception name.
-                    print('Skipped {} due to a {} exception.'.format(
+                    print('Skipped {} due to {}: "{}".'.format(
                         func.__name__,
-                        type(ex).__name__
+                        type(ex).__name__,
+                        str(ex)
                         ))
                 else:
                     # Reraise the exception.

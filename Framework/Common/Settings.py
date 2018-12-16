@@ -98,7 +98,7 @@ class Settings_class:
     * verbose
       - Bool, if True some extra status messages may be printed to the
         console.
-      - Defaults to False
+      - Defaults to True
 
     Behavior:
     * disable_cleanup_and_writeback
@@ -142,9 +142,14 @@ class Settings_class:
     def __init__(self):
 
         # For the path lookups, use os.environ to look up some windows
-        # path terms, but in case they aren't found just use '.' so
-        # this doesn't error out here.
-        self.path_to_x4_folder   = (Path(os.environ.get('HOMEDRIVE','.')) 
+        #  path terms, but in case they aren't found just use '.' so
+        #  this doesn't error out here.
+        # Add '/' after the drive letter, else it gets ignored and the path
+        #  is treated as relative.
+        # TODO: some sort of smart but fast folder search.
+        # TODO: consider placing default settings overrides in a json file,
+        #  that will work on all called scripts.
+        self.path_to_x4_folder   = (Path(os.environ.get('HOMEDRIVE','.') + '/') 
                                     / 'Steam/steamapps/common/X4 Foundations')
         self.path_to_user_folder = (Path(os.environ.get('HOMEPATH','.'))  
                                     / 'Documents/Egosoft/X4')
@@ -184,7 +189,7 @@ class Settings_class:
         self.use_scipy_for_scaling_equations = True
         self.show_scaling_plots = False
         self.developer = False
-        self.verbose = False
+        self.verbose = True
         self.allow_path_error = False
         self.output_to_catalog = False
 

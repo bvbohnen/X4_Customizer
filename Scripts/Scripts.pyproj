@@ -30,12 +30,15 @@
     <Compile Include="Cat_Unpack.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Check_Extensions.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Example_Transforms.py" />
     <Compile Include="Make_Documentation.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Test.py" />
-    <Compile Include="User_Transforms_template.py" />
+    <Compile Include="Default_Script_template.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

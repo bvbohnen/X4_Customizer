@@ -18,21 +18,28 @@ class Plugin_Log_class:
     Attributes:
     * log_file
       - File object for the log, opened on the first write.
+    * logging_function
+      - Optional function which will be called by Print instead
+        of doing the normal file write. The function should accept
+        one argument, the message string.
     '''
     def __init__(self):
         self.log_file = None
+        self.logging_function = None
 
-    def Print(self, line, newline = True):
+    def Print(self, line):
         '''
         Write a line to the summary file.
-        A newline is inserted automatically unless newline == False.
         '''
+        # If there is a logging_function attached, call it.
+        if self.logging_function != None:
+            self.logging_function(line)
+            return
+
         # Open the file if needed.
         if self.log_file == None:
             self.log_file = open(Settings.Get_Plugin_Log_Path(), 'w')
-        self.log_file.write(line)
-        if newline:
-            self.log_file.write('\n')
+        self.log_file.write(line + '\n')
         # Flush out to be a little safer against crashes.
         self.log_file.flush()
         return

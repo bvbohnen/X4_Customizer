@@ -122,7 +122,7 @@ class Cat_Reader:
         return self.cat_entries
 
             
-    def Read(self, cat_path, error_if_not_found = False):
+    def Read(self, cat_path, error_if_not_found = False, allow_md5_error = False):
         '''
         Read an entry in the corresponding dat file, based on the
         provided file name (including internal path).
@@ -134,6 +134,9 @@ class Cat_Reader:
         * error_if_not_found
           - Bool, if True and the name is not recorded in this cat, then
             an exception will be thrown, otherwise returns None.
+        * allow_md5_error
+          - Bool, if True then the md5 check will be suppressed and
+            errors allowed. May still print a warning message.
         '''
         # Check for the file being missing.
         if cat_path not in self.cat_entries:
@@ -169,7 +172,8 @@ class Cat_Reader:
             # Handle the error message.
             message = 'File {} in cat {} failed the md5 hash check'.format(
                     cat_path, self.cat_path)
-            if not Settings.allow_cat_md5_errors:
+            # Prevent the exception based on Settings or the input arg.
+            if not Settings.allow_cat_md5_errors and not allow_md5_error:
                 raise Cat_Hash_Exception(message)
             elif Settings.verbose:
                 print(message)

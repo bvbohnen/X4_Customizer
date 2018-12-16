@@ -278,7 +278,14 @@ class XML_File(Game_File):
         #  set up proper trees.
         modified_node = XML_Diff.Apply_Patch(
             original_node = self.original_root, 
-            patch_node    = other_xml_file.original_root )
+            patch_node    = other_xml_file.original_root,
+            # For any errors, print out the file name, the patch extension
+            # name. TODO: maybe include the already applied source
+            # extension names, though that gets overly verbose.
+            error_prefix  = '"{}" patched from extension "{}"'.format(
+                self.virtual_path,
+                other_xml_file.extension_name )
+            )
                 
         # Record this as the new original root.
         self.original_root = modified_node

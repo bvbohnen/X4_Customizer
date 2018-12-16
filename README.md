@@ -1,4 +1,4 @@
-X4 Customizer 0.10.2
+X4 Customizer 0.11
 -----------------
 
 Current status: functional, framework being refined.
@@ -29,12 +29,12 @@ The control script:
     - Call a series of plugins with desired input parameters.
     - Call to Write_Extension() to write any modified files if transforms were used.
     
-  * The quickest way to set up the control script is to copy and edit the "Scripts/User_Transforms_template.py" file, renaming it to "User_Transforms.py" for recognition by Launch_X4_Customizer.bat.
+  * The quickest way to set up the control script is to copy and edit the "Scripts/Default_template.py" file, renaming it to "Default.py" for recognition by Launch_X4_Customizer.bat.
 
 Usage for compiled releases:
 
   * "Launch_X4_Customizer.bat <optional path to control script>"
-    - Call from the command line for full options (-h for help), or run directly to execute the default script at "Scripts/User_Transforms.py".
+    - Call from the command line for full options (-h for help), or run directly to execute the default script at "Scripts/Default.py".
   * "Clean_X4_Customizer.bat <optional path to control script>"
     - Removes files generated in a prior run of the given or default3 control script.
 
@@ -114,6 +114,14 @@ Utilities:
 
     Unpack a single catalog file, or a group if a folder given. When a file is in multiple catalogs, the latest one in the list will be used. If a file is already present at the destination, it is compared to the catalog version and skipped if the same.
 
+  * Check_All_Extensions
+
+    Calls Check_Extension on all enabled extensions, looking for errors. Returns True if no errors found, else False.
+
+  * Check_Extension
+
+    Checks an extension for xml diff patch errors and dependency errors. Performs two passes: scheduling this extension as early as possible (after its dependencies), and as late as possible (after all other extensions that can go before it). Problems are printed to the console. Returns True if no errors found, else False.
+
   * Write_To_Extension
 
     Write all currently modified game files to the extension folder. Existing files at the location written on a prior call will be cleared out. Content.xml will have dependencies added for files modified from existing extensions.
@@ -146,3 +154,7 @@ Change Log:
    - Added workaround for a bug in x4 catalogs that sometimes use an incorrect empty file hash; also added an optional setting to allow hash mismatches to support otherwise problematic catalogs.
  * 0.10.2
    - Bug fix in cat unpacker.
+ * 0.11
+   - Added plugins Check_Extension, Check_All_Extensions.
+   - Added passthrough argparse support, along with command line callable scripts for extension check and cat pack/unpack.
+   - Swapped the default script from User_Transforms to Default_Script.

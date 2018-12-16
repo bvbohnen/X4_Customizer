@@ -31,6 +31,11 @@ Change Log:
      allow hash mismatches to support otherwise problematic catalogs.
  * 0.10.2
    - Bug fix in cat unpacker.
+ * 0.11
+   - Added plugins Check_Extension, Check_All_Extensions.
+   - Added passthrough argparse support, along with command line callable
+     scripts for extension check and cat pack/unpack.
+   - Swapped the default script from User_Transforms to Default_Script.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

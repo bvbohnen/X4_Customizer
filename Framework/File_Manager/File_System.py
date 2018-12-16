@@ -67,52 +67,75 @@ class File_System_class:
         self.game_file_dict[game_file.virtual_path] = game_file
 
 
-    def Load_File(self,
-                  file_name,
-                  # TODO: rename this to be more generic.
-                  return_game_file = False, 
-                  return_text = False,
-                  error_if_not_found = True):
+    def Load_File(
+            self,
+            virtual_path,
+            error_if_not_found = True,
+            test_load = False,
+            ):
         '''
         Returns a Game_File subclass object for the given file, according
         to its extension.
         If the file has not been loaded yet, reads from the expected
         source file.
 
-        * file_name
+        * virtual_path
           - Name of the file, using the cat_path style (forward slashes,
-            no 'addon' folder).
-          - For the special text override file to go in the addon/t folder,
-            use 'text_override', which will be translated to the correct
-            name according to Settings.
+            relative to X4 base directory).
         * error_if_not_found
           - Bool, if True and the file is not found, raises an exception,
             else returns None.
+        * test_load
+          - Bool, if True then the file will be loaded regardless of
+            any currently tracked version of it, and the results will
+            not be recorded.
+          - When in use, None is returned.
         '''
         # Verify Init was called.
         self.Delayed_Init()
 
         # If the file is not loaded, handle loading.
-        if file_name not in self.game_file_dict:
+        if virtual_path not in self.game_file_dict or test_load:
 
             # Get the file using the source_reader, maybe pulling from
             #  a cat/dat pair.
             # Returns a Game_File object, of some subclass, or None
             #  if not found.
-            game_file = self.source_reader.Read(file_name, error_if_not_found = False)
+            game_file = self.source_reader.Read(virtual_path, error_if_not_found = False)
 
             # Problem if the file isn't found.
             if game_file == None:
                 if error_if_not_found:
                     raise File_Missing_Exception(
-                        'Could not find file {}, or file was empty'.format(file_name))
+                        'Could not find file "{}", or file was empty'.format(virtual_path))
                 return None
         
-            # Store the contents in the game_file_dict.
-            self.Add_File(game_file)
+            # Store the contents in the game_file_dict if not in testing.
+            if not test_load:
+                self.Add_File(game_file)
+            else:
+                return None
 
         # Return the file contents.
-        return self.game_file_dict[file_name]
+        return self.game_file_dict[virtual_path]
+    
+
+    def Get_Source_Reader(self):
+        '''
+        Returns the current Source_Reader.
+        '''
+        # Ensure init was run.
+        self.Delayed_Init()
+        return self.source_reader
+
+
+    def Get_Extension_Names(self):
+        '''
+        Returns a list of names of all enabled extensions.
+        '''
+        # Ensure init was run.
+        self.Delayed_Init()
+        return self.source_reader.Get_Extension_Names()
 
           
     def Cleanup(self):
@@ -191,7 +214,7 @@ class File_System_class:
         Existing files which may conflict with the new writes will be renamed,
          including files of the same name as well as their .pck versions.
         '''
-        print('Writing output files')# to {}'.format(Settings.Get_Output_Folder()))
+        print('Writing output files')#to {}'.format(Settings.Get_Output_Folder()))
 
         # Add copies of leftover files from the user source folder.
         # Do this before the proper writeout, so it can reuse functionality.

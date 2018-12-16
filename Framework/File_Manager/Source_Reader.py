@@ -43,6 +43,12 @@ class Location_Source_Reader:
       - If not given, auto detection of cat files will be skipped.
     * extension_name
       - String, name of the extension, if an extension, else None.
+    * soft_dependencies
+      - List of strings, names of other extensions this one should
+        load after; other extension might not exist.
+    * hard_dependencies
+      - List of strings, names of other extensions this one should
+        load after; other extension should exist.
     * catalog_file_dict
       - OrderedDict of Cat_Reader objects, keyed by file path, organized
         by priority, where the first entry is the highest priority cat.
@@ -53,10 +59,18 @@ class Location_Source_Reader:
         for where the file is located, for files in the source folder
         specified in the Settings.
     '''
-    def __init__(self, location = None, extension_name = None):
+    def __init__(
+            self, 
+            location = None, 
+            extension_name = None,
+            soft_dependencies = None,
+            hard_dependencies = None,
+        ):
         self.location = location
         self.catalog_file_dict = OrderedDict()
-        self.extension_name = extension_name        
+        self.extension_name = extension_name     
+        self.soft_dependencies = soft_dependencies
+        self.hard_dependencies = hard_dependencies
         # Search for cats if location given.
         if location != None:
             self.Find_Catalogs(location)
@@ -76,9 +90,19 @@ class Location_Source_Reader:
         #  'subst_' get loaded first, and overwrite lower game files
         #  instead of patching them (eg. 'substitute').
         #  'ext_' get loaded next, and are treated as patches.
-        prefixes = ['']
-        if self.extension_name:
-            prefixes = ['subst_','ext_']
+        # Since the base folder names (01.cat etc) are never expected
+        #  to be mixed with extension names (ext_01.cat etc), and to
+        #  simplify Location_Source_Reader setup so that it doesn't
+        #  need to be told if it is pointed at an extension, all
+        #  prefixes could be searched here.
+        # TODO: maybe revisit this to go back to using the self.extension_name
+        #  check and pushing extension detection higher, to avoid accidentally
+        #  reading a unexpected "01.cat" in an extension folder.
+        prefixes = ['subst_','ext_','']
+        #if self.extension_name:
+        #    prefixes = ['subst_','ext_']
+        #else:
+        #    prefixes = ['']
 
         # For convenience, the first pass will fill in a list with low
         #  to high priority, then the list can be reversed at the end.
@@ -196,7 +220,22 @@ class Location_Source_Reader:
         return path_entry_dict
 
 
-    def Read_Loose_File(self, virtual_path):
+    def Get_Virtual_Paths(self):
+        '''
+        Returns a list of all virtual paths used at this location
+        by catalogs or loose files.
+        '''
+        virtual_paths = []
+        # Use the keys returned by Get_All_Loose_Files and Get_Cat_Entries.
+        for virtual_path in chain(  self.Get_All_Loose_Files().keys(),
+                                    self.Get_Cat_Entries().keys() ):
+            # Include each path once, if repeated.
+            if virtual_path not in virtual_paths:
+                virtual_paths.append(virtual_path)
+        return virtual_paths
+
+
+    def Read_Loose_File(self, virtual_path, allow_md5_error = False):
         '''
         Returns a tuple of (file_path, file_binary) for a loose file
         matching the given virtual_path.
@@ -211,7 +250,7 @@ class Location_Source_Reader:
         return (file_path, file_binary)
 
 
-    def Read_Catalog_File(self, virtual_path):
+    def Read_Catalog_File(self, virtual_path, allow_md5_error = False):
         '''
         Returns a tuple of (cat_path, file_binary) for a cat/dat entry
         matching the given virtual_path.
@@ -224,7 +263,8 @@ class Location_Source_Reader:
             # Get the reader.
             cat_reader = self.Get_Catalog_Reader(cat_path)
             # Check the cat for the file.
-            file_binary = cat_reader.Read(virtual_path)
+            file_binary = cat_reader.Read(virtual_path, 
+                                          allow_md5_error = allow_md5_error)
             # Stop looping over cats once a match found.
             if file_binary != None:
                 break
@@ -234,6 +274,7 @@ class Location_Source_Reader:
     def Read(self, 
              virtual_path,
              error_if_not_found = False,
+             allow_md5_error = False,
              ):
         '''
         Returns a Game_File intialized with the contents read from
@@ -247,6 +288,9 @@ class Location_Source_Reader:
         * error_if_not_found
           - Bool, if True an exception will be thrown if the file cannot
             be found, otherwise None is returned.
+        * allow_md5_error
+          - Bool, if True then the md5 check will be suppressed and
+            errors allowed. May still print a warning message.
         '''
         # Can pick from either loose files or cat/dat files.
         # Preference is taken from Settings.
@@ -262,7 +306,7 @@ class Location_Source_Reader:
         source_path = None
         file_binary = None
         for method in method_order:
-            source_path, file_binary = method(virtual_path)
+            source_path, file_binary = method(virtual_path, allow_md5_error)
             if file_binary != None:
                 break
             
@@ -309,16 +353,21 @@ class Source_Reader_class:
       - Location_Source_Reader for the optional user source folder.
       - Takes priority over the base X4 folder.
     * extension_source_readers
-      - List of Location_Source_Reader objects pointing at enabled
-        extensions.
+      - OrderedDict of Location_Source_Reader objects pointing at enabled
+        extensions, keyed by extension name.
       - Earlier extensions in the list satisfy dependencies from later
         extensions in the list, so xml patching should be done from
         first entry to last entry.
+    * ext_currently_patching
+      - String, during xml patch application this is the name of the
+        extension sourcing the patch.
+      - For use by monitoring code.
     '''
     def __init__(self):
         self.base_x4_source_reader    = None
         self.loose_source_reader      = None
-        self.extension_source_readers = []
+        self.extension_source_readers = OrderedDict()
+        self.ext_currently_patching = None
         return
 
 
@@ -406,76 +455,129 @@ class Source_Reader_class:
                     continue
 
                 # Collect all the names of dependencies.
-                # Don't worry if dependencies are optional or not; that would
-                #  only matter if wanting to police missing dependencies.
                 dependencies = [x.get('id') 
                                 for x in content_root.findall('dependency')]
+                # Collect optional dependencies.
+                soft_dependencies = [x.get('id') 
+                                for x in content_root.findall('dependency[@optional="true"]')]
+                # Pick out hard dependencies (those not optional).
+                hard_dependencies = [x for x in dependencies
+                                     if x not in soft_dependencies ]
+                
+                # Create the reader object.
+                # Don't worry about ordering just yet.
+                ext_name = content_xml_path.parent.name
+                self.extension_source_readers[ext_name] = Location_Source_Reader(
+                    location = content_xml_path.parent,
+                    extension_name = content_xml_path.parent.name,
+                    soft_dependencies = soft_dependencies,
+                    hard_dependencies = hard_dependencies,
+                    )
 
-                # Record the details.
-                ext_summary_dict[name] = _Extension_Summary(
-                    name, content_xml_path.parent, dependencies)
+        # Now sort the extension order to satisfy dependencies.
+        self.Sort_Extensions()            
+        return
 
+
+    def Sort_Extensions(self, priorities = None):
+        '''
+        Sort the found extensions so that all dependencies are satisfied.
+        Optionally, allow setting of sorting priority.
+
+        * priorities
+          - Dict, keyed by extension name, holding an integer priority.
+          - Default priority is 0.
+          - Negative priority loads an extension earlier, positive later.
+        '''
         # TODO: maybe sort the ext_summary_dict so that extensions are
         # always loaded in the same order, which might be a better match
         # to X4 loading.
 
+        # Get a starting dict, keyed by extension name.
+        unsorted_dict = {ext.extension_name : ext 
+                        for ext in self.extension_source_readers.values()}
+
+        # Fill out the priorities with defaults.
+        if not priorities:
+            priorities = {}
+        for name in unsorted_dict:
+            if name not in priorities:
+                priorities[name] = 0
+
         # Need to sort the extensions according to dependencies.
         # A brute force appoach will be used, scheduling extensions
         #  that have dependencies filled first, iterating until done.
-        # Each loop will move some number of summaries from ext_summary_dict
-        #  to sorted_ext_summary_dict.
-        sorted_ext_summary_dict = OrderedDict()
+        # Each loop will move some number of summaries from unsorted_dict
+        #  to sorted_dict.
+        sorted_dict = OrderedDict()
 
+        # Do a hard dependency error check.
+        for name, source_reader in unsorted_dict.items():
+            for hard_dep_name in source_reader.hard_dependencies:
+                if hard_dep_name not in unsorted_dict:
+                    # Just consider a warning for now.
+                    Plugin_Log.Print(('Error: extension "{}" has a missing'
+                        ' hard dependency on "{}"').format(name, hard_dep_name))
+                    
         # To satisfy optional dependencies, start by filling in dummy
         #  entries for all missing extensions.
-        # This loop will modify the dict, so loop over a copy of its entries.
-        for ext_summary in list(ext_summary_dict.values()):
-            for dependency in ext_summary.dependencies:
-
-                # If the dependency is missing, fill it in.
-                if dependency not in ext_summary_dict:
-
-                    # These go in the sorted list, to satisfy checks.
-                    sorted_ext_summary_dict[dependency] = None
-
-                    # Report a warning as well.
-                    Plugin_Log.Print(
-                        'Warning: extension "{}" dependency "{}" not found'.format(
-                        ext_summary.name, dependency))
+        for name, source_reader in unsorted_dict.items():
+            for dep_name in ( source_reader.hard_dependencies 
+                            + source_reader.soft_dependencies):
+                if dep_name not in unsorted_dict:
+                    sorted_dict[dep_name] = None
                 
 
-        # Start the sorting process. Add a safety limit.
+        # Start the sorting process, with a safety limit.
         limit = 10000
-        while ext_summary_dict:
+        while unsorted_dict:
             limit -= 1
             if limit <= 0:
                 raise Exception('Something went wrong with extension sorting.')
 
-            # Loop over a copy of the ext_summary_dict again, since it
-            # will get entries removed.
-            for ext_summary in list(ext_summary_dict.values()):
+            # Gather which extensions can be sorted into the next slot.
+            # Start with all that have hard and soft dependencies filled.
+            valid_next_exts = [
+                ext for ext in unsorted_dict.values()
+                if all(dep in sorted_dict for dep in (
+                    ext.hard_dependencies + ext.soft_dependencies))]
 
-                # Check if all dependencies are satisfied.
-                # (Note: all() will be True if it ends up checking nothing
-                # due to no dependencies.)
-                if all(x in sorted_ext_summary_dict 
-                       for x in ext_summary.dependencies):
+            # If none were found, try just those with hard dependencies filled.
+            # TODO: This may be more lax than X4 about soft dependencies;
+            #  maybe look into it.
+            if not valid_next_exts:
+                valid_next_exts = [
+                    ext for ext in unsorted_dict.values()
+                    if all(dep in sorted_dict for dep in ext.soft_dependencies)]
 
-                    # Move the extension between dicts.
-                    sorted_ext_summary_dict[ext_summary.name] = ext_summary
-                    ext_summary_dict.pop(ext_summary.name)
+            # Now sort them in priority order, with secondary on name order.
+            valid_next_exts = sorted(
+                valid_next_exts,
+                # Priority goes first (low to high), then name (A to Z).
+                key = lambda ext: (priorities[ext.extension_name], 
+                                   ext.extension_name))
+
+            # Pick the first one and schedule it.
+            pick = valid_next_exts[0]
+            sorted_dict[pick.extension_name] = pick
+            unsorted_dict.pop(pick.extension_name)
 
 
-        # With extensions now sorted, set up the readers.
-        for ext_name, ext_summary in sorted_ext_summary_dict.items():
-            # Skip dependency dummies.
-            if ext_summary == None:
-                continue
-            self.extension_source_readers.append( Location_Source_Reader(
-                location = ext_summary.path,
-                extension_name = ext_name ))
-            
+        # Prune out dummy entries.
+        for name in list(sorted_dict.keys()):
+            if sorted_dict[name] == None:
+                sorted_dict.pop(name)
+
+        # Store the sorted list.
+        self.extension_source_readers = sorted_dict
         return
+
+
+    def Get_Extension_Names(self):
+        '''
+        Returns a list of names of all enabled extensions.
+        '''
+        return [x for x in self.extension_source_readers]
 
 
     def Get_All_Virtual_Paths(self, pattern = None):
@@ -492,7 +594,7 @@ class Source_Reader_class:
         for source_location_reader in ([
                 self.base_x4_source_reader, 
                 self.loose_source_reader] 
-                + self.extension_source_readers
+                + self.extension_source_readers.values()
             ):
             # Skip if no reader, eg. when the loose source folder
             # wasn't given.
@@ -500,8 +602,7 @@ class Source_Reader_class:
                 continue
 
             # Pick out the cat and loose file virtual_paths.
-            for virtual_path in chain(source_location_reader.Get_All_Loose_Files(),
-                                      source_location_reader.Get_Cat_Entries()):
+            for virtual_path in source_location_reader.Get_Virtual_Paths():
                 # If a pattern given, filter based on it.
                 if pattern != None and not fnmatch(virtual_path, pattern):
                     continue
@@ -539,7 +640,7 @@ class Source_Reader_class:
             game_file = None
             # Look for it in extensions in reverse order, since the
             # latest ones are the last to load.
-            for extension_source_reader in reversed(self.extension_source_readers):
+            for extension_source_reader in reversed(self.extension_source_readers.values()):
                 game_file = extension_source_reader.Read(virtual_path)
                 if game_file != None:
                     break
@@ -554,7 +655,7 @@ class Source_Reader_class:
         else:
             # Get a list of all extension versions of the file.
             extension_game_files = []
-            for extension_source_reader in self.extension_source_readers:
+            for extension_source_reader in self.extension_source_readers.values():
                 extension_game_file = extension_source_reader.Read(virtual_path)
                 if extension_game_file != None:
                     extension_game_files.append(extension_game_file)
@@ -595,8 +696,12 @@ class Source_Reader_class:
                                 virtual_path,
                                 game_file.file_source_path,
                                 extension_game_file.file_source_path))
+                        # Record the extension name; TODO: maybe get rid of
+                        # this if there is a more elegant solution.
+                        self.ext_currently_patching = extension_game_file.extension_name
                         # Call the patcher.
                         game_file.Patch(extension_game_file)
+                        self.ext_currently_patching = None
                     else:
                         # Non-patch, so overwrite.
                         game_file = extension_game_file

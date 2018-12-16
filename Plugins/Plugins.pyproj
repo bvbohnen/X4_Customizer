@@ -29,6 +29,9 @@
     <Compile Include="Utilities\Catalog.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Utilities\Check_Extension.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Utilities\Write_To_Extension.py">
       <SubType>Code</SubType>
     </Compile>

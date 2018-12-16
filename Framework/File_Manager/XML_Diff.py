@@ -133,7 +133,7 @@ def Print(xml_node, **kwargs):
     return text
 
 
-def Apply_Patch(original_node, patch_node):
+def Apply_Patch(original_node, patch_node, error_prefix = None):
     '''
     Apply a diff patch to the target xml node.
     Returns the modified node, possibly a changed-in-place original_node
@@ -142,30 +142,46 @@ def Apply_Patch(original_node, patch_node):
     If the patch_node is a 'diff', performs diff patching.
     Otherwise the patch_node must have the same tag as original_node,
     and its children will be appended to this original_node's children.
+
+    * error_prefix
+      - Optional string, a prefix to put before any error messages.
+      - Can be used to indicate the sources for the xml nodes.
     '''
     # Requires elements as inputs.
     assert isinstance(original_node, ET._Element)
     assert isinstance(patch_node, ET._Element)
+
+    # Preprocess the error_prefix real quick.
+    error_prefix = '' if not error_prefix else '({}) '.format(error_prefix)
     
     if patch_node.tag != 'diff':
         # Error check for tag mismatch.
         if patch_node.tag != original_node.tag:
             raise Exception(
-                'Patch failed, root tags differ: {} vs {}'.format(
+                '{}Error: Root tags differ: {} vs {}; skipping patch'.format(
+                    error_prefix,
                     original_node.tag,
                     patch_node.tag ))
 
         # Move over the children.
         original_node.extend(patch_node.getchildren())
 
+        # TODO: maybe do error detection on adding a node with
+        # an "id" attribute that matches an existing node, since
+        # x4 prints such errors in some cases (maybe all?).
+        # Would need to see if it can be done blindly for all files.
+
     else:
         # Small convenience function for printing errors in various
         # conditions.
+        # TODO: note which extensions the files come from.
         def Print_Error(message):
-            Plugin_Log.Print(('Problem occured when handling diff '
-                'node {}, xpath {}; skipping; error message: {}'
+            Plugin_Log.Print(('{}Error: Problem occured when handling diff '
+                'node "{}" on line {}, xpath "{}"; skipping; error message: {}.'
                 ).format(
-                    op_node.tag, xpath, message))
+                    error_prefix,
+                    op_node.tag, op_node.sourceline, 
+                    xpath, message))
             
         # For patching purposes, to enable root replacement, nest
         # the original_node under a temporary parent, and then form

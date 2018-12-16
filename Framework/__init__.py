@@ -38,15 +38,15 @@ The control script:
       if transforms were used.
     
   * The quickest way to set up the control script is to copy and edit
-    the "Scripts/User_Transforms_template.py" file, renaming
-    it to "User_Transforms.py" for recognition by Launch_X4_Customizer.bat.
+    the "Scripts/Default_template.py" file, renaming
+    it to "Default.py" for recognition by Launch_X4_Customizer.bat.
 
 Usage for compiled releases:
 
   * "Launch_X4_Customizer.bat <optional path to control script>"
     - Call from the command line for full options (-h for help), or run
       directly to execute the default script at
-      "Scripts/User_Transforms.py".
+      "Scripts/Default.py".
   * "Clean_X4_Customizer.bat <optional path to control script>"
     - Removes files generated in a prior run of the given or default3
       control script.
@@ -92,11 +92,15 @@ Usage for Python source code:
 
 #from .Common.Settings import Set_Path
 from . import Common
-from .Common import Change_Log
+# Make some logs available.
+from .Common import Change_Log, Plugin_Log
+from .Common import Get_Version
 from .Common import Settings
 from .Common import Analysis_Wrapper
 from .Common import Transform_Wrapper
 from .Common import Utility_Wrapper
+# Allow convenient catching of all special exception types.
+from .Common.Exceptions import *
 
 from . import File_Manager
 from .File_Manager import Load_File, File_System

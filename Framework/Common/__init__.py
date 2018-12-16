@@ -11,6 +11,7 @@ from .Exceptions import XML_Patch_Exception
 from .Exceptions import Cat_Hash_Exception
 
 from . import Change_Log
+from .Change_Log import Get_Version
 from .Settings import Settings
 from .Logs import Plugin_Log
 from .Logs import Customizer_Log_class

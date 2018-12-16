@@ -7,22 +7,27 @@ from pathlib import Path
 import argparse
 
 # To support packages cross-referencing each other, set up this
-#  top level as a package, findable on the sys path.
+# top level as a package, findable on the sys path.
 parent_dir = Path(__file__).resolve().parent.parent
 if str(parent_dir) not in sys.path:
     sys.path.append(str(parent_dir))
+# To support easy control script naming, add the Scripts folder to
+# the search path, but put it at the end (to reduce interference
+# if the user wants to import from their call location).
+scripts_dir = parent_dir / 'Scripts'
+if str(scripts_dir) not in sys.path:
+    sys.path.append(str(scripts_dir))
+
 import Framework
 
-# TODO: Add the Scripts folder to the search path, so
-#  scripts can import each other easily. May also want to
-#  do this for the input script location (may be elsewhere).
-#  Although perhaps scripts can handle it on their own.
 
 def Run(*args):
     '''
     Run the customizer.
     This expect a single argument: the name of the .py file to load
-    which specifies file paths and the transforms to run.
+    which specifies file paths and the transforms to run. Some other
+    command line args supported.  Excess args will be placed in
+    sys.args for called script to argparse if desired.
     '''
     
     # Rename the settings for convenience.
@@ -35,29 +40,27 @@ def Run(*args):
             ),
         # Special setting to add default values to help messages.
         # -Removed; doesn't work on positional args.
-        #formatter_class = argparse.ArgumentDefaultsHelpFormatter,
+        #formatter_class = argparse.ArgumentDefault_ScriptsHelpFormatter,
+
+        # To better support nested scripts doing their own argparsing,
+        #  prevent abbreviation support at this level.
+        allow_abbrev = False,
         )
 
     # Set this to default to None, which will be caught manually.
     argparser.add_argument(
-        'user_module',
-        default = None,
-        # Consume 0 or more arguments.
-        # This prevents an error message when an arg not given.
+        'control_script',
+        default = 'Default_Script',
+        # Consume 0 or 1 argument.
+        # This prevents an error message when an arg not given,
+        # and the default is used instead.
         nargs = '?',
-        help = 'Python module setting up paths and specifying'
-               ' transforms to be run.'
-               ' Example in Scripts/Example_Transforms.py.'
-               ' If full path not given, the Scripts folder is searched.'
+        help =  'Python control script which will specify settings and'
+                ' plugins to run; path may be given relative to the Scripts'
+                ' folder; .py extension is optional; defaults to running'
+                ' Scripts/Default_Script.py'
                )
     
-    # Flag to use the user_transforms as a default.
-    argparser.add_argument(
-        '-default_script', 
-        action='store_true',
-        help = 'Runs Scripts/User_Transforms.py if no user_module'
-                ' provided.')
-
     # Flag to clean out old files.
     argparser.add_argument(
         '-clean', 
@@ -69,27 +72,6 @@ def Run(*args):
                ' Still requires a user_transform file which specifies'
                ' the necessary paths, but transforms will not be run.')
     
-    # Flag to ignore loose files in the game folders.
-    argparser.add_argument(
-        '-ignore_loose_files', 
-        action='store_true',
-        help = 'Ignores files loose in the game folders when looking'
-               ' for sources; only files in the user source folder or'
-               ' the cat/dat pairs are considered.')
-    
-    # Flag to add source paths to the message log.
-    argparser.add_argument(
-        '-write_source_paths', 
-        action='store_true',
-        help = 'Prints the paths used for each sourced file to the'
-               ' general message log.')
-    
-    argparser.add_argument(
-        '-use_catalog', 
-        action='store_true',
-        help =  'Enabled generation of a catalog file instead of writing'
-                ' modifications to loose files.')
-    
     argparser.add_argument(
         '-dev', 
         action='store_true',
@@ -99,112 +81,122 @@ def Run(*args):
     argparser.add_argument(
         '-quiet', 
         action='store_true',
-        help =  'Quiets some extra status messages.')
+        help =  'Hides some status messages.')
     
     argparser.add_argument(
-        '-allow_path_error', 
-        action='store_true',
-        help =  'Allows the customizer to attempt to run if the x4'
-                ' path appears incorrect; may be used if the source folder'
-                ' contains all needed files.')
-    
-    argparser.add_argument(
-        '-test_run', 
+        '-test', 
         action='store_true',
         help =  'Performs a test run of the transforms, behaving like'
-                ' a normal run but not writing out results.')
+                ' a normal run but not writing out modified files.')
     
+    argparser.add_argument(
+        '-argpass', 
+        action='store_true',
+        help =  'Indicates the control script has its own arg parsing;'
+                ' extra args and "-h" are passed through sys.argv.')
     
-    # Run the parser on the sys args.
-    args = argparser.parse_args(args)
-
+    # Capture leftover args.
+    # Note: when tested, this appears to be buggy, and was grabbing
+    # "-dev" even though that has no ambiguity; parse_known_args
+    # works better.
+    #argparser.add_argument('args', nargs=argparse.REMAINDER)
     
-    # The arg should be a python module.
-    # This may include pathing.
-    # May be None if no module was specified.
-    user_module_name = args.user_module
+    # Parsing behavior will change depending on if args are being
+    # passed downward.
+    if not '-argpass' in args:
+        # Do a normal arg parsing.
+        args = argparser.parse_args(args)
+
+    else:
+        # Pick out the -h flag, so help can be printed in the
+        # control script instead of here.
+        pass_help_arg = False
+        if '-h' in args:
+            pass_help_arg = True
+            # Need to swap from tuple to list to remove an item.
+            args = list(args)
+            args.remove('-h')
+
+        # Do a partial parsing.
+        args, remainder = argparser.parse_known_args(args)
+
+        # Put the remainder in sys.argv so called scripts can use it;
+        # these should go after the first argv (always the called script name,
+        # eg. Main.py).
+        sys.argv = [sys.argv[0]] + remainder
+        # Add back in the -h flag.
+        if pass_help_arg:
+            sys.argv.append('-h')
 
 
-    # Catch the None case.
-    # TODO: maybe standardize user_module_name to a Path object.
-    if user_module_name == None:
-        if args.default_script:
-            # Default will be to use 'Scripts/User_Transforms.py'.
-            # To find it more robustly, no matter what working directory
-            #  this tool is called from, set the path up relative to
-            #  the parent_dir.
-            user_module_name = str(parent_dir / 'Scripts' / 'User_Transforms.py')
-        else:
-            # Print out the argparse help text, and return.
+    # Convenience flag for when the default script is in use.
+    using_default_script = args.control_script == 'Default_Script.py'
+
+    # Convert the script to a Path, for convenience.
+    args.control_script = Path(args.control_script)
+    
+    # Add the .py extension if needed.
+    if args.control_script.suffix != '.py':
+        args.control_script = args.control_script.with_suffix('.py')
+
+    # If the given script isn't found, try finding it in the scripts folder.
+    # Only support this switch for relative paths.
+    if not args.control_script.exists() and not args.control_script.is_absolute():
+        alt_path = scripts_dir / args.control_script
+        if alt_path.exists():
+            args.control_script = alt_path
+
+
+    # Handle if the script isn't found.
+    if not args.control_script.exists():
+        # If the default script is in use, Main may have been called with
+        # no args, which case print the argparse help.
+        if using_default_script:
             argparser.print_help()
-            return
 
-    if not user_module_name.endswith('.py'):
-        print('Error: expecting the name of a python module, ending in .py.')
-        return
+        # Follow up with an error on the control script name.
+        print('Error: {} not found.'.format(args.control_script))
 
-    # Check for file existence, either with the name as given or in
-    #  the Scripts folder.
-    user_module_path = None
-    for test_path in [Path(user_module_name),
-                      Framework.Common.framework_path / '..' / 'Scripts']:
-        if test_path.exists():
-            user_module_path = test_path
-            break
-
-    if not user_module_path:
-        print('Error: {} not found.'.format(user_module_name))
         # Print some extra help text if the user tried to run the default
         #  script from the bat file.
-        if user_module_name.endswith('User_Transforms.py'):
+        if using_default_script:
             # Avoid word wrap in the middle of a word by using an explicit
             #  newline.
             print('For new users, please open Scripts/'
-                  'User_Transforms_template.py\n'
+                  'Default_Script_template.py\n'
                   'for first time setup instructions.')
         return
+
+
+    # Add the script location to the search path, so it can include
+    # other scripts at that location.
+    # This will often just by the Scripts folder, which is already in
+    # the sys.path, but for cases when it is not, put this path
+    # early in the search order.
+    control_script_dir = args.control_script.parent
+    if str(control_script_dir) not in sys.path:
+        sys.path.insert(0, str(control_script_dir))
     
-    # Check for the clean option.
+        
+    # Handle other args.
+    if args.quiet:
+        Settings.verbose = False
+
     if args.clean:
-        if not args.quiet:
-            print('Enabling cleanup mode; transforms will be skipped.')
-        # Apply this to the settings, so that all transforms get
-        #  skipped early.
+        print('Enabling cleanup mode; transforms will be skipped.')
         Settings.skip_all_transforms = True
 
-    if args.ignore_loose_files:
-        if not args.quiet:
-            print('Ignoring existing loose game files.')
-        Settings.ignore_loose_files = True
-
-    if args.write_source_paths:
-        if not args.quiet:
-            print('Adding source paths to the message log.')
-        Settings.log_source_paths = True
-
     if args.dev:
-        if not args.quiet:
-            print('Enabling developer mode.')
+        print('Enabling developer mode.')
         Settings.developer = True
 
-    if args.use_catalog:
-        if not args.quiet:
-            print('Enabling catalog generation.')
-        Settings.output_to_catalog = True
-        
-    if args.quiet:
-        # No status message here, since being quiet.
-        Settings.verbose = False
-           
-    if args.test_run:
-        if not args.quiet:
-            print('Performing test run.')
+    if args.test:
+        print('Performing test run.')
         # This uses the disable_cleanup flag.
         Settings.disable_cleanup_and_writeback = True
                 
-    if not args.quiet:
-        print('Attempting to run {}'.format(user_module_name))
-      
+
+    print('Calling {}'.format(args.control_script))
     try:
         # Attempt to load the module.
         # This will kick off all of the transforms as a result.
@@ -214,11 +206,12 @@ def Run(*args):
             # Use the basename to get rid of any path, and prefix
             #  to ensure the name is unique (don't want to collide
             #  with other loaded modules).
-            'user_module_' + os.path.basename(user_module_name), 
-            user_module_name
+            'control_script_' + args.control_script.name.replace(' ','_'), 
+            # Just grab the name; it should be found on included paths.
+            str(args.control_script)
             ).load_module()
         
-        print('Run complete')    
+        #print('Run complete')    
 
     except Exception as ex:
         # Make a nice message, to prevent a full stack trace being
