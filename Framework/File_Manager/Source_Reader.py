@@ -56,8 +56,9 @@ class Location_Source_Reader:
         as the cats are searched.
     * source_file_path_dict
       - Dict, keyed by virtual_path, holding the system path
-        for where the file is located, for files in the source folder
-        specified in the Settings.
+        for where the file is located, for loose files at the location
+        folder.
+      - The key will always be lowercased, though the path may not be.
     '''
     def __init__(
             self, 
@@ -71,9 +72,11 @@ class Location_Source_Reader:
         self.extension_name = extension_name     
         self.soft_dependencies = soft_dependencies
         self.hard_dependencies = hard_dependencies
-        # Search for cats if location given.
+        self.source_file_path_dict = None
+        # Search for cats and loose files if location given.
         if location != None:
             self.Find_Catalogs(location)
+            self.Find_Loose_Files(location)
         return
     
 
@@ -144,14 +147,12 @@ class Location_Source_Reader:
         return
 
 
-    def Get_All_Loose_Files(self):
+    def Find_Loose_Files(self, location):
         '''
-        Returns a dict of absolute paths to all loose files at this location,
-        keyed by virtual path, skipping those at the top directory level
-        (eg. other cat files, the content file, etc.).
-        Files in subfolders not used by x4 are ignored.
+        Finds all loose files at the location folder, recording
+        them into self.source_file_path_dict.
         '''
-        source_file_path_dict = {}
+        self.source_file_path_dict = {}
 
         # Dynamically find all files in the source folder.
         # The glob pattern means: 
@@ -173,11 +174,22 @@ class Location_Source_Reader:
                        for x in valid_virtual_path_prefixes):
                 continue
 
-            # Can now record it.
-            source_file_path_dict[virtual_path] = file_path
+            # Can now record it, with lower case virtual_path.
+            self.source_file_path_dict[virtual_path.lower()] = file_path
+        return
 
-        return source_file_path_dict
 
+    def Get_All_Loose_Files(self):
+        '''
+        Returns a dict of absolute paths to all loose files at this location,
+        keyed by virtual path, skipping those at the top directory level
+        (eg. other cat files, the content file, etc.).
+        Files in subfolders not used by x4 are ignored.
+        '''
+        if self.source_file_path_dict == None:
+            self.Find_Loose_Files()
+        return self.source_file_path_dict
+    
 
     def Get_Catalog_Reader(self, cat_path):
         '''
@@ -239,14 +251,16 @@ class Location_Source_Reader:
         '''
         Returns a tuple of (file_path, file_binary) for a loose file
         matching the given virtual_path.
-        If no file found, returns (attempted_file_path, None).
+        If no file found, returns (None, None).
+        Note: pathing is case sensitive.
         '''
-        file_binary = None
-        file_path = self.location / virtual_path
-        if file_path.exists():
-            # Load from the selected file.
-            with open(file_path, 'rb') as file:
-                file_binary = file.read()
+        if virtual_path not in self.source_file_path_dict:
+            return (None, None)
+
+        # Load from the selected file.
+        file_path = self.source_file_path_dict[virtual_path]
+        with open(file_path, 'rb') as file:
+            file_binary = file.read()
         return (file_path, file_binary)
 
 
@@ -334,11 +348,6 @@ class Location_Source_Reader:
         return game_file
 
     
-# Small support namedtuple for extension details.
-_Extension_Summary = namedtuple(
-    '_Extension_Summary', 
-    ['name', 'path', 'dependencies'])
-
 
 class Source_Reader_class:
     '''
@@ -450,7 +459,9 @@ class Source_Reader_class:
                 if name in user_extensions_enabled:
                     enabled = user_extensions_enabled[name]
                 else:
-                    enabled = content_root.get('enabled', 'true') == 'true'
+                    # Apparently a mod can use '1' for this instead of
+                    # 'true', so try both.
+                    enabled = content_root.get('enabled', 'true').lower() in ['true','1']
                 if not enabled:
                     continue
 
@@ -630,6 +641,9 @@ class Source_Reader_class:
           - Bool, if True an exception will be thrown if the file cannot
             be found, otherwise None is returned.
         '''
+        # Always work with lowercase virtual paths.
+        virtual_path = virtual_path.lower()
+
         # Non-xml files will just use the latest extension's
         # version. TODO: check if this is consistent with x4 behavior.
         # Xml files will handle the more complicated merging.
@@ -660,7 +674,6 @@ class Source_Reader_class:
                 if extension_game_file != None:
                     extension_game_files.append(extension_game_file)
 
-
             # Get a base file from either the loose source folder or the
             # x4 folder. Note: it may not be found if the file was added
             # purely by an extension (which could come up for custom
@@ -679,7 +692,7 @@ class Source_Reader_class:
 
                 # This could go awry if the first extension file is a diff
                 #  patch, which has nothing to patch.
-                if base_game_file.Get_Tree().tag == 'diff':
+                if game_file.Get_Root_Readonly().tag == 'diff':
                     raise Exception(('No base file found for {}, and the'
                         ' first extension file is a diff patch').format(
                             virtual_path))

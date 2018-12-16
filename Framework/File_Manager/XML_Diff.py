@@ -229,11 +229,32 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
             # These either end the xpath with '/@<name>' for remove/replace,
             #  or have a 'type' property for adding.
             if '/@' in xpath:
+                type = 'attrib'
+
                 if xpath.count('/@') != 1:
                     Print_Error('multiple "/@"')
                     continue
-                xpath, _ = xpath.rsplit('/@', 1)    
-                type = 'attrib'
+                # Pull off the /@; it is diff funkiness and not part of
+                #  a valid xpath.
+                xpath, attrib_name = xpath.rsplit('/@', 1)
+
+                # To ensure the xpath lookup still fails if the attrib
+                #  is missing, put it back on the xpath using [@...]
+                #  syntax.
+                #xpath += '[@{}]'.format(attrib_name)
+                # -Removed for now; x4 seems inconsistent on if this should
+                #  give an error when replacing an attribute that doesn't
+                #  exist.
+                # Example:
+                #  Fails in x4:
+                #    turret_arg_m_mining_01_mk1_macro.xml:
+                #    <replace sel="//macros/macro/properties/hull/@max">2500</replace>
+                #  Succeeds in x4:
+                #    bullet_par_m_railgun_01_mk1_macro.xml:
+                #    <replace sel="//macros/macro/properties/bullet/@angle">0.2</replace>
+                # Both lack this attribute in the base file.
+                # Most commonly, x4 seems to allow missing attributes
+
             elif op_node.get('type'):
                 type = 'attrib'
 

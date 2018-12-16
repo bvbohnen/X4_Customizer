@@ -1,4 +1,4 @@
-X4 Customizer 0.11
+X4 Customizer 0.11.1
 -----------------
 
 Current status: functional, framework being refined.
@@ -131,7 +131,7 @@ Utilities:
 
 Change Log:
  * 0.9
-   - Initial version, after a long evening of adapting X3_Customizer for X4.
+   - Initial version, quick adaption of X3_Customizer for X4.
    - Added first transform, Adjust_Job_Count.
  * 0.9.1
    - Major framework development.
@@ -158,3 +158,5 @@ Change Log:
    - Added plugins Check_Extension, Check_All_Extensions.
    - Added passthrough argparse support, along with command line callable scripts for extension check and cat pack/unpack.
    - Swapped the default script from User_Transforms to Default_Script.
+ * 0.11.1
+   - Added support for case insensitive path matching, instead of requiring a match to the catalogs.
