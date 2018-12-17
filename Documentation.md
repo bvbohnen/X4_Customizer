@@ -88,10 +88,26 @@ Example input file:
 
     This holds general settings and paths to control the customizer. Adjust these settings as needed prior to running the first plugin, using direct writes to attributes.
     
-    Settings may be updated individually, or as arguments of a call to Settings. Examples:
-    * Settings.path_to_x4_folder   = 'C:\...'
-    * Settings.path_to_user_folder = 'C:\...'
-    * Settings( path_to_x4_folder = 'C:\...', path_to_user_folder = 'C:\...')
+    Settings may be updated individually, or as arguments of a call to Settings, or through a "settings.json" file in the top X4 Customizer folder (eg. where documentation resides). Any json settings will overwrite defaults, and be overwritten by settings in the control script.
+    
+    Examples:
+    * In the control script (prefix paths with 'r' to support backslashes):
+    
+          Settings.path_to_x4_folder   = r'C:\...'
+          Settings.path_to_user_folder = r'C:\...'
+          Settings(
+               path_to_x4_folder   = r'C:\...',
+               path_to_user_folder = r'C:\...'
+               )
+    
+    * In settings.json (defaults for all scripts):
+    
+          {
+            "path_to_x4_folder"        : "C:\...",
+            "path_to_user_folder"      : "C:\...",
+            "output_to_user_extensions":"true"
+          }
+    
     
     Paths:
     * path_to_x4_folder

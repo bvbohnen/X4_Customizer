@@ -31,17 +31,17 @@ def Make(*args):
     argparser.add_argument(
         '-refresh', 
         action='store_true',
-        help = 'Default refresh will apply -doc_refresh and -exe_refresh.')
+        help = 'Automatically call Make_Documentation and Make_Executable.')
     
-    argparser.add_argument(
-        '-doc_refresh', 
-        action='store_true',
-        help = 'Regenerates documentation files before release.')
-    
-    argparser.add_argument(
-        '-exe_refresh', 
-        action='store_true',
-        help = 'Regenerates executable and support files before release.')
+    #argparser.add_argument(
+    #    '-doc_refresh', 
+    #    action='store_true',
+    #    help = 'Regenerates documentation files before release.')
+    #
+    #argparser.add_argument(
+    #    '-exe_refresh', 
+    #    action='store_true',
+    #    help = 'Regenerates executable and support files before release.')
     
     #argparser.add_argument(
     #    '-patch_refresh', 
@@ -50,16 +50,18 @@ def Make(*args):
     #           ' rarely needed.')
         
     # Run the parser on the input args.
-    parsed_args = argparser.parse_args(args)
+    # Split off the remainder, mostly to make it easy to run this
+    # in VS when its default args are still set for Main.
+    parsed_args, remainder = argparser.parse_known_args(args)
 
 
     # Update the documentation and binary and patches.
-    if parsed_args.doc_refresh or parsed_args.refresh:
+    if parsed_args.refresh:
         print('Refreshing documentation.')
         Make_Documentation.Make()
-    if parsed_args.exe_refresh or parsed_args.refresh:
         print('Refreshing executable.')
         Make_Executable.Make()
+
     #if parsed_args.patch_refresh:
     #    print('Refreshing patches.')
     #    Make_Patches.Make()
@@ -69,15 +71,19 @@ def Make(*args):
     file_paths = []
 
     # Check the top dir.
+    wanted_top_names = (
+        'Cat_Pack.bat',
+        'Cat_Unpack.bat',
+        'Check_Extensions.bat',
+        'Clean_X4_Customizer.bat',
+        'Launch_X4_Customizer.bat',            
+        'Documentation.md',
+        'README.md',
+        'License.txt',
+        )
     for file_name in os.listdir(Top_dir):
-        # Loop over extensions to include.
-        # This will be somewhat blind for the moment.
-        for extension in ['.md','.txt','.bat']:
-            # Ignore the 'for egosoft forums' file.
-            if 'for_egosoft_forum.txt' in file_name:
-                continue
-            if file_name.endswith(extension):
-                file_paths.append(os.path.join(Top_dir, file_name))
+        if file_name in wanted_top_names:
+            file_paths.append(os.path.join(Top_dir, file_name))
 
     # Grab everything in bin, game_files, and patches.
     # TODO: look into parsing the git index to know which files are

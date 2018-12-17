@@ -89,6 +89,8 @@ def Cat_Unpack(
 
     # Loop over the Cat_Entry objects; the reader takes care of
     #  cat priorities.
+    # Note: virtual_path is lowercase, but cat_entry.cat_path has
+    #  original case.
     for virtual_path, cat_entry in source_reader.Get_Cat_Entries().items():
 
         # Skip if a pattern given and this doesn't match.
@@ -96,7 +98,7 @@ def Cat_Unpack(
             num_pattern_skips += 1
             continue
 
-        dest_path = dest_dir_path / virtual_path
+        dest_path = dest_dir_path / cat_entry.cat_path
 
         # To save some effort, check if the file already exists at
         #  the dest, and if so, get its md5 hash.

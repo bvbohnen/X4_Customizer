@@ -23,12 +23,12 @@ Note on case:
     X4 appears to support case-insensitive matching, though the original
     catalogs do sometimes have uppercase characters in paths.
     Mods may use lowercase paths.
-    Idealy, original case can be kept for cat unpacking or similar,
-    since it is just cleaner, but other (lesser) tools may force
-    into lowercase when extracting files that modders worked on.
-
-    A workaround here will be to keep a second dict with lowercase keys,
-    and use that for alternate matching.
+    Ideally, original case can be kept for cat unpacking or similar,
+    since it is just cleaner, but other tools may force into
+    lowercase when extracting files that modders worked on.
+    However, working in pure lowercase is just simpler to maintain,
+    so any case preservation will be sidelined to a special
+    support dict.    
 '''
 from pathlib import Path
 import hashlib
@@ -75,15 +75,13 @@ class Cat_Reader:
       - Generated from cat_path automatically.
     * cat_entries
       - Dict of Cat_Entry objects holding the parsed file information,
-        keyed by the cat file path (lower case).
-    * cat_entries_lower
-      - Lowercase version of cat_entries.
+        keyed by the virtual path (lower case).
+      - A Cat_Entry itself will have an original case path.
     '''
     def __init__(self, cat_path = None):
         self.cat_path = cat_path
         self.dat_path = cat_path.with_suffix('.dat')
         self.cat_entries = {}
-        self.cat_entries_lower = {}
                 
         # Read the cat. Error if not found.
         if not self.cat_path.exists():
@@ -105,15 +103,13 @@ class Cat_Reader:
             num_bytes = int(size_str)
 
             # Make a new cat entry for it.
-            self.cat_entries[cat_path] = Cat_Entry(
+            self.cat_entries[cat_path.lower()] = Cat_Entry(
                 cat_path,
                 num_bytes,
                 dat_start_offset,
                 int(timestamp_str),
                 hash_str,
                 )
-            # Lowercase version.
-            self.cat_entries_lower[cat_path.lower()] = self.cat_entries[cat_path]
 
             # Advance the offset for the next packed file.
             dat_start_offset += num_bytes
@@ -137,12 +133,12 @@ class Cat_Reader:
         return self.cat_entries
 
             
-    def Read(self, cat_path, error_if_not_found = False, allow_md5_error = False):
+    def Read(self, virtual_path, error_if_not_found = False, allow_md5_error = False):
         '''
         Read an entry in the corresponding dat file, based on the
         provided file name (including internal path).
 
-        * cat_path
+        * virtual_path
           - String, path of the file to look up in cat format.
           - If packed files are wanted, this should end in a suitable
             suffix (eg. .gz).
@@ -153,13 +149,11 @@ class Cat_Reader:
           - Bool, if True then the md5 check will be suppressed and
             errors allowed. May still print a warning message.
         '''
-        cat_path_lower = cat_path.lower()
-
         # Check for the file being missing.
-        if cat_path_lower not in self.cat_entries_lower:
+        if virtual_path not in self.cat_entries:
             if error_if_not_found:
                 raise Exception('File {} not found in cat {}'.format(
-                    cat_path, self.cat_path))
+                    virtual_path, self.cat_path))
             return None
 
         # For now, open the dat file on every call and close it
@@ -167,14 +161,14 @@ class Cat_Reader:
         #  across calls, if many reads are expected, for a speedup.
         with open(self.dat_path, 'rb') as file:
             # Move to the file start location.
-            file.seek(self.cat_entries_lower[cat_path_lower].start_byte)
+            file.seek(self.cat_entries[virtual_path].start_byte)
             # Grab the byte range.
-            binary = file.read(self.cat_entries_lower[cat_path_lower].num_bytes)
+            binary = file.read(self.cat_entries[virtual_path].num_bytes)
 
 
         # Verify the hash.
         binary_hash_str = Get_Hash_String(binary)
-        cat_hash_str = self.cat_entries_lower[cat_path_lower].hash_str
+        cat_hash_str = self.cat_entries[virtual_path].hash_str
 
         # Note: egosoft cats are buggy and can have a 0 for the hash
         # of empty files, so also check that, but keep the normal
@@ -188,7 +182,7 @@ class Cat_Reader:
         else:
             # Handle the error message.
             message = 'File {} in cat {} failed the md5 hash check'.format(
-                    cat_path, self.cat_path)
+                    virtual_path, self.cat_path)
             # Prevent the exception based on Settings or the input arg.
             if not Settings.allow_cat_md5_errors and not allow_md5_error:
                 raise Cat_Hash_Exception(message)

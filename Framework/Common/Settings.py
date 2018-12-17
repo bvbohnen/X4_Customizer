@@ -6,6 +6,8 @@ Import as:
 '''
 import os
 from pathlib import Path
+import json
+from .Home_Path import home_path
 
 class Settings_class:
     '''
@@ -14,13 +16,29 @@ class Settings_class:
     using direct writes to attributes.
 
     Settings may be updated individually, or as arguments of
-    a call to Settings.
+    a call to Settings, or through a "settings.json" file in the
+    top X4 Customizer folder (eg. where documentation resides).
+    Any json settings will overwrite defaults, and be overwritten by
+    settings in the control script.
+
     Examples:
-    * Settings.path_to_x4_folder   = 'C:\...'
-    * Settings.path_to_user_folder = 'C:\...'
-    * Settings(
-         path_to_x4_folder = 'C:\...',
-         path_to_user_folder = 'C:\...')
+    * In the control script (prefix paths with 'r' to support backslashes):
+      <code>
+          Settings.path_to_x4_folder   = r'C:\...'
+          Settings.path_to_user_folder = r'C:\...'
+          Settings(
+               path_to_x4_folder   = r'C:\...',
+               path_to_user_folder = r'C:\...'
+               )
+      </code>
+    * In settings.json (sets defaults for all scripts):
+      <code>
+          {
+            "path_to_x4_folder"        : "C:\...",
+            "path_to_user_folder"      : "C:\...",
+            "output_to_user_extensions": "true"
+          }
+      </code>
 
     Paths:
     * path_to_x4_folder
@@ -130,6 +148,7 @@ class Settings_class:
     '''
     '''
     TODO:
+    - This was moved to an input arg of Write_To_Extension.
     * generate_content_xml
       - Bool, when True a new content.xml will be generated for the
         extension, overwriting any that already exists.
@@ -192,11 +211,58 @@ class Settings_class:
         self.verbose = True
         self.allow_path_error = False
         self.output_to_catalog = False
+        
+        # Very early call to look for a json file to overwrite detaults.
+        self.Load_Json()
 
         # Flag to track if delayed init has completed.
         self._init_complete = False
         return
-        
+
+
+    # TODO: maybe set up a template json file for easier user copying
+    # and editing.
+    def Load_Json(self):
+        '''
+        Look for a "settings.json" file in the main x4 customizer directory,
+        and load defaults from it.
+        '''
+        json_path = home_path / 'settings.json'
+        if not json_path.exists():
+            return
+
+        # If the json is malformed, json.load with toss an exception.
+        # In that case, just ignore it.
+        try:
+            with open(json_path, 'r') as file:
+                json_dict = json.load(file)
+        except Exception as ex:
+            print(('Skipping load of "settings.json" due to {}.'
+                    ).format(type(ex).__name__))
+            return
+
+        # Do some replacements of strings for normal types;
+        # unfortunately json.load doesn't do this automatically.
+        replacements_dict = {
+            'true' : True,
+            'True' : True,
+            '1'    : True,
+            'false': False,
+            'False': False,
+            '0'    : False,
+            }
+
+        for key, value in json_dict.items():
+            # Convert to python bools.
+            value = replacements_dict.get(value, value)
+            if hasattr(self, key):
+                # This should always be a bool or a string.
+                setattr(self, key, value)
+            else:
+                print(('Entry "{}" in settings.json not recognized; skipping.'
+                       ).format(key))
+        return
+       
 
     def __call__(self, *args, **kwargs):
         '''

@@ -173,6 +173,16 @@ class XML_File(Game_File):
         return
     
 
+    def Delayed_Init(self):
+        '''
+        Fills in node ids for the original_root.
+        This should be called once after all patching is finished.
+        '''
+        # Annotate the original_root with node ids.
+        XML_Diff.Fill_Node_IDs(self.original_root)
+        return
+
+
     def Get_Root(self):
         '''
         Return an Element object with a copy of the current modified xml.
@@ -181,9 +191,6 @@ class XML_File(Game_File):
         and copied.
         '''
         if self.modified_root == None:
-            # Annotate the original_root with node ids, since it is no
-            #  longer changing.
-            XML_Diff.Fill_Node_IDs(self.original_root)
             # Set the initial modified tree to a deep copy of the original;
             #  this will keep node_ids intact.
             self.modified_root = deepcopy(self.original_root)
@@ -321,9 +328,9 @@ class XML_Text_File(XML_File):
           - Int or string, page and id separated.
         '''
         # Break up input page_id text, if needed.
+        # Also, get rid of spacing fluff that messes up lookups.
         if page_id:
-            page, id = page_id.replace('{','').replace('}','').split(',')
-
+            page, id = page_id.replace(' ','').replace('{','').replace('}','').split(',')
         root = self.Get_Root_Readonly()
         node = root.find('.//page[@id="{}"]/t[@id="{}"]'.format(page, id))
         if node == None:                                 

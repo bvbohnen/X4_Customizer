@@ -14,26 +14,33 @@ Settings(
     path_to_x4_folder = r'C:\Steam\SteamApps\common\X4 Foundations',
     )
 
+# For all tests to run, mostly to tease out exceptions after
+# code changes.
+test_all = 0
+
+# Documentation writers.
+if 0 or test_all:
+    Print_Weapon_Stats()
+
 
 # Test the extension checker.
-if 0:
+if 0 or test_all:
     Check_Extension('test_mod')
-if 0:
+if 0 or test_all:
     # Alternatively, check everything (may take longer).
     Check_All_Extensions()
 
 # Simple cat unpack, allowing errors.
-if 0:
+if 0 or test_all:
     Settings.allow_cat_md5_errors = True
     Cat_Unpack(
         source_cat_path = r'D:\X4\Pack',
         dest_dir_path   = r'D:\X4\UnPack',
-        is_extension    = True
         )
 
 
 # Slightly more complex cat unpack.
-if 0:
+if 0 or test_all:
     # Pick where to grab cats from.
     # Could also call this script from that directory and use relative
     #  paths for the cat file names.
@@ -44,22 +51,22 @@ if 0:
     dest_dir_path = 'extracted'
 
     # Optional wildcard pattern to use for matching.
-    include_pattern = ['*.xml','*.xsd','*.lua'] #,'*.xpl']
+    # Just lua for quick test.
+    include_pattern = ['*.lua']#['*.xml','*.xsd'] #,'*.xpl']
     exclude_pattern = None
 
     # Call the unpacker.
     Cat_Unpack(
         source_cat_path = cat_dir,
         #dest_dir_path   = cat_dir / dest_dir_path,
-        dest_dir_path   = r'D:\X4_extracted_2',
-        is_extension    = False,
-        include_pattern = None,#include_pattern,
+        dest_dir_path   = r'D:\X4_extracted',
+        include_pattern = include_pattern,
         exclude_pattern = exclude_pattern
         )
 
 
 # Cat pack test.
-if 0:
+if 0 or test_all:
     # Pick where to grab files from.
     # Could also call this script from that directory and use relative
     # paths for the cat file names.
@@ -84,44 +91,46 @@ if 0:
     
 
 # Run diff patch test on whatever xml.
-if 0:
-    jobs_game_file = Load_File('libraries/jobs.xml')
+if 0 or test_all:
+    jobs_game_file = Framework.Load_File('libraries/jobs.xml')
     Framework.File_Manager.XML_Diff.Unit_Test(
         test_node      = jobs_game_file.Get_Root(), 
-        num_tests      = 100, 
+        # Shorten test count when in test_all mode.
+        num_tests      = 100 if not test_all else 5, 
         edits_per_test = 5,
         rand_seed      = 1,
         )
 
 
 # Call a single transform to test call machinery.
-if 0:
+if 0 or test_all:
     Adjust_Job_Count()
 
 
 # Manual testing of cat reading.
-if 0:
+if 0 or test_all:
+    Framework.File_Manager.File_System.Delayed_Init()
     # Test: open up a cat file, the one with text pages.
-    cat09 = X4_Customizer.File_Manager.Cat_Reader.Cat_Reader(
+    cat09 = Framework.File_Manager.Cat_Reader.Cat_Reader(
         Settings.path_to_x4_folder / '09.cat')
     
     # Read the files from it.
     t44 = cat09.Read('t/0001-L044.xml')
     
     # Now try out the source reader.
-    reader = X4_Customizer.File_Manager.Source_Reader.Source_Reader
-    reader.Init()
+    reader = Framework.File_Manager.Source_Reader.Source_Reader_class()
+    reader.Init_From_Settings()
     t44_game_file = reader.Read('t/0001-L044.xml')
     jobs_game_file = reader.Read('libraries/jobs.xml')
     
     # Write to a new cat file.
     binary = t44_game_file.Get_Binary()
-    cat_dir = Settings.path_to_x4_folder / 'extensions' / 'X4_Customizer'
+    cat_dir = Settings.path_to_x4_folder / 'extensions' / 'test_mod'
     if not cat_dir.exists():
         cat_dir.mkdir(parents = True)
     
-    cat_writer = X4_Customizer.File_Manager.Cat_Writer.Cat_Writer(
-        cat_path = cat_dir / 'ext_01.cat')
+    cat_writer = Framework.File_Manager.Cat_Writer.Cat_Writer(
+        cat_path = cat_dir / 'test_01.cat')
     cat_writer.Add_File(t44_game_file)
     cat_writer.Write()
 

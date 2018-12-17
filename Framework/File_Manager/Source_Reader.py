@@ -156,26 +156,33 @@ class Location_Source_Reader:
 
         # Dynamically find all files in the source folder.
         # The glob pattern means: 
-        #  '**' (recursive search) 
-        #  '/*' (one folder down) 
+        #  '**' (recursive search)
         #  '/*' (anything in that folder, including subfolders)
-        for file_path in self.location.glob('**/*/*'):
-            # Skip folders.
-            if not file_path.is_file():
-                continue
+        # Note: to limit overhead from looking at invalid paths, the
+        # outer loop would ideally be limited to the valid path prefixes,
+        # though glob is case sensitive so this might not work great.
+        # TODO: revisit this.
+        for path_prefix in valid_virtual_path_prefixes:
+            for file_path in self.location.glob(path_prefix+'**/*'):
+                # Skip folders.
+                if not file_path.is_file():
+                    continue
+                # Skip sig files; don't care about those.
+                if file_path.suffix == '.sig':
+                    continue
 
-            # Isolate the relative part of the path.
-            # This will be the same as a virtual path.
-            # Convert from Path to a posix style string (forward slashes).
-            virtual_path = file_path.relative_to(self.location).as_posix()
+                # Isolate the relative part of the path.
+                # This will be the same as a virtual path once lowercased.
+                # Convert from Path to a posix style string (forward slashes).
+                virtual_path = file_path.relative_to(self.location).as_posix().lower()
 
-            # Skip if this doesn't start in an x4 subfolder.
-            if not any(virtual_path.startswith(x) 
-                       for x in valid_virtual_path_prefixes):
-                continue
+                # Skip if this doesn't start in an x4 subfolder.
+                if not any(virtual_path.startswith(x) 
+                           for x in valid_virtual_path_prefixes):
+                    continue
 
-            # Can now record it, with lower case virtual_path.
-            self.source_file_path_dict[virtual_path.lower()] = file_path
+                # Can now record it, with lower case virtual_path.
+                self.source_file_path_dict[virtual_path.lower()] = file_path
         return
 
 
@@ -234,16 +241,20 @@ class Location_Source_Reader:
 
     def Get_Virtual_Paths(self):
         '''
-        Returns a list of all virtual paths used at this location
+        Returns a set of all virtual paths used at this location
         by catalogs or loose files.
         '''
-        virtual_paths = []
+        # Note: for large number of files, using a list for this
+        # gives really bad performance; switch to a set().
+        # TODO: consider finding a way to make this a generator,
+        # though that may be impractical when needing to avoid
+        # repeating names.
+        virtual_paths = set()
         # Use the keys returned by Get_All_Loose_Files and Get_Cat_Entries.
         for virtual_path in chain(  self.Get_All_Loose_Files().keys(),
                                     self.Get_Cat_Entries().keys() ):
             # Include each path once, if repeated.
-            if virtual_path not in virtual_paths:
-                virtual_paths.append(virtual_path)
+            virtual_paths.add(virtual_path)
         return virtual_paths
 
 
@@ -591,21 +602,19 @@ class Source_Reader_class:
         return [x for x in self.extension_source_readers]
 
 
-    def Get_All_Virtual_Paths(self, pattern = None):
+    def Gen_All_Virtual_Paths(self, pattern = None):
         '''
-        Return a set of virtual_path names of all discovered files,
+        Generators which yields all virtual_path names of all discovered files,
         optionally filtered by a wildcard pattern.
 
         * pattern
           - String, optional, wildcard pattern to use for matching names.
         '''
-        virtual_paths_set = set()
-
         # Loop over readers.
         for source_location_reader in ([
                 self.base_x4_source_reader, 
                 self.loose_source_reader] 
-                + self.extension_source_readers.values()
+                + list(self.extension_source_readers.values())
             ):
             # Skip if no reader, eg. when the loose source folder
             # wasn't given.
@@ -617,9 +626,8 @@ class Source_Reader_class:
                 # If a pattern given, filter based on it.
                 if pattern != None and not fnmatch(virtual_path, pattern):
                     continue
-                virtual_paths_set.add(virtual_path)
-
-        return virtual_paths_set
+                yield virtual_path
+        return
     
 
     def Read(self, 
@@ -642,6 +650,9 @@ class Source_Reader_class:
             be found, otherwise None is returned.
         '''
         # Always work with lowercase virtual paths.
+        # (Note: this may have been done already in the File_System, but
+        # do it here as well to support direct source_reader reads
+        # for now, in case any plugins use that.)
         virtual_path = virtual_path.lower()
 
         # Non-xml files will just use the latest extension's
@@ -718,6 +729,10 @@ class Source_Reader_class:
                     else:
                         # Non-patch, so overwrite.
                         game_file = extension_game_file
+
+                # Finish initializing the xml file once patching
+                # is complete.
+                game_file.Delayed_Init()
             
 
         # If the file wasn't found anywhere, raise any error needed.

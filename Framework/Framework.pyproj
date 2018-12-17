@@ -13,7 +13,7 @@
     <Name>Framework</Name>
     <RootNamespace>Framework</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>Check_Extensions -argpass -dev</CommandLineArguments>
+    <CommandLineArguments>Test -dev</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -26,6 +26,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Common\Exceptions.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Common\Home_Path.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Common\XML.py">

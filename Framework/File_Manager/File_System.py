@@ -10,7 +10,7 @@ from ..Common import Settings
 from ..Common import File_Missing_Exception
 from ..Common import Customizer_Log_class
 from ..Common import Change_Log
-from ..Common import framework_path
+from ..Common import home_path
 from lxml import etree as ET
 
 
@@ -82,6 +82,7 @@ class File_System_class:
         * virtual_path
           - Name of the file, using the cat_path style (forward slashes,
             relative to X4 base directory).
+          - May have mixed case, but will be lowercased internally.
         * error_if_not_found
           - Bool, if True and the file is not found, raises an exception,
             else returns None.
@@ -91,6 +92,9 @@ class File_System_class:
             not be recorded.
           - When in use, None is returned.
         '''
+        # Standardize all virtual paths to lower case.
+        virtual_path = virtual_path.lower()
+
         # Verify Init was called.
         self.Delayed_Init()
 
@@ -311,7 +315,7 @@ class File_System_class:
         # Get the path for where to find the source file, and load
         #  its binary.
         # Similar to above, but the folder is located in this project.    
-        with open(framework_path / '..' / 'game_files' / virtual_path, 'rb') as file:
+        with open(home_path / 'game_files' / virtual_path, 'rb') as file:
             source_binary = file.read()
 
         # Create a generic game object for this, using the dest path.
@@ -329,9 +333,9 @@ class File_System_class:
         return str(datetime.date.today())
     
 
-    def Get_All_Virtual_Paths(self, pattern = None):
+    def Gen_All_Virtual_Paths(self, pattern = None):
         '''
-        Return a list of virtual_path names of all discovered files,
+        Generator which yields all virtual_path names of all discovered files,
         optionally filtered by a wildcard pattern.
 
         * pattern
@@ -342,7 +346,8 @@ class File_System_class:
         self.Delayed_Init()
 
         # Pass the call to the source reader.
-        return self.source_reader.Get_All_Virtual_Paths(pattern)
+        yield from self.source_reader.Gen_All_Virtual_Paths(pattern)
+        return
     
 
 # Static copy of the file system object.
