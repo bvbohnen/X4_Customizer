@@ -604,36 +604,47 @@ class Source_Reader_class:
 
     def Gen_All_Virtual_Paths(self, pattern = None):
         '''
-        Generators which yields all virtual_path names of all discovered files,
+        Generator which yields all virtual_path names of all discovered files,
         optionally filtered by a wildcard pattern.
 
         * pattern
           - String, optional, wildcard pattern to use for matching names.
         '''
-        # Loop over readers.
-        for source_location_reader in ([
-                self.base_x4_source_reader, 
-                self.loose_source_reader] 
-                + list(self.extension_source_readers.values())
-            ):
-            # Skip if no reader, eg. when the loose source folder
-            # wasn't given.
-            if source_location_reader == None:
-                continue
+        # Results will be cached for quick lookups.
+        # TODO: maybe move this into a normal attribute for use by
+        # other methods.
+        if not hasattr(self, '_virtual_paths_set'):
+            self._virtual_paths_set = set()
 
-            # Pick out the cat and loose file virtual_paths.
-            for virtual_path in source_location_reader.Get_Virtual_Paths():
-                # If a pattern given, filter based on it.
-                if pattern != None and not fnmatch(virtual_path, pattern):
+            # Loop over readers.
+            # Note: multiple readers may produce the same file, in which
+            # case the name should only be returned once.
+            for source_location_reader in ([
+                    self.base_x4_source_reader, 
+                    self.loose_source_reader] 
+                    + list(self.extension_source_readers.values())
+                ):
+                # Skip if no reader, eg. when the loose source folder
+                # wasn't given.
+                if source_location_reader == None:
                     continue
-                yield virtual_path
+                # Pick out the cat and loose file virtual_paths.
+                for virtual_path in source_location_reader.Get_Virtual_Paths():
+                    self._virtual_paths_set.add(virtual_path)
+
+        for virtual_path in self._virtual_paths_set:
+            # If a pattern given, filter based on it.
+            if pattern != None and not fnmatch(virtual_path, pattern):
+                continue
+            yield virtual_path
         return
     
 
-    def Read(self, 
-             virtual_path,
-             error_if_not_found = True
-             ):
+    def Read(
+            self, 
+            virtual_path,
+            error_if_not_found = True
+        ):
         '''
         Returns a Game_File intialized with the contents read from
         a loose file or unpacked from a cat file.

@@ -23,3 +23,4 @@ from .Plugin_Manager import Plugin_Was_Run_Before
 
 from .Home_Path import home_path
 
+from . import XML_Misc

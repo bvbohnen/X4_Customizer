@@ -361,7 +361,7 @@ class XML_Text_File(XML_File):
 
         return text
 
-
+    
 # TODO: split this into separate text and binary versions.
 class Misc_File(Game_File):
     '''

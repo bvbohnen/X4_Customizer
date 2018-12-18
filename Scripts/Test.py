@@ -18,9 +18,53 @@ Settings(
 # code changes.
 test_all = 0
 
+
 # Documentation writers.
 if 0 or test_all:
-    Print_Weapon_Stats()
+    Print_Weapon_Stats('weapon_stats_premod')
+    Adjust_Weapon_Damage(('*',1.2))
+    Adjust_Weapon_Damage(
+        ('name weapon_tel_l_beam_01_mk1', 10),
+        ('tags large standard turret'   , 5),
+        ('tags medium missile weapon'   , 3),
+        ('class mine'                   , 20),
+        ('*'                            , 1.2) )
+    Print_Weapon_Stats('weapon_stats_postmod')
+    
+
+# Testing ways to call Jobs.
+if 0 or test_all:
+    #Adjust_Job_Count(
+    #    ('id'     ,'masstraffic*'      , 0.5),
+    #    ('tags'   ,'military destroyer', 2  ),
+    #    ('tags'   ,'miner'             , 1.5),
+    #    ('size'   ,'s'                 , 1.5),
+    #    ('faction','argon'             , 1.2),
+    #    ('id'     ,'*'                 , 1.1) )
+    #
+    #Adjust_Job_Count(
+    #    ('id      : masstraffic*'      , 0.5),
+    #    ('tags    : military destroyer', 2  ),
+    #    ('tags    : miner'             , 1.5),
+    #    ('size    : s'                 , 1.5),
+    #    ('faction : argon'             , 1.2),
+    #    ('*'                           , 1.1) )
+    
+    Adjust_Job_Count(
+        ('id        masstraffic*'      , 0.5),
+        ('tags      military destroyer', 2  ),
+        ('tags      miner'             , 1.5),
+        ('size      s'                 , 1.5),
+        ('faction   argon'             , 1.2),
+        ('*'                           , 1.1) )
+    
+    #Adjust_Job_Count(
+    #    ('id        masstraffic*'      , 0.5),
+    #    ('tags      military destroyer', 2  ),
+    #    ('tags      miner'             , 1.5),
+    #    ('size      s'                 , 1.5),
+    #    ('faction   argon'             , 1.2),
+    #                                     1.1 )
 
 
 # Test the extension checker.
@@ -100,11 +144,6 @@ if 0 or test_all:
         edits_per_test = 5,
         rand_seed      = 1,
         )
-
-
-# Call a single transform to test call machinery.
-if 0 or test_all:
-    Adjust_Job_Count()
 
 
 # Manual testing of cat reading.

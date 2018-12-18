@@ -99,6 +99,7 @@ from .Common import Settings
 from .Common import Analysis_Wrapper
 from .Common import Transform_Wrapper
 from .Common import Utility_Wrapper
+from .Common import XML_Misc
 # Allow convenient catching of all special exception types.
 from .Common.Exceptions import *
 

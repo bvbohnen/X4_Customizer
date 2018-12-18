@@ -45,9 +45,9 @@ def Find_All_Matches(base_node, match_node):
     #  text strings. That would handle all recursive aspects in one step,
     #  and shouldn't have to much overhead if the pre-filter did a good
     #  job trimming down the problem space. Use a support function for this.
-    match_text = XML_To_Unformatted_String(match_node)
+    match_text = _XML_To_Unformatted_String(match_node)
     found_nodes = [x for x in found_nodes 
-                   if XML_To_Unformatted_String(x) == match_text]
+                   if _XML_To_Unformatted_String(x) == match_text]
 
     return found_nodes
 
@@ -72,7 +72,7 @@ def Find_Match(base_node, match_node):
     return found_nodes[0]
 
 
-def XML_To_Unformatted_String(node):
+def _XML_To_Unformatted_String(node):
     '''
     Convert an xml node (with attributes, children, etc.) to a string,
     omitting whitespace from the 'text' and 'tail' fields. Attributes
@@ -114,7 +114,7 @@ def XML_To_Unformatted_String(node):
         # Append all children.
         # Note: newline separators are unnecessary, but may make debug
         #  viewing easier.
-        '\n'.join([XML_To_Unformatted_String(child) for child in node]),
+        '\n'.join([_XML_To_Unformatted_String(child) for child in node]),
         # Extra final newline if there are children.
         '\n' if node else '',
         
@@ -142,3 +142,111 @@ def Insert_After(parent_node, old_node, new_node):
     parent_node.insert(index + 1, new_node)
     return
 
+
+'''
+Random thoughts on node matching:
+Options are:
+    a) Use manually defined matching terms per node type (jobs, bullets, etc.)
+        - Limited with occasionally hand crafted powerful options.
+        - Somewhat messy to develop out.
+        - Easier to test, since there are limited matching options.
+    b) Support xpath
+        - Somewhat powerful, somewhat limited (in ways custom code isn't).
+        - Cannot match the root node, seemingly.
+        - Messy path definitions, but user might be familiar with them.
+    c) Custom matching language
+        - Most powerful
+        - Requires user learn the mini language, though
+        - Most complex to set up and debug/support
+        - Hardest to explain easily
+    Overall, it might be best to stick to (a), since there are probably
+    relatively few match conditions that make much sense, and it
+    is the most bounded in scope and complexity.
+'''
+# TODO: maybe remove this as too general.
+def Has_Matching_Attribute(parent, attr, value, partial = False):
+    '''
+    Checks if the given node, or any of its children recursively,
+    contains a given attribute and value. In a special case,
+    a 'tag' or 'tags' attribute will check the value against any
+    space separated term in the attribute 'tags'.
+    Returns True on match, False on mismatch.
+    
+    * parent
+      - Parent xml element.
+    * attr
+      - String, name of the attribute.
+      - If '*', checks all attribute values.
+    * value
+      - String, value looked for.
+      - If '*', matches on any value if the attribute is found.
+    * partial
+      - Bool, if True then a partial value string match is allowed.
+      - Note: with 'tags', this will do a partial match on the whole
+        element value string without space separation.
+    '''
+    # Swap tag to tags (checking one tag, but looking up all tags).
+    # TODO: maybe support full matches on 'tags' still; this will
+    #  treat 'tags' like 'tag' currently.
+    if attr == 'tag':
+        attr = 'tags'
+    for node in parent.iter():
+
+        # To simplify code, brute for the attribute search for now.
+        for node_attr, node_value in node.attrib.items():
+
+            # Skip mismatches.
+            if node_attr != attr and attr != '*':
+                continue
+            # Wildcard value is always a match.
+            if value == '*':
+                return True
+
+            # Check partial matches regardless of attribute name.
+            if partial:
+                if value in node_value:
+                    return True
+            else:
+                # Tag check.
+                if attr == 'tags':
+                    if value in node_value.split(' '):
+                        return True
+                # Normal check.
+                elif value == node_value:
+                    return True
+    return False
+
+
+def Multiply_Int_Attribute(node, attr, multiplier):
+    '''
+    Multiplies the given node attribute's value by the multiplier.
+    Value is treated as an integer, and rounded before replacement.
+    The value will be floored to 1 if the original was positive
+    and non-0 and the multiplier is non-0.
+    '''
+    # Convert to int.
+    value = int(node.get(attr))
+    # Multiply, round, and re-int.
+    new_value = int(round(value * multiplier))
+    # If neither original term was 0, set a min of 1.
+    if value > 0 and multiplier > 0 and new_value == 0:
+        new_value = 1
+    node.set(attr, str(new_value))
+    return
+
+
+def Multiply_Float_Attribute(node, attr, multiplier):
+    '''
+    Multiplies the given node attribute's value by the multiplier.
+    Value is treated as an float, and stored with up to 2 decimal
+    places.
+    '''
+    value = float(node.get(attr))
+    # Multiply.
+    new_value = value * multiplier
+    # Limit string precision to a couple decimals.
+    # For the sake of printouts, trim off trailing 0s; kinda ugly
+    #  to do this in python, sadly.
+    new_value_str = '{:.2f}'.format(new_value).rstrip('0').rstrip('.')
+    node.set(attr, new_value_str)
+    return

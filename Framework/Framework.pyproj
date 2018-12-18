@@ -31,7 +31,7 @@
     <Compile Include="Common\Home_Path.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Common\XML.py">
+    <Compile Include="Common\XML_Misc.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="File_Manager\Cat_Writer.py">

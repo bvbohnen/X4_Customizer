@@ -1,27 +1,34 @@
 
-from lxml import etree as ET
 from collections import defaultdict, OrderedDict
 from Framework import Analysis_Wrapper, File_System, Settings
 
+from ..Transforms.Weapons import Get_All_Weapons
+from .Write_Tables import Write_Tables
+
 @Analysis_Wrapper()
-def Print_Weapon_Stats():
+def Print_Weapon_Stats(file_name = 'weapon_stats'):
     '''
     Gather up all weapon statistics, and print them out.
     Currently only supports csv output.
     Will include changes from enabled extensions.
+
+    * file_name
+      - String, name to use for generated files, without extension.
+      - Defaults to "weapon_stats".
     '''
-    weapons_dict = Collect_Weapons()
+    weapons_list = Collect_Weapons()
 
     # Categorize by type (eg. 'turret').
-    type_weapons_dict_dict = defaultdict(dict)
-    for name, weapon in weapons_dict.items():
-        type_weapons_dict_dict[weapon['weapon_class']][name] = weapon
+    type_weapons_dict = defaultdict(list)
+    for weapon in weapons_list:
+        type_weapons_dict[weapon['weapon_class']].append(weapon)
 
     # Collect a list of tables (themselves lists of lists).
+    # One table per weapon class.
     table_list = []
     
     # Loop over the types.
-    for weapon_type, weapons_dict in sorted(type_weapons_dict_dict.items()):
+    for weapon_type, weapons_list in sorted(type_weapons_dict.items()):
 
         # A list of lists will make up the table.
         # First entry is the weapon type.
@@ -34,24 +41,11 @@ def Print_Weapon_Stats():
         # Treat '0' as not in use, since in some cases an attribute
         # is always None or 0.
         attributes_used = set()
-        for weapon in weapons_dict.values():
+        for weapon in weapons_list:
             for attr_name, value in weapon.items():
                 if value not in [None, '0']:
                     attributes_used.add(attr_name)
         
-        # -Removed; use the fixed order in attribute_print_order.
-        ## Pick a display order for the attributes.
-        ## Preorder a couple fields.
-        #attributes_list = ['Name']
-        ## Grab the rest of the attributes in sorted order.
-        #for name in sorted(attributes_used):
-        #    # Skip some attributes.
-        #    if name in ['t_name_entry']:
-        #        continue
-        #    if name in attributes_list:
-        #        continue
-        #    attributes_list.append(name)
-
         # Join the ordered list with the used attributes.
         attributes_to_print = [attr for attr in attribute_names_ordered_dict
                                 if attr in attributes_used]
@@ -61,7 +55,8 @@ def Print_Weapon_Stats():
                       for x in attributes_to_print])
 
         # Sort the weapons by name and record them.
-        for name, weapon in sorted(weapons_dict.items()):
+        # TODO: better sorting style.
+        for weapon in sorted(weapons_list, key = lambda x: x['t_name']):
             line = []
             table.append(line)
             for attr_name in attributes_to_print:
@@ -72,155 +67,44 @@ def Print_Weapon_Stats():
                     value = ''
                 line.append(value)
 
-
-    # Now pick a format to print to.
-    # CSV initially.
-    with open(Settings.Get_Output_Folder() / 'weapon_stats.csv', 'w') as file:
-        for table in table_list:
-            for line in table:
-                file.write(', '.join(line) + '\n')
-            # Put extra space between tables.
-            file.write('\n')
-
-    # HTML style.
-    with open(Settings.Get_Output_Folder() / 'weapon_stats.html', 'w') as file:
-        for table in table_list:
-            xml_node = Table_To_Html(table)
-            file.write(ET.tostring(xml_node, pretty_print = True, encoding='unicode'))
-            # Put extra space between tables.
-            file.write('\n')
-
+    # Write results.
+    Write_Tables(file_name, *table_list)
     return
 
-
-def Table_To_Html(table):
-    '''
-    Returns an xml root node holding html style nodes with the
-    contents of the given table (list of lists, first line
-    being the columns headers).
-    '''
-    # Pick the css styles; these will be ';' joined in a 'style' attribute.
-    # Using http://www.stylinwithcss.com/resources_css_properties.php
-    # to look up options.
-    table_styles = {
-        # Single line instead of double line borders.
-        'border-collapse' : 'collapse',
-        # Not too clear on this; was an attempt to stop word wrap.
-        #'width'           : '100%', 
-        # Stop wordwrap on the names and headers and such.
-        'white-space'     : 'nowrap', 
-        # Get values to be centered instead of left aligned.
-        'text-align'      : 'center',
-        # TODO: play with captioning.
-        'caption-side'    : 'left',
-        # Margin between tables.
-        'margin-bottom'   : '20px',
-        }
-    cell_styles = {
-        # Give some room around the text before hitting the cell borders.
-        # TODO: not working; if placed on the table, puts a giant
-        # margin around the whole table.
-        #'margin'          : '10px',
-        # Adjust this with padding. Don't set this very high; it is really
-        # sensitive.
-        'padding'         : '2px',
-        }
-    root = ET.Element('table', attrib = {
-        'border':'1',
-        #'cellpadding' : '0', 
-        #'cellspacing' : '0',
-        # CSS styles, separated by ;
-        'style' : ';'.join('{}:{}'.format(k,v) 
-                           for k,v in table_styles.items()),
-        })
-    for index, line in enumerate(table):
-        row = ET.Element('tr', attrib = {
-                # CSS styles, separated by ;
-                'style' : ';'.join('{}:{}'.format(k,v) 
-                                   for k,v in cell_styles.items()),
-                })
-        root.append(row)
-        for entry in line:
-            if index == 0:
-                tag = 'th'
-            else:
-                tag = 'td'
-            col = ET.Element(tag, attrib = {
-                # CSS styles, separated by ;
-                'style' : ';'.join('{}:{}'.format(k,v) 
-                                   for k,v in cell_styles.items()),
-                })
-            col.text = entry
-            row.append(col)
-    return root
 
 
 def Collect_Weapons():
     '''
-    Returns a dict of Weapon objects, keyed by name.
+    Returns a dict of Weapon objects, keyed by name,
+    holding various parsed field values of interest.
     '''
-    weapon_dict     = {}
-    projectile_dict = {}
-    
-    # Set file search patterns to use.
-    # Weapons/missiles are in one spot, bullets another.
-    # All of the ones of interest are the macros.
-    for pattern in [
-        'assets/props/WeaponSystems/*macro.xml',
-        'assets/fx/weaponFx/macros/*macro.xml',
-        ]:
-        for virtual_path in File_System.Gen_All_Virtual_Paths(pattern):
-
-            # Load the xml file.
-            xml_file = File_System.Load_File(virtual_path)
-            # Grab the root node, possibly modified by prior transforms.
-            root = xml_file.Get_Root_Readonly()
-
-            # Look up what type of object it is.
-            object_class = root.find('.//macro').get('class')
-            name         = root.find('.//macro').get('name')
-
-            # Parse it into a class object.
-            if object_class in ['weapon','missilelauncher','turret',
-                                'missileturret','bomblauncher']:
-                weapon = Weapon(root)
-                weapon_dict[name] = weapon
-            elif object_class in ['bullet','missile','bomb',
-                                  'mine','countermeasure']:
-                projectile = Projectile(root)
-                projectile_dict[name] = projectile
-            else:
-                # There are also 'effectobject' things; ignore for now.
-                pass
-
-
-    # Connect up the weapons with their projectiles.
-    for weapon in weapon_dict.values():
-        bullet = projectile_dict[weapon['bullet_codename']]
-
-        # Collect the bullet attributes into the weapon.
-        for attr_name, value in bullet.items():
-            # Copy over; don't worry about overwrite for now.
-            # TODO: look into overwrites where the value changes.
-            weapon[attr_name] = value
-
-
-    # Look up the names.
     t_file = File_System.Load_File('t/0001-L044.xml')
-    for weapon in weapon_dict.values():
-        # Start with no name.
-        weapon['t_name'] = None
-        if weapon['codename'] == 'weapon_tel_l_beam_01_mk1_macro':
-            bla = 0
-
-        # If a weapon has no Codename, skip it.
-        if 't_name_entry' not in weapon:
-            continue
-        # Let the file Read handle the lookup.
-        weapon['t_name'] = t_file.Read(weapon['t_name_entry'])
-
-    return weapon_dict
     
+    weapon_fields_list = []
+    for weapon in Get_All_Weapons():
+        weapon_root = weapon.weapon_file.Get_Root_Readonly()
+        bullet_root = weapon.bullet_file.Get_Root_Readonly()
+
+        # Parse out fields of interest, and combine into a single dict.
+        weapon_fields = Weapon_Fields(weapon_root)
+        bullet_fields = Projectile_Fields(bullet_root)
+        weapon_fields.update(bullet_fields)
+
+        # Fill in the name, if there is one.
+        if 't_name_entry' not in weapon_fields:
+            # Default to the component name.
+            weapon_fields['t_name'] = weapon_fields['component']
+        else:
+            # Let the t-file Read handle the lookup.
+            weapon_fields['t_name'] = t_file.Read(weapon_fields['t_name_entry'])
+        weapon_fields_list.append(weapon_fields)
+
+    return weapon_fields_list
+
+
+
+# TODO: change around the field filling code to be less complicated;
+# it really doesn't need classes to hold things.
 
 def Parse_XML(object, xml_node, lookup_patterns):
     '''
@@ -242,7 +126,7 @@ def Parse_XML(object, xml_node, lookup_patterns):
     return
     
 
-class Weapon(dict):
+class Weapon_Fields(dict):
     '''
     Base class for weapons; subclassed from dict.
     '''
@@ -251,6 +135,7 @@ class Weapon(dict):
             ('codename'             , './/macro'                , 'name'),
             ('weapon_class'         , './/macro'                , 'class'),
             ('t_name_entry'         , './/identification'       , 'name'),
+            ('component'            , './/component'            , 'ref'),
             ('rotation_speed'       , './/rotationspeed'        , 'max'),
             ('bullet_codename'      , './/bullet'               , 'class'),
             ('hull'                 , './/hull'                 , 'max'),
@@ -274,7 +159,7 @@ class Weapon(dict):
         # get weapon size.
         
 
-class Projectile(dict):
+class Projectile_Fields(dict):
     '''
     Base class for bullets, missiles, bombs, etc.
     '''

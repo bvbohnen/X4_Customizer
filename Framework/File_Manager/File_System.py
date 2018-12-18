@@ -2,6 +2,7 @@
     
 from pathlib import Path
 import datetime
+from collections import defaultdict
 
 from .Source_Reader import Source_Reader_class
 from .Cat_Writer import Cat_Writer
@@ -17,7 +18,8 @@ from lxml import etree as ET
 class File_System_class:
     '''
     Primary handler for all loaded files, including both read
-    and write functionality.
+    and write functionality. Also supports some parsing of
+    xml content for easier lookups of file groups.
 
     Attributes:
     * game_file_dict
@@ -29,14 +31,40 @@ class File_System_class:
       - Bool, set True after the delayed init function has completed.
     * source_reader
       - Source_Reader object.
+    * asset_class_dict
+      - Dict of dicts of lists holding XML_File objects, organized according
+        to asset properties.
+      - Outer key is the root node tag for supported tags,
+        currently one of ['macros','components'].
+      - Inner key is the "class" attribute of the first child node,
+        eg. macros/macro/@class or components/component/@class.
+      - Example: asset_class_dict['macros']['bullet'] to get all
+        loaded bullet macro files.
+      - Filled in as files are loaded or created; use Load_Pattern to fill
+        in files on paths that hold the classes of  interest.
+    * asset_name_dict
+      - Dict of XML_File objects keyed by their "name" attribute.
+      - Similar to asset_class_dict, except set up to satisfy the
+        way x4 files can reference each other by "name" attribute
+        without clarifying tag or "class".
+    * _patterns_loaded
+      - Set of strings, virtual path name patterns that have been
+        loaded and, when macros, added to class_macro_dict.
     '''
+    valid_asset_tags = ['macros','components']
+
     def __init__(self):
         self.game_file_dict = {}
         self.old_log = Customizer_Log_class()
         self.init_complete = False
         self.source_reader = Source_Reader_class()
+        # Set this up as a defaultdict of defaultdicts of lists,
+        # for easy initialization on new tags or classes.
+        self.asset_class_dict = defaultdict(lambda: defaultdict(list))
+        self.asset_name_dict = {}
+        self._patterns_loaded = set()
         return
-
+    
 
     def Delayed_Init(self):
         '''
@@ -65,7 +93,60 @@ class File_System_class:
         Record a new a Game_File object, keyed by its virtual path.
         '''
         self.game_file_dict[game_file.virtual_path] = game_file
+        
+        # Check if the game_file is an xml file with a supported
+        # asset tags, and updates the asset_class_dict if so.
+        if isinstance(game_file, XML_File):
+            # Grab the root node.
+            root = game_file.Get_Root_Readonly()
 
+            # Skip if the tag doesn't match supported asset types.
+            if root.tag not in self.valid_asset_tags:
+                return
+
+            # Look through the root children for class attributes.
+            # Currently, this always expects 1 child that should always
+            #  have a class; toss an error if that isn't so.
+            assert len(root) == 1
+            # Want the inner tag, eg. 'macro' instead of 'macros',
+            #  just because it makes for nicer lookup syntax.
+            # -Nevermind; plural form helps visually distinguish from
+            #  class_name
+            #tag_name   = root[0].tag
+            class_name = root[0].get('class')
+            name       = root[0].get('name')
+            assert class_name != None
+            assert name != None
+            # Record the file two ways.
+            self.asset_class_dict[root.tag][class_name].append(game_file)
+            self.asset_name_dict[name] = game_file
+        return
+
+
+    def Get_Asset_File(self, name):
+        '''
+        Returns a loaded asset XML_File object with the corresponding
+        "name" (as found in the xml).  Error if not found.
+        
+        Example: Get_Asset_File('weapon_tel_l_beam_01_mk1')
+        '''
+        return self.asset_name_dict[name]
+
+
+    def Get_Asset_Files_By_Class(self, tag, *class_names):
+        '''
+        Returns the list of loaded asset XML_Files matching the
+        given tag and class_names. Accepts multiple class names.
+        Returns an empty list if no matching files are loaded yet.
+
+        Example: Get_Asset_Files('macros','bullet','missile')
+        '''
+        ret_list = []
+        # Collect lists together.
+        for name in class_names:
+            ret_list += self.asset_class_dict[tag][name]
+        return ret_list
+    
 
     def Load_File(
             self,
@@ -77,12 +158,14 @@ class File_System_class:
         Returns a Game_File subclass object for the given file, according
         to its extension.
         If the file has not been loaded yet, reads from the expected
-        source file.
+        source file. Files which are XML macros or components
+        be recorded according to their "class" attribute.
 
         * virtual_path
           - Name of the file, using the cat_path style (forward slashes,
             relative to X4 base directory).
-          - May have mixed case, but will be lowercased internally.
+          - May have mixed case and reverse slashes, but will be
+            lowercased and forward slashed internally.
         * error_if_not_found
           - Bool, if True and the file is not found, raises an exception,
             else returns None.
@@ -92,8 +175,10 @@ class File_System_class:
             not be recorded.
           - When in use, None is returned.
         '''
-        # Standardize all virtual paths to lower case.
-        virtual_path = virtual_path.lower()
+        # Standardize all virtual paths to lower case, forward slashes.
+        # (Back slashes show up in some xml attribute paths, so converting
+        # here makes those easier to manage.)
+        virtual_path = virtual_path.lower().replace('\\','/')
 
         # Verify Init was called.
         self.Delayed_Init()
@@ -123,6 +208,24 @@ class File_System_class:
         # Return the file contents.
         return self.game_file_dict[virtual_path]
     
+
+    def Load_Files(self, pattern):
+        '''
+        Searches for and loads in xml files following the given
+        virtual_path wildcard pattern.
+        Returns a list of files loaded.
+        '''
+        # Limit each pattern to running once.
+        if pattern in self._patterns_loaded:
+            return
+        self._patterns_loaded.add(pattern)
+
+        # Load all files matching the pattern.
+        files = []
+        for virtual_path in self.Gen_All_Virtual_Paths(pattern):
+            files.append( self.Load_File(virtual_path) )
+        return files
+
 
     def Get_Source_Reader(self):
         '''
@@ -346,6 +449,8 @@ class File_System_class:
         self.Delayed_Init()
 
         # Pass the call to the source reader.
+        # TODO: swap this around to gathering a set of paths here,
+        #  and adding to them new files that get added during runtime.
         yield from self.source_reader.Gen_All_Virtual_Paths(pattern)
         return
     

@@ -25,7 +25,13 @@
     <Compile Include="Analyses\Print_Weapon_Stats.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Analyses\Write_Tables.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Analyses\__init__.py" />
+    <Compile Include="Transforms\Weapons.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Utilities\Catalog.py">
       <SubType>Code</SubType>
     </Compile>
@@ -39,7 +45,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="__init__.py" />
-    <Compile Include="Transforms\Job.py" />
+    <Compile Include="Transforms\Jobs.py" />
     <Compile Include="Transforms\__init__.py" />
   </ItemGroup>
   <ItemGroup>
