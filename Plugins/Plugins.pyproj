@@ -29,6 +29,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Analyses\__init__.py" />
+    <Compile Include="Transforms\Support.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Transforms\Weapons.py">
       <SubType>Code</SubType>
     </Compile>

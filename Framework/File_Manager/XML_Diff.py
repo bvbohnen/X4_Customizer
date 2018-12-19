@@ -157,7 +157,7 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
     if patch_node.tag != 'diff':
         # Error check for tag mismatch.
         if patch_node.tag != original_node.tag:
-            raise Exception(
+            raise AssertionError(
                 '{}Error: Root tags differ: {} vs {}; skipping patch'.format(
                     error_prefix,
                     original_node.tag,
@@ -829,7 +829,7 @@ def Unit_Test(test_node, num_tests = 100, edits_per_test = 5, rand_seed = None):
                 # If no attributes present, cannot remove any.
                 try:
                     attrib_name = random.choice(edit_node.keys())
-                except:
+                except Exception:
                     continue
                 edit_node.attrib.pop(attrib_name)
 
@@ -846,7 +846,7 @@ def Unit_Test(test_node, num_tests = 100, edits_per_test = 5, rand_seed = None):
                 # Replace attribute, if any present.
                 try:
                     attrib_name = random.choice(edit_node.keys())
-                except:
+                except Exception:
                     continue
                 edit_node.set(attrib_name, edit_node.tag)
 

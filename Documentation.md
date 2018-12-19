@@ -1,7 +1,5 @@
-X4 Customizer 0.11.1
+X4 Customizer 1.0
 -----------------
-
-Current status: functional, framework being refined.
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
 
@@ -16,8 +14,9 @@ This tool offers a framework for modding the X4 and extension game files program
   * Transforms are parameterized, to adjust their behavior.
   * Analyses can generate customized documentation.
   * Transformed files are written to a new or specified X4 extension.
+  * Utilities offer extension error checking and cat pack/unpack support.
 
-This tool is available as platform portable Python source code (tested on 3.7 with the lxml package) or as a compiled executable for 64-bit Windows.
+This tool is available as runnable Python source code (tested on 3.7 with the lxml package) or as a compiled executable for 64-bit Windows.
 
 The control script:
 
@@ -25,31 +24,30 @@ The control script:
 
   * The key control script sections are:
     - "from Plugins import *" to make all major functions available.
-    - Call Settings() to change paths and set non-default options.
+    - Call Settings() to change paths and set non-default options; this can also be done through a setttings.json file.
     - Call a series of plugins with desired input parameters.
     - Call to Write_Extension() to write any modified files if transforms were used.
     
-  * The quickest way to set up the control script is to copy and edit the "Scripts/Default_template.py" file, renaming it to "Default.py" for recognition by Launch_X4_Customizer.bat.
+  * The quickest way to set up the control script is to copy and edit the "Scripts/Default_Script_template.py" file, renaming it to "Default_Script.py" for recognition by Launch_X4_Customizer.bat.
 
-Usage for compiled releases:
+Usage for compiled version:
 
-  * "Launch_X4_Customizer.bat <optional path to control script>"
-    - Call from the command line for full options (-h for help), or run directly to execute the default script at "Scripts/Default.py".
-  * "Clean_X4_Customizer.bat <optional path to control script>"
-    - Removes files generated in a prior run of the given or default3 control script.
+  * "Launch_X4_Customizer.bat [script_name] [args]"
+    - Call from the command line for full options (-h for help), or run directly to execute the default script at "Scripts/Default_Script.py".
+    - Script name may be given without a .py extension, and without a path if it is in the Scripts folder.
+  * "Clean_X4_Customizer.bat [script_name] [args]"
+    - Removes files generated in a prior run of the given or default control script.
+  * "Check_Extensions.bat [args]"
+    - Runs a command line script which will test extensions for errors, focusing on diff patching and dependency checks.
+  * "Cat_Unpack.bat [args]"
+    - Runs a command line script which unpacks catalog files.
+  * "Cat_Pack.bat [args]"
+    - Runs a command line script which packs catalog files.
 
 Usage for Python source code:
 
-  * "python Framework\Main.py <optional path to control script>"
-    - This is the primary entry function for the python source code.
-    - Add the "-default_script" option to behave like the bat launcher.
-    - Control scripts may freely use any python packages, instead of being limited to those included with the release.
-  * "python Framework\Make_Documentation.py"
-    - Generates updated documentation for this project, as markdown formatted files README.md and Documentation.md.
-  * "python Framework\Make_Executable.py"
-    - Generates a standalone executable and support files, placed in the bin folder. Requires the PyInstaller package be available. The executable will be created for the system it was generated on.
-  * "python Framework\Make_Release.py"
-    - Generates a zip file with all necessary binaries, source files, and example scripts for general release.
+  * "python Framework\Main.py [script_name] [args]"
+    - This is the primary entry function for the python source code, and equivalent to using Launch_X4_Customizer.bat.
 
 ***
 
@@ -63,20 +61,34 @@ Example input file:
     # Import all transform functions.
     from Plugins import *
     
+    # This could also be done in settings.json.
     Settings(
         # Set the path to the X4 installation folder.
         path_to_x4_folder   = r'C:\Steam\SteamApps\common\X4 Foundations',
         # Set the path to the user documents folder.
-        path_to_user_folder = r'C:\Users\charname\Documents\Egosoft\X4\12345678',
+        #path_to_user_folder = r'C:\Users\charname\Documents\Egosoft\X4\12345678',
         # Switch output to be in the user documents folder.
         output_to_user_extensions = True,
         )
     
     # Reduce mass traffic and increase military jobs.
     Adjust_Job_Count(
-        ('id','masstraffic', 0.5),
-        ('tag','military', 2)
+        ('id   masstraffic*', 0.5),
+        ('tags military'   , 1.3)
         )
+    
+    # Make weapons in general, and turrets in particular, better.
+    Adjust_Weapon_Damage(
+        ('tags turret standard'   , 2),
+        ('*'                      , 1.2),
+        )
+    Adjust_Weapon_Shot_Speed(
+        ('tags turret standard'   , 2),
+        ('*'                      , 1.2),
+        )
+    
+    # Get csv and html documentation with weapon changes.
+    Print_Weapon_Stats()
     
     # Write modified files.
     Write_To_Extension()
@@ -100,12 +112,12 @@ Example input file:
                path_to_user_folder = r'C:\...'
                )
     
-    * In settings.json (defaults for all scripts):
+    * In settings.json (sets defaults for all scripts):
     
           {
             "path_to_x4_folder"        : "C:\...",
             "path_to_user_folder"      : "C:\...",
-            "output_to_user_extensions":"true"
+            "output_to_user_extensions": "true"
           }
     
     
@@ -136,6 +148,9 @@ Example input file:
     * allow_cat_md5_errors
       - Bool, if True then when files extracted from cat/dat fail to verify their md5 hash, no exception will be thrown.
       - Defaults to False; consider setting True if needing to unpack incorrectly assembled catalogs.
+    * ignore_output_extension
+      - Bool, if True, the target extension being generated will have its prior content ignored.
+      - Defaults to True; should only be set False if not running transforms and wanting to analyse prior output.
     
     Output:
     * extension_name
@@ -199,12 +214,16 @@ Analyses:
   * Print_Weapon_Stats
 
     Gather up all weapon statistics, and print them out. Currently only supports csv output. Will include changes from enabled extensions.
+    
+    * file_name
+      - String, name to use for generated files, without extension.
+      - Defaults to "weapon_stats".
         
 
 
 ***
 
-Job Transforms:
+Jobs Transforms:
 
   * Adjust_Job_Count
 
@@ -212,26 +231,96 @@ Job Transforms:
     
     Resulting non-integer job counts are rounded, with a minimum of 1 unless the multiplier or original count were 0.
     
-    * job_factors:
-      - Tuples holding the matching rules and job count  multipliers, (match_key, match_value, multiplier).
-      - The match_key is one of a select few fields from the job nodes, against which the match_value will be compared.
-      - Multiplier is an int or float, how much to adjust the job count by.
-      - If a job matches multiple entries, the first match is used.
+    * job_multipliers:
+      - Tuples holding the matching rules and job count multipliers, ("key  value", multiplier).
+      - The "key" specifies the job field to look up, which will be checked for a match with "value".
+      - If a job matches multiple rules, the first match is used.
       - Supported keys:
-        - 'faction' : The name of the category/faction.
-        - 'tag'     : A possible value in the category/tags list.
-        - 'id'      : Name of the job entry, partial matches supported.
-        - '*'       : Wildcard, always matches, takes no match_value.
+        - 'id'      : Name of the job entry; supports wildcards.
+        - 'faction' : The name of the faction.
+        - 'tags'    : One or more tags, space separated.
+        - 'size'    : The ship size suffix, 's','m','l', or 'xl'.
+        - '*'       : Matches all jobs; takes no value term.
     
-    Example:
+    Examples:
     
+        Adjust_Job_Count(1.2)
         Adjust_Job_Count(
-            ('id','masstraffic', 0.5),
-            ('tag','military', 2),
-            ('tag','miner', 1.5),
-            ('faction','argon', 1.2),
-            ('*', 1.1) )
+            ('id       masstraffic*'      , 0.5),
+            ('tags     military destroyer', 2  ),
+            ('tags     miner'             , 1.5),
+            ('size     s'                 , 1.5),
+            ('faction  argon'             , 1.2),
+            ('*'                          , 1.1) )
     
+        
+
+
+***
+
+Weapons Transforms:
+
+  * Weapon_Documentation
+
+    Weapon transforms will commonly use a group of matching rules to determine which weapons get modified, and by how much.    
+    
+    * Weapon match rules:
+      - Series of tuples pairing matching rules (strings) with transform defined args, eg. ("key  value", arg0, arg1, ...).
+      - The "key" specifies the xml field to look up, which will be checked for a match with "value".
+      - If a target object matches multiple entries, the first match is used.
+      - If a bullet or missile is shared across multiple weapons, only the first matched weapon will modify it.
+      - Supported keys for weapons:
+        - 'name'  : Internal name of the weapon component; supports wildcards.
+        - 'class' : The component class.
+          - One of: weapon, missilelauncher, turret, missileturret, bomblauncher
+          - These are often redundant with tag options.
+        - 'tags'  : One or more tags for this weapon, space separated.
+          - See Print_Weapon_Stats output for tag listings.
+    
+    Examples:
+    
+        Adjust_Weapon_Range(1.5)
+        Adjust_Weapon_Fire_Rate(
+            ('name *_mk1', 1.1) )
+        Adjust_Weapon_Damage(
+            ('name weapon_tel_l_beam_01_mk1', 1.2),
+            ('tags large standard turret'   , 1.5),
+            ('tags medium missile weapon'   , 1.4),
+            ('class bomblauncher'           , 4),
+            ('*'                            , 1.1) )
+    
+        
+
+  * Adjust_Weapon_Damage
+
+    Adjusts damage done by weapons.  If multiple weapons use the same bullet or missile, it will be modified for only the first weapon matched.
+    
+    * match_rule_multipliers:
+      - Series of matching rules paired with the damage multipliers to use.
+        
+
+  * Adjust_Weapon_Fire_Rate
+
+    Adjusts weapon rate of fire. DPS remains constant.
+    
+    * match_rule_multipliers:
+      - Series of matching rules paired with the RoF multipliers to use.
+        
+
+  * Adjust_Weapon_Range
+
+    Adjusts weapon range. Shot speed is unchanged.
+    
+    * match_rule_multipliers:
+      - Series of matching rules paired with the range multipliers to use.
+        
+
+  * Adjust_Weapon_Shot_Speed
+
+    Adjusts weapon projectile speed. Range is unchanged.
+    
+    * match_rule_multipliers:
+      - Series of matching rules paired with the speed multipliers to use.
         
 
 
@@ -269,11 +358,11 @@ Utilities:
       - Path to the folder where unpacked files are written.
     * include_pattern
       - String or list of strings, optional, wildcard patterns for file names to include in the unpacked output.
-      - Eg. "*.xml" to unpack only xml files, "md/*" to  unpack only mission director files, etc.
+      - Eg. "*.xml" to unpack only xml files
       - Case is ignored.
     * exclude_pattern
       - String or list of strings, optional, wildcard patterns for file names to include in the unpacked output.
-      - Eg. "['*.lua','*.dae']" to skip lua and dae files.
+      - Eg. "['*.lua']" to skip lua files.
     * allow_md5_errors
       - Bool, if True then files with md5 errors will be unpacked, otherwise they are skipped.
       - Such errors may arise from poorly constructed catalog files.
@@ -336,3 +425,12 @@ Change Log:
    - Swapped the default script from User_Transforms to Default_Script.
  * 0.11.1
    - Added support for case insensitive path matching, instead of requiring a match to the catalogs.
+ * 1.0
+   - Scattered framework refinements.
+   - Added Adjust_Weapon_Damage.
+   - Added Adjust_Weapon_Fire_Rate.
+   - Added Adjust_Weapon_Range.
+   - Added Adjust_Weapon_Shot_Speed.
+   - Refined Print_Weapon_Stats further.
+   - Refined matching rule format for Adjust_Job_Count.
+   

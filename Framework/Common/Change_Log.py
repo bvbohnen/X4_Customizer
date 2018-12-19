@@ -39,6 +39,15 @@ Change Log:
  * 0.11.1
    - Added support for case insensitive path matching, instead of
      requiring a match to the catalogs.
+ * 1.0
+   - Scattered framework refinements.
+   - Added Adjust_Weapon_Damage.
+   - Added Adjust_Weapon_Fire_Rate.
+   - Added Adjust_Weapon_Range.
+   - Added Adjust_Weapon_Shot_Speed.
+   - Refined Print_Weapon_Stats further.
+   - Refined matching rule format for Adjust_Job_Count.
+   
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

@@ -61,7 +61,7 @@ import shutil
 # Conditional import of pyinstaller, checking if it is available.
 try:
     import PyInstaller
-except:
+except Exception:
     print('Error: PyInstaller not found.')
     sys.exit()
 
@@ -78,7 +78,7 @@ def Make(*args):
     try:
         if args[0].endswith('.py'):
             args = args[1:]
-    except:
+    except Exception:
         pass
     
     # Set up command line arguments.

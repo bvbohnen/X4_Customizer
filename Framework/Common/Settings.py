@@ -77,6 +77,11 @@ class Settings_class:
         to verify their md5 hash, no exception will be thrown.
       - Defaults to False; consider setting True if needing to
         unpack incorrectly assembled catalogs.
+    * ignore_output_extension
+      - Bool, if True, the target extension being generated will have
+        its prior content ignored.
+      - Defaults to True; should only be set False if not running
+        transforms and wanting to analyse prior output.
 
     Output:
     * extension_name
@@ -199,6 +204,7 @@ class Settings_class:
         self.prefer_single_files = False
         self.ignore_extensions = False
         self.allow_cat_md5_errors = False
+        self.ignore_output_extension = True
         self.make_maximal_diffs = False
         self.plugin_log_file_name = 'plugin_log.txt'
         self.customizer_log_file_name = 'customizer_log.json'
@@ -227,40 +233,46 @@ class Settings_class:
         Look for a "settings.json" file in the main x4 customizer directory,
         and load defaults from it.
         '''
-        json_path = home_path / 'settings.json'
-        if not json_path.exists():
-            return
+        # Try the home_path and the call directory to find this.
+        for json_path in [Path('settings.json'), home_path / 'settings.json']:
+            if not json_path.exists():
+                continue
 
-        # If the json is malformed, json.load with toss an exception.
-        # In that case, just ignore it.
-        try:
-            with open(json_path, 'r') as file:
-                json_dict = json.load(file)
-        except Exception as ex:
-            print(('Skipping load of "settings.json" due to {}.'
-                    ).format(type(ex).__name__))
-            return
+            # If the json is malformed, json.load with toss an exception.
+            # In that case, just ignore it.
+            try:
+                with open(json_path, 'r') as file:
+                    json_dict = json.load(file)
+            except Exception as ex:
+                print(('Skipping load of "settings.json" due to {}.'
+                        ).format(type(ex).__name__))
+                # Don't continue; just return. Avoids repeating errors
+                # if the cwd is the home_path.
+                return
 
-        # Do some replacements of strings for normal types;
-        # unfortunately json.load doesn't do this automatically.
-        replacements_dict = {
-            'true' : True,
-            'True' : True,
-            '1'    : True,
-            'false': False,
-            'False': False,
-            '0'    : False,
-            }
+            # Do some replacements of strings for normal types;
+            # unfortunately json.load doesn't do this automatically.
+            replacements_dict = {
+                'true' : True,
+                'True' : True,
+                '1'    : True,
+                'false': False,
+                'False': False,
+                '0'    : False,
+                }
 
-        for key, value in json_dict.items():
-            # Convert to python bools.
-            value = replacements_dict.get(value, value)
-            if hasattr(self, key):
-                # This should always be a bool or a string.
-                setattr(self, key, value)
-            else:
-                print(('Entry "{}" in settings.json not recognized; skipping.'
-                       ).format(key))
+            for key, value in json_dict.items():
+                # Convert to python bools.
+                value = replacements_dict.get(value, value)
+                if hasattr(self, key):
+                    # This should always be a bool or a string.
+                    setattr(self, key, value)
+                else:
+                    print(('Entry "{}" in settings.json not recognized; skipping.'
+                           ).format(key))
+
+            # Don't want to check other json files.
+            break
         return
        
 
@@ -299,7 +311,7 @@ class Settings_class:
 
         # Verify the X4 path looks correct.
         if not self.path_to_x4_folder.exists():
-            raise Exception(
+            raise AssertionError(
                 'Path to the X4 folder appears to not exist.'
                 +'\n (x4 path: {})'.format(self.path_to_x4_folder)
                 )
@@ -315,7 +327,7 @@ class Settings_class:
                 print(message)
             else:
                 # Hard error.
-                raise Exception(message)
+                raise AssertionError(message)
             
         # Check the user folder for config.xml.
         if not (self.path_to_user_folder / 'config.xml').exists():
@@ -325,7 +337,7 @@ class Settings_class:
                 print(message)
             else:
                 # Hard error.
-                raise Exception(message)
+                raise AssertionError(message)
 
         # Create the output folder if it does not exist,
         #  so that runtime logging can go here.

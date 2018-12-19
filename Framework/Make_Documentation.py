@@ -257,9 +257,11 @@ def Make(*args):
                 plugin_type_plural))
             Add_Line('')
 
-            # Loop over the plugin in the category, sorted
-            #  by their name.
-            for transform in sorted(transform_list, key = lambda k: k.__name__):
+            # Loop over the plugin in the category, sorted by reversed
+            # priority, then by name. Want high priority to go first,
+            # so negate it.
+            for transform in sorted(transform_list, 
+                                    key = lambda k: (-1 * k._doc_priority, k.__name__)):
                 # Add the text.
                 Record_Func(transform, indent_level = 1, include_in_simple = True)
             

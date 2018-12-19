@@ -98,7 +98,7 @@ class Customizer_Log_class:
             self.version = log_dict['version']
             for relative_path in log_dict['file_paths_written']:
                 self.file_paths_written.append(Path(relative_path))
-        except:
+        except Exception:
             # When something goes wrong, just leave it alone for now.
             pass
         return

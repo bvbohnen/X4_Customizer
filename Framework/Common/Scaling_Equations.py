@@ -141,7 +141,7 @@ from Common.Settings import Settings
 try:
     import scipy.optimize as optimize
     Scipy_available = True
-except:
+except Exception:
     Scipy_available = False
 
 
@@ -489,7 +489,7 @@ def Plot_Fit(fit_equation):
     try:
         import matplotlib.pyplot
         import numpy
-    except:
+    except Exception:
         print('Skipping scaling equation plot; numy or matplotlib missing.')
         return
 

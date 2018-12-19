@@ -13,7 +13,7 @@
     <Name>Framework</Name>
     <RootNamespace>Framework</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>Test -dev</CommandLineArguments>
+    <CommandLineArguments>Check_Extensions -argpass</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

@@ -25,6 +25,8 @@ c)  Using the python source, run
 # Import all transform functions.
 from Plugins import *
 
+# Apply paths and other settings.
+# This could also be done in settings.json.
 Settings(
     # Set the path to the X4 installation folder.
     path_to_x4_folder   = r'C:\Steam\SteamApps\common\X4 Foundations',
@@ -35,13 +37,25 @@ Settings(
     )
 
 # Fill in transforms below.
+# A few samples are commented out.
 
 ## Reduce mass traffic and increase military jobs.
 #Adjust_Job_Count(
-#    ('id','masstraffic', 0.5),
-#    ('tag','military', 2)
+#    ('id   masstraffic*', 0.5),
+#    ('tags military'   , 1.3)
+#    )
+
+## Make weapons in general, and turrets in particular, better.
+#Adjust_Weapon_Damage(
+#    ('tags turret standard'   , 2),
+#    ('*'                      , 1.2),
+#    )
+#Adjust_Weapon_Shot_Speed(
+#    ('tags turret standard'   , 2),
+#    ('*'                      , 1.2),
 #    )
 
 
-# Write modified files when done.
+# Write transform modified files when done.
+# This can be commented out if not using transforms.
 Write_To_Extension()

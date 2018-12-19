@@ -27,15 +27,15 @@ def Print_Weapon_Stats(file_name = 'weapon_stats'):
     # One table per weapon class.
     table_list = []
     
-    # Loop over the types.
-    for weapon_type, weapons_list in sorted(type_weapons_dict.items()):
+    # Loop over the types, in selective ordering.
+    for weapon_class in ['weapon','turret','missilelauncher','missileturret','bomblauncher']:
+        weapons_list = type_weapons_dict[weapon_class]
 
         # A list of lists will make up the table.
         # First entry is the weapon type.
         # Second entry is the column labels.
         table = []
         table_list.append(table)
-        #table.append(['weapon_type:',weapon_type])
 
         # Determine which fields are in use.
         # Treat '0' as not in use, since in some cases an attribute
@@ -79,6 +79,9 @@ def Collect_Weapons():
     holding various parsed field values of interest.
     '''
     t_file = File_System.Load_File('t/0001-L044.xml')
+    def Float_to_String(this_float):
+        'Prints float with cleaned up precision decimal places.'
+        return '{:.2f}'.format(this_float).rstrip('0').rstrip('.')
     
     weapon_fields_list = []
     for weapon in Get_All_Weapons():
@@ -90,6 +93,9 @@ def Collect_Weapons():
         bullet_fields = Projectile_Fields(bullet_root)
         weapon_fields.update(bullet_fields)
 
+        # Add in weapon tags specially.
+        weapon_fields['tags'] = str(weapon.Get_Tags())
+
         # Fill in the name, if there is one.
         if 't_name_entry' not in weapon_fields:
             # Default to the component name.
@@ -98,6 +104,68 @@ def Collect_Weapons():
             # Let the t-file Read handle the lookup.
             weapon_fields['t_name'] = t_file.Read(weapon_fields['t_name_entry'])
         weapon_fields_list.append(weapon_fields)
+
+
+        # Calculations:
+
+        # Start with filling out rate of fire.
+        reload_rate      = weapon_fields.get('reload_rate')
+        reload_time      = weapon_fields.get('reload_time')
+        ammo_reload_time = weapon_fields.get('ammunition_reload')
+        ammo_cap         = weapon_fields.get('ammunition_value')
+
+        # If only reload_rate available, use it directly.
+        if reload_rate and not reload_time and not ammo_reload_time:
+            weapon_fields['fire_rate'] = reload_rate
+
+        # If only reload_time available, invert it and use.
+        if not reload_rate and reload_time and not ammo_reload_time:
+            weapon_fields['fire_rate'] = Float_to_String(1/float(reload_time))
+
+        # If reload_rate and ammo_reload_time available, mix them.
+        if reload_rate and not reload_time and ammo_reload_time:
+            # Note: game calculates this wrongly as of ~1.5, multiplying
+            # the ammo_cap-1 by reload_rate instead of 1/reload_rate.
+            # This will do it correctly.
+            burst_time = 1/float(reload_rate) * (float(ammo_cap)-1)
+            time = float(ammo_reload_time) + burst_time
+            weapon_fields['fire_rate'] = Float_to_String(1/time)
+
+
+        # Fill in range.
+        if not weapon_fields.get('range'):
+            # Can compute from lifetime and speed.
+            lifetime = weapon_fields.get('lifetime')
+            speed    = weapon_fields.get('speed')
+            if lifetime and speed:
+                weapon_fields['range'] = Float_to_String(float(lifetime) * float(speed))
+
+
+        # Fill in burst dps.
+        fire_rate     = weapon_fields.get('fire_rate')
+        damage        = weapon_fields.get('damage')
+        damage_s      = weapon_fields.get('damage_shield')
+        damage_h      = weapon_fields.get('damage_hull')
+        damage_r      = weapon_fields.get('damage_repair')
+        bullet_amount = weapon_fields.get('amount')
+        if fire_rate:
+            multiplier = float(fire_rate)
+            if bullet_amount:
+                multiplier *= float(bullet_amount)
+            if damage:
+                weapon_fields['dps'] = Float_to_String(multiplier * float(damage))
+            if damage_s:
+                weapon_fields['dps_s'] = Float_to_String(multiplier * float(damage_s))
+            if damage_h:
+                weapon_fields['dps_h'] = Float_to_String(multiplier * float(damage_h))
+            if damage_r:
+                weapon_fields['dps_r'] = Float_to_String(multiplier * float(damage_r))
+
+
+        # Compute heat limited dps.
+        # TODO
+
+
 
     return weapon_fields_list
 
@@ -169,10 +237,11 @@ class Projectile_Fields(dict):
             ('bullet_codename'           , './/macro'                , 'name'),
             ('ammunition_value'          , './/ammunition'           , 'value'),
             ('ammunition_reload'         , './/ammunition'           , 'reload'),
-            ('bullet_speed'              , './/bullet'               , 'speed'),
-            ('bullet_lifetime'           , './/bullet'               , 'lifetime'),
-            ('bullet_amount'             , './/bullet'               , 'amount'),
-            ('bullet_barrel_amount'      , './/bullet'               , 'barrelamount'),
+            ('speed'                     , './/bullet'               , 'speed'),
+            ('lifetime'                  , './/bullet'               , 'lifetime'),
+            ('range'                     , './/bullet'               , 'range'),
+            ('amount'                    , './/bullet'               , 'amount'),
+            ('barrel_amount'             , './/bullet'               , 'barrelamount'),
             ('bullet_timediff'           , './/bullet'               , 'timediff'),
             ('bullet_angle'              , './/bullet'               , 'angle'),
             ('bullet_max_hits'           , './/bullet'               , 'maxhits'),
@@ -181,22 +250,22 @@ class Projectile_Fields(dict):
             ('bullet_attach'             , './/bullet'               , 'attach'),
             ('heat'                      , './/heat'                 , 'value'),
             ('reload_rate'               , './/reload'               , 'rate'),
+            ('reload_time'               , './/reload'               , 'time'),
             ('damage'                    , './/damage'               , 'value'),
             ('damage_shield'             , './/damage'               , 'shield'),
             ('damage_hull'               , './/damage'               , 'hull'),
             ('damage_repair'             , './/damage'               , 'repair'),
             
             # typical for missiles.          
-            ('missile_amount'            , './/missile'              , 'amount'),
-            ('missile_barrel amount'     , './/missile'              , 'barrelamount'),
-            ('missile_lifetime'          , './/missile'              , 'lifetime'),
-            ('missile_range'             , './/missile'              , 'range'),
+            ('amount'                    , './/missile'              , 'amount'),
+            ('barrel_amount'             , './/missile'              , 'barrelamount'),
+            ('lifetime'                  , './/missile'              , 'lifetime'),
+            ('range'                     , './/missile'              , 'range'),
             ('missile_guided'            , './/missile'              , 'guided'),
-            ('missile_retarget'          , './/missile'              , 'retarget'),            
+            ('missile_retarget'          , './/missile'              , 'retarget'),
             ('damage'                    , './/explosiondamage'      , 'value'),
             ('damage_shield'             , './/explosiondamage'      , 'shield'),
             ('damage_hull'               , './/explosiondamage'      , 'hull'),
-            ('reload_time'               , './/reload'               , 'time'),
             ('missile_hull'              , './/hull'                 , 'max'),
             ('lock_time'                 , './/lock'                 , 'time'),
             ('lock_range'                , './/lock'                 , 'range'),
@@ -211,31 +280,38 @@ class Projectile_Fields(dict):
 
 attribute_names_ordered_dict = OrderedDict((
     ('t_name'                    , 'Name'),
-    ('weapon_class'              , 'Class'),
 
     #('t_name_entry'              , ''),
 
-    ('reload_time'               , 'Reload Time'),
-    ('reload_rate'               , 'Reload Rate'),
+    ('dps'                       , 'DPS'),
+    ('dps_s'                     , '+Shield'),
+    ('dps_h'                     , '+Hull'),
+    ('dps_r'                     , '+Repair'),
 
-    # Ammo values aren't very useful.
+
     # For missiles, ammo is either dumbfire or guided, but that
     # is captured in missile_guided.
-    # Ammo value is always 1 for missiles, None or 999 for weapons.
-    # Reload is always 0 or None, except for bomb launcher where it is 2.
     #('ammunition'                , ''),
-    #('ammunition_value'          , ''),
-    ('ammunition_reload'         , 'Ammo Reload'),
+
         
+    ('fire_rate'                 , 'Fire Rate'),    
+    ('speed'                     , 'Speed'),
+    ('range'                     , 'Range'),
+    ('lifetime'                  , 'Lifetime'),
+    
     ('damage'                    , 'Damage'),
     ('damage_shield'             , '+Shield'),
     ('damage_hull'               , '+Hull'),
     ('damage_repair'             , '+Repair'),
-    
-    ('bullet_speed'              , 'Speed'),
-    ('bullet_lifetime'           , 'Lifetime'),
-    ('bullet_amount'             , 'Amount'),
-    ('bullet_barrel_amount'      , 'Barrel Amount'),
+
+    ('reload_time'               , 'Reload Time'),
+    ('reload_rate'               , 'Reload Rate'),
+    ('ammunition_reload'         , 'Ammo Reload'),
+    ('ammunition_value'          , 'Max Ammo'),
+
+    ('amount'                    , 'Amount'),
+    ('barrel_amount'             , 'Barrel Amount'),
+
     ('bullet_timediff'           , 'Time Diff'),
     ('bullet_angle'              , 'Angle'),
     ('bullet_max_hits'           , 'Max Hits'),
@@ -243,10 +319,7 @@ attribute_names_ordered_dict = OrderedDict((
     ('bullet_scale'              , 'Scale'),
     ('bullet_attach'             , 'Attach'),
 
-    ('missile_amount'            , 'Amount'),
-    ('missile_barrel amount'     , 'Barrel Amount'),
-    ('missile_lifetime'          , 'Lifetime'),
-    ('missile_range'             , 'Range'),
+    # TODO: compute speed.
     ('missile_guided'            , 'Guided'),
     ('missile_retarget'          , 'Retarget'),
     
@@ -267,6 +340,8 @@ attribute_names_ordered_dict = OrderedDict((
     ('storage_capacity'          , 'Storage'),
     
     ('hull'                      , 'Hull'),
+    ('weapon_class'              , 'Class'),
     ('codename'                  , 'Weapon Codename'),
     ('bullet_codename'           , 'Bullet Codename'),
+    ('tags'                      , 'Tags'),
 ))

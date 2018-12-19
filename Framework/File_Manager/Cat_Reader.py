@@ -85,7 +85,7 @@ class Cat_Reader:
                 
         # Read the cat. Error if not found.
         if not self.cat_path.exists():
-            raise Exception('Error: failed to find cat file at {}'.format(path))
+            raise AssertionError('Error: failed to find cat file at {}'.format(path))
         # This can just do a raw text read.
         with open(self.cat_path, 'r') as file:
             text = file.read()
@@ -152,7 +152,7 @@ class Cat_Reader:
         # Check for the file being missing.
         if virtual_path not in self.cat_entries:
             if error_if_not_found:
-                raise Exception('File {} not found in cat {}'.format(
+                raise AssertionError('File {} not found in cat {}'.format(
                     virtual_path, self.cat_path))
             return None
 

@@ -2,7 +2,8 @@
 Transforms to jobs.
 '''
 from fnmatch import fnmatch
-from Framework import Transform_Wrapper, Load_File, XML_Misc
+from Framework import Transform_Wrapper, Load_File
+from .Support import *
 
 @Transform_Wrapper()
 def Adjust_Job_Count(
@@ -29,8 +30,9 @@ def Adjust_Job_Count(
         - 'size'    : The ship size suffix, 's','m','l', or 'xl'.
         - '*'       : Matches all jobs; takes no value term.
 
-    Example:
+    Examples:
     <code>
+        Adjust_Job_Count(1.2)
         Adjust_Job_Count(
             ('id       masstraffic*'      , 0.5),
             ('tags     military destroyer', 2  ),
@@ -40,33 +42,16 @@ def Adjust_Job_Count(
             ('*'                          , 1.1) )
     </code>
     '''
-    '''
-    Toy around with xpath matching:
-        // Kinda clumsy compared to id.
-        // Cannot do partial matches.
-        // Cannot check id (since it is part of the base node,
-        //  and xpath is a bit of a headach about matching the base).
-        ('.//masstraffic', 0.5),
-        // This won't work; xpath cannot check for 'military' inside
-        //  a list of terms.
-        ('.//*[@tag="military"]', 2),
-        ('.//*[@tag="miner"]', 1.5),
-        // This one should work fine.
-        ('.//*[@faction="argon"]', 1.2),
-        // This is a little clumsy, though should work unless there
-        //  are 0 children.
-        ('.//*', 1.1) )
-    Overall, xpath matching seems like a mess to write, and limited
-    in ability. A custom matching language would be better.
-    '''
     assert isinstance(job_multipliers, (list, tuple))
     #-Removed, don't worry about this for now.
     ## If the call happened to be unnamed but packed in a list, it may
     ##  now be double-wrapped, so unwrap once.
     #if len(job_multipliers) == 1 and isinstance(job_multipliers[0], list):
     #    job_multipliers = job_multipliers[0]
-
-
+    
+    # Put matching rules in standard form.
+    rules = Standardize_Match_Rules(job_multipliers)
+    
     jobs_game_file = Load_File('libraries/jobs.xml')
     xml_root = jobs_game_file.Get_Root()
         
@@ -88,20 +73,9 @@ def Adjust_Job_Count(
             size     = None
             tags     = []
 
-
-        # For this job, loop over match rules.
-        # The first match will break out, leaving its multiplier set.
-        # If no match found, default to 1x.
+        # Check the matching rules.
         multiplier = None
-        for rule in job_multipliers:
-            # There may or may not be a value with the key, placed
-            # after a space. TODO: think of a more elegant solution.
-            try:
-                key, value = rule[0].split(' ',1)
-            except ValueError:
-                key, value = rule[0], ''
-            value = value.strip()
-
+        for key, value, mult in rules:
             if((key == '*')
             or (key == 'id' and fnmatch(job_id, value))
             or (key == 'faction' and faction == value)
@@ -109,10 +83,9 @@ def Adjust_Job_Count(
             or (key == 'tags' and all(x in tags for x in value.split(' ')))
             # For sizes, add a 'ship_' prefix to the match_str.
             or (key == 'size' and size == ('ship_'+value)) ):
-                multiplier = rule[-1]
+                multiplier = mult
                 break
-
-        # Early skip if not changing counts.
+        # Skip if no match.
         if multiplier == None:
             continue
 
@@ -121,7 +94,7 @@ def Adjust_Job_Count(
         #  go ahead and adjust it too for now.
         quota = job.find('quota')
         for name, value in quota.items():
-            XML_Misc.Multiply_Int_Attribute(quota, name, multiplier)
+            XML_Multiply_Int_Attribute(quota, name, multiplier)
                         
     jobs_game_file.Update_Root(xml_root)
     return

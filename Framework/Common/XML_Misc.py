@@ -1,5 +1,7 @@
 '''
 XML helper functions, for use by transforms.
+TODO: remove the ones that aren't useful anymore after switching
+to lxml.
 '''
 #import xml.etree.ElementTree as ET
 #from xml.dom import minidom
@@ -64,9 +66,9 @@ def Find_Match(base_node, match_node):
     # Error if there isn't a single match.
     found_count = len(found_nodes)
     if found_count == 0:
-        raise Exception('XML_Find_Match failed to find a match')
+        raise AssertionError('XML_Find_Match failed to find a match')
     elif found_count > 1:
-        raise Exception('XML_Find_Match found {} matches'.format(found_count))
+        raise AssertionError('XML_Find_Match found {} matches'.format(found_count))
 
     # Return a single node.
     return found_nodes[0]
@@ -216,37 +218,3 @@ def Has_Matching_Attribute(parent, attr, value, partial = False):
                     return True
     return False
 
-
-def Multiply_Int_Attribute(node, attr, multiplier):
-    '''
-    Multiplies the given node attribute's value by the multiplier.
-    Value is treated as an integer, and rounded before replacement.
-    The value will be floored to 1 if the original was positive
-    and non-0 and the multiplier is non-0.
-    '''
-    # Convert to int.
-    value = int(node.get(attr))
-    # Multiply, round, and re-int.
-    new_value = int(round(value * multiplier))
-    # If neither original term was 0, set a min of 1.
-    if value > 0 and multiplier > 0 and new_value == 0:
-        new_value = 1
-    node.set(attr, str(new_value))
-    return
-
-
-def Multiply_Float_Attribute(node, attr, multiplier):
-    '''
-    Multiplies the given node attribute's value by the multiplier.
-    Value is treated as an float, and stored with up to 2 decimal
-    places.
-    '''
-    value = float(node.get(attr))
-    # Multiply.
-    new_value = value * multiplier
-    # Limit string precision to a couple decimals.
-    # For the sake of printouts, trim off trailing 0s; kinda ugly
-    #  to do this in python, sadly.
-    new_value_str = '{:.2f}'.format(new_value).rstrip('0').rstrip('.')
-    node.set(attr, new_value_str)
-    return

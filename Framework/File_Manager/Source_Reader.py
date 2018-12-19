@@ -456,7 +456,10 @@ class Source_Reader_class:
 
                 # Skip the current output extension target, since its contents
                 #  are the ones being updated this run.
-                if content_xml_path == output_content_path:
+                # Sometimes this will be included based on settings, eg. when
+                #  only creating documentation.
+                if (content_xml_path == output_content_path 
+                and Settings.ignore_output_extension):
                     continue
 
                 # Load it and pick out the id.
@@ -555,7 +558,7 @@ class Source_Reader_class:
         while unsorted_dict:
             limit -= 1
             if limit <= 0:
-                raise Exception('Something went wrong with extension sorting.')
+                raise AssertionError('Something went wrong with extension sorting.')
 
             # Gather which extensions can be sorted into the next slot.
             # Start with all that have hard and soft dependencies filled.
@@ -715,7 +718,7 @@ class Source_Reader_class:
                 # This could go awry if the first extension file is a diff
                 #  patch, which has nothing to patch.
                 if game_file.Get_Root_Readonly().tag == 'diff':
-                    raise Exception(('No base file found for {}, and the'
+                    raise AssertionError(('No base file found for {}, and the'
                         ' first extension file is a diff patch').format(
                             virtual_path))
 

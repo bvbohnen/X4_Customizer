@@ -49,8 +49,11 @@ if args.x4 != None:
 if args.user != None:
     Settings.path_to_user_folder = args.user
 
-
+# Include the current output extension in the check.
+Settings.ignore_output_extension = False
+    
 # If no extension names given, grab all of them.
+# This will also initialize the file system.
 if not args.extensions:
     args.extensions = File_System.Get_Extension_Names()
 

@@ -76,10 +76,18 @@ def Make(*args):
         'Cat_Unpack.bat',
         'Check_Extensions.bat',
         'Clean_X4_Customizer.bat',
-        'Launch_X4_Customizer.bat',            
+        'Launch_X4_Customizer.bat',
         'Documentation.md',
         'README.md',
         'License.txt',
+        )
+    wanted_script_names = (
+        'Authors_Transforms.py',
+        'Cat_Pack.py',
+        'Cat_Unpack.py',
+        'Check_Extensions.py',
+        'Example_Transforms.py',
+        'Default_Script_template.py',
         )
     for file_name in os.listdir(Top_dir):
         if file_name in wanted_top_names:
@@ -113,11 +121,8 @@ def Make(*args):
                 if folder in ['Scripts','Plugins'] and not file_name.endswith('.py'):
                     continue
 
-                # Omit some input scripts.
-                if folder == 'Scripts' and file_name in [
-                        #'Example_Transforms.py',
-                        'Test.py',
-                        ]:
+                # Pick scripts to include.
+                if folder == 'Scripts' and file_name not in wanted_script_names:
                     continue
 
                 file_paths.append(os.path.join(folder, dir_path, file_name))

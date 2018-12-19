@@ -16,19 +16,42 @@ Settings(
 
 # For all tests to run, mostly to tease out exceptions after
 # code changes.
-test_all = 0
+test_all = 1
 
 
-# Documentation writers.
-if 0 or test_all:
+# Weapon transforms.
+if 1 or test_all:
     Print_Weapon_Stats('weapon_stats_premod')
-    Adjust_Weapon_Damage(('*',1.2))
+    #Adjust_Weapon_Damage(1.2)
+    #Adjust_Weapon_Damage(
+    #    ('name weapon_tel_l_beam_01_mk1', 10),
+    #    ('tags large standard turret'   , 5),
+    #    ('tags medium missile weapon'   , 3),
+    #    ('class bomblauncher'           , 20),
+    #    ('*'                            , 1.2) )
+    #Adjust_Weapon_Range(
+    #    ('name weapon_tel_l_beam_01_mk1', 10),
+    #    ('tags large standard turret'   , 5),
+    #    ('tags medium missile weapon'   , 3),
+    #    ('class bomblauncher'           , 20),
+    #    ('*'                            , 1.2) )
+    
     Adjust_Weapon_Damage(
-        ('name weapon_tel_l_beam_01_mk1', 10),
-        ('tags large standard turret'   , 5),
-        ('tags medium missile weapon'   , 3),
-        ('class mine'                   , 20),
-        ('*'                            , 1.2) )
+        ('tags small standard weapon'   , 2),
+        ('*'                            , 1.2),
+        )
+    Adjust_Weapon_Range(
+        ('tags small standard weapon'   , 2),
+        ('tags missile'                 , 2),
+        )
+    Adjust_Weapon_Shot_Speed(
+        ('tags small standard weapon'   , 2),
+        ('tags missile'                 , 2),
+        )
+    Adjust_Weapon_Fire_Rate(
+        ('tags small standard weapon'   , 2),
+        ('tags missile'                 , 2),
+        )
     Print_Weapon_Stats('weapon_stats_postmod')
     
 

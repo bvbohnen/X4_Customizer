@@ -1,5 +1,7 @@
 '''
 These transforms are those used by the author.
+For early versions, these may be filled more with play than
+actual good ideas for game modifications.
 '''
 
 # Import all transform functions.
@@ -12,13 +14,27 @@ Settings(
     )
 
 
-# Toy around with job counts.
-Adjust_Job_Count(
-    ('id','masstraffic', 0.5),
-    ('tag','military', 2),
-    ('tag','miner', 1.5),
-    ('faction','argon', 1.2),
-    ('*', 1.1) )
+# Prune some mass traffic.
+Adjust_Job_Count(('id masstraffic*', 0.5))
+
+# Toy around with small weapons.
+Adjust_Weapon_Damage(
+    ('tags small standard weapon'   , 2),
+    ('*'                            , 1.2),
+    )
+Adjust_Weapon_Range(
+    ('tags small standard weapon'   , 2),
+    ('tags missile'                 , 2),
+    )
+Adjust_Weapon_Shot_Speed(
+    ('tags small standard weapon'   , 2),
+    ('tags missile'                 , 2),
+    )
+Adjust_Weapon_Fire_Rate(
+    ('tags small standard weapon'   , 2),
+    ('tags missile'                 , 2),
+    )
+Print_Weapon_Stats()
 
 # Write modified files.
 Write_To_Extension()

@@ -183,8 +183,8 @@ def Run(*args):
         Settings.verbose = False
 
     if args.clean:
-        print('Enabling cleanup mode; transforms will be skipped.')
-        Settings.skip_all_transforms = True
+        print('Enabling cleanup mode; plugins will be skipped.')
+        Settings.skip_all_plugins = True
 
     if args.dev:
         print('Enabling developer mode.')
@@ -198,8 +198,7 @@ def Run(*args):
 
     print('Calling {}'.format(args.control_script))
     try:
-        # Attempt to load the module.
-        # This will kick off all of the transforms as a result.
+        # Attempt to load/run the module.
         import importlib        
         module = importlib.machinery.SourceFileLoader(
             # Provide the name sys will use for this module.
@@ -211,7 +210,12 @@ def Run(*args):
             str(args.control_script)
             ).load_module()
         
-        #print('Run complete')    
+        #print('Run complete')
+        
+        # Since a plugin normally handles file cleanup and writeback,
+        #  cleanup needs to be done manually here when needed.
+        if args.clean:
+            Framework.File_System.Cleanup()
 
     except Exception as ex:
         # Make a nice message, to prevent a full stack trace being

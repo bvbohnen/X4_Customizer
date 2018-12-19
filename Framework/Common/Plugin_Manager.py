@@ -44,6 +44,7 @@ def _Plugin_Wrapper(
         plugin_type = None,
         category = None,
         uses_paths_from_settings = True,
+        doc_priority = 0,
     ):
     '''
     Wrapper function for plugins.
@@ -61,6 +62,11 @@ def _Plugin_Wrapper(
         setup the output folder for logging.
       - Not required if a plugin doesn't use any paths from Settings,
         and does not try to write to a log.
+    * doc_priority
+      - Int, indicates how early in documentation this should
+        be printed relative to other plugins of the same type
+        and category.
+      - Defaults 0; positive numbers print earlier.
     '''
     # Make the inner decorator function, capturing the wrapped function.
     def inner_decorator(func):
@@ -68,9 +74,10 @@ def _Plugin_Wrapper(
         # Attach the plugin type and other flags.
         func._plugin_type   = plugin_type
         func._uses_paths_from_settings = uses_paths_from_settings
+        func._doc_priority = doc_priority
             
-        # Attach the override category to the function.
         if category != None:
+            # Attach the override category to the function.
             func._category = category
         else:
             # Fill a default category from the module name.
@@ -78,6 +85,7 @@ def _Plugin_Wrapper(
             # The module may have multiple package layers in it, so
             #  get just the last one.
             func._category = func._category.split('.')[-1]
+
 
         # Record the plugin function.
         plugin_list.append(func)
@@ -151,3 +159,67 @@ def Utility_Wrapper(**kwargs):
     return _Plugin_Wrapper(plugin_type = 'Utility', category = '', **kwargs)
 def Analysis_Wrapper(**kwargs):
     return _Plugin_Wrapper(plugin_type = 'Analysis', category = '', **kwargs)
+
+
+'''
+To let transforms share some documentation, support can be added
+to specifying categorized docstrings that will be printed at
+the head of each documentation section.
+
+Since modules can be spread out, and the doc generator doesn't know
+where transforms came from, perhaps the docs should be wrapped into
+some sort of object that gets imported upward to the Transforms package.
+However, this has some clumsiness since the object would need
+to be named, although the name is fluff.
+
+Some ideas:
+
+    @Plugin_Doc(category)
+    def somename():
+        'doc stuff'
+
+    somename = Plugin_Doc(category, 'doc stuff')
+
+    'doc stuff' (at top of module)
+    somename = Plugin_Doc(category, __doc__)
+
+To avoid "somename" fluff, could potentially stick the documentation
+in the module or package __doc__, then annotate all transforms
+automatically to grab that docstring (through the wrapper), adding
+some term to the docstring to indicate it is for printout.
+
+    'doc stuff' (at top of module)
+    @Transform_Wrapper(category, ).
+    ...
+        func.category = ...
+        module_doc = globals()['__doc__']
+        func.category_doc = module_doc if 'tag' in module_doc else ''
+
+Another approach might be to use a reserved plugin name, and capture
+shared documentation in that plugin (that is otherwise uncallable
+in some way), which has the advantage of plugin categorization
+keeping it combined with others in its category.
+
+    @Transform_Wrapper()
+    def Documentation():
+        'doc stuff'
+        
+    This will be a little clumsy with name conflicts as the plugins
+    get * imported from multiple places, though, so won't really work out.
+    Can put the category in the name, maybe.
+    
+    @Transform_Wrapper()
+    def Weapon_Documentation():
+        'doc stuff'
+
+    Uniquifies the documentation during imports. The name is still
+    a little fluffy, but serves a purpose. Transform category would
+    be filled in like other transforms (from module or package name).
+    The doc generator only needs a special handler to sort this
+    plugin first when printing; otherwise it gets categorized along
+    with what it is documenting automatically
+    Can handle sorting with a special transform wrapper arg that
+    indicates preferred sorting priority.
+        
+
+'''

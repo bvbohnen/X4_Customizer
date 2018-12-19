@@ -67,8 +67,6 @@ argparser.add_argument(
             ' This may occur in badly formed catalog files.')
 
 args = argparser.parse_args(sys.argv[1:])
-print(args.source)
-print(args.dest)
 
 # Make the source a Path, and convert to absolute to fill in the parents.
 args.source = Path(args.source).resolve()

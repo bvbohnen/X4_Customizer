@@ -31,13 +31,12 @@ def Cat_Unpack(
     * include_pattern
       - String or list of strings, optional, wildcard patterns for file
         names to include in the unpacked output.
-      - Eg. "*.xml" to unpack only xml files, "md/*" to  unpack only
-        mission director files, etc.
+      - Eg. "*.xml" to unpack only xml files
       - Case is ignored.
     * exclude_pattern
       - String or list of strings, optional, wildcard patterns for file
         names to include in the unpacked output.
-      - Eg. "['*.lua','*.dae']" to skip lua and dae files.
+      - Eg. "['*.lua']" to skip lua files.
     * allow_md5_errors
       - Bool, if True then files with md5 errors will be unpacked, otherwise
         they are skipped.
@@ -47,15 +46,18 @@ def Cat_Unpack(
     try:
         source_cat_path = Path(source_cat_path).resolve()
         assert source_cat_path.exists()
-    except:
-        raise Exception('Error in the source path ({})'.format(source_cat_path))
+    except Exception:
+        raise AssertionError('Error in the source path ({})'.format(source_cat_path))
 
     try:
         dest_dir_path = Path(dest_dir_path).resolve()
         # Make the dest dir if needed.
-        dest_dir_path.mkdir(parents = True, exist_ok = True)
-    except:
-        raise Exception('Error in the dest path ({})'.format(dest_dir_path))
+        # -Removed; create it only when a file gets unpacked, so that it
+        # doesn't make a spurious folder if the bat file is launched
+        # directly from the customizer folder.
+        #dest_dir_path.mkdir(parents = True, exist_ok = True)
+    except Exception:
+        raise AssertionError('Error in the dest path ({})'.format(dest_dir_path))
 
 
     # Pack up the patterns given to always be lists or None.
@@ -176,7 +178,7 @@ def Cat_Pack(
     try:
         source_dir_path = Path(source_dir_path)
         assert source_dir_path.exists()
-    except:
+    except Exception:
         raise AssertionError('Error in the source path ({})'.format(source_dir_path))
 
     try:
@@ -187,7 +189,7 @@ def Cat_Pack(
         assert dest_cat_path.suffix == '.cat'
         # Make the dest dir if needed.
         dest_cat_path.parent.mkdir(parents = True, exist_ok = True)
-    except:
+    except Exception:
         raise AssertionError('Error in the dest path ({})'.format(dest_cat_path))
     
 
@@ -240,8 +242,11 @@ def Cat_Pack(
         num_writes += 1
         print('Packed {}'.format(virtual_path))
 
-    # Generate the actual cat file.
-    cat_writer.Write()
+
+    # If no files found, skip cat creation.
+    if num_writes != 0:
+        # Generate the actual cat file.
+        cat_writer.Write()
     
     print('Files written                    : {}'.format(num_writes))
     print('Files skipped (pattern mismatch) : {}'.format(num_pattern_skips))
