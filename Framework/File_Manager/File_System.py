@@ -321,7 +321,8 @@ class File_System_class:
         Existing files which may conflict with the new writes will be renamed,
          including files of the same name as well as their .pck versions.
         '''
-        print('Writing output files')#to {}'.format(Settings.Get_Output_Folder()))
+        print('Writing output files' + ' (diff encoded)' if not Settings.make_maximal_diffs else '')
+        #to {}'.format(Settings.Get_Output_Folder()))
 
         # Add copies of leftover files from the user source folder.
         # Do this before the proper writeout, so it can reuse functionality.

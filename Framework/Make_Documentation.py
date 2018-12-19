@@ -263,7 +263,15 @@ def Make(*args):
             for transform in sorted(transform_list, 
                                     key = lambda k: (-1 * k._doc_priority, k.__name__)):
                 # Add the text.
-                Record_Func(transform, indent_level = 1, include_in_simple = True)
+                # Temp hack: if it had a priority != 0, don't include
+                #  it in the simple output.
+                # TODO: more elegant solution for this to catch documentation
+                #  psuedo-transforms, like moving their docstring up under
+                #  the category header.
+                include_in_simple = True
+                if transform._doc_priority != 0:
+                    include_in_simple = False
+                Record_Func(transform, indent_level = 1, include_in_simple = include_in_simple)
             
 
     # Print out the change log.

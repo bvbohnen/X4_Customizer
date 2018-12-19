@@ -38,17 +38,17 @@ from .Support import *
 
 # Shared documentation.
 @Transform_Wrapper(doc_priority = 1)
-def Weapon_Documentation():
+def Shared_Weapon_Transforms_Documentation():
     '''
     Weapon transforms will commonly use a group of matching rules
     to determine which weapons get modified, and by how much.    
 
-    * Weapon match rules:
-      - Series of tuples pairing matching rules (strings) with transform
+    * Weapon match rule:
+      - A tuple pairing a matching rule (string) with transform
         defined args, eg. ("key  value", arg0, arg1, ...).
       - The "key" specifies the xml field to look up, which will
         be checked for a match with "value".
-      - If a target object matches multiple entries, the first match is used.
+      - If a target object matches multiple rules, the first match is used.
       - If a bullet or missile is shared across multiple weapons, only the
         first matched weapon will modify it.
       - Supported keys for weapons:
@@ -58,6 +58,7 @@ def Weapon_Documentation():
           - These are often redundant with tag options.
         - 'tags'  : One or more tags for this weapon, space separated.
           - See Print_Weapon_Stats output for tag listings.
+        - '*'     : Matches all wares; takes no value term.
 
     Examples:
     <code>

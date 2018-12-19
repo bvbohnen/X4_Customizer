@@ -41,14 +41,7 @@ def Adjust_Job_Count(
             ('faction  argon'             , 1.2),
             ('*'                          , 1.1) )
     </code>
-    '''
-    assert isinstance(job_multipliers, (list, tuple))
-    #-Removed, don't worry about this for now.
-    ## If the call happened to be unnamed but packed in a list, it may
-    ##  now be double-wrapped, so unwrap once.
-    #if len(job_multipliers) == 1 and isinstance(job_multipliers[0], list):
-    #    job_multipliers = job_multipliers[0]
-    
+    '''    
     # Put matching rules in standard form.
     rules = Standardize_Match_Rules(job_multipliers)
     

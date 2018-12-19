@@ -36,5 +36,13 @@ Adjust_Weapon_Fire_Rate(
     )
 Print_Weapon_Stats()
 
+# Reduce general price spread on wares, to reduce trade profit.
+Adjust_Ware_Price_Spread(0.5)
+# Reduce the prices on inventory items, since they are often
+# obtained for free.
+Adjust_Ware_Prices(
+    ('container inventory'         , 0.5) ) 
+Print_Ware_Stats()
+
 # Write modified files.
 Write_To_Extension()

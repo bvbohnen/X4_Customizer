@@ -314,36 +314,43 @@ class XML_Text_File(XML_File):
     XML file holding game text.
     '''
     # TODO: maybe a version that takes separate page and id terms.
-    def Read(self, page_id = None, page = None, id = None):
+    def Read(self, text = None, page = None, id = None):
         '''
         Reads and returns the text at the given {page,id}.
         Recursively expands nested references.
         Removes comments in parentheses.
         Returns None if no text found.
 
-        * page_id
-          - String, of the form '{page,id}'.
-          - Can give this or separate page and id terms.
+        * text
+          - String, including any internal '{page,id}' terms.
         * page, id
-          - Int or string, page and id separated.
+          - Int or string, page and id separated; give for direct
+            dereference instead of a full text string.
         '''
-        # Break up input page_id text, if needed.
-        # Also, get rid of spacing fluff that messes up lookups.
-        if page_id:
-            page, id = page_id.replace(' ','').replace('{','').replace('}','').split(',')
-        root = self.Get_Root_Readonly()
-        node = root.find('.//page[@id="{}"]/t[@id="{}"]'.format(page, id))
-        if node == None:                                 
-            return
-        text = node.text
+        # If page and id given, pack them in a string to reuse the
+        # following code. Probably don't need to worry about performance
+        # of this.
+        if text == None:
+            text = '{{{},{}}}'.fromat(page,id)
+                       
+        # Remove any comments, in parentheses.
+        if '(' in text:
+            # .*?     : Non-greed match a series of chars.
+            # \( \)   : Match parentheses
+            # (?<!\\) : Look behind for no preceeding escape char.
+            # Note: put all this in a raw string to avoid python escapes.
+            text = ''.join(re.split(r'(?<!\\)\(.*?(?<!\\)\)', text))
+        #if text.startswith('(') and ')' in text:
+        #    text = text.split(')',1)[1]
 
-        # Remove any starting comment.
-        # Note: assumes only on comment, not chained comments.
-        if text.startswith('(') and ')' in text:
-            text = text.split(')',1)[1]
+        # Remove leftover escape characters, blindly for now (assume
+        # they are never escaped themselves).
+        text = text.replace('\\','')
 
-        # If further lookups are present, deal with them recursively.
+        # If lookups are present, deal with them recursively.
         if '{' in text:
+            root = self.Get_Root_Readonly()
+
             # RE pattern used:
             #  .*    : Match a series of chars.
             #  .*?   : As above, but changes to non-greedy.
@@ -354,7 +361,21 @@ class XML_Text_File(XML_File):
             for term in re.split('({.*?})', text):
                 # Check if it is a nested lookup.
                 if term.startswith('{'):
-                    new_text += self.Read(term)
+
+                    # Split it apart.
+                    page, id = (term.replace(' ','').replace('{','')
+                                .replace('}','').split(','))
+
+                    # Look up the initial replacement.
+                    node = root.find('.//page[@id="{}"]/t[@id="{}"]'.format(page, id))
+                    if node == None:                                 
+                        return
+                    replacement_text = node.text
+
+                    # In case this replacement has nested terms,
+                    # recursively process it, and append to the running
+                    # result.
+                    new_text += self.Read(replacement_text)
                 else:
                     new_text += term
             text = new_text

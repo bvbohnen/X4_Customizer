@@ -91,6 +91,7 @@ from lxml import etree as ET
 from copy import deepcopy
 from itertools import zip_longest
 import random
+import time # Used for some profiling.
 
 from ..Common import Plugin_Log
 from ..Common.Exceptions import XML_Patch_Exception
@@ -254,6 +255,7 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
                 #    <replace sel="//macros/macro/properties/bullet/@angle">0.2</replace>
                 # Both lack this attribute in the base file.
                 # Most commonly, x4 seems to allow missing attributes
+                # TODO: revisit to sync up with x4 errors better.
 
             elif op_node.get('type'):
                 type = 'attrib'
@@ -693,25 +695,64 @@ def _Get_Xpath_Recursive(node):
     Recursively gets called on parent nodes, using their xpaths
     as prefixes.
     '''
-    # Initially, this can just use child indexing to work through the
-    #  whole tree.
-    # TODO: swap over to node tag and some attributes when they
-    #  are sufficient for unique lookup, either within a child list
-    #  or globally (with a prefix '//' to shorten the path).
-
     # If there is no parent then this is the top node, but still needs
     #  to include itself since X4 has a fake node above it.
     parent = node.getparent()
     if parent == None:
         return '/{}'.format(node.tag)
+
+    # Initially, this can just use child indexing to work through the
+    #  whole tree.
+    # Note: it was discovered that lxml experiences drastic slowdown
+    #  when dealing with indexed xpaths, suggesting it can only omit
+    #  deadends on attributes or child tags, not on bad indexes,
+    #  hence a bit of a rubbish implementation in this aspect.
+    # So, it is extremely important that this xpath creator use
+    #  attributes to clarify searches whenever possible.
+
+    # TODO: swap over to node tag and some attributes when they
+    #  are sufficient for unique lookup, either within a child list
+    #  or globally (with a prefix '//' to shorten the path).
+
     # The xpath is just the path to the parent, combined with the tag
-    #  of the child node and the index among nodes with that tag.
-    # Direct indexing is really clumsy or not working when attempted;
-    #  need the tag based indexing for xpath to work well.
-    # Note: xpath is 1-based indexing.
-    elements_with_this_tag = parent.findall(node.tag)
-    index = elements_with_this_tag.index(node) + 1
-    xpath = _Get_Xpath_Recursive(parent) + '/{}[{}]'.format(node.tag, index)
+    #  of the child node and its attributes, and the index among 
+    #  nodes with that tag and attributes (as a backup).
+    # To reduce fluff, a first check will just use the tag, and if
+    #  there are multiple matches, a loop will add attributes iteratively
+    #  until a single node matches.
+    # (This could just start with all attributes, but they are often
+    #  not needed and clutter up the output diff patch.)
+    xpath = node.tag
+    similar_elements = parent.findall(xpath)
+    if len(similar_elements) > 1:
+        # Add attributes.
+        for key, value in node.items():
+            xpath += '[@{}="{}"]'.format(key, value)
+            # Check element matches again.
+            similar_elements = parent.findall(xpath)
+            # If just one match, done.
+            if len(similar_elements):
+                break
+
+    # Verify this node was matched with the current xpath.
+    assert len(similar_elements) >= 1
+
+    # Flesh out the xpath with the parent prefix.
+    xpath = _Get_Xpath_Recursive(parent) + '/' + xpath
+
+    # If there were multiple element matches, add a suffix.
+    # Note: after some toying around, it appears lxml/xpath buggers up
+    #  if given an index if the prior xpath had attribute qualifiers and
+    #  returned 1 element instead of a list, so never put a default [1] here
+    #  when there is only one matched element.
+    if len(similar_elements) > 1:
+        # Clarify the search by indexing to the wanted node, in case there
+        # were multiple matches. This also verifies this node was found,
+        # otherwise there is an error on the index check.
+        # Note: xpath is 1-based indexing.
+        index = similar_elements.index(node) + 1
+        xpath += '[{}]'.format(index)
+
     return xpath
 
 
@@ -737,22 +778,25 @@ def Verify_Patch(original_node, modified_node, patch_node):
         if patched_line != mod_line:
             # If it was succesful up to this point, print a message.
             if success:
-                print('Patch test failed on line {}; dumping xml.'.format(
-                    line_number))
+                print('Patch test failed on line {}.'.format(line_number))
                 # For checking, dump all of the xml to files.
-                with open('test_original_node.xml', 'wb') as file:
-                    file.write(Print(original_node))
-                with open('test_modified_node.xml', 'wb') as file:
-                    file.write(Print(modified_node))
-                with open('test_patch_node.xml', 'wb') as file:
-                    file.write(Print(patch_node))
-                with open('test_original_node_patched.xml', 'wb') as file:
-                    file.write(Print(original_node_patched))
-                # Pause; allow time to peek at files or ctrl-C.
-                input('Press enter to continue testing.')
+                # This is mainly intended for use by the unit test.
+                # TODO: attach to an input arg.
+                if 0:
+                    with open('test_original_node.xml', 'wb') as file:
+                        file.write(Print(original_node))
+                    with open('test_modified_node.xml', 'wb') as file:
+                        file.write(Print(modified_node))
+                    with open('test_patch_node.xml', 'wb') as file:
+                        file.write(Print(patch_node))
+                    with open('test_original_node_patched.xml', 'wb') as file:
+                        file.write(Print(original_node_patched))
+                    # Pause; allow time to peek at files or ctrl-C.
+                    input('Press enter to continue testing.')
+                    
             # Flag as a failure.
             success = False
-
+            break
     return success
 
 

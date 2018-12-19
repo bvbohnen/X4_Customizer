@@ -1,4 +1,4 @@
-X4 Customizer 1.0
+X4 Customizer 1.1
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -211,13 +211,39 @@ Example input file:
 
 Analyses:
 
+  * Print_Ware_Stats
+
+    Gather up all ware statistics, and print them out. Produces csv and html output. Will include changes from enabled extensions.
+    
+    * file_name
+      - String, name to use for generated files, without extension.
+      - Defaults to "ware_stats".
+        
+
   * Print_Weapon_Stats
 
-    Gather up all weapon statistics, and print them out. Currently only supports csv output. Will include changes from enabled extensions.
+    Gather up all weapon statistics, and print them out. Produces csv and html output. Will include changes from enabled extensions.
     
     * file_name
       - String, name to use for generated files, without extension.
       - Defaults to "weapon_stats".
+        
+
+
+***
+
+Director Transforms:
+
+  * Adjust_Mission_Rewards
+
+    Adjusts generic mission credit and notoriety rewards by a flat multiplier.
+    
+    * multiplier
+      - Float, value to adjust rewards by.
+    * adjust_credits
+      - Bool, if True (default) changes the credit reward.
+    * adjust_notoriety
+      - Bool, if True (default) changes the notoriety reward.
         
 
 
@@ -258,16 +284,65 @@ Jobs Transforms:
 
 ***
 
+Wares Transforms:
+
+  * Shared_Ware_Transforms_Documentation
+
+    Ware transforms will commonly use a group of matching rules to determine which wares get modified, and by how much.    
+    
+    * Ware match rule:
+      - A tuples pairing a matching rule (string) with transform defined args, eg. ("key  value", arg0, arg1, ...).
+      - The "key" specifies the ware field to look up, which will be checked for a match with "value".
+      - If a ware matches multiple rules, the first match is used.
+      - Supported keys:
+        - 'id'        : Name of the ware entry; supports wildcards.
+        - 'group'     : The ware group category.
+        - 'container' : The ware container type.
+        - 'tags'      : One or more tags, space separated.
+          - See Print_Wares output for tag listings.
+        - '*'         : Matches all wares; takes no value term.
+    
+    Examples:
+    
+        Adjust_Ware_Price_Spread(0.5)
+        Adjust_Ware_Price_Spread(
+            ('id        energycells'       , 2  ),
+            ('group     shiptech'          , 0.8),
+            ('container ship'              , 1.5),
+            ('tags      crafting'          , 0.2),
+            ('*'                           , 0.5) )
+    
+        
+
+  * Adjust_Ware_Price_Spread
+
+    Adjusts ware min to max price spreads. This primarily impacts trading profit. Spread will be limited to ensure 10 credits from min to max, to avoid impairing AI decision making.
+    
+    * match_rule_multipliers:
+      - Series of matching rules paired with the spread multipliers to use.
+        
+
+  * Adjust_Ware_Prices
+
+    Adjusts ware prices. This should be used with care when selecting production chain related wares.
+        
+    * match_rule_multipliers:
+      - Series of matching rules paired with the spread multipliers to use.
+        
+
+
+***
+
 Weapons Transforms:
 
-  * Weapon_Documentation
+  * Shared_Weapon_Transforms_Documentation
 
     Weapon transforms will commonly use a group of matching rules to determine which weapons get modified, and by how much.    
     
-    * Weapon match rules:
-      - Series of tuples pairing matching rules (strings) with transform defined args, eg. ("key  value", arg0, arg1, ...).
+    * Weapon match rule:
+      - A tuple pairing a matching rule (string) with transform defined args, eg. ("key  value", arg0, arg1, ...).
       - The "key" specifies the xml field to look up, which will be checked for a match with "value".
-      - If a target object matches multiple entries, the first match is used.
+      - If a target object matches multiple rules, the first match is used.
       - If a bullet or missile is shared across multiple weapons, only the first matched weapon will modify it.
       - Supported keys for weapons:
         - 'name'  : Internal name of the weapon component; supports wildcards.
@@ -276,6 +351,7 @@ Weapons Transforms:
           - These are often redundant with tag options.
         - 'tags'  : One or more tags for this weapon, space separated.
           - See Print_Weapon_Stats output for tag listings.
+        - '*'     : Matches all wares; takes no value term.
     
     Examples:
     
@@ -433,4 +509,10 @@ Change Log:
    - Added Adjust_Weapon_Shot_Speed.
    - Refined Print_Weapon_Stats further.
    - Refined matching rule format for Adjust_Job_Count.
+ * 1.1
+   - Worked around lxml performance issue with index based xpaths, to speed up diff patch verification.
+   - Added Print_Ware_Stats.
+   - Added Adjust_Ware_Prices.
+   - Added Adjust_Ware_Price_Spread.
+   - Added Adjust_Mission_Rewards.
    

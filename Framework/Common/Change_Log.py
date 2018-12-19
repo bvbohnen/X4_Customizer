@@ -47,6 +47,13 @@ Change Log:
    - Added Adjust_Weapon_Shot_Speed.
    - Refined Print_Weapon_Stats further.
    - Refined matching rule format for Adjust_Job_Count.
+ * 1.1
+   - Worked around lxml performance issue with index based xpaths, to
+     speed up diff patch verification.
+   - Added Print_Ware_Stats.
+   - Added Adjust_Ware_Prices.
+   - Added Adjust_Ware_Price_Spread.
+   - Added Adjust_Mission_Rewards.
    
 '''
 # Note: changes moved here for organization, and to make them easier to

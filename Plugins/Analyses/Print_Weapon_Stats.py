@@ -4,12 +4,13 @@ from Framework import Analysis_Wrapper, File_System, Settings
 
 from ..Transforms.Weapons import Get_All_Weapons
 from .Write_Tables import Write_Tables
+from ..Transforms.Support import Float_to_String
 
 @Analysis_Wrapper()
 def Print_Weapon_Stats(file_name = 'weapon_stats'):
     '''
     Gather up all weapon statistics, and print them out.
-    Currently only supports csv output.
+    Produces csv and html output.
     Will include changes from enabled extensions.
 
     * file_name
@@ -79,9 +80,6 @@ def Collect_Weapons():
     holding various parsed field values of interest.
     '''
     t_file = File_System.Load_File('t/0001-L044.xml')
-    def Float_to_String(this_float):
-        'Prints float with cleaned up precision decimal places.'
-        return '{:.2f}'.format(this_float).rstrip('0').rstrip('.')
     
     weapon_fields_list = []
     for weapon in Get_All_Weapons():
@@ -153,7 +151,7 @@ def Collect_Weapons():
             if bullet_amount:
                 multiplier *= float(bullet_amount)
             if damage:
-                weapon_fields['dps'] = Float_to_String(multiplier * float(damage))
+                weapon_fields['dps']   = Float_to_String(multiplier * float(damage))
             if damage_s:
                 weapon_fields['dps_s'] = Float_to_String(multiplier * float(damage_s))
             if damage_h:
