@@ -70,6 +70,7 @@ if 0:
 
 if 0 or test_all:
     Adjust_Mission_Rewards(0.5)
+    #Write_To_Extension()
 
 if 0 or test_all:
     #Print_Ware_Stats('ware_stats_premod')

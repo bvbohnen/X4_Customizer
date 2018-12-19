@@ -244,7 +244,6 @@ class XML_File(Game_File):
     def Get_Binary(self):
         '''
         Returns a bytearray with the full modified_root.
-        TODO: swap to diff patch output.
         '''
         # Pack into an ElementTree, to get full header.
         # Modified source files will form a diff patch, others
@@ -255,10 +254,12 @@ class XML_File(Game_File):
             tree = ET.ElementTree(self.Get_Root_Readonly())
 
         # Pretty print it. This returns bytes.
-        binary = XML_Diff.Print(tree, encoding = 'utf-8')
-        # To be safe, add a newline at the end if there.
-        if not binary.endswith(b'\n'):
-            binary += '\n'.encode(encoding = 'utf-8')
+        binary = XML_Diff.Print(tree, encoding = 'utf-8', xml_declaration = True)
+        # To be safe, add a newline at the end if not there, since
+        # some file readers need it.
+        newline_char = '\n'.encode(encoding = 'utf-8')
+        if not binary.endswith(newline_char):
+            binary += newline_char
         return binary
 
 

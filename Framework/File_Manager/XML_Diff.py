@@ -723,11 +723,20 @@ def _Get_Xpath_Recursive(node):
     # (This could just start with all attributes, but they are often
     #  not needed and clutter up the output diff patch.)
     xpath = node.tag
-    similar_elements = parent.findall(xpath)
+    # Get elements with the same tag.
+    similar_tag_elements = parent.findall(xpath)
+    # Store this into a temp var; want to use the same-tag version later.
+    similar_elements = similar_tag_elements
+    # Loop while there is more than 1 similar element (want just self).
     if len(similar_elements) > 1:
         # Add attributes.
         for key, value in node.items():
-            xpath += '[@{}="{}"]'.format(key, value)
+            # Note: the xpath will itself be an attribute in double
+            # quotes, so to avoid nested double quotes (which get
+            # output as &quot; in the xml, which xpath then can't
+            # deal with reliably), just use single quotes for this
+            # inner term.
+            xpath += '''[@{}='{}']'''.format(key, value)
             # Check element matches again.
             similar_elements = parent.findall(xpath)
             # If just one match, done.
@@ -737,20 +746,17 @@ def _Get_Xpath_Recursive(node):
     # Verify this node was matched with the current xpath.
     assert len(similar_elements) >= 1
 
+
     # Flesh out the xpath with the parent prefix.
     xpath = _Get_Xpath_Recursive(parent) + '/' + xpath
 
     # If there were multiple element matches, add a suffix.
-    # Note: after some toying around, it appears lxml/xpath buggers up
-    #  if given an index if the prior xpath had attribute qualifiers and
-    #  returned 1 element instead of a list, so never put a default [1] here
-    #  when there is only one matched element.
+    # Note: the xpath index is relative to other nodes with the same tag,
+    #  ignoring attributes.
     if len(similar_elements) > 1:
-        # Clarify the search by indexing to the wanted node, in case there
-        # were multiple matches. This also verifies this node was found,
-        # otherwise there is an error on the index check.
+        # Get the index of this node relative to other same-tag nodes.
         # Note: xpath is 1-based indexing.
-        index = similar_elements.index(node) + 1
+        index = similar_tag_elements.index(node) + 1
         xpath += '[{}]'.format(index)
 
     return xpath
@@ -767,8 +773,8 @@ def Verify_Patch(original_node, modified_node, patch_node):
 
     # Easiest is just to convert both to strings, but it can be helpful
     # to break them up for line-by-line compare for debug.
-    original_node_patched_lines = Print(original_node_patched).splitlines()
-    modified_node_lines         = Print(modified_node)        .splitlines()
+    original_node_patched_lines = Print(original_node_patched, encoding = 'unicode').splitlines()
+    modified_node_lines         = Print(modified_node        , encoding = 'unicode').splitlines()
 
     # Compare by line, out to the longest line list.
     success = True
@@ -782,15 +788,15 @@ def Verify_Patch(original_node, modified_node, patch_node):
                 # For checking, dump all of the xml to files.
                 # This is mainly intended for use by the unit test.
                 # TODO: attach to an input arg.
-                if 0:
-                    with open('test_original_node.xml', 'wb') as file:
-                        file.write(Print(original_node))
-                    with open('test_modified_node.xml', 'wb') as file:
-                        file.write(Print(modified_node))
-                    with open('test_patch_node.xml', 'wb') as file:
-                        file.write(Print(patch_node))
-                    with open('test_original_node_patched.xml', 'wb') as file:
-                        file.write(Print(original_node_patched))
+                if 1:
+                    with open('test_original_node.xml', 'w') as file:
+                        file.write(Print(original_node, encoding = 'unicode'))
+                    with open('test_modified_node.xml', 'w') as file:
+                        file.write(Print(modified_node, encoding = 'unicode'))
+                    with open('test_patch_node.xml', 'w') as file:
+                        file.write(Print(patch_node, encoding = 'unicode'))
+                    with open('test_original_node_patched.xml', 'w') as file:
+                        file.write(Print(original_node_patched, encoding = 'unicode'))
                     # Pause; allow time to peek at files or ctrl-C.
                     input('Press enter to continue testing.')
                     

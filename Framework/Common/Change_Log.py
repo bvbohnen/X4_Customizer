@@ -54,7 +54,9 @@ Change Log:
    - Added Adjust_Ware_Prices.
    - Added Adjust_Ware_Price_Spread.
    - Added Adjust_Mission_Rewards.
-   
+ * 1.1.1
+   - Bugfix for ambiguous xpaths that still require indexes, and cleaned
+     up quotes to avoid nesting double quotes.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.
