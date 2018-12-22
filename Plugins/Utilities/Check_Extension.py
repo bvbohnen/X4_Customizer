@@ -1,6 +1,6 @@
 
 from pathlib import Path
-from Framework import Utility_Wrapper, File_Manager, Load_File, Plugin_Log
+from Framework import Utility_Wrapper, File_Manager, Load_File, Plugin_Log, Print
 
 @Utility_Wrapper()
 def Check_Extension(
@@ -21,7 +21,7 @@ def Check_Extension(
     # TODO: think about also checking later extensions to see if they
     #  might overwrite this extension.
     
-    print('Checking extension: "{}"'.format(extension_name))
+    Print('Checking extension: "{}"'.format(extension_name))
 
     # Success flag will be set false on any unexpected message.
     success = True
@@ -58,7 +58,7 @@ def Check_Extension(
             nonlocal success
             success = False
             # Add an indent for visual niceness.
-            print('  ' + message)
+            Print('  ' + message)
         return
 
     Plugin_Log.logging_function = Logging_Function
@@ -69,9 +69,9 @@ def Check_Extension(
     # other dependencies.
     for priority in [-1,1]:
         if priority == -1:
-            print('  Loading {} early...'.format(quoted_ext_name))
+            Print('  Loading {} early...'.format(quoted_ext_name))
         else:
-            print('  Loading {} late...'.format(quoted_ext_name))
+            Print('  Loading {} late...'.format(quoted_ext_name))
 
         # Resort the extensions.
         source_reader.Sort_Extensions(priorities = {

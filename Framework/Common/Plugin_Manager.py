@@ -1,5 +1,6 @@
 
-from ..Common import Settings
+from .Settings import Settings
+from .Print import Print
 
 # Record a list of all plugins defined.
 # This is filled in by the decorator at startup.
@@ -121,7 +122,7 @@ def _Plugin_Wrapper(
                 # (This may not be the case in dev mode, but that will
                 #  have other messages to indicate the problem.)
                 if Settings.verbose:
-                    print('Successfully ran {}'.format(
+                    Print('Successfully ran {}'.format(
                         func.__name__
                         ))
 
@@ -133,7 +134,7 @@ def _Plugin_Wrapper(
                 # When set to catch exceptions, just print a nice message.
                 if not Settings.developer:
                     # Give the exception name.
-                    print('Skipped {} due to {}: "{}".'.format(
+                    Print('Skipped {} due to {}: "{}".'.format(
                         func.__name__,
                         type(ex).__name__,
                         str(ex)

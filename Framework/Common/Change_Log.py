@@ -57,6 +57,11 @@ Change Log:
  * 1.1.1
    - Bugfix for ambiguous xpaths that still require indexes, and cleaned
      up quotes to avoid nesting double quotes.
+ * 1.2
+   - Added the initial Gui, featuring: python syntax highlighter,
+     documentation viewer, settings editor, script launcher, plus
+     niceties like changing font and remembering layout.
+   - Switched releases to 7z format, due to gui package bloat.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

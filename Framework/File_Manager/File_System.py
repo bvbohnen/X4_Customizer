@@ -10,7 +10,7 @@ from .File_Types import Misc_File, XML_File
 from ..Common import Settings
 from ..Common import File_Missing_Exception
 from ..Common import Customizer_Log_class
-from ..Common import Change_Log
+from ..Common import Change_Log, Print
 from ..Common import home_path
 from lxml import etree as ET
 
@@ -54,15 +54,8 @@ class File_System_class:
     valid_asset_tags = ['macros','components']
 
     def __init__(self):
-        self.game_file_dict = {}
-        self.old_log = Customizer_Log_class()
-        self.init_complete = False
-        self.source_reader = Source_Reader_class()
-        # Set this up as a defaultdict of defaultdicts of lists,
-        # for easy initialization on new tags or classes.
-        self.asset_class_dict = defaultdict(lambda: defaultdict(list))
-        self.asset_name_dict = {}
-        self._patterns_loaded = set()
+        # Let the Reset method fill everything in.
+        self.Reset()
         return
     
 
@@ -85,6 +78,25 @@ class File_System_class:
 
         # Initialize the source reader, now that paths are set in settings.
         self.source_reader.Init_From_Settings()    
+        return
+
+
+    def Reset(self):
+        '''
+        Resets the file system, clearing out prior loaded files,
+        returning to non-initialized state, etc.
+        '''
+        # This will recreate things even when not needed, for
+        # core reuse with init.
+        self.game_file_dict = {}
+        self.old_log = Customizer_Log_class()
+        self.init_complete = False
+        self.source_reader = Source_Reader_class()
+        # Set this up as a defaultdict of defaultdicts of lists,
+        # for easy initialization on new tags or classes.
+        self.asset_class_dict = defaultdict(lambda: defaultdict(list))
+        self.asset_name_dict = {}
+        self._patterns_loaded = set()
         return
 
 
@@ -260,7 +272,7 @@ class File_System_class:
         # Ensure it gets run here in such cases.
         self.Delayed_Init()
 
-        print('Cleaning up old files')
+        Print('Cleaning up old files')
 
         # TODO: maybe just completely delete the extension/customizer contents,
         # though that would mess with logs and messages that have been written
@@ -321,7 +333,8 @@ class File_System_class:
         Existing files which may conflict with the new writes will be renamed,
          including files of the same name as well as their .pck versions.
         '''
-        print('Writing output files' + ' (diff encoded)' if not Settings.make_maximal_diffs else '')
+        Print('Writing output files' 
+              + (' (diff encoded)' if not Settings.make_maximal_diffs else ''))
         #to {}'.format(Settings.Get_Output_Folder()))
 
         # Add copies of leftover files from the user source folder.

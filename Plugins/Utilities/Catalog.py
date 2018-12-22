@@ -5,7 +5,7 @@ from pathlib import Path
 #import re
 from fnmatch import fnmatch
 
-from Framework import Utility_Wrapper, File_Manager, Cat_Hash_Exception
+from Framework import Utility_Wrapper, File_Manager, Cat_Hash_Exception, Print
 
 
 @Utility_Wrapper(uses_paths_from_settings = False)
@@ -73,7 +73,7 @@ def Cat_Unpack(
         source_reader = File_Manager.Source_Reader.Location_Source_Reader(
             location = source_cat_path)
         # Print how many catalogs were found.
-        print(('{} catalog files found using standard naming convention.'
+        Print(('{} catalog files found using standard naming convention.'
                ).format(len(source_reader.catalog_file_dict)))
     else:
         # Set up an empty reader.
@@ -131,13 +131,13 @@ def Cat_Unpack(
 
         # Be verbose for now.
         num_writes += 1
-        print('Extracted {}'.format(virtual_path))
+        Print('Extracted {}'.format(virtual_path))
 
         
-    print('Files written                    : {}'.format(num_writes))
-    print('Files skipped (pattern mismatch) : {}'.format(num_pattern_skips))
-    print('Files skipped (hash match)       : {}'.format(num_hash_skips))
-    print('Files skipped (md5 hash failure) : {}'.format(num_md5_skips))    
+    Print('Files written                    : {}'.format(num_writes))
+    Print('Files skipped (pattern mismatch) : {}'.format(num_pattern_skips))
+    Print('Files skipped (hash match)       : {}'.format(num_hash_skips))
+    Print('Files skipped (md5 hash failure) : {}'.format(num_md5_skips))    
 
     return
 
@@ -240,7 +240,7 @@ def Cat_Pack(
         
         # Be verbose for now.
         num_writes += 1
-        print('Packed {}'.format(virtual_path))
+        Print('Packed {}'.format(virtual_path))
 
 
     # If no files found, skip cat creation.
@@ -248,9 +248,9 @@ def Cat_Pack(
         # Generate the actual cat file.
         cat_writer.Write()
     
-    print('Files written                    : {}'.format(num_writes))
-    print('Files skipped (pattern mismatch) : {}'.format(num_pattern_skips))
-    print('Files skipped (not x4 subdir)    : {}'.format(num_folder_skips))
+    Print('Files written                    : {}'.format(num_writes))
+    Print('Files skipped (pattern mismatch) : {}'.format(num_pattern_skips))
+    Print('Files skipped (not x4 subdir)    : {}'.format(num_folder_skips))
     return
 
 

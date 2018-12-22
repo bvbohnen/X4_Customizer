@@ -80,8 +80,13 @@ class Customizer_Log_class:
     def Load(self, log_path):
         '''
         Load information from an existing log json file.
+        Clears any existing information.
         If a log file is not found, nothing will be changed.
         '''
+        # Version can be left as whatever, but need to clear the
+        # file log.
+        self.file_paths_written.clear()
+
         # If the file doesn't exist, return early.
         if not log_path.exists():
             return

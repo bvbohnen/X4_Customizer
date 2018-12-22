@@ -135,7 +135,8 @@ Update:
 
 '''
 import math
-from Common.Settings import Settings
+from .Settings import Settings
+from .Print import Print
 
 # Conditional import of scipy.
 try:
@@ -258,8 +259,8 @@ def Get_Scaling_Fit(x_vec, y_vec, **kwargs):
 
     # Optionally plot the equation.
     if Settings.show_scaling_plots:
-        print('x:', x_vec)
-        print('y:', y_vec)
+        Print('x:', x_vec)
+        Print('y:', y_vec)
         # For debug, view the curve to see if it looks as expected.
         Plot_Fit(fit_equation)
 
@@ -490,7 +491,7 @@ def Plot_Fit(fit_equation):
         import matplotlib.pyplot
         import numpy
     except Exception:
-        print('Skipping scaling equation plot; numy or matplotlib missing.')
+        Print('Skipping scaling equation plot; numpy or matplotlib missing.')
         return
 
     # Plot over the full range, plus an extra 10% on each side to see

@@ -7,7 +7,9 @@ Import as:
 import os
 from pathlib import Path
 import json
+from collections import OrderedDict
 from .Home_Path import home_path
+from .Print import Print
 
 class Settings_class:
     '''
@@ -165,58 +167,9 @@ class Settings_class:
     # TODO: language selection for modifying t files.
     def __init__(self):
 
-        # For the path lookups, use os.environ to look up some windows
-        #  path terms, but in case they aren't found just use '.' so
-        #  this doesn't error out here.
-        # Add '/' after the drive letter, else it gets ignored and the path
-        #  is treated as relative.
-        # TODO: some sort of smart but fast folder search.
-        # TODO: consider placing default settings overrides in a json file,
-        #  that will work on all called scripts.
-        self.path_to_x4_folder   = (Path(os.environ.get('HOMEDRIVE','.') + '/') 
-                                    / 'Steam/steamapps/common/X4 Foundations')
-        self.path_to_user_folder = (Path(os.environ.get('HOMEPATH','.'))  
-                                    / 'Documents/Egosoft/X4')
-        
-        # If the user folder exists but has no config.xml, check an id folder.
-        # Note: while content.xml is wanted, it apparently not always
-        # created (maybe only made the first time a mod gets enabled/disabled
-        # in the menu?).
-        if (self.path_to_user_folder.exists() 
-        and not (self.path_to_user_folder / 'config.xml').exists()):
-            # Iterate through all files and dirs.
-            for dir in self.path_to_user_folder.iterdir():
-                # Skip non-dirs.
-                if not dir.is_dir():
-                    continue
-                # Check for the config.xml.
-                # Probably don't need to check folder name for digits;
-                # common case just has one folder.
-                if (dir / 'config.xml').exists():
-                    # Record it and stop looping.
-                    self.path_to_user_folder = dir
-                    break
-                
-
-        self.extension_name = 'X4_Customizer'
-        self.output_to_user_extensions = False
-        self.path_to_source_folder = None
-        self.prefer_single_files = False
-        self.ignore_extensions = False
-        self.allow_cat_md5_errors = False
-        self.ignore_output_extension = True
-        self.make_maximal_diffs = False
-        self.plugin_log_file_name = 'plugin_log.txt'
-        self.customizer_log_file_name = 'customizer_log.json'
-        self.disable_cleanup_and_writeback = False
-        self.log_source_paths = False
-        self.skip_all_plugins = False
-        self.use_scipy_for_scaling_equations = True
-        self.show_scaling_plots = False
-        self.developer = False
-        self.verbose = True
-        self.allow_path_error = False
-        self.output_to_catalog = False
+        # Fill in initial defaults.
+        for field, default in self.Get_Defaults().items():
+            setattr(self, field, default)
         
         # Very early call to look for a json file to overwrite detaults.
         self.Load_Json()
@@ -226,13 +179,111 @@ class Settings_class:
         return
 
 
-    # TODO: maybe set up a template json file for easier user copying
-    # and editing.
+    def Reset(self):
+        '''
+        Resets the settings, such that Delayed_Init will be run
+        again. For use when paths may be changed since a prior run.
+        '''
+        self._init_complete = False
+        return
+
+
+    def Get_Categorized_Fields(self):
+        '''
+        Returns an OrderedDict, keyed by category, with a list of fields in
+        their preferred display order. Parses the docstring to determine
+        this ordering.
+        '''
+        # TODO: maybe cache if this will be called often, but probably
+        # doesn't matter.
+        category_list_dict = OrderedDict()
+        category = None
+        for line in self.__doc__.splitlines():
+            # Category titles are single words with an ending :, no
+            #  prefix.
+            strip_line = line.strip()
+            if strip_line.endswith(':') and strip_line[0] not in ['-','*']:
+                category = strip_line.replace(':','')
+            # Fields are recognized names after a *.
+            elif strip_line.startswith('*'):
+                field = strip_line.replace('*','').strip()
+                if hasattr(self, field):
+                    assert category != None
+                    if category not in category_list_dict:
+                        category_list_dict[category] = []
+                    category_list_dict[category].append(field)
+        return category_list_dict
+
+
+    def Get_Defaults(self):
+        '''
+        Returns a dict holding fields and their default values.
+        Does some dynamic compute to determine default paths, so
+        this could potentially change across calls.
+        '''
+        defaults = {}
+        # For the path lookups, use os.environ to look up some windows
+        #  path terms, but in case they aren't found just use '.' so
+        #  this doesn't error out here.
+        # Add '/' after the drive letter, else it gets ignored and the path
+        #  is treated as relative.
+        # TODO: some sort of smart but fast folder search.
+        # TODO: consider placing default settings overrides in a json file,
+        #  that will work on all called scripts.
+        defaults['path_to_x4_folder']  = (Path(os.environ.get('HOMEDRIVE','.') + '/') 
+                                    / 'Steam/steamapps/common/X4 Foundations')
+        defaults['path_to_user_folder'] = (Path(os.environ.get('HOMEPATH','.'))  
+                                    / 'Documents/Egosoft/X4')
+        
+        # If the user folder exists but has no config.xml, check an id folder.
+        # Note: while content.xml is wanted, it apparently not always
+        # created (maybe only made the first time a mod gets enabled/disabled
+        # in the menu?).
+        if (defaults['path_to_user_folder'].exists() 
+        and not (defaults['path_to_user_folder'] / 'config.xml').exists()):
+            # Iterate through all files and dirs.
+            for dir in defaults['path_to_user_folder'].iterdir():
+                # Skip non-dirs.
+                if not dir.is_dir():
+                    continue
+                # Check for the config.xml.
+                # Probably don't need to check folder name for digits;
+                # common case just has one folder.
+                if (dir / 'config.xml').exists():
+                    # Record it and stop looping.
+                    defaults['path_to_user_folder'] = dir
+                    break                
+
+        defaults['extension_name'] = 'X4_Customizer'
+        defaults['output_to_user_extensions'] = False
+        defaults['path_to_source_folder'] = None
+        defaults['prefer_single_files'] = False
+        defaults['ignore_extensions'] = False
+        defaults['allow_cat_md5_errors'] = False
+        defaults['ignore_output_extension'] = True
+        defaults['make_maximal_diffs'] = False
+        defaults['plugin_log_file_name'] = 'plugin_log.txt'
+        defaults['customizer_log_file_name'] = 'customizer_log.json'
+        defaults['disable_cleanup_and_writeback'] = False
+        defaults['log_source_paths'] = False
+        defaults['skip_all_plugins'] = False
+        defaults['use_scipy_for_scaling_equations'] = True
+        defaults['show_scaling_plots'] = False
+        defaults['developer'] = False
+        defaults['verbose'] = True
+        defaults['allow_path_error'] = False
+        defaults['output_to_catalog'] = False
+        return defaults
+
+
     def Load_Json(self):
         '''
         Look for a "settings.json" file in the main x4 customizer directory,
         and load defaults from it.
+        Returns a list of field names updated.
         '''
+        fields_update = []
+
         # Try the home_path and the call directory to find this.
         for json_path in [Path('settings.json'), home_path / 'settings.json']:
             if not json_path.exists():
@@ -244,11 +295,11 @@ class Settings_class:
                 with open(json_path, 'r') as file:
                     json_dict = json.load(file)
             except Exception as ex:
-                print(('Skipping load of "settings.json" due to {}.'
+                Print(('Skipping load of "settings.json" due to {}.'
                         ).format(type(ex).__name__))
                 # Don't continue; just return. Avoids repeating errors
                 # if the cwd is the home_path.
-                return
+                return fields_update
 
             # Do some replacements of strings for normal types;
             # unfortunately json.load doesn't do this automatically.
@@ -259,6 +310,7 @@ class Settings_class:
                 'false': False,
                 'False': False,
                 '0'    : False,
+                'none' : None,
                 }
 
             for key, value in json_dict.items():
@@ -267,14 +319,49 @@ class Settings_class:
                 if hasattr(self, key):
                     # This should always be a bool or a string.
                     setattr(self, key, value)
+                    fields_update.append(key)
                 else:
-                    print(('Entry "{}" in settings.json not recognized; skipping.'
+                    Print(('Entry "{}" in settings.json not recognized; skipping.'
                            ).format(key))
 
             # Don't want to check other json files.
             break
+        return fields_update
+
+
+    def Save_Json(self, fields_to_save):
+        '''
+        Save the given settings fields to settings.json.
+        This should preferably only save non-default settings.
+        '''
+        json_dict = OrderedDict()
+        
+        # Field replacements going to json.
+        replacements_dict = {
+            True : 'true',
+            False : 'false',
+            None : 'none',
+            }
+        # Can follow the preferred field order, for readability.
+        for category, field_list in self.Get_Categorized_Fields().items():
+            for field in field_list:
+                # Skip if unwanted.
+                if field not in fields_to_save:
+                    continue
+
+                value = getattr(self, field)
+                # Get any json suitable replacements.
+                if value in replacements_dict:
+                    value = replacements_dict[value]
+
+                # Stringify, in case it is a Path.
+                json_dict[field] = str(value)
+
+        # Always save to the home_path for now.
+        with open(home_path / 'settings.json', 'w') as file:
+            json.dump(json_dict, file, indent = 2)
         return
-       
+
 
     def __call__(self, *args, **kwargs):
         '''
@@ -285,7 +372,7 @@ class Settings_class:
         for name, value in kwargs.items():
             # Warn on unexpected names.
             if not hasattr(self, name):
-                print('Warning: setting "{}" not recognized'.format(name))
+                Print('Warning: setting "{}" not recognized'.format(name))
             else:
                 setattr(self, name, value)
         return
@@ -324,7 +411,7 @@ class Settings_class:
             message = ('Warning: Path to the X4 folder appears incorrect.'
                     '\n (x4 path: {})').format(self.path_to_x4_folder)
             if self.allow_path_error:
-                print(message)
+                Print(message)
             else:
                 # Hard error.
                 raise AssertionError(message)
@@ -334,7 +421,7 @@ class Settings_class:
             message = ('Path to the user folder appears incorrect, lacking'
                     ' config.xml.\n (path: {})').format(self.path_to_user_folder)
             if self.allow_path_error:
-                print(message)
+                Print(message)
             else:
                 # Hard error.
                 raise AssertionError(message)

@@ -2,7 +2,7 @@
 from pathlib import Path
 from lxml import etree as ET
 import Framework
-from Framework import File_System, Settings
+from Framework import File_System, Settings, Print
 
 @Framework.Utility_Wrapper()
 def Write_To_Extension(skip_content = False):
@@ -26,7 +26,7 @@ def Write_To_Extension(skip_content = False):
 
     # Return early if settings have writeback disabled.
     if Settings.disable_cleanup_and_writeback:
-        print('Skipping Write_Extension; writeback disabled in Settings.')
+        Print('Skipping Write_Extension; writeback disabled in Settings.')
         return
 
     # Clean old files, based on whatever old log is there.

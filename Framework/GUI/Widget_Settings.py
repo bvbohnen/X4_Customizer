@@ -1,0 +1,238 @@
+
+from PyQt5 import QtWidgets
+from ..Common import Settings
+
+class Widget_Settings(QtWidgets.QGroupBox):
+    '''
+    Group box with a grid layout, to be filled with settings
+    labels and widgets (text edit fields, on/off buttons).
+
+    Attributes:
+    * field_widget_dict
+      - Dict, keyed by Settings field name, holding the widget
+        responsible for it, either a QLineEdit or QButtonGroup.
+    * modified
+      - Bool, if True the settings were modified since last being
+        loaded or saved.
+    '''
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.modified = False
+        # Gather the settings fields into a dict, paired up with the
+        # widgets to edit them.
+        self.field_widget_dict = {}
+
+        layout = self.layout()
+        # Set up a new layout, form style (rows with 2 columns).
+        layout = QtWidgets.QFormLayout()
+        self.setLayout(layout)
+                
+        # Get the settings defualt values.
+        defaults = Settings.Get_Defaults()
+
+        
+        # Set up widgets.
+        # Use the categorized and ordered fields.
+        for category, field_list in Settings.Get_Categorized_Fields().items():
+
+            # Create a fluff row with just the category.
+            # This apparently needs to be a widget, not just raw text,
+            # to span both columns and accept richtext format;
+            # though QString is who knows where, so try using setText
+            # of the label for richtext detection.
+            # Bold this.
+            layout.addRow(QtWidgets.QLabel('<b>'+category+'</b>'))
+
+            for field in field_list:
+                default = defaults[field]
+
+                # Create an edit widget:
+                # - Text box for paths
+                # - Buttons for booleans
+                # Test for bool.
+                if isinstance(default, bool):
+
+                    # Looking to set up yes/no/default buttons.
+                    # Can apparently use QRadioButton objects for this,
+                    # gathered in a QButtonGroup, which will automatically
+                    # handle exclusivity and provides state lookup,
+                    # though is not actually a widget and doesn't have
+                    # layout, so need to nest it inside a QGroupBox with
+                    # a layout that has the QButtonGroup that holds
+                    # the QRadioButtons. (omg why...)
+                    widget = QtWidgets.QGroupBox()
+                    this_layout = QtWidgets.QHBoxLayout()
+                    widget.setLayout(this_layout)
+
+                    button_t = QtWidgets.QRadioButton('true')
+                    button_f = QtWidgets.QRadioButton('false')
+                    # Try to keep this label shortish.
+                    button_d = QtWidgets.QRadioButton('default ({})'.format(
+                        't' if default else 'f'))
+                    # Set default enabled by default.
+                    # TODO: Move this to Restore_Defaults, and call that
+                    # when done.
+                    button_d.setChecked(True)
+                    # Attach python values to the buttons, for ease of use.
+                    button_t.py_value = True
+                    button_f.py_value = False
+                    button_d.py_value = None
+
+                    button_group = QtWidgets.QButtonGroup()
+                    # Give these integer indexes, positive.
+                    # Make somewhat sensible.
+                    button_group.addButton(button_t, 1)
+                    button_group.addButton(button_f, 0)
+                    button_group.addButton(button_d, 2)
+                    # Annotate with a reverse lookup dict.
+                    button_group.button_dict = {
+                        True  : button_t,
+                        False : button_f,
+                        None  : button_d,
+                        }
+
+                    this_layout.addWidget(button_t)
+                    this_layout.addWidget(button_f)
+                    this_layout.addWidget(button_d)
+                    
+                    # Though not the top widget, treat the button group
+                    # as the main widget, since the group and layout are
+                    # just fluff.
+                    self.field_widget_dict[field] = button_group
+                    button_group.default = default
+
+                # Non-bools are either Paths, strings, or None (for optional
+                # paths or strings). All can be handled the same way.
+                else:
+                    widget = QtWidgets.QLineEdit()
+                    # Treat default text as a placeholder.
+                    widget.setPlaceholderText(str(default))
+
+                    # Record the field:widget pair.
+                    # Indent the field a little to set it behind
+                    # the category label.
+                    self.field_widget_dict['  ' + field] = widget
+                    widget.default = default
+
+                # Set up a new layout row.
+                layout.addRow(field, widget)
+
+
+       
+        # Make sure Settings loaded the Json file, and get what fields
+        #  it loaded. This is needed to know which values should not
+        #  be set to default, particularly when a specified path
+        #  exactly matches the default (which can be a problem if
+        #  defaults are changed in future versions).
+        non_default_fields = Settings.Load_Json()
+        
+        # For each of these, set up the widgets into a non-default
+        # state.
+        for field in non_default_fields:
+            # Look up the current setting.
+            value = getattr(Settings, field)
+            # Pick the widget to edit.
+            widget = self.field_widget_dict[field]
+
+            # Edit based on type.
+            if isinstance(widget, QtWidgets.QLineEdit):
+                # Fill in with a string version of the setting.
+                widget.setText(str(value))
+
+            elif isinstance(widget, QtWidgets.QButtonGroup):
+                # Value should be a bool, for easy dict lookup.
+                assert isinstance(value, bool)
+                widget.button_dict[value].setChecked(True)
+            
+        return
+    
+
+    def Load_Settings(self):
+        '''
+        Load the current Settings values into the gui.
+        For use at startup, and maybe if changes are ever cancelled
+        without saving.
+        TODO
+        '''
+
+
+    def Restore_Defaults(self):
+        '''
+        Restore all settings to their Settings defaults.
+        TODO
+        '''
+        # Two options:
+        #  1 Tell Settings to go back to its defaults, then load
+        #    them back into here.
+        #  2 Apply the widget default values to Settings, and then
+        #    set widget states back to default.
+
+
+    def Store_Settings(self):
+        '''
+        Update the global Settings with the current selections,
+        either overwriting or restoring defaults.
+        This should be called after a script runs, in case it did
+        local settings edits.
+        '''
+        for field, widget in self.field_widget_dict.items():
+
+            if isinstance(widget, QtWidgets.QLineEdit):
+                # TODO: How to know when to Path convert, and if it is
+                #  a valid path?
+                # -Maybe have a Settings function to polish paths, or just
+                #  re-call the Settings Delayed_Init code.
+                # Only save if text is present.
+                if widget.text():
+                    setattr(Settings, field, widget.text())
+                else:
+                    setattr(Settings, field, widget.default)
+
+            elif isinstance(widget, QtWidgets.QButtonGroup):
+                # Use the value, None/True/False.
+                value = widget.checkedButton().py_value
+                if value != None:
+                    setattr(Settings, field, value)
+                else:
+                    setattr(Settings, field, widget.default)
+        return
+
+
+    def Save(self):
+        '''
+        Save the current settings to a json file, and update the
+        Settings object.
+        '''
+        # Gather which fields need saving.
+        fields_to_save = []
+        for field, widget in self.field_widget_dict.items():
+
+            save = False
+            # Handle text fields.
+            if isinstance(widget, QtWidgets.QLineEdit):
+                # If any text is filled in, treat it as non-default.
+                if widget.text():
+                    save = True
+
+            elif isinstance(widget, QtWidgets.QButtonGroup):
+                # Pick out which button is pressed, and get the py value.
+                # If not None (default), save.
+                if widget.checkedButton().py_value != None:
+                    save = True
+
+            if save:
+                # Record the field name.
+                fields_to_save.append(field)
+
+        # Write the json file.
+        # The Settings should already have the correct values applied.
+        Settings.Save_Json(fields_to_save)
+        self.modified = False
+        return
+
+
+    def Handle_Widget_Actions(self, *args):
+        '''
+        Handle events when widgets are modified.
+        TODO
+        '''

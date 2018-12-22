@@ -123,7 +123,6 @@ def _XML_To_Unformatted_String(node):
         # Closer.
         node.tag,
         )
-    #print(text)
     return text
 
 

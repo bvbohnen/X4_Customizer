@@ -19,6 +19,10 @@ Settings(
 test_all = 0
 
 
+if 0:
+    # Gui test.
+    Framework.GUI.Start_GUI()
+
 # lxml seems to have slow findall performance with wares.xml;
 # toy around with it.
 if 0:

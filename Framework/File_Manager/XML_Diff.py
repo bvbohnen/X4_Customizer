@@ -93,7 +93,7 @@ from itertools import zip_longest
 import random
 import time # Used for some profiling.
 
-from ..Common import Plugin_Log
+from ..Common import Plugin_Log, Print
 from ..Common.Exceptions import XML_Patch_Exception
 
 # Statically track the number of node id values assigned, and just
@@ -784,7 +784,7 @@ def Verify_Patch(original_node, modified_node, patch_node):
         if patched_line != mod_line:
             # If it was succesful up to this point, print a message.
             if success:
-                print('Patch test failed on line {}.'.format(line_number))
+                Print('Patch test failed on line {}.'.format(line_number))
                 # For checking, dump all of the xml to files.
                 # This is mainly intended for use by the unit test.
                 # TODO: attach to an input arg.
@@ -918,7 +918,7 @@ def Unit_Test(test_node, num_tests = 100, edits_per_test = 5, rand_seed = None):
                 modified_node, 
                 maximal = False,
                 verify = True)
-            print('Test {} passed'.format(test_number))
+            Print('Test {} passed'.format(test_number))
         except XML_Patch_Exception as ex:
-            print('Test {} failed; message: {}'.format(test_number, ex))
+            Print('Test {} failed; message: {}'.format(test_number, ex))
     return
