@@ -36,15 +36,12 @@ from fnmatch import fnmatch
 from Framework import Transform_Wrapper, Load_File, File_System
 from .Support import *
 
-# Shared documentation.
-@Transform_Wrapper(doc_priority = 1)
-def Shared_Weapon_Transforms_Documentation():
-    '''
+doc_matching_rules = '''
     Weapon transforms will commonly use a group of matching rules
-    to determine which weapons get modified, and by how much.    
+    to determine which weapons get modified, and by how much.   
 
-    * Weapon match rule:
-      - A tuple pairing a matching rule (string) with transform
+    * Matching rules:
+      - These are tuples pairing a matching rule (string) with transform
         defined args, eg. ("key  value", arg0, arg1, ...).
       - The "key" specifies the xml field to look up, which will
         be checked for a match with "value".
@@ -74,7 +71,7 @@ def Shared_Weapon_Transforms_Documentation():
     </code>
     '''
 
-@Transform_Wrapper()
+@Transform_Wrapper(shared_docs = doc_matching_rules)
 def Adjust_Weapon_Damage(
         # Allow multipliers to be given as a loose list of args.
         *match_rule_multipliers
@@ -105,7 +102,7 @@ def Adjust_Weapon_Damage(
 
 
 
-@Transform_Wrapper()
+@Transform_Wrapper(shared_docs = doc_matching_rules)
 def Adjust_Weapon_Range(
         # Allow multipliers to be given as a loose list of args.
         *match_rule_multipliers
@@ -147,7 +144,7 @@ def Adjust_Weapon_Range(
     return
 
 
-@Transform_Wrapper()
+@Transform_Wrapper(shared_docs = doc_matching_rules)
 def Adjust_Weapon_Shot_Speed(
         # Allow multipliers to be given as a loose list of args.
         *match_rule_multipliers
@@ -201,7 +198,7 @@ def Adjust_Weapon_Shot_Speed(
     return
 
 
-@Transform_Wrapper()
+@Transform_Wrapper(shared_docs = doc_matching_rules)
 def Adjust_Weapon_Fire_Rate(
         # Allow multipliers to be given as a loose list of args.
         *match_rule_multipliers

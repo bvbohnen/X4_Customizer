@@ -31,6 +31,7 @@ class Plugin_Log_class:
         '''
         Write a line to the summary file.
         '''
+        line = str(line)
         # If there is a logging_function attached, call it.
         if self.logging_function != None:
             self.logging_function(line)

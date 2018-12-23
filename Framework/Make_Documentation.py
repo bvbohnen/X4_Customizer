@@ -142,29 +142,31 @@ def Make(*args):
                     doc_short_lines.append(this_line)
 
 
-    def Record_Func(function, 
-                    indent_level = 0, 
-                    end_with_empty_line = True,
-                    include_in_simple = False,
-                    include_name = True):
+    def Record_Text_Block(
+            text,
+            header_name = None, 
+            indent_level = 0, 
+            end_with_empty_line = True,
+            include_in_simple = False,
+            include_name = True):
         '''
-        Adds lines for a function (or class) name with docstring
-        and requirements.
-        If include_in_simple == True, the simple file is skipped entirely.
+        Record a text block, with an optional header name.
+        Text is expected to come from docstrings.
+        If include_in_simple == False, the simple file is skipped entirely.
         Otherwise, the simple file will get a truncated name with the initial
         part of the docstring, and no requirement list.
         '''
         # Get the name as-is.
         # Put an asterix in front for markdown.
-        if include_name:
-            name_line = '* ' + function.__name__        
+        if header_name:
+            name_line = '* ' + header_name      
             Add_Line(name_line, indent_level, 
                       include_in_simple = include_in_simple)
 
-        # Stick another newline, then the function docstring, maybe
+        # Stick another newline, then the text docstring, maybe
         #  truncated for the simple file.
         Add_Line('', include_in_simple = include_in_simple)
-        Add_Lines(function.__doc__, indent_level +1, 
+        Add_Lines(text, indent_level +1,
                   include_in_simple = include_in_simple,
                   only_header_in_simple = True,
                   # Get rid of excess newlines.
@@ -209,12 +211,14 @@ def Make(*args):
     # Grab the Settings documentation.
     # Skip this for the simple summary.
     Make_Horizontal_Line(include_in_simple = False)
+    # TODO: maybe leave this header to the Record_Text_Block call.
     Add_Line('* Settings:', include_in_simple = False)
     Add_Line('', include_in_simple = False)
-    Record_Func(Framework.Settings, indent_level = 1,
-                include_in_simple = False,
-                # Name isn't needed.
-                include_name = False)
+    Record_Text_Block(
+        Framework.Settings.__doc__, 
+        indent_level = 1,
+        include_in_simple = False
+        )
     
 
     # Grab the various plugins.
@@ -245,7 +249,7 @@ def Make(*args):
         
 
         # Can now print out by category, sorted.
-        for category, transform_list in sorted(category_plugin_dict.items()):
+        for category, plugin_list in sorted(category_plugin_dict.items()):
     
             # Put a header for the category transform list.
             # Note: if category was left blank, just print the plugin_type
@@ -257,21 +261,34 @@ def Make(*args):
                 plugin_type_plural))
             Add_Line('')
 
+
+            # Handle shared documentation at the top.
+            # Look through the plugins, find shared docstrings, and keep
+            # one copy of each.
+            shared_docs = []
+            for plugin in plugin_list:
+                for shared_doc in plugin._shared_docs:
+                    if shared_doc not in shared_docs:
+                        shared_docs.append(shared_doc)
+            # Chain them together, with header.
+            if shared_docs:
+                shared_docs_text = '\n'.join(shared_docs)
+                Record_Text_Block(
+                    shared_docs_text, 
+                    header_name = 'Common documentation',
+                    indent_level = 1, 
+                    include_in_simple = False)
+
+
             # Loop over the plugin in the category, sorted by reversed
             # priority, then by name. Want high priority to go first,
             # so negate it.
-            for transform in sorted(transform_list, 
-                                    key = lambda k: (-1 * k._doc_priority, k.__name__)):
-                # Add the text.
-                # Temp hack: if it had a priority != 0, don't include
-                #  it in the simple output.
-                # TODO: more elegant solution for this to catch documentation
-                #  psuedo-transforms, like moving their docstring up under
-                #  the category header.
-                include_in_simple = True
-                if transform._doc_priority != 0:
-                    include_in_simple = False
-                Record_Func(transform, indent_level = 1, include_in_simple = include_in_simple)
+            for plugin in sorted(plugin_list, key = lambda k: (-1 * k._doc_priority, k.__name__)):
+                Record_Text_Block(
+                    plugin.__doc__, 
+                    header_name = plugin.__name__,
+                    indent_level = 1, 
+                    include_in_simple = True)
             
 
     # Print out the change log.
@@ -317,6 +334,33 @@ def Make(*args):
     return
 
 
+def Remove_Line_Indents(line_list):
+    '''
+    Removes global indentation from the text block.
+    Eg. if all lines are indented by 4 spaces, those 4 are removed
+    from all lines.
+    Takes in a list of lines, and edits the list directly.
+    '''
+    # Start by finding the global indent level and removing it.
+    min_indent = None
+    for line in line_list:
+        # Skip empty lines.
+        if not line.strip():
+            continue
+        indent = len(line) - len(line.lstrip(' '))
+        if min_indent == None or indent < min_indent:
+            min_indent = indent
+    # Do removal only if a min_indent was found, and is not 0.
+    if min_indent:
+        for index, line in enumerate(line_list):
+            # Skip empty lines.
+            if not line.strip():
+                continue
+            # Cut off the start of each line.
+            line_list[index] = line[min_indent : ]
+    return
+
+
 def Merge_Lines(text_block):
     '''
     To get a better text file from the python docstrings, with proper
@@ -337,25 +381,9 @@ def Merge_Lines(text_block):
     '''
     # Convert the input to a list.
     line_list = [x for x in text_block.splitlines()]
-
+    
     # Start by finding the global indent level and removing it.
-    min_indent = None
-    for line in line_list:
-        # Skip empty lines.
-        if not line.strip():
-            continue
-        indent = len(line) - len(line.lstrip(' '))
-        if min_indent == None or indent < min_indent:
-            min_indent = indent
-    # Do removal only if a min_indent was found, and is not 0.
-    if min_indent:
-        for index, line in enumerate(line_list):
-            # Skip empty lines.
-            if not line.strip():
-                continue
-            # Cut off the start of each line.
-            line_list[index] = line[min_indent : ]
-
+    Remove_Line_Indents(line_list)
 
     # Next, want to collect a list of line indices where merges
     # are wanted, and trim out some tags that were used to

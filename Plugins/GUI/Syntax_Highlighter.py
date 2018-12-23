@@ -1,6 +1,6 @@
 
 
-from PyQt5.QtGui import QSyntaxHighlighter, QColor, QFont, QTextCharFormat
+from PyQt5.QtGui import QSyntaxHighlighter, QColor, QFont, QTextCharFormat, QTextCursor
 from PyQt5.QtCore import QRegExp
 
 import Plugins
@@ -40,6 +40,9 @@ class Script_Syntax_Highlighter(QSyntaxHighlighter):
     Apply syntax highlighting to python script files.
     This will be mostly python style highlights, with maybe some
     tweaks for plugin names.
+    Note: this will connect to the document's contentsChange signal;
+    any other functions connected to this signal should be connected
+    before the highlighter is attached if they might edit the text.
 
     Attributes:
     * enabled
@@ -82,9 +85,11 @@ class Script_Syntax_Highlighter(QSyntaxHighlighter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.enabled = True
+        
+        # Set up the cursor, attached to the document.
+        self.cursor = QTextCursor(self.document())
 
         # Set up the various rules.
-
         rules = []
         
         # Comment detection.

@@ -1,4 +1,4 @@
-X4 Customizer 1.1.1
+X4 Customizer 1.2
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -63,7 +63,7 @@ Example input file:
     # Import all transform functions.
     from Plugins import *
     
-    # This could also be done in settings.json.
+    # This could also be done in settings.json or through the gui.
     Settings(
         # Set the path to the X4 installation folder.
         path_to_x4_folder   = r'C:\Steam\SteamApps\common\X4 Foundations',
@@ -237,3 +237,6 @@ Change Log:
    - Added Adjust_Mission_Rewards.
  * 1.1.1
    - Bugfix for ambiguous xpaths that still require indexes, and cleaned up quotes to avoid nesting double quotes.
+ * 1.2
+   - Added the initial Gui, featuring: python syntax and plugin highlighter, documentation viewer, settings editor, script launcher, preliminary weapon info viewer; plus niceties like changing font, remembering layout, and processing on a background thread.
+   - Some unfortunate file size bloat in the compiled version.

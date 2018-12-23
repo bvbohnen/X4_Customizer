@@ -1,4 +1,4 @@
-X4 Customizer 1.1.1
+X4 Customizer 1.2
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -61,7 +61,7 @@ Example input file:
     # Import all transform functions.
     from Plugins import *
     
-    # This could also be done in settings.json.
+    # This could also be done in settings.json or through the gui.
     Settings(
         # Set the path to the X4 installation folder.
         path_to_x4_folder   = r'C:\Steam\SteamApps\common\X4 Foundations',
@@ -100,7 +100,7 @@ Example input file:
 
     This holds general settings and paths to control the customizer. Adjust these settings as needed prior to running the first plugin, using direct writes to attributes.
     
-    Settings may be updated individually, or as arguments of a call to Settings, or through a "settings.json" file in the top X4 Customizer folder (eg. where documentation resides). Any json settings will overwrite defaults, and be overwritten by settings in the control script.
+    Settings may be updated individually, or as arguments of a call to Settings, OR through a "settings.json" file in the top X4 Customizer folder (eg. where documentation resides). Any json settings will overwrite defaults, and be overwritten by settings in the control script. Changes made using the GUI will be applied to the json settings.
     
     Examples:
     * In the control script (prefix paths with 'r' to support backslashes):
@@ -159,6 +159,7 @@ Example input file:
       - Defaults to 'X4_Customizer'
     * output_to_user_extensions
       - Bool, if True then the generated extension holding output files will be under <path_to_user_folder/extensions>.
+      - Warning: any prior output on the original path will still exist, and is not cleaned out automatically at the time of this note.
       - Defaults to False, writing to <path_to_x4_folder/extensions>
     * output_to_catalog
       - Bool, if True then the modified files will be written to a single cat/dat pair, otherwise they are written as loose files.
@@ -196,6 +197,10 @@ Example input file:
     * developer
       - Bool, if True then enable some behavior meant just for development, such as leaving exceptions uncaught.
       - Defaults to False
+    * disable_threading
+      - Bool, if True then threads will not be used in the gui to call scripts and plugins. Will cause the gui to lock up during processing.
+      - Intended for development use, to enable breakpoints during calls.
+      - Defaults to False
     * use_scipy_for_scaling_equations
       - Bool, if True then scipy will be used to optimize scaling equations, for smoother curves between the boundaries.
       - If False or scipy is not found, then a simple linear scaling will be used instead.
@@ -227,6 +232,9 @@ Analyses:
     * file_name
       - String, name to use for generated files, without extension.
       - Defaults to "weapon_stats".
+    * return_tables
+      - Bool, if True then this transform returns a list of tables (themselves lists of lists) holding the weapon data, and file writeback is skipped.
+      - Defaults to False.
         
 
 
@@ -286,12 +294,12 @@ Jobs Transforms:
 
 Wares Transforms:
 
-  * Shared_Ware_Transforms_Documentation
+  * Common documentation
 
     Ware transforms will commonly use a group of matching rules to determine which wares get modified, and by how much.    
     
-    * Ware match rule:
-      - A tuples pairing a matching rule (string) with transform defined args, eg. ("key  value", arg0, arg1, ...).
+    * Matching rules:
+      - These are tuples pairing a matching rule (string) with transform defined args, eg. ("key  value", arg0, arg1, ...).
       - The "key" specifies the ware field to look up, which will be checked for a match with "value".
       - If a ware matches multiple rules, the first match is used.
       - Supported keys:
@@ -335,12 +343,12 @@ Wares Transforms:
 
 Weapons Transforms:
 
-  * Shared_Weapon_Transforms_Documentation
+  * Common documentation
 
-    Weapon transforms will commonly use a group of matching rules to determine which weapons get modified, and by how much.    
+    Weapon transforms will commonly use a group of matching rules to determine which weapons get modified, and by how much.   
     
-    * Weapon match rule:
-      - A tuple pairing a matching rule (string) with transform defined args, eg. ("key  value", arg0, arg1, ...).
+    * Matching rules:
+      - These are tuples pairing a matching rule (string) with transform defined args, eg. ("key  value", arg0, arg1, ...).
       - The "key" specifies the xml field to look up, which will be checked for a match with "value".
       - If a target object matches multiple rules, the first match is used.
       - If a bullet or missile is shared across multiple weapons, only the first matched weapon will modify it.
@@ -517,3 +525,6 @@ Change Log:
    - Added Adjust_Mission_Rewards.
  * 1.1.1
    - Bugfix for ambiguous xpaths that still require indexes, and cleaned up quotes to avoid nesting double quotes.
+ * 1.2
+   - Added the initial Gui, featuring: python syntax and plugin highlighter, documentation viewer, settings editor, script launcher, preliminary weapon info viewer; plus niceties like changing font, remembering layout, and processing on a background thread.
+   - Some unfortunate file size bloat in the compiled version.

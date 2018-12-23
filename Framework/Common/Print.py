@@ -19,6 +19,8 @@ class Print_class:
         '''
         Write a line to the console.
         '''
+        # Like normal print, convert input to a string if needed.
+        line = str(line)
         # If there is a logging_function attached, call it.
         if self.logging_function != None:
             self.logging_function(line)

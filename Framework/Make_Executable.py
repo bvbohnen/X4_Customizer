@@ -41,16 +41,35 @@ workarounds:
     for an example.
     In practice, any subfolder seems to work without needing the hook,
     though a couple files still need to be kept with the exe to
-    the basic bootstrapping.
+    the basic bootstrapping. Update: a newer pyinstaller verions no
+    longer detects dlls in the subfolder.
 
 3)  Make a bat file to launch the app, which can more easily pass
     command line args.
 
 
+Note on multiple exes:
+    Pyinstaller can either make the exe for console or window mode.
+    This tool has console style support (run a script), and gui support.
 
-TODO:
-Consider bundling with documentation into a zip file automatically,
-include all misc files from the source and patches folders.
+    If compiled in console mode, the gui will be launched with an
+    idling console window in the background catching random prints
+    and exceptions.
+
+    If compiled in windowed mode, the command line will still work
+    except that it doesn't catch any prints or exception messages.
+
+    A possible workaround is suggested here:
+    https://stackoverflow.com/questions/38981547/making-a-pyinstaller-exe-do-both-command-line-and-windowed
+
+    Basically, compile in window mode, then for the command line
+    launch with the "|more" suffix to cause the console to capture
+    printouts.
+
+    TODO: look into this, and swap over bat files if it looks good.
+
+Note: pyinstaller had trouble finding pyqt5 source files ("plugins"),
+but this was solved with a pip update.
 '''
 
 import argparse
@@ -113,11 +132,12 @@ def Make(*args):
         help = 'Compile with basic python optimization, removing assertions'
                ' and perhaps some debug checks.')
     
-    argparser.add_argument(
-        '-oo', '-OO', 
-        action='store_true',
-        help = 'Compile with more python optimization, similar to -O'
-               ' but also trimming docstrings to reduce code size.')
+    # -Removed, keep docstrings.
+    #argparser.add_argument(
+    #    '-oo', '-OO', 
+    #    action='store_true',
+    #    help = 'Compile with more python optimization, similar to -O'
+    #           ' but also trimming docstrings to reduce code size.')
     
     # Run the parser on the input args.
     parsed_args = argparser.parse_args(args)
@@ -197,7 +217,16 @@ def Make(*args):
         #-Removed, heavyweight.
         #'        r"re",',
         # Add fnmatch instead (wildcard style string matching).
+        # -This might be removable if it is in the framework.
         '        r"fnmatch",',
+        # Add pyqt for the gui plugin.
+        # Pyinstaller needs a lot of help on this one when not being
+        # given the original source files (which are in plugins).
+        '        r"PyQt5",',
+        '        r"PyQt5.QtWidgets",',
+        '        r"PyQt5.QtCore",',
+        '        r"PyQt5.QtGui",',
+        '        r"PyQt5.uic",',
         '    ],',
 
         '    hookspath = [],',
@@ -239,6 +268,7 @@ def Make(*args):
         '    debug = False,',
         '    strip = False,',
         '    upx = True,',
+        # TODO: disabled console for a gui version; can also tweak name.
         '    console = True,',
         ')',
         '',
@@ -303,8 +333,9 @@ def Make(*args):
     #  to the script.
     # (In practice, these seem to make little to no difference, but are
     #  kinda neat to have anyway.)
-    if parsed_args.oo:
-        pyinstaller_call_args.insert(1, '-OO')
+    # -Removed; some places now reference docstrings, so need to keep them.
+    #if parsed_args.oo:
+    #    pyinstaller_call_args.insert(1, '-OO')
     elif parsed_args.o:
         pyinstaller_call_args.insert(1, '-O')
 
@@ -363,28 +394,38 @@ def Make(*args):
     # Set up bat files for easier launching.
     bat_file_details_list = [
         {
-            'name' : 'Launch_X4_Customizer',
+            'name' : 'Run_Script',
             # Use '%*' to pass all command line args.
             'cmd'  : os.path.join('bin', program_name + '.exe') + ' %*',
+            # Pause the window when done, so messages can be read.
+            'pause': True,
             },
         {
-            'name' : 'Clean_X4_Customizer',
+            'name' : 'Clean_Script',
             'cmd'  : os.path.join('bin', program_name + '.exe') + ' %* -clean',
+            'pause': True,
             },
         {
             'name' : 'Cat_Unpack',
-            # Set to pass extra command line args.
             'cmd'  : os.path.join('bin', program_name + '.exe') + ' Cat_Unpack -argpass %*',
+            'pause': True,
             },
         {
             'name' : 'Cat_Pack',
-            # Set to pass extra command line args.
             'cmd'  : os.path.join('bin', program_name + '.exe') + ' Cat_Pack -argpass %*',
+            'pause': True,
             },
         {
             'name' : 'Check_Extensions',
-            # Set to pass extra command line args.
             'cmd'  : os.path.join('bin', program_name + '.exe') + ' Check_Extensions -argpass %*',
+            'pause': True,
+            },
+        {
+            'name' : 'Start_Gui',
+            'cmd'  : os.path.join('bin', program_name + '.exe') + ' -gui %*',
+            # No pausing for now; probably just annoying if the gui
+            # doesn't crash.
+            'pause': False,
             },
         ]
 
@@ -395,9 +436,10 @@ def Make(*args):
             # Disable the echo of the command.
             '@echo off',
             bat_file_details['cmd'],
-            # Wait for user input, so they can read messages.
-            'pause',
             ]
+        if bat_file_details['pause']:
+            # Wait for user input, so they can read messages.
+            lines.append('pause')
         with open(file_name, 'w') as file:
             file.write('\n'.join(lines))
 

@@ -32,6 +32,18 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Analyses\__init__.py" />
+    <Compile Include="GUI\Main_Window\Gui_Settings.py" />
+    <Compile Include="GUI\Main_Window\Main_Window.py" />
+    <Compile Include="GUI\Main_Window\Script_Actions.py" />
+    <Compile Include="GUI\Main_Window\Worker_Thread.py" />
+    <Compile Include="GUI\Main_Window\__init__.py" />
+    <Compile Include="GUI\Syntax_Highlighter.py" />
+    <Compile Include="GUI\Widget_Documentation.py" />
+    <Compile Include="GUI\Widget_Plugins.py" />
+    <Compile Include="GUI\Widget_Script.py" />
+    <Compile Include="GUI\Widget_Settings.py" />
+    <Compile Include="GUI\Widget_X4_Table.py" />
+    <Compile Include="GUI\__init__.py" />
     <Compile Include="Transforms\Director.py">
       <SubType>Code</SubType>
     </Compile>
@@ -62,6 +74,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Analyses\" />
+    <Folder Include="GUI\" />
+    <Folder Include="GUI\Main_Window\" />
     <Folder Include="Utilities\" />
     <Folder Include="Transforms\" />
   </ItemGroup>

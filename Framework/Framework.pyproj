@@ -13,7 +13,7 @@
     <Name>Framework</Name>
     <RootNamespace>Framework</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>Test</CommandLineArguments>
+    <CommandLineArguments>Test -gui</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -29,6 +29,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Common\Home_Path.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Common\Print.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Common\XML_Misc.py">

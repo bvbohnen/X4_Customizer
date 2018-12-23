@@ -1,6 +1,6 @@
 
 from PyQt5.QtWidgets import QTextBrowser
-from ..Make_Documentation import Merge_Lines
+from Framework.Make_Documentation import Merge_Lines, Remove_Line_Indents
 
 class Widget_Documentation(QTextBrowser):
     '''
@@ -12,9 +12,17 @@ class Widget_Documentation(QTextBrowser):
 
     def setPlainText(self, text):
         '''
-        Displays text, after doing some formatting.
+        Displays text, maybe after doing some formatting.
         '''
-        text = Merge_Lines(text)
+        # -Removed; this requires line wrap, and ends up looking
+        #  really bad when markdown indents are lost.
+        #text = Merge_Lines(text)
+        # If not mergine lines, still want to remove excess indentation.
+        # This takes a line list, for now.
+        line_list = [x for x in text.splitlines()]
+        Remove_Line_Indents(line_list)
+        text = '\n'.join(line_list)
+
         super().setPlainText(text)
 
 

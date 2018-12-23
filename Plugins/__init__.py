@@ -22,6 +22,12 @@ from .Utilities  import *
 #  for convenience.
 from Framework import Settings
 
+# The gui is not really a plugin, but there isn't a better place
+# to put it, since the layout .ui file has somewhat difficult
+# to modify import paths that only work well with raw python
+# input. Also, this gives a nice folder to put the .ui file in.
+from . import GUI
+
 
 def _Init():
     '''

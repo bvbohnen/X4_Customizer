@@ -89,7 +89,7 @@ Usage for Python source code:
 #from .Common.Settings import Set_Path
 from . import Common
 # Make some logs available.
-from .Common import Change_Log, Plugin_Log
+from .Common import Change_Log, Plugin_Log, Print
 from .Common import Get_Version
 from .Common import Settings
 from .Common import Analysis_Wrapper
@@ -102,6 +102,9 @@ from .Common.Exceptions import *
 from . import File_Manager
 from .File_Manager import Load_File, File_System
 
+# The Gui wants a few more imports to work when compiled.
+from . import Main
+from . import Make_Documentation
 
 def _Init():
     '''

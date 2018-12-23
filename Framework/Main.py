@@ -5,6 +5,7 @@ import os
 import sys
 from pathlib import Path
 import argparse
+import traceback
 
 # To support packages cross-referencing each other, set up this
 # top level as a package, findable on the sys path.
@@ -19,6 +20,8 @@ if str(scripts_dir) not in sys.path:
     sys.path.append(str(scripts_dir))
 
 import Framework
+import Plugins
+from Framework import Print
 
 
 def Run(*args):
@@ -95,6 +98,11 @@ def Run(*args):
         help =  'Indicates the control script has its own arg parsing;'
                 ' extra args and "-h" are passed through sys.argv.')
     
+    argparser.add_argument(
+        '-gui', 
+        action='store_true',
+        help =  'Launches the Gui instead of running any script.')
+    
     # Capture leftover args.
     # Note: when tested, this appears to be buggy, and was grabbing
     # "-dev" even though that has no ambiguity; parse_known_args
@@ -129,6 +137,16 @@ def Run(*args):
             sys.argv.append('-h')
 
 
+    # Check for a gui launch.
+    if args.gui:
+        # In this case, the gui takes over and no script is expected.
+        # TODO: maybe pass an input script path to the gui, but it
+        # isn't important.
+        Plugins.GUI.Start_GUI()
+        # Return when the gui closes.
+        return
+
+
     # Convenience flag for when the default script is in use.
     using_default_script = args.control_script == 'Default_Script'
 
@@ -155,14 +173,14 @@ def Run(*args):
             argparser.print_help()
 
         # Follow up with an error on the control script name.
-        print('Error: {} not found.'.format(args.control_script))
+        Print('Error: {} not found.'.format(args.control_script))
 
         # Print some extra help text if the user tried to run the default
         #  script from the bat file.
         if using_default_script:
             # Avoid word wrap in the middle of a word by using an explicit
             #  newline.
-            print('For new users, please open Scripts/'
+            Print('For new users, please open Scripts/'
                   'Default_Script_template.py\n'
                   'for first time setup instructions.')
         return
@@ -183,20 +201,20 @@ def Run(*args):
         Settings.verbose = False
 
     if args.clean:
-        print('Enabling cleanup mode; plugins will be skipped.')
+        Print('Enabling cleanup mode; plugins will be skipped.')
         Settings.skip_all_plugins = True
 
     if args.dev:
-        print('Enabling developer mode.')
+        Print('Enabling developer mode.')
         Settings.developer = True
 
     if args.test:
-        print('Performing test run.')
+        Print('Performing test run.')
         # This uses the disable_cleanup flag.
         Settings.disable_cleanup_and_writeback = True
                 
 
-    print('Calling {}'.format(args.control_script))
+    Print('Calling {}'.format(args.control_script))
     try:
         # Attempt to load/run the module.
         import importlib        
@@ -210,7 +228,7 @@ def Run(*args):
             str(args.control_script)
             ).load_module()
         
-        #print('Run complete')
+        #Print('Run complete')
         
         # Since a plugin normally handles file cleanup and writeback,
         #  cleanup needs to be done manually here when needed.
@@ -220,21 +238,21 @@ def Run(*args):
     except Exception as ex:
         # Make a nice message, to prevent a full stack trace being
         #  dropped on the user.
-        print('Exception of type "{}" encountered.\n'.format(
+        Print('Exception of type "{}" encountered.\n'.format(
             type(ex).__name__))
         ex_text = str(ex)
         if ex_text:
-            print(ex_text)
-            
+            Print(ex_text)
+
         # Close the plugin log safely (in case of raising another
         #  exception).
         Framework.Common.Logs.Plugin_Log.Close()
 
-        # In dev mode, reraise the exception.
+        # In dev mode, print the exception traceback.
         if Settings.developer:
-            raise ex
+            Print(traceback.format_exc())
         #else:
-        #    print('Enable developer mode for exception stack trace.')
+        #    Print('Enable developer mode for exception stack trace.')
         
     return
 

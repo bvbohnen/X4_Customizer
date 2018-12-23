@@ -58,10 +58,11 @@ Change Log:
    - Bugfix for ambiguous xpaths that still require indexes, and cleaned
      up quotes to avoid nesting double quotes.
  * 1.2
-   - Added the initial Gui, featuring: python syntax highlighter,
-     documentation viewer, settings editor, script launcher, plus
-     niceties like changing font and remembering layout.
-   - Switched releases to 7z format, due to gui package bloat.
+   - Added the initial Gui, featuring: python syntax and plugin highlighter,
+     documentation viewer, settings editor, script launcher, preliminary
+     weapon info viewer; plus niceties like changing font, remembering
+     layout, and processing on a background thread.
+   - Some unfortunate file size bloat in the compiled version.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

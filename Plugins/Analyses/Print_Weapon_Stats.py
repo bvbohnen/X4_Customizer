@@ -7,7 +7,7 @@ from .Write_Tables import Write_Tables
 from ..Transforms.Support import Float_to_String
 
 @Analysis_Wrapper()
-def Print_Weapon_Stats(file_name = 'weapon_stats'):
+def Print_Weapon_Stats(file_name = 'weapon_stats', return_tables = False):
     '''
     Gather up all weapon statistics, and print them out.
     Produces csv and html output.
@@ -16,6 +16,26 @@ def Print_Weapon_Stats(file_name = 'weapon_stats'):
     * file_name
       - String, name to use for generated files, without extension.
       - Defaults to "weapon_stats".
+    * return_tables
+      - Bool, if True then this transform returns a list of tables
+        (themselves lists of lists) holding the weapon data,
+        and file writeback is skipped.
+      - Defaults to False.
+    '''
+    # This function will just get the tables and print them.
+    # This is done so the gui can grab tables more directly.
+    table_list = Get_Weapons_Tables()
+    if return_tables:
+        return table_list
+    # Write results.
+    Write_Tables(file_name, *table_list)
+    return
+
+
+def Get_Weapons_Tables():
+    '''
+    Collects and returns a list of tables (lists of lists) holding
+    the weapon info, categorized by weapon type.
     '''
     weapons_list = Collect_Weapons()
 
@@ -68,10 +88,7 @@ def Print_Weapon_Stats(file_name = 'weapon_stats'):
                     value = ''
                 line.append(value)
 
-    # Write results.
-    Write_Tables(file_name, *table_list)
-    return
-
+    return table_list
 
 
 def Collect_Weapons():

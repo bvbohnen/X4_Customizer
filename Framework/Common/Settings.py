@@ -18,10 +18,11 @@ class Settings_class:
     using direct writes to attributes.
 
     Settings may be updated individually, or as arguments of
-    a call to Settings, or through a "settings.json" file in the
+    a call to Settings, OR through a "settings.json" file in the
     top X4 Customizer folder (eg. where documentation resides).
     Any json settings will overwrite defaults, and be overwritten by
-    settings in the control script.
+    settings in the control script. Changes made using the GUI
+    will be applied to the json settings.
 
     Examples:
     * In the control script (prefix paths with 'r' to support backslashes):
@@ -93,6 +94,8 @@ class Settings_class:
     * output_to_user_extensions
       - Bool, if True then the generated extension holding output files
         will be under <path_to_user_folder/extensions>.
+      - Warning: any prior output on the original path will still exist,
+        and is not cleaned out automatically at the time of this note.
       - Defaults to False, writing to <path_to_x4_folder/extensions>
     * output_to_catalog
       - Bool, if True then the modified files will be written to a single
@@ -138,6 +141,12 @@ class Settings_class:
     * developer
       - Bool, if True then enable some behavior meant just for development,
         such as leaving exceptions uncaught.
+      - Defaults to False
+    * disable_threading
+      - Bool, if True then threads will not be used in the gui to
+        call scripts and plugins. Will cause the gui to lock up
+        during processing.
+      - Intended for development use, to enable breakpoints during calls.
       - Defaults to False
     * use_scipy_for_scaling_equations
       - Bool, if True then scipy will be used to optimize scaling
@@ -270,6 +279,7 @@ class Settings_class:
         defaults['use_scipy_for_scaling_equations'] = True
         defaults['show_scaling_plots'] = False
         defaults['developer'] = False
+        defaults['disable_threading'] = False        
         defaults['verbose'] = True
         defaults['allow_path_error'] = False
         defaults['output_to_catalog'] = False

@@ -46,6 +46,7 @@ def _Plugin_Wrapper(
         category = None,
         uses_paths_from_settings = True,
         doc_priority = 0,
+        shared_docs = None,
     ):
     '''
     Wrapper function for plugins.
@@ -68,6 +69,13 @@ def _Plugin_Wrapper(
         be printed relative to other plugins of the same type
         and category.
       - Defaults 0; positive numbers print earlier.
+      - At the same priority, plugins print in alphabetical order.
+    * shared_docs
+      - List of strings, shared documentation text that is also used by other
+        plugins in this category.
+      - Printouts will aim to print this once when listing multiple
+        plugins with the same shared_doc, or per-plugin when they
+        are printed individually.
     '''
     # Make the inner decorator function, capturing the wrapped function.
     def inner_decorator(func):
@@ -76,7 +84,18 @@ def _Plugin_Wrapper(
         func._plugin_type   = plugin_type
         func._uses_paths_from_settings = uses_paths_from_settings
         func._doc_priority = doc_priority
+
+        # If a shared_docs string given, pack into a list;
+        # use an empty list if None,
+        # otherwise accept as-is (should be tuple or list).
+        if isinstance(shared_docs, str):
+            func._shared_docs = [shared_docs]
+        elif shared_docs == None:
+            func._shared_docs = []
+        else:
+            func._shared_docs = shared_docs
             
+
         if category != None:
             # Attach the override category to the function.
             func._category = category

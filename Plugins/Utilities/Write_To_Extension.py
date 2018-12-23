@@ -107,13 +107,18 @@ def Make_Extension_Content_XML():
     #  modified nodes.
     source_extension_names = set()
     for file_name, game_file in File_System.game_file_dict.items():
-        if game_file.modified or 1:
+        if game_file.modified:
             source_extension_names |= set(game_file.source_extension_names)
 
     # Add the elements; keep alphabetical for easy reading.
     for source_extension_name in sorted(source_extension_names):
-        content_node.append( ET.Element('dependency', attrib={
-            'id' : source_extension_name }))
+        # Omit self, just in case... shouldn't come up, but might.
+        if source_extension_name == Settings.extension_name.replace(' ','_'):
+            Print('Error: output extension appears in its own dependencies,'
+                  ' indicating it transformed its own prior output.')
+        else:
+            content_node.append( ET.Element('dependency', attrib={
+                'id' : source_extension_name }))
 
     # Record it.
     File_System.Add_File( Framework.File_Manager.XML_File(

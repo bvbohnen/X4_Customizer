@@ -6,7 +6,7 @@ the X4 directory and running some simple transforms.
 # Import all transform functions.
 from Plugins import *
 
-# This could also be done in settings.json.
+# This could also be done in settings.json or through the gui.
 Settings(
     # Set the path to the X4 installation folder.
     path_to_x4_folder   = r'C:\Steam\SteamApps\common\X4 Foundations',

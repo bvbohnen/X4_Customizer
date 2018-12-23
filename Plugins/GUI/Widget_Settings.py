@@ -1,6 +1,6 @@
 
 from PyQt5 import QtWidgets
-from ..Common import Settings
+from Framework import Settings
 
 class Widget_Settings(QtWidgets.QGroupBox):
     '''
@@ -22,7 +22,6 @@ class Widget_Settings(QtWidgets.QGroupBox):
         # widgets to edit them.
         self.field_widget_dict = {}
 
-        layout = self.layout()
         # Set up a new layout, form style (rows with 2 columns).
         layout = QtWidgets.QFormLayout()
         self.setLayout(layout)

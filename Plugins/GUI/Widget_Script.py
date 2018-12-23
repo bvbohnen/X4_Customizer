@@ -1,5 +1,5 @@
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QTextCursor
 from .Syntax_Highlighter import Script_Syntax_Highlighter
 
@@ -25,12 +25,19 @@ class Widget_Script(QtWidgets.QPlainTextEdit):
         # Set up dragging. (TODO: maybe remove if set up in qt designer.)
         self.setAcceptDrops(True)
 
-        # Set up the QSyntaxHighlighter.
-        self.highlighter = Script_Syntax_Highlighter(self.document())
-
         self.modificationChanged.connect(self.Handle_modificationChanged)
         # Hook up a handler to the document's content change signal.
         self.document().contentsChange.connect(self.Handle_contentsChange)
+
+        # Set up the QSyntaxHighlighter.
+        # Note: this also connect to contentsChange, and qt will handle
+        # connected handlers in their connection order; since the custom
+        # handler edits the text, it needs to run before the highlighter
+        # otherwise the highlight position can get thrown off (pointing
+        # at changed positions). So, add this after setting up
+        # the above connections to avoid the problem.
+        self.highlighter = Script_Syntax_Highlighter(self.document())
+
         return
 
 
@@ -66,8 +73,7 @@ class Widget_Script(QtWidgets.QPlainTextEdit):
         # source code, it looks like it wants to hook this signal
         # into its _q_reformatBlocks function.
         #-Removed; this was needed from some example code used in
-        # testing, but personal code (maybe better written?) doesn't
-        # need this.
+        # testing, but personal code doesn't need this.
         #self.highlighter._q_reformatBlocks(position, chars_removed, chars_added)
 
         # Note: position is the start of the edited section, after
@@ -134,6 +140,32 @@ class Widget_Script(QtWidgets.QPlainTextEdit):
                 self.cursor.insertText(text.replace('\t','    '))
             
         return
+
+
+    # TODO: the above could be better done by intercepting key pressed,
+    # which would also allow adding shift-tab support.
+    # https://stackoverflow.com/questions/13579116/qtextedit-shift-tab-wrong-behaviour
+       
+    def keyPressEvent(self, event):
+        '''
+        This function is called automatically when a key is pressed.
+        The original version handles up/down/left/right/pageup/pagedown
+        and ignores other keys.
+        '''
+        if event.key() in [QtCore.Qt.Key_Backtab, QtCore.Qt.Key_Tab]:
+            # The text cursor will need to be updated appropriately.
+            # self.textCursor()
+            # Get the place the edit is occurring.
+            # The anchor may indicate a section of text is highlighted.
+            # Proper handling of highlights in VS/notepad style would
+            # be a little complicated...
+            # TODO: think about this.
+            position = self.textCursor().position()
+            anchor   = self.textCursor().anchor()
+
+            # TODO: fill this in more.
+        # Just pass the call upward for now.
+        return super().keyPressEvent(event)
 
 
     def New_Script(self):

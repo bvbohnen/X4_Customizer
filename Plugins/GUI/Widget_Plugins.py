@@ -3,12 +3,17 @@ from collections import defaultdict
 
 from PyQt5.QtWidgets import QTreeWidgetItem, QTreeWidget
 
-from Plugins import Analyses
-from Plugins import Transforms
-from Plugins import Utilities
+from .. import Analyses
+from .. import Transforms
+from .. import Utilities
 
 
 class Widget_Plugins(QTreeWidget):
+    '''
+    Tree view of all available plugins.
+    Clicking a plugin will signal a separate documentation
+    window to change text.
+    '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
@@ -18,6 +23,7 @@ class Widget_Plugins(QTreeWidget):
 
         # Clear the treeWidget_Plugins list and redraw it, according to
         #  the type filter.
+        # TODO: is this needed?  forget why it was put here.
         self.clear()
                 
         # Loop over the plugin subpackages.
@@ -75,11 +81,13 @@ class Widget_Plugins(QTreeWidget):
 
     def Handle_currentItemChanged(self, new_item = None):
         '''
-        An different item was clicked on.
+        A different item was clicked on.
         '''
         if hasattr(new_item, 'plugin'):
             # Get the doc text.
-            text = new_item.plugin.__doc__
+            # Add shared documenation at the end.
+            text = '\n'.join([new_item.plugin.__doc__] + new_item.plugin._shared_docs)
+
             # Send to the text viewer.
             self.parent.widget_documentation.setPlainText(text)
         return

@@ -75,8 +75,9 @@ def Make(*args):
         'Cat_Pack.bat',
         'Cat_Unpack.bat',
         'Check_Extensions.bat',
-        'Clean_X4_Customizer.bat',
-        'Launch_X4_Customizer.bat',
+        'Clean_Script.bat',
+        'Run_Script.bat',
+        'Start_Gui.bat',
         'Documentation.md',
         'README.md',
         'License.txt',
@@ -117,8 +118,10 @@ def Make(*args):
                 #if folder == 'game_files' and file_name.endswith('.bak'):
                 #    continue
 
-                # Skip anything in scripts or plugins that isn't .py.
-                if folder in ['Scripts','Plugins'] and not file_name.endswith('.py'):
+                # Skip anything in scripts or plugins that isn't .py or .ui.
+                if (folder in ['Scripts','Plugins'] 
+                and not file_name.endswith('.py')
+                and not file_name.endswith('.ui')):
                     continue
 
                 # Pick scripts to include.
@@ -132,7 +135,16 @@ def Make(*args):
     # Put this in the top level directory.
     zip_name = 'X4_Customizer_v{}.zip'.format(Framework.Change_Log.Get_Version())
     zip_path = os.path.normpath(os.path.join(This_dir, '..', zip_name))
-    zip_file = zipfile.ZipFile(zip_path, 'w')
+    zip_file = zipfile.ZipFile(
+        zip_path, 'w',
+        # Can try out different zip algorithms, though from a really
+        # brief search it seems lzma is the newest and strongest.
+        # Result: seems to work well, dropping the ~90M qt version
+        # down to ~25M.
+        compression = zipfile.ZIP_LZMA,
+        # Compression level only matters for bzip2 and deflated.
+        #compresslevel = 5
+        )
 
     # Add all files to the zip.
     for path in file_paths:

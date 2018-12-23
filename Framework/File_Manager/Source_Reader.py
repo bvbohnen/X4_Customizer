@@ -16,7 +16,7 @@ from .Cat_Reader import Cat_Reader
 from .. import Common
 from ..Common import Settings
 from ..Common import File_Missing_Exception
-from ..Common import Plugin_Log
+from ..Common import Plugin_Log, Print
 
 # Set a list of subfolders that are standard for x4 files.
 # Other folders can generally be ignored.
@@ -101,6 +101,8 @@ class Location_Source_Reader:
         # TODO: maybe revisit this to go back to using the self.extension_name
         #  check and pushing extension detection higher, to avoid accidentally
         #  reading a unexpected "01.cat" in an extension folder.
+        # TODO: distinguish file files from subst catalogs from others,
+        #  and handle them differently in the source loader.
         prefixes = ['subst_','ext_','']
         #if self.extension_name:
         #    prefixes = ['subst_','ext_']
@@ -126,6 +128,9 @@ class Location_Source_Reader:
                 cat_dir_list_low_to_high.append(cat_path)
                 # Increment for the next cat.
                 cat_index += 1
+                # Temp warning.
+                if prefix == 'subst_':
+                    Print('Warning: subst_ catalogs not fully supported yet')
                                
         # Fill in dict entries with the cat paths, in reverse order.
         for path in reversed(cat_dir_list_low_to_high):
