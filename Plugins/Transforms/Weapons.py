@@ -361,26 +361,64 @@ class Weapon:
         self.component_file = File_System.Get_Asset_File(component_name)
         return
 
+
+    def Get_Tags_Xpath(self):
+        '''
+        Returns an xpath to the "connection" node holding the main weapon
+        "tags" attribute.  If none found, returns None.
+        '''
+        # Note: this connection doesn't have a standard name, but can
+        # be identified by a "component" term in the tags.
+        root = self.component_file.Get_Root_Readonly()
+        xpath = './/connection[@tags]'
+        for connection in root.findall(xpath):
+            if 'component' in connection.get('tags'):
+                # Add the name of the connection to the xpath to
+                # uniquify it.
+                name = connection.get('name')
+                xpath += '[@name="{}"]'.format(name)
+                # Verify it.
+                assert root.findall(xpath)[0] is connection
+                return xpath
+        return None
+
+
     def Get_Tags(self):
         '''
         Finds and returns a list of strings holding the primary tags
         for this weapon, or an empty list if tags are not found.
         Pulled from a connection node the component_file.
+        If the tags are not found, returns an empty list.
         '''
-        # Note: this connection doesn't have a standard name, but can
-        # be identified by a "component" term in the tags.
+        xpath = self.Get_Tags_Xpath()
+        if xpath == None:
+            return []
         root = self.component_file.Get_Root_Readonly()
-        for connection in root.findall('.//connection[@tags]'):
-            if 'component' in connection.get('tags'):
-                tags_str = connection.get('tags')
-                # These appear to always be space separated.
-                # Some tag lists have brackets and commas; verify that
-                #  isn't the case here.
-                assert '[' not in tags_str
-                assert ',' not in tags_str
-                # Remove any blanks due to excess spaces.
-                return [x for x in tags_str.split(' ') if x]
-        return []
+        connection = root.find(xpath)
+        tags_str = connection.get('tags')
+
+        # These appear to always be space separated.
+        # Some tag lists have brackets and commas; verify that
+        #  isn't the case here.
+        assert '[' not in tags_str
+        assert ',' not in tags_str
+        # Remove any blanks due to excess spaces.
+        return [x for x in tags_str.split(' ') if x]
+
+        ## Note: this connection doesn't have a standard name, but can
+        ## be identified by a "component" term in the tags.
+        #root = self.component_file.Get_Root_Readonly()
+        #for connection in root.findall('.//connection[@tags]'):
+        #    if 'component' in connection.get('tags'):
+        #        tags_str = connection.get('tags')
+        #        # These appear to always be space separated.
+        #        # Some tag lists have brackets and commas; verify that
+        #        #  isn't the case here.
+        #        assert '[' not in tags_str
+        #        assert ',' not in tags_str
+        #        # Remove any blanks due to excess spaces.
+        #        return [x for x in tags_str.split(' ') if x]
+        #return []
 
 
 def Get_All_Weapons():
@@ -389,6 +427,12 @@ def Get_All_Weapons():
     Loads files from expected locations.
     Includes various weapon classes: weapon, turret, missileturret, etc.
     '''
+    # TODO: consider reading  components.xml and macros.xml for all
+    # macro and comp locations, since it pairs names with virtual path.
+    # That still leaves open the issue of picking which macros to
+    # load initially, and just simplifies bullet and component lookups
+    # after the weapon is found.
+
     # Ensure the related files are loaded in.
     # Weapons/missiles are in one spot, bullets another.
     # Want to load in components as well as macros; most of the

@@ -8,6 +8,7 @@ from Framework import File_System
 from Framework.Common import home_path
 from Framework import Main
 
+from ...Analyses.Live_Editor import Live_Editor
 
 class Script_Actions:
     '''
@@ -234,6 +235,10 @@ class Script_Actions:
 
         # Clear out the file system from any prior run changes.
         File_System.Reset()
+        
+        # Save the Live_Editor patches, since they may get loaded
+        #  by a plugin for xml application.
+        Live_Editor.Save_Patches()
         
         # Set up its command, to run a script.
         # The easiest way to do this is to just call Main.Run, and let

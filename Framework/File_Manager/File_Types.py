@@ -14,23 +14,24 @@ Settings = Common.Settings
 from . import XML_Diff
 
 
-def New_Game_File(*args, **kwargs):
+def New_Game_File(binary, **kwargs):
     '''
     Creates and returns a Game_File, picking an appropriate subclass
-    based on the virtual_path.  For use with file_binary.
+    based on the virtual_path.  For use with 'binary' input data.
+    All inputs should be given as keyword args.
     '''
     virtual_path = kwargs['virtual_path']
     # Check for xml files.
     if virtual_path.endswith('.xml'):
         # Check for special file types.
         if virtual_path.startswith('t/'):
-            return XML_Text_File(*args, **kwargs)
+            return XML_Text_File(binary = binary, **kwargs)
         else:
             # Default generic xml.
-            return XML_File(*args, **kwargs)
+            return XML_File(binary = binary, **kwargs)
     else:
         # Generic binary file.
-        return Misc_File(*args, **kwargs)
+        return Misc_File(binary = binary, **kwargs)
 
 
 class Game_File:
@@ -140,12 +141,26 @@ class XML_File(Game_File):
 
     Attributes:
     * original_root
-      - Element holding the original parsed xml, pre-transforms,
-        possibly with prior diff patches applied.
+      - Element holding the original parsed xml, pre-patches, pre-transforms.
+    * patched_root
+      - Element holding the diff patched root, pre-transforms.
     * modified_root
       - Element holding transformed xml, suitable for generating
         new diff patches.
+    * root_tag
+      - Tag name of the root node, for convenient referencing.
+      - TODO: maybe remove if not used often enough.
+    * asset_class_name
+      - Name of the asset class as defined in the xml, if this appears
+        to be a recognized asset file (based on root node tag).
+      - Eg. 'macro', 'component', etc.
+    * asset_name
+      - Specific name of the object defined in this file.
+      - Often or always matches the last component of the virtual_path,
+        without suffix.
     '''
+    valid_asset_tags = ['macros','components']
+
     def __init__(
             self, 
             binary = None, 
@@ -167,19 +182,50 @@ class XML_File(Game_File):
             assert isinstance(xml_root, ET._Element)
             self.original_root = xml_root
 
-        # Set the initial modified tree to a deep copy of the above,
-        #  so it can be freely modified.
+        # Init the patched version to the original.
+        self.patched_root = self.original_root
         self.modified_root = None
+
+        # The root tag should never be changed by mods, so can
+        #  record it here pre-patching.
+        self.root_tag = self.original_root.tag
         return
     
-
+    
     def Delayed_Init(self):
         '''
-        Fills in node ids for the original_root.
+        Fills in node ids for the patched_root, and any other delayed
+        setup that needs to account for diff patches.
         This should be called once after all patching is finished.
         '''
-        # Annotate the original_root with node ids.
-        XML_Diff.Fill_Node_IDs(self.original_root)
+        # Annotate the patched_root with node ids.
+        XML_Diff.Fill_Node_IDs(self.patched_root)
+        
+        # Set up asset fields, which patches may have changed.
+        self.asset_class_name = None
+        self.asset_name = None
+
+        # Skip if the tag doesn't match supported asset types.
+        # Note: diff patches will have a 'diff' root, and don't
+        # get matched here.
+        if self.patched_root.tag not in self.valid_asset_tags:
+            return
+
+        # Look through the root children for class attributes.
+        # Currently, this always expects 1 child that should always
+        #  have a class; toss an error if that isn't so.
+        assert len(self.patched_root) == 1
+
+        # Want the inner tag, eg. 'macro' instead of 'macros',
+        #  just because it makes for nicer lookup syntax.
+        # -Nevermind; plural form helps visually distinguish from
+        #  class_name
+        #tag_name   = root[0].tag
+        self.asset_class_name = self.patched_root[0].get('class')
+        self.asset_name       = self.patched_root[0].get('name')
+        assert self.asset_class_name != None
+        assert self.asset_name != None
+
         return
 
 
@@ -187,28 +233,44 @@ class XML_File(Game_File):
         '''
         Return an Element object with a copy of the current modified xml.
         The first call of this should occur after all initial patching is
-        complete, as that is when the original_root is first annotated
+        complete, as that is when the patched_root is first annotated
         and copied.
         '''
         if self.modified_root == None:
-            # Set the initial modified tree to a deep copy of the original;
-            #  this will keep node_ids intact.
-            self.modified_root = deepcopy(self.original_root)
+            # Set the initial modified tree to a deep copy of the patched
+            #  version; this will keep node_ids intact.
+            self.modified_root = deepcopy(self.patched_root)
         # Return a deepcopy of the modified_root, so that a transform
         #  can edit it safely, even if it exceptions out and doesn't
         #  complete.
         return deepcopy(self.modified_root)
 
 
-    def Get_Root_Readonly(self):
+    def Get_Root_Readonly(self, version = None):
         '''
         Returns an Element object with the current modified xml,
-        or original xml if no modifications made. It should not
+        or patched xml if no modifications made. It should not
         be written to, only read.
+
+        * version
+          - String, optional version of the root to return.
+          - 'vanilla': returns the original root, pre-patching.
+          - 'patched': returns the patched root, pre-transforms.
+          - 'current': Default, returns the current modified root.
         '''
-        if self.modified_root != None:
-            return self.modified_root
-        return self.original_root
+        if not version or version == 'current':
+            # TODO: maybe just have modified_root init to the patched_root,
+            # removing this check.
+            if self.modified_root != None:
+                return self.modified_root
+            return self.patched_root
+        elif version == 'vanilla':
+            return self.original_root
+        elif version == 'patched':
+            return self.patched_root
+        else:
+            raise AssertionError(('Get_Root_Readonly version "{}" not'
+                                    ' recognized').format(version))
 
 
     def Update_Root(self, element_root):
@@ -218,7 +280,7 @@ class XML_File(Game_File):
         element type be unchanged.
         '''
         assert element_root.tag == self.modified_root.tag
-        # Assume the xml changed from the original.
+        # Assume the xml changed from the patched version.
         self.modified = True
         self.modified_root = element_root
         return
@@ -234,7 +296,7 @@ class XML_File(Game_File):
         the original tree to the modified tree.
         '''
         patch_node = XML_Diff.Make_Patch(
-            original_node = self.original_root, 
+            original_node = self.patched_root, 
             modified_node = self.Get_Root_Readonly(),
             maximal = Settings.make_maximal_diffs,
             verify = True)
@@ -276,17 +338,15 @@ class XML_File(Game_File):
     def Patch(self, other_xml_file):
         '''
         Merge another xml_file into this one.
-        Changes the original_root, and does not flag this file as modified.
+        Changes the patched_root, and does not flag this file as modified.
         '''
         assert other_xml_file.Is_Patch()
 
         # Diff patches have a series of add, remove, replace nodes.
-        # These will operate on the original tree, not the original root,
-        #  (allowing direct removal/replacement of the root), so first
-        #  set up proper trees.
+        # Operated on the patched_root, leaving the original_root untouched.
         modified_node = XML_Diff.Apply_Patch(
-            original_node = self.original_root, 
-            patch_node    = other_xml_file.original_root,
+            original_node = self.patched_root, 
+            patch_node    = other_xml_file.patched_root,
             # For any errors, print out the file name, the patch extension
             # name. TODO: maybe include the already applied source
             # extension names, though that gets overly verbose.
@@ -295,8 +355,8 @@ class XML_File(Game_File):
                 other_xml_file.extension_name )
             )
                 
-        # Record this as the new original root.
-        self.original_root = modified_node
+        # Record this as the new patched root.
+        self.patched_root = modified_node
 
         # Record the extension holding the patch, as a source for
         #  this file.
@@ -308,6 +368,7 @@ class XML_File(Game_File):
         #  in detail. For now, other extensions always create dependencies
         #  on any file modification.
         return
+
 
 
 class XML_Text_File(XML_File):

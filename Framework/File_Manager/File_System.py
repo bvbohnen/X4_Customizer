@@ -51,8 +51,6 @@ class File_System_class:
       - Set of strings, virtual path name patterns that have been
         loaded and, when macros, added to class_macro_dict.
     '''
-    valid_asset_tags = ['macros','components']
-
     def __init__(self):
         # Let the Reset method fill everything in.
         self.Reset()
@@ -107,30 +105,13 @@ class File_System_class:
         self.game_file_dict[game_file.virtual_path] = game_file
         
         # Check if the game_file is an xml file with a supported
-        # asset tags, and updates the asset_class_dict if so.
-        if isinstance(game_file, XML_File):
-            # Grab the root node.
-            root = game_file.Get_Root_Readonly()
-
-            # Skip if the tag doesn't match supported asset types.
-            if root.tag not in self.valid_asset_tags:
-                return
-
-            # Look through the root children for class attributes.
-            # Currently, this always expects 1 child that should always
-            #  have a class; toss an error if that isn't so.
-            assert len(root) == 1
-            # Want the inner tag, eg. 'macro' instead of 'macros',
-            #  just because it makes for nicer lookup syntax.
-            # -Nevermind; plural form helps visually distinguish from
-            #  class_name
-            #tag_name   = root[0].tag
-            class_name = root[0].get('class')
-            name       = root[0].get('name')
-            assert class_name != None
-            assert name != None
+        # asset tag, and updates the asset_class_dict if so.
+        if isinstance(game_file, XML_File) and game_file.asset_class_name != None:
+            tag        = game_file.root_tag
+            class_name = game_file.asset_class_name
+            name       = game_file.asset_name
             # Record the file two ways.
-            self.asset_class_dict[root.tag][class_name].append(game_file)
+            self.asset_class_dict[tag][class_name].append(game_file)
             self.asset_name_dict[name] = game_file
         return
 

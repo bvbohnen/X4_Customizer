@@ -5,6 +5,7 @@ from Framework import Analysis_Wrapper, File_System, Settings
 from ..Transforms.Weapons import Get_All_Weapons
 from .Write_Tables import Write_Tables
 from ..Transforms.Support import Float_to_String
+from .Live_Editor import Live_Editor
 
 @Analysis_Wrapper()
 def Print_Weapon_Stats(file_name = 'weapon_stats', return_tables = False):
@@ -24,7 +25,9 @@ def Print_Weapon_Stats(file_name = 'weapon_stats', return_tables = False):
     '''
     # This function will just get the tables and print them.
     # This is done so the gui can grab tables more directly.
-    table_list = Get_Weapons_Tables()
+    #table_list = Get_Weapons_Tables()
+    # Switching to new version that reuses the edit tables.
+    table_list = Convert_Weapon_Edit_Table_Group()
     if return_tables:
         return table_list
     # Write results.
@@ -32,10 +35,49 @@ def Print_Weapon_Stats(file_name = 'weapon_stats', return_tables = False):
     return
 
 
+def Convert_Weapon_Edit_Table_Group():
+    '''
+    Uses the Edit_Table_Group for weapons to construct a list of lists,
+    to be used for file writing.
+    '''
+    table_group = Live_Editor.Get_Table_Group('weapons')
+    table_list = []
+
+    for edit_table in table_group.Get_Tables():
+
+        # This returns a 2d list of lists holding edit items, that
+        # still need to be converted to strings.
+        item_table = edit_table.Get_Table()
+        
+        # Prep a clean table of strings.
+        new_table = []
+        table_list.append(new_table)
+
+        # Copy over the headers.
+        new_table.append(item_table[0])
+
+        for row in item_table[1:]:
+            new_row = []
+            new_table.append(new_row)
+            for item in row:
+
+                # Get its current value, or an empty string if no
+                # item was available.
+                if item != None:
+                    # TODO: maybe support other versions (vanilla, patched, etc.).
+                    value = item.Get_Value('current')
+                else:
+                    value = ''
+                new_row.append( value )
+
+    return table_list
+
+
 def Get_Weapons_Tables():
     '''
     Collects and returns a list of tables (lists of lists) holding
     the weapon info, categorized by weapon type.
+    Note: older version that builds tables here.
     '''
     weapons_list = Collect_Weapons()
 
@@ -202,7 +244,7 @@ def Parse_XML(object, xml_node, lookup_patterns):
         if node == None:
             continue
         value = node.get(xml_attr)
-        # Skip if values not found.
+        # Skip if value not found.
         if value == None:
             continue
         object[weapon_attr] = value

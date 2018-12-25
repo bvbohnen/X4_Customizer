@@ -22,6 +22,15 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Analyses\Live_Editor\Support.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Analyses\Live_Editor\Weapons.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Analyses\Live_Editor\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Analyses\Print_Ware_Stats.py">
       <SubType>Code</SubType>
     </Compile>
@@ -74,6 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Analyses\" />
+    <Folder Include="Analyses\Live_Editor\" />
     <Folder Include="GUI\" />
     <Folder Include="GUI\Main_Window\" />
     <Folder Include="Utilities\" />

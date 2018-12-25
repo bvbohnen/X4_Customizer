@@ -28,6 +28,8 @@ from .Script_Actions import Script_Actions
 from .Worker_Thread import Worker_Thread
 from Framework.Common import home_path
 
+from ...Analyses.Live_Editor import Live_Editor
+
 
 class GUI_Main_Window(QtWidgets.QMainWindow):
     '''
@@ -148,6 +150,9 @@ class GUI_Main_Window(QtWidgets.QMainWindow):
         #  will cause it to want to switch to the graph tab 
         #  (for whatever reason).
         self.tabWidget.setCurrentIndex(0)
+                
+        # Load the Live_Editor patches.
+        Live_Editor.Load_Patches()
 
         # Display the GUI upon creation.
         self.show()
@@ -227,6 +232,8 @@ class GUI_Main_Window(QtWidgets.QMainWindow):
             self.widget_documentation,
             self.widget_settings,
             self.widget_settings_doc,
+            self.widget_weapons,
+            self.widget_weapons_info,
             ]
         small_font_widgets = [
             self.widget_output,
@@ -300,6 +307,9 @@ class GUI_Main_Window(QtWidgets.QMainWindow):
         self.widget_settings.Save()
         # Save the gui settings themselves.
         self.gui_settings.Save_Gui_Settings()
+
+        # Save the Live_Editor changes.
+        Live_Editor.Save_Patches()
 
         super().close()
         return True

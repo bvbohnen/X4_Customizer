@@ -63,11 +63,12 @@ def Get_Hash_String(binary):
 
 class Cat_Reader:
     '''
-    Parsed catalog file contentself.
+    Parsed catalog file contents.
 
     Attributes:
     * cat_path
       - String, the full path to the cat file.
+      - TODO: track ext_ vs subst_ cats in a convenient way.
     * dat_path
       - String, the full path to corresponding dat file, as specified in
         the cat file.

@@ -219,6 +219,8 @@ def Make(*args):
         # Add fnmatch instead (wildcard style string matching).
         # -This might be removable if it is in the framework.
         '        r"fnmatch",',
+        # Inspect is used in the Live_Editor to ease some code writing.
+        '        r"inspect",',
         # Add pyqt for the gui plugin.
         # Pyinstaller needs a lot of help on this one when not being
         # given the original source files (which are in plugins).

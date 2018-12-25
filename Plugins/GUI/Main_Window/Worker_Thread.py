@@ -83,7 +83,9 @@ class Worker_Thread(QtCore.QThread):
             pass
             # Don't print for now; the framework will generally print the
             # exception on its own.
-            #self.Print(str(ex))
+            # Maybe in dev mode can double print.
+            if Settings.developer:
+                self.Print(str(ex))
 
         # Restore the old printer.
         Print.logging_function = old_printer
