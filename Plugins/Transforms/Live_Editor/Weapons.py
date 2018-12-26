@@ -3,10 +3,14 @@ from itertools import chain
 from collections import OrderedDict, defaultdict
 
 from Framework import File_System, Settings
-# Do a lazy import of classes from support.
-from .Support import *
-from ...Transforms.Weapons import Get_All_Weapons
-from ...Transforms.Support import Float_to_String
+
+from .Live_Editor_class import Live_Editor
+from .Edit_Tables import Edit_Table, Edit_Table_Group
+from .Edit_Object import Edit_Object
+from .Edit_Items  import Edit_Item, Display_Item
+
+from ..Weapons import Get_All_Weapons
+from ..Support import Float_to_String
 
 
 def Get_Weapon_Bullet_Edit_Objects():

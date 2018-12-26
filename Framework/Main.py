@@ -9,13 +9,20 @@ import traceback
 
 # To support packages cross-referencing each other, set up this
 # top level as a package, findable on the sys path.
-parent_dir = Path(__file__).resolve().parent.parent
-if str(parent_dir) not in sys.path:
-    sys.path.append(str(parent_dir))
+# TODO: this is a little redundant with Home_Path, but it is unclear
+# on how to import home_path before this is done, so just repeat
+# the effort for now.
+if getattr(sys, 'frozen', False):
+    home_path = Path(sys._MEIPASS).parent
+else:
+    home_path = Path(__file__).resolve().parents[1]
+if str(home_path) not in sys.path:
+    sys.path.append(str(home_path))
+
 # To support easy control script naming, add the Scripts folder to
 # the search path, but put it at the end (to reduce interference
 # if the user wants to import from their call location).
-scripts_dir = parent_dir / 'Scripts'
+scripts_dir = home_path / 'Scripts'
 if str(scripts_dir) not in sys.path:
     sys.path.append(str(scripts_dir))
 
@@ -58,10 +65,9 @@ def Run(*args):
         # This prevents an error message when an arg not given,
         # and the default is used instead.
         nargs = '?',
-        help =  'Python control script which will specify settings and'
-                ' plugins to run; path may be given relative to the Scripts'
-                ' folder; .py extension is optional; defaults to running'
-                ' Scripts/Default_Script.py'
+        help =  'Python control script which will run directly instead of'
+                ' launching the gui; path may be given relative to the'
+                ' Scripts folder; .py extension is optional; '
                )
     
     # Flag to clean out old files.
@@ -99,9 +105,10 @@ def Run(*args):
                 ' extra args and "-h" are passed through sys.argv.')
     
     argparser.add_argument(
-        '-gui', 
+        '-nogui', 
         action='store_true',
-        help =  'Launches the Gui instead of running any script.')
+        help =  'Suppresses the gui from launching; a default script'
+                ' will attempt to run if no script was given.')
     
     # Capture leftover args.
     # Note: when tested, this appears to be buggy, and was grabbing
@@ -138,7 +145,8 @@ def Run(*args):
 
 
     # Check for a gui launch.
-    if args.gui:
+    # This has been changed to act as the default when no script is given.
+    if not args.nogui:
         # In this case, the gui takes over and no script is expected.
         # TODO: maybe pass an input script path to the gui, but it
         # isn't important.

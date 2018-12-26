@@ -63,6 +63,13 @@ Change Log:
      weapon info viewer; plus niceties like changing font, remembering
      layout, and processing on a background thread.
    - Some unfortunate file size bloat in the compiled version.
+ * 1.3
+   - Added the Live_Editor, an extension for supporting gui based hand
+     editing of game files.
+   - Gui refined further, and live editor support added.
+   - Weapon tables updated for the live editor.
+   - Swapped the release exe to run without a console, and fixed
+     a bug when running from outside the main directory.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

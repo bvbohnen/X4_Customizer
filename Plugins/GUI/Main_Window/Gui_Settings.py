@@ -46,6 +46,7 @@ class Gui_Settings:
             #('size', parent.resize),
             #('pos' , parent.move),
             ('font', parent.Update_Font),
+            ('style', parent.Update_Style),
             ('geometry', parent.restoreGeometry),
             ('state', parent.restoreState),
             ]:
@@ -112,6 +113,7 @@ class Gui_Settings:
         settings.setValue('geometry', parent.saveGeometry())
         settings.setValue('state', parent.saveState())
         settings.setValue('font', parent.current_font)
+        settings.setValue('style', parent.current_style)
         settings.endGroup()
 
         # Iterate over all widgets, finding splitters.

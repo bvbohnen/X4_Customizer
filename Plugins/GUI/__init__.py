@@ -29,9 +29,10 @@ def Start_GUI():
 
     # Create the custom gui window itself, and set it to be shown.
     # Presumably this will get attached automatically to the 
-    #  QApplication object.
+    # QApplication object.
+    # To be able to changes styles, give this a link back to the app.
     from . import Main_Window
-    window = Main_Window.GUI_Main_Window()
+    window = Main_Window.GUI_Main_Window(qt_app)
 
     # Launch the QApplication; this will halt execution until the gui exits.
     return_value = qt_app.exec()

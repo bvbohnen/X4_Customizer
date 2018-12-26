@@ -12,8 +12,8 @@ Settings(
     path_to_x4_folder   = r'C:\Steam\SteamApps\common\X4 Foundations',
     # Set the path to the user documents folder.
     #path_to_user_folder = r'C:\Users\charname\Documents\Egosoft\X4\12345678',
-    # Switch output to be in the user documents folder.
-    output_to_user_extensions = True,
+    # Switch output to be in the user documents folder if needed.
+    output_to_user_extensions = False,
     )
 
 # Reduce mass traffic and increase military jobs.

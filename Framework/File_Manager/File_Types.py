@@ -167,6 +167,8 @@ class XML_File(Game_File):
             xml_root = None,
             **kwargs):
         super().__init__(**kwargs)
+        self.asset_class_name = None
+        self.asset_name = None
 
         # Should receive either the binary or the xml itself.
         assert binary != None or xml_root != None
@@ -201,10 +203,6 @@ class XML_File(Game_File):
         # Annotate the patched_root with node ids.
         XML_Diff.Fill_Node_IDs(self.patched_root)
         
-        # Set up asset fields, which patches may have changed.
-        self.asset_class_name = None
-        self.asset_name = None
-
         # Skip if the tag doesn't match supported asset types.
         # Note: diff patches will have a 'diff' root, and don't
         # get matched here.

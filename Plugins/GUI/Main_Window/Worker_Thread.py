@@ -1,4 +1,6 @@
 
+import traceback
+
 from PyQt5 import QtWidgets, QtCore
 from Framework import Print
 from Framework import Settings
@@ -42,7 +44,7 @@ class Worker_Thread(QtCore.QThread):
         self.send_message.emit(line)
 
 
-    def Start(self):
+    def start(self):
         '''
         Runs the selected function, starting a side thread unless
         disabled through Settings, in which case the function
@@ -50,7 +52,7 @@ class Worker_Thread(QtCore.QThread):
         '''
         if not Settings.disable_threading:
             # Call the pyqt start function.
-            self.start()
+            super().start()
         else:
             self.run()
             # Manually send the finished signal, to mimic a thread.
@@ -80,12 +82,10 @@ class Worker_Thread(QtCore.QThread):
         try:
             self.return_value = self.function(*self.args, **self.kwargs)
         except Exception as ex:
-            pass
-            # Don't print for now; the framework will generally print the
-            # exception on its own.
+            self.Print(str(ex))
             # Maybe in dev mode can double print.
             if Settings.developer:
-                self.Print(str(ex))
+                Print(traceback.format_exc())
 
         # Restore the old printer.
         Print.logging_function = old_printer

@@ -19,12 +19,20 @@ Settings(
 test_all = 0
 
 
-if 0:
-    # Gui test.
-    Framework.GUI.Start_GUI()
+# Test the gui live editor, doing a transform before and after
+# the patch application. Transform before should show up in the
+# gui edit tables; transform after should show up in the final
+# game files (along with the hand edits from the gui).
+if 1:
+    # Pre-editor should have halved damage, post-editor 2x damage,
+    # compared to vanilla or the input extensions.
+    Adjust_Weapon_Damage(0.5)
+    Apply_Live_Editor_Patches()
+    Adjust_Weapon_Damage(4)
+
 
 # lxml seems to have slow findall performance with wares.xml;
-# toy around with it.
+# toy around with it. TODO: remove this; problem was found and fixed.
 if 0:
     wares_file = Framework.Load_File('libraries/wares.xml')
     xml_node = wares_file.Get_Root()

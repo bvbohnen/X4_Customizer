@@ -26,9 +26,10 @@ from Framework import Print
 from .Gui_Settings import Gui_Settings
 from .Script_Actions import Script_Actions
 from .Worker_Thread import Worker_Thread
+from . import Styles
 from Framework.Common import home_path
 
-from ...Analyses.Live_Editor import Live_Editor
+from ...Transforms.Live_Editor import Live_Editor
 
 
 class GUI_Main_Window(QtWidgets.QMainWindow):
@@ -36,9 +37,13 @@ class GUI_Main_Window(QtWidgets.QMainWindow):
     Custom Gui class object, as a child of the QMainWindow class.
 
     Attributes:
+    * application
+      - Link back to the parent QApplication object.
     * current_font
       - QFont object specifying the current primary display font.
       - This may differ from the main window .font().
+    * current_style
+      - Name of the current QStyle in use.
     * gui_settings
       - Gui_Settings object which will handle saving and reloading
         window settings.
@@ -56,15 +61,20 @@ class GUI_Main_Window(QtWidgets.QMainWindow):
         being careful not to take action if the thread finishes
         for another user.
     '''
-    def __init__(self):
+    def __init__(self, application):
         # Init the QMainWindow.
         super().__init__()
+        self.application = application
 
         # Load the .ui file created in Qt Designer into this window.
         gui_file = Path(__file__).parents[1] / 'x4c_gui_layout.ui'
         loadUi(str(gui_file), self)
-
+        # Set up the styles menu.
+        # This is done programatically, not in the gui file.
+        self.Init_Styles()
+        
         self.current_font = None
+        self.current_style = None
         self.gui_settings = Gui_Settings(self)
         self.script_actions = Script_Actions(self, self.widget_script)
 
@@ -142,7 +152,7 @@ class GUI_Main_Window(QtWidgets.QMainWindow):
 
         # Set a default font, prior to loading prior settings.
         self.Init_Font()
-        
+
         # Restore the settings.
         self.gui_settings.Restore_Gui_Settings()
         
@@ -261,6 +271,64 @@ class GUI_Main_Window(QtWidgets.QMainWindow):
             widget.setFont(small_font)
         return
 
+    
+    ##########################################################################
+    # Style related actions.
+
+    def Init_Styles(self):
+        '''
+        Expands the menuStyle submenu with the selection options for
+        found available qt styles.
+        '''
+        # Add submenu items for the style names.
+        for name in sorted(Styles.Get_Style_Names()):
+            action = self.menuStyle.addAction(name)
+            # Annotate the action with the style name, for easy 
+            # handling when triggered.
+            action.style_name = name
+
+            # Connect up the action to a shared handler.
+            # This can use a lambda function to pass args to the called
+            # handler function.
+            # Note: this requires jumping through hoops to get the current
+            # name to pass through, instead of all lambdas using the name
+            # on the last loop iteration.
+            # https://stackoverflow.com/questions/50298582/why-does-python-asyncio-loop-call-soon-overwrite-data
+            # The first term is some qt junk term; after that give the
+            # wanted term with a default set to the wanted value.
+            action.triggered.connect(
+                lambda qtjunk, name = name: self.Action_Change_Style(name))
+
+        # Record the current style name; probably default Windows or similar.
+        return
+
+        
+    def Action_Change_Style(self, style_name):
+        '''
+        A 'Style' submenu action was selected.
+        '''
+        # Update the style if needed.
+        if style_name != self.current_style:
+            self.Update_Style(style_name)
+        return
+
+
+    def Update_Style(self, style_name):
+        '''
+        Update up the style to use in the various windows.
+        '''
+        # Build the style.
+        style = Styles.Make_Style(style_name)
+        # Catch failures.
+        if style == None:
+            self.Print('Failed to create style ""'.format(style))
+            return
+
+        # Update the app.
+        self.application.setStyle(style)
+        # Save the name.
+        self.current_style = style_name
+        return
         
     ##########################################################################
     # Shutdown functions.

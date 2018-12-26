@@ -132,6 +132,11 @@ def Make(*args):
         help = 'Compile with basic python optimization, removing assertions'
                ' and perhaps some debug checks.')
     
+    #argparser.add_argument(
+    #    '-window', 
+    #    action='store_true',
+    #    help = 'Compiles for windowed output instead of console output.')
+    
     # -Removed, keep docstrings.
     #argparser.add_argument(
     #    '-oo', '-OO', 
@@ -270,8 +275,10 @@ def Make(*args):
         '    debug = False,',
         '    strip = False,',
         '    upx = True,',
-        # TODO: disabled console for a gui version; can also tweak name.
-        '    console = True,',
+        # May want to disable console for a gui version.
+        #'    console = True,',
+        '    console = False,',
+        '    windowed = True,',
         ')',
         '',
     ]
@@ -398,33 +405,37 @@ def Make(*args):
         {
             'name' : 'Run_Script',
             # Use '%*' to pass all command line args.
-            'cmd'  : os.path.join('bin', program_name + '.exe') + ' %*',
+            # The " | MORE" tag supposedly will capture stdout of
+            # the tool even though it was compiled for a window.
+            'cmd'  : os.path.join('bin', program_name + '.exe') + ' -nogui %* | MORE',
             # Pause the window when done, so messages can be read.
             'pause': True,
             },
         {
             'name' : 'Clean_Script',
-            'cmd'  : os.path.join('bin', program_name + '.exe') + ' %* -clean',
+            'cmd'  : os.path.join('bin', program_name + '.exe') + ' -nogui %* -clean | MORE',
             'pause': True,
             },
         {
             'name' : 'Cat_Unpack',
-            'cmd'  : os.path.join('bin', program_name + '.exe') + ' Cat_Unpack -argpass %*',
+            'cmd'  : os.path.join('bin', program_name + '.exe') + ' -nogui Cat_Unpack -argpass %* | MORE',
             'pause': True,
             },
         {
             'name' : 'Cat_Pack',
-            'cmd'  : os.path.join('bin', program_name + '.exe') + ' Cat_Pack -argpass %*',
+            'cmd'  : os.path.join('bin', program_name + '.exe') + ' -nogui Cat_Pack -argpass %* | MORE',
             'pause': True,
             },
         {
             'name' : 'Check_Extensions',
-            'cmd'  : os.path.join('bin', program_name + '.exe') + ' Check_Extensions -argpass %*',
+            'cmd'  : os.path.join('bin', program_name + '.exe') + ' -nogui Check_Extensions -argpass %* | MORE',
             'pause': True,
             },
         {
             'name' : 'Start_Gui',
-            'cmd'  : os.path.join('bin', program_name + '.exe') + ' -gui %*',
+            # Use 'start' to launch the gui and close the bat window
+            # right away.
+            'cmd'  : 'start ' + os.path.join('bin', program_name + '.exe') + ' %*',
             # No pausing for now; probably just annoying if the gui
             # doesn't crash.
             'pause': False,

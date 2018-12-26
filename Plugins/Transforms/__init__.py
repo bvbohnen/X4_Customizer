@@ -10,6 +10,8 @@ from .Jobs import Adjust_Job_Count
 #from .Weapon import *
 #from .Director import *
 
+from .Live_Editor import Apply_Live_Editor_Patches
+
 from .Wares import Adjust_Ware_Price_Spread
 from .Wares import Adjust_Ware_Prices
 

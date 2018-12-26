@@ -88,6 +88,7 @@ Usage for Python source code:
 
 #from .Common.Settings import Set_Path
 from . import Common
+from .Common import home_path
 # Make some logs available.
 from .Common import Change_Log, Plugin_Log, Print
 from .Common import Get_Version
@@ -110,10 +111,8 @@ def _Init():
     '''
     One-time setup, not to be part of * imports.
     '''
-    # Set the import path so the Imports is findable.
-    from pathlib import Path
     import sys
-    parent_dir = str(Path(__file__).resolve().parent.parent)
-    if parent_dir not in sys.path:
-        sys.path.append(parent_dir)
+    # Set the home_path to be a search path for other packages.
+    if str(home_path) not in sys.path:
+        sys.path.append(str(home_path))
 _Init()

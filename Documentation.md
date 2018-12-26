@@ -1,4 +1,4 @@
-X4 Customizer 1.2
+X4 Customizer 1.3
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -67,8 +67,8 @@ Example input file:
         path_to_x4_folder   = r'C:\Steam\SteamApps\common\X4 Foundations',
         # Set the path to the user documents folder.
         #path_to_user_folder = r'C:\Users\charname\Documents\Egosoft\X4\12345678',
-        # Switch output to be in the user documents folder.
-        output_to_user_extensions = True,
+        # Switch output to be in the user documents folder if needed.
+        output_to_user_extensions = False,
         )
     
     # Reduce mass traffic and increase military jobs.
@@ -170,12 +170,17 @@ Example input file:
       - Defaults to False.
     
     Logging:
+    * live_editor_log_file_name
+      - String, name a json file which the live editor (tracking hand edits in the gui) will save patches to, and reload from.
+      - Patches will capture any hand edits made by the user.
+      - File is located in the output extension folder.
+      - Defaults to 'live_editor_log.json'
     * plugin_log_file_name
-      - String, name a text file to write plugin output messages to; content depends on plugins run.
+      - String, name of a text file to write plugin output messages to; content depends on plugins run.
       - File is located in the output extension folder.
       - Defaults to 'plugin_log.txt'
     * customizer_log_file_name
-      - String, name a json file to write customizer log information to, including a list of files written.
+      - String, name a json file to write customizer log information to, including a list of files written, information that will be loaded on the next run to guide the file handling logic.
       - File is located in the output extension folder.
       - Defaults to 'customizer_log.json'
     * log_source_paths
@@ -287,6 +292,20 @@ Jobs Transforms:
             ('faction  argon'             , 1.2),
             ('*'                          , 1.1) )
     
+        
+
+
+***
+
+Live_Editor Transforms:
+
+  * Apply_Live_Editor_Patches
+
+    This will apply all patches created by hand through the live editor in the GUI. This should be called no more than once per script, and currently should be called before any other transforms which might read the edited values. Pending support for running some transforms prior to hand edits.
+    
+    * file_name
+      - Optional, alternate name of a json file holding the Live_Editor generated patches file.
+      - Default uses the name in Settings.
         
 
 
@@ -528,3 +547,8 @@ Change Log:
  * 1.2
    - Added the initial Gui, featuring: python syntax and plugin highlighter, documentation viewer, settings editor, script launcher, preliminary weapon info viewer; plus niceties like changing font, remembering layout, and processing on a background thread.
    - Some unfortunate file size bloat in the compiled version.
+ * 1.3
+   - Added the Live_Editor, an extension for supporting gui based hand editing of game files.
+   - Gui refined further, and live editor support added.
+   - Weapon tables updated for the live editor.
+   - Swapped the release exe to run without a console, and fixed a bug when running from outside the main directory.

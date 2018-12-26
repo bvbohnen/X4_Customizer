@@ -22,13 +22,28 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Analyses\Live_Editor\Support.py">
+    <Compile Include="GUI\Main_Window\Styles.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Analyses\Live_Editor\Weapons.py">
+    <Compile Include="Transforms\Live_Editor\Apply_Patches.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Analyses\Live_Editor\__init__.py">
+    <Compile Include="Transforms\Live_Editor\Edit_Object.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Live_Editor\Edit_Items.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Live_Editor\Live_Editor_class.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Live_Editor\Edit_Tables.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Live_Editor\Weapons.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Live_Editor\__init__.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Analyses\Print_Ware_Stats.py">
@@ -83,7 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Analyses\" />
-    <Folder Include="Analyses\Live_Editor\" />
+    <Folder Include="Transforms\Live_Editor\" />
     <Folder Include="GUI\" />
     <Folder Include="GUI\Main_Window\" />
     <Folder Include="Utilities\" />

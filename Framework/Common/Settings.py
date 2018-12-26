@@ -109,14 +109,21 @@ class Settings_class:
       - Defaults to False.
 
     Logging:
+    * live_editor_log_file_name
+      - String, name a json file which the live editor (tracking hand
+        edits in the gui) will save patches to, and reload from.
+      - Patches will capture any hand edits made by the user.
+      - File is located in the output extension folder.
+      - Defaults to 'live_editor_log.json'
     * plugin_log_file_name
-      - String, name a text file to write plugin output messages to;
+      - String, name of a text file to write plugin output messages to;
         content depends on plugins run.
       - File is located in the output extension folder.
       - Defaults to 'plugin_log.txt'
     * customizer_log_file_name
       - String, name a json file to write customizer log information to,
-        including a list of files written.
+        including a list of files written, information that will be loaded
+        on the next run to guide the file handling logic.
       - File is located in the output extension folder.
       - Defaults to 'customizer_log.json'
     * log_source_paths
@@ -272,6 +279,7 @@ class Settings_class:
         defaults['ignore_output_extension'] = True
         defaults['make_maximal_diffs'] = False
         defaults['plugin_log_file_name'] = 'plugin_log.txt'
+        defaults['live_editor_log_file_name'] = 'live_editor_log.json'        
         defaults['customizer_log_file_name'] = 'customizer_log.json'
         defaults['disable_cleanup_and_writeback'] = False
         defaults['log_source_paths'] = False
@@ -478,6 +486,11 @@ class Settings_class:
     def Get_User_Content_XML_Path(self):
         'Returns the path to the user content.xml file.'
         return self.path_to_user_folder / 'content.xml'
+
+    def Get_Live_Editor_Log_Path(self):
+        'Returns the path to the live editor log file.'
+        return self.Get_Output_Folder() / self.live_editor_log_file_name
+
 
 
 # General settings object, to be referenced by any place so interested.

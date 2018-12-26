@@ -14,7 +14,7 @@
    <bool>true</bool>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>X4 Customizer</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_3">
@@ -127,38 +127,14 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayout_4">
         <item row="0" column="0">
-         <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0,0,1">
+         <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1">
           <property name="sizeConstraint">
            <enum>QLayout::SetMinimumSize</enum>
           </property>
           <item>
-           <widget class="QRadioButton" name="widget_Table_Vanilla_button">
-            <property name="text">
-             <string>Vanilla</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="widget_Table_Uncustomized_button">
-            <property name="text">
-             <string>External Mods</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="widget_Table_Customized_button">
-            <property name="text">
-             <string>Current</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QPushButton" name="widget_Table_Update">
             <property name="text">
-             <string>Load</string>
+             <string>Refresh</string>
             </property>
            </widget>
           </item>
@@ -198,7 +174,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>596</width>
+              <width>106</width>
               <height>190</height>
              </rect>
             </property>
@@ -252,7 +228,13 @@
     <property name="title">
      <string>Settings</string>
     </property>
+    <widget class="QMenu" name="menuStyle">
+     <property name="title">
+      <string>Style</string>
+     </property>
+    </widget>
     <addaction name="action_Change_Font"/>
+    <addaction name="menuStyle"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -374,6 +356,11 @@
    </property>
    <property name="text">
     <string>Output</string>
+   </property>
+  </action>
+  <action name="actionasdf">
+   <property name="text">
+    <string>asdf</string>
    </property>
   </action>
  </widget>

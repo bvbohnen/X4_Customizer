@@ -33,6 +33,11 @@ def Make(*args):
         action='store_true',
         help = 'Automatically call Make_Documentation and Make_Executable.')
     
+    argparser.add_argument(
+        '-uncompress', 
+        action='store_true',
+        help = 'Leaves the output zip file uncompressed.')
+
     #argparser.add_argument(
     #    '-doc_refresh', 
     #    action='store_true',
@@ -133,20 +138,25 @@ def Make(*args):
                 
     # Create a new zip file.
     # Put this in the top level directory.
-    zip_name = 'X4_Customizer_v{}.zip'.format(Framework.Change_Log.Get_Version())
-    zip_path = os.path.normpath(os.path.join(This_dir, '..', zip_name))
-    zip_file = zipfile.ZipFile(
-        zip_path, 'w',
-        # Can try out different zip algorithms, though from a really
-        # brief search it seems lzma is the newest and strongest.
-        # Result: seems to work well, dropping the ~90M qt version
-        # down to ~25M.
-        compression = zipfile.ZIP_LZMA,
-        # Compression level only matters for bzip2 and deflated.
-        #compresslevel = 5
-        )
+    version_name = 'X4_Customizer_v{}'.format(Framework.Change_Log.Get_Version())
+    zip_path = os.path.normpath(os.path.join(This_dir, '..', version_name + '.zip'))
+    # Optionally open it with compression.
+    if parsed_args.uncompress:
+        zip_file = zipfile.ZipFile(zip_path, 'w')
+    else:
+        zip_file = zipfile.ZipFile(
+            zip_path, 'w',
+            # Can try out different zip algorithms, though from a really
+            # brief search it seems lzma is the newest and strongest.
+            # Result: seems to work well, dropping the ~90M qt version
+            # down to ~25M.
+            compression = zipfile.ZIP_LZMA,
+            # Compression level only matters for bzip2 and deflated.
+            #compresslevel = 5
+            )
 
-    # Add all files to the zip.
+    # Add all files to the zip, with an extra nesting folder to
+    # that the files don't sprawl out when unpacked.
     for path in file_paths:
         zip_file.write(
             # Give a full path.
@@ -155,7 +165,7 @@ def Make(*args):
             # This will be relative to the top dir.
             # Note: relpath seems to bugger up if the directories match,
             #  returning a blank instead of the file name.
-            arcname = os.path.relpath(path, Top_dir)
+            arcname = os.path.join(version_name, os.path.relpath(path, Top_dir))
             )
 
     # Close the zip; this needs to be explicit, according to the

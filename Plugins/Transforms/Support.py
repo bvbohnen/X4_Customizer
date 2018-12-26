@@ -3,7 +3,9 @@ Various shared support functions for the transforms.
 '''
 
 def Float_to_String(this_float, precision = 2):
-    'Prints float with cleaned up precision decimal places.'
+    '''
+    Returns a float as a string with cleaned up precision decimal places.
+    '''
     return '{1:.{0}f}'.format(precision, this_float).rstrip('0').rstrip('.')
 
 def Standardize_Match_Rules(rules):

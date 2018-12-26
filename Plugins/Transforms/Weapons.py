@@ -444,7 +444,8 @@ def Get_All_Weapons():
     # Grab the weapon macros.
     weapon_files = File_System.Get_Asset_Files_By_Class('macros',
                     'weapon','missilelauncher','turret',
-                    'missileturret','bomblauncher')
+                    'missileturret',
+                    'bomblauncher')
     # Wrap into Weapon class objects to fill in links to other xml.
     return [Weapon(x) for x in weapon_files]
 

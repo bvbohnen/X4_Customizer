@@ -8,7 +8,7 @@ from Framework import File_System
 from Framework.Common import home_path
 from Framework import Main
 
-from ...Analyses.Live_Editor import Live_Editor
+from ...Transforms.Live_Editor import Live_Editor
 
 class Script_Actions:
     '''
@@ -265,11 +265,18 @@ class Script_Actions:
         '''
         Clean up after a Run Script thread has finished.
         '''
+        self.parent.action_Run_Script.setEnabled(True)
         self.parent.worker_thread.finished.disconnect(self.Handle_Thread_Finished)
+
         # When done, restore Settings back to the gui values.
         # This may not be strictly necessary.
         self.parent.widget_settings.Store_Settings()
-        # TODO: detect errors in the script and note them.
+
+        # TODO: detect errors in the script and note them; for now, the
+        # thread or framework will tend to print them out.
         self.parent.Print('Script Run completed')
-        self.parent.action_Run_Script.setEnabled(True)
+
+        # Tell any live edit tables to refresh their current values,
+        # since the script may have changed them.
+        self.parent.widget_weapons.Soft_Refresh()
         return

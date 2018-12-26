@@ -1,4 +1,4 @@
-X4 Customizer 1.2
+X4 Customizer 1.3
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -69,8 +69,8 @@ Example input file:
         path_to_x4_folder   = r'C:\Steam\SteamApps\common\X4 Foundations',
         # Set the path to the user documents folder.
         #path_to_user_folder = r'C:\Users\charname\Documents\Egosoft\X4\12345678',
-        # Switch output to be in the user documents folder.
-        output_to_user_extensions = True,
+        # Switch output to be in the user documents folder if needed.
+        output_to_user_extensions = False,
         )
     
     # Reduce mass traffic and increase military jobs.
@@ -125,6 +125,15 @@ Jobs Transforms:
   * Adjust_Job_Count
 
     Adjusts job ship counts using a multiplier, affecting all quota fields. Input is a list of matching rules, determining which jobs get adjusted.
+
+
+***
+
+Live_Editor Transforms:
+
+  * Apply_Live_Editor_Patches
+
+    This will apply all patches created by hand through the live editor in the GUI. This should be called no more than once per script, and currently should be called before any other transforms which might read the edited values. Pending support for running some transforms prior to hand edits.
 
 
 ***
@@ -240,3 +249,8 @@ Change Log:
  * 1.2
    - Added the initial Gui, featuring: python syntax and plugin highlighter, documentation viewer, settings editor, script launcher, preliminary weapon info viewer; plus niceties like changing font, remembering layout, and processing on a background thread.
    - Some unfortunate file size bloat in the compiled version.
+ * 1.3
+   - Added the Live_Editor, an extension for supporting gui based hand editing of game files.
+   - Gui refined further, and live editor support added.
+   - Weapon tables updated for the live editor.
+   - Swapped the release exe to run without a console, and fixed a bug when running from outside the main directory.
