@@ -60,7 +60,6 @@ def Run(*args):
     # Set this to default to None, which will be caught manually.
     argparser.add_argument(
         'control_script',
-        default = 'Default_Script',
         # Consume 0 or 1 argument.
         # This prevents an error message when an arg not given,
         # and the default is used instead.
@@ -146,7 +145,7 @@ def Run(*args):
 
     # Check for a gui launch.
     # This has been changed to act as the default when no script is given.
-    if not args.nogui:
+    if not args.nogui and not args.control_script:
         # In this case, the gui takes over and no script is expected.
         # TODO: maybe pass an input script path to the gui, but it
         # isn't important.
@@ -154,7 +153,9 @@ def Run(*args):
         # Return when the gui closes.
         return
 
-
+    # Set the input script to default if one wasn't given.
+    if not args.control_script:
+        args.control_script = 'Default_Script'
     # Convenience flag for when the default script is in use.
     using_default_script = args.control_script == 'Default_Script'
 

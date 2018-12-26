@@ -1,4 +1,4 @@
-X4 Customizer 1.3
+X4 Customizer 1.3.1
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -552,3 +552,5 @@ Change Log:
    - Gui refined further, and live editor support added.
    - Weapon tables updated for the live editor.
    - Swapped the release exe to run without a console, and fixed a bug when running from outside the main directory.
+ * 1.3.1
+   - Fix a couple small bugs that crept in.

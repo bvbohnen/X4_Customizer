@@ -70,6 +70,8 @@ Change Log:
    - Weapon tables updated for the live editor.
    - Swapped the release exe to run without a console, and fixed
      a bug when running from outside the main directory.
+ * 1.3.1
+   - Fix a couple small bugs that crept in.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

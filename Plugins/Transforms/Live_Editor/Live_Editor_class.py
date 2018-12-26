@@ -9,7 +9,7 @@ from .Edit_Items import Edit_Item, Display_Item
 # Values are strings.
 Custom_Patch = namedtuple(
     'Custom_Patch', 
-    ['virtual_path', 'xpath', 'attribute', 'value'])
+    ['name', 'virtual_path', 'xpath', 'attribute', 'value'])
 
 
 class Live_Editor_class:
@@ -237,12 +237,12 @@ class Live_Editor_class:
         '''
         patch_list = []
         for key, value in self.patches_dict.items():
-            # Convert 
             split_key = key.split(',')
             patch_list.append(Custom_Patch(
-                virtual_path = split_key[0],
-                xpath        = split_key[1],
-                attribute    = split_key[2],
+                name         = split_key[0],
+                virtual_path = split_key[1],
+                xpath        = split_key[2],
+                attribute    = split_key[3],
                 value        = value,
                 ))
         return patch_list

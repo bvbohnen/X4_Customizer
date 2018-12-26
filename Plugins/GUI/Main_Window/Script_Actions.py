@@ -89,7 +89,6 @@ class Script_Actions:
         file_dialogue.setFileMode(QtWidgets.QFileDialog.ExistingFile)
             
         # Get the filename/path from the dialogue.
-        print(self.last_dialog_path)
         file_selected, _ = file_dialogue.getOpenFileName(
             directory = str(self.last_dialog_path),
             filter = 'Python script (*.py)')
