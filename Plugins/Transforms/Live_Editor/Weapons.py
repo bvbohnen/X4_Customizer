@@ -83,7 +83,7 @@ def Get_Weapon_Bullet_Edit_Objects():
             this_entry = [x.replace('connection_xpath', connection_xpath)
                             if isinstance(x, str) else x 
                             for x in entry]
-            this_weapon_component_xpath_fields.append(entry)
+            this_weapon_component_xpath_fields.append(this_entry)
         
         weapon_edit_object.Make_Edit_Items(
             weapon.component_file,
@@ -412,7 +412,9 @@ def _Get_Weapon_Edit_Table_Group():
             ('weapon_class'              , 'Class'),
             ('codename'                  , 'Weapon Codename'),
             ('bullet_codename'           , 'Bullet Codename'),
-            ('tags'                      , 'Tags'),
+            ('connection_name'           , 'Connection Name'),
+            ('connection_tags'           , 'Connection Tags'),
+            
         ])
 
     return edit_table_group

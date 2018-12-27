@@ -25,6 +25,32 @@
     <Compile Include="GUI\Main_Window\Styles.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="GUI\Edit_Table_Window\Edit_Item.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GUI\Edit_Table_Window\Item_Table.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GUI\Edit_Table_Window\Edit_Table_Window.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GUI\Edit_Table_Window\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GUI\Script_Window\Script_Window.py" />
+    <Compile Include="GUI\Script_Window\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GUI\Settings_Window\Settings_Window.py" />
+    <Compile Include="GUI\Settings_Window\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GUI\Shared\Tab_Page_Widget.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GUI\Shared\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Transforms\Live_Editor\Apply_Patches.py">
       <SubType>Code</SubType>
     </Compile>
@@ -56,17 +82,16 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Analyses\__init__.py" />
-    <Compile Include="GUI\Main_Window\Gui_Settings.py" />
+    <Compile Include="GUI\Main_Window\Session_Memory.py" />
     <Compile Include="GUI\Main_Window\Main_Window.py" />
-    <Compile Include="GUI\Main_Window\Script_Actions.py" />
-    <Compile Include="GUI\Main_Window\Worker_Thread.py" />
+    <Compile Include="GUI\Main_Window\Worker_Thread_Handler.py" />
     <Compile Include="GUI\Main_Window\__init__.py" />
-    <Compile Include="GUI\Syntax_Highlighter.py" />
-    <Compile Include="GUI\Widget_Documentation.py" />
-    <Compile Include="GUI\Widget_Plugins.py" />
-    <Compile Include="GUI\Widget_Script.py" />
-    <Compile Include="GUI\Widget_Settings.py" />
-    <Compile Include="GUI\Widget_X4_Table.py" />
+    <Compile Include="GUI\Script_Window\Syntax_Highlighter.py" />
+    <Compile Include="GUI\Shared\Widget_Documentation.py" />
+    <Compile Include="GUI\Script_Window\Widget_Plugins.py" />
+    <Compile Include="GUI\Script_Window\Widget_Script.py" />
+    <Compile Include="GUI\Settings_Window\Widget_Settings.py" />
+    <Compile Include="GUI\Edit_Table_Window\Tree_Viewer.py" />
     <Compile Include="GUI\__init__.py" />
     <Compile Include="Transforms\Director.py">
       <SubType>Code</SubType>
@@ -98,6 +123,10 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Analyses\" />
+    <Folder Include="GUI\Edit_Table_Window\" />
+    <Folder Include="GUI\Shared\" />
+    <Folder Include="GUI\Script_Window\" />
+    <Folder Include="GUI\Settings_Window\" />
     <Folder Include="Transforms\Live_Editor\" />
     <Folder Include="GUI\" />
     <Folder Include="GUI\Main_Window\" />

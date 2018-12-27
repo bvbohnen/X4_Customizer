@@ -3,9 +3,9 @@ from collections import defaultdict
 
 from PyQt5.QtWidgets import QTreeWidgetItem, QTreeWidget
 
-from .. import Analyses
-from .. import Transforms
-from .. import Utilities
+from ... import Analyses
+from ... import Transforms
+from ... import Utilities
 
 
 class Widget_Plugins(QTreeWidget):
@@ -89,7 +89,7 @@ class Widget_Plugins(QTreeWidget):
             text = '\n'.join([new_item.plugin.__doc__] + new_item.plugin._shared_docs)
 
             # Send to the text viewer.
-            self.parent.widget_documentation.setPlainText(text)
+            self.window.widget_documentation.setPlainText(text)
         return
 
     
@@ -107,12 +107,16 @@ class Widget_Plugins(QTreeWidget):
         mimedata = super().mimeData(selections)
         if selections:
             item = selections[0]
-
-            # Add empty args and a newline for now.
-            # TODO: maybe add named args and defaults; that would
-            # take some inspection. Alternatively, could create
-            # custom defaults for each transform.
-            text = item.plugin.__name__ + '()\n'
+            
+            if hasattr(item, 'plugin'):
+                # Add empty args and a newline for now.
+                # TODO: maybe add named args and defaults; that would
+                # take some inspection. Alternatively, could create
+                # custom defaults for each transform.
+                text = item.plugin.__name__ + '()\n'
+            else:
+                # Don't copy over anything for non-plugins.
+                text = ''
             mimedata.setText(text)
 
         return mimedata

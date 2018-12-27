@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>904</width>
+    <height>416</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QSplitter" name="hsplitter">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <widget class="QSplitter" name="vsplitter">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <widget class="Widget_Plugins" name="widget_plugins">
+       <property name="dragEnabled">
+        <bool>true</bool>
+       </property>
+       <property name="dragDropMode">
+        <enum>QAbstractItemView::DragOnly</enum>
+       </property>
+       <attribute name="headerVisible">
+        <bool>false</bool>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>Plugins</string>
+        </property>
+       </column>
+      </widget>
+      <widget class="Widget_Documentation" name="widget_documentation">
+       <property name="acceptDrops">
+        <bool>false</bool>
+       </property>
+       <property name="lineWrapMode">
+        <enum>QTextEdit::NoWrap</enum>
+       </property>
+      </widget>
+     </widget>
+     <widget class="Widget_Script" name="widget_script"/>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Widget_Plugins</class>
+   <extends>QTreeWidget</extends>
+   <header>Plugins.GUI.Script_Window</header>
+  </customwidget>
+  <customwidget>
+   <class>Widget_Documentation</class>
+   <extends>QTextBrowser</extends>
+   <header>Plugins.GUI.Shared</header>
+  </customwidget>
+  <customwidget>
+   <class>Widget_Script</class>
+   <extends>QPlainTextEdit</extends>
+   <header>Plugins.GUI.Script_Window</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

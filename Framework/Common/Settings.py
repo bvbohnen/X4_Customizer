@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import json
 from collections import OrderedDict
+from functools import wraps
 from .Home_Path import home_path
 from .Print import Print
 
@@ -193,6 +194,29 @@ class Settings_class:
         # Flag to track if delayed init has completed.
         self._init_complete = False
         return
+    
+
+    def _Verify_Init(func):
+        '''
+        Small wrapper on functions that should verify the init
+        check has been done before returning.
+        '''
+        '''
+        Note: this cannot be set as a staticmethod since that
+        delays its creation until after it is needed (presumably);
+        also, it does not take 'self' on its own, just the
+        wrapped func.
+        '''
+        # Use functools wraps to preserve the docstring and such.
+        @wraps(func)
+        # All wrapped functions will have self.
+        def func_wrapper(self, *args, **kwargs):
+            # Run delayed init if needed.
+            if not self._init_complete:
+                self.Delayed_Init()
+            # Run the func as normal.
+            return func(self, *args, **kwargs)
+        return func_wrapper
 
 
     def Reset(self):
@@ -214,20 +238,33 @@ class Settings_class:
         # doesn't matter.
         category_list_dict = OrderedDict()
         category = None
+
+        # Work through the docstring.
         for line in self.__doc__.splitlines():
+
             # Category titles are single words with an ending :, no
             #  prefix.
             strip_line = line.strip()
             if strip_line.endswith(':') and strip_line[0] not in ['-','*']:
                 category = strip_line.replace(':','')
+
             # Fields are recognized names after a *.
             elif strip_line.startswith('*'):
                 field = strip_line.replace('*','').strip()
+
+                # Check that the doc term maches a local attribute.
                 if hasattr(self, field):
+
+                    # A category should have been found at this point.
                     assert category != None
+
+                    # Record the new category if needed.
+                    # Note: cannot use defaultdict for this since already
+                    # using an OrderedDict.
                     if category not in category_list_dict:
                         category_list_dict[category] = []
                     category_list_dict[category].append(field)
+
         return category_list_dict
 
 
@@ -393,9 +430,14 @@ class Settings_class:
                 Print('Warning: setting "{}" not recognized'.format(name))
             else:
                 setattr(self, name, value)
+        # Reset to pre-init state, so the new paths and such
+        # will get cleaned up and checked.
+        self.Reset()
         return
 
 
+    # TODO: with _Verify_Init in place, wherever this was called
+    # originally may no longer need to call it.
     def Delayed_Init(self):
         '''
         Checks the current paths for errors (not existing, etc.), converts
@@ -452,15 +494,19 @@ class Settings_class:
 
         return
 
-
+    # The following functions return paths that might be unsafe
+    # if delayed init wasn't run yet.
+    @_Verify_Init
     def Get_X4_Folder(self):
         'Returns the path to the X4 base folder.'
         return self.path_to_x4_folder
     
+    @_Verify_Init
     def Get_User_Folder(self):
         'Returns the path to the user folder.'
         return self.path_to_user_folder
-
+    
+    @_Verify_Init
     def Get_Output_Folder(self):
         'Returns the path to the output extension folder.'
         # Pick the user or x4 folder.
@@ -470,23 +516,28 @@ class Settings_class:
             path = self.path_to_x4_folder
         # Offset to the extension.
         return path / 'extensions' / self.extension_name
-
+    
+    @_Verify_Init
     def Get_Source_Folder(self):
         'Returns the path to the Source folder.'
         return self.path_to_source_folder
-
+    
+    @_Verify_Init
     def Get_Plugin_Log_Path(self):
         'Returns the path to the plugin log file.'
         return self.Get_Output_Folder() / self.plugin_log_file_name
-
+    
+    @_Verify_Init
     def Get_Customizer_Log_Path(self):
         'Returns the path to the customizer log file.'
         return self.Get_Output_Folder() / self.customizer_log_file_name
     
+    @_Verify_Init
     def Get_User_Content_XML_Path(self):
         'Returns the path to the user content.xml file.'
         return self.path_to_user_folder / 'content.xml'
-
+    
+    @_Verify_Init
     def Get_Live_Editor_Log_Path(self):
         'Returns the path to the live editor log file.'
         return self.Get_Output_Folder() / self.live_editor_log_file_name

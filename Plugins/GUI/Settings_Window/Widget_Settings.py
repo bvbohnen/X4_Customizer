@@ -29,7 +29,26 @@ class Widget_Settings(QtWidgets.QGroupBox):
         # Get the settings defualt values.
         defaults = Settings.Get_Defaults()
 
-        
+
+        def Setup_Modification_Listener(widget, field):
+            '''
+            Sets the widget changed signal to call the Handle_Widget_Actions
+            function, passing along the field changed.
+            '''
+            if isinstance(widget, QtWidgets.QLineEdit):
+                widget.editingFinished.connect(
+                    # Use the default name trick to ensure the field
+                    # gets through the lambda construction.
+                    lambda field = field: self.Handle_Widget_Modification_Signals(field))
+
+            elif isinstance(widget, QtWidgets.QRadioButton):
+                widget.clicked.connect(
+                    # Catch and ignore the 'clicked' boolean that
+                    # is normally emitted.
+                    lambda clicked, field = field: self.Handle_Widget_Modification_Signals(field))
+            return
+
+
         # Set up widgets.
         # Use the categorized and ordered fields.
         for category, field_list in Settings.Get_Categorized_Fields().items():
@@ -77,7 +96,13 @@ class Widget_Settings(QtWidgets.QGroupBox):
                     button_f.py_value = False
                     button_d.py_value = None
 
+                    # Listen to the clicked signals.
+                    Setup_Modification_Listener(button_t, field)
+                    Setup_Modification_Listener(button_f, field)
+                    Setup_Modification_Listener(button_d, field)
+
                     button_group = QtWidgets.QButtonGroup()
+
                     # Give these integer indexes, positive.
                     # Make somewhat sensible.
                     button_group.addButton(button_t, 1)
@@ -106,6 +131,9 @@ class Widget_Settings(QtWidgets.QGroupBox):
                     widget = QtWidgets.QLineEdit()
                     # Treat default text as a placeholder.
                     widget.setPlaceholderText(str(default))
+                    
+                    # Listen to changes.
+                    Setup_Modification_Listener(widget, field)
 
                     # Record the field:widget pair.
                     # Indent the field a little to set it behind
@@ -151,49 +179,65 @@ class Widget_Settings(QtWidgets.QGroupBox):
         Load the current Settings values into the gui.
         For use at startup, and maybe if changes are ever cancelled
         without saving.
-        TODO
+        TODO: fill in if needed
         '''
 
 
     def Restore_Defaults(self):
         '''
         Restore all settings to their Settings defaults.
-        TODO
+        TODO: fill in if needed
         '''
         # Two options:
         #  1 Tell Settings to go back to its defaults, then load
         #    them back into here.
         #  2 Apply the widget default values to Settings, and then
         #    set widget states back to default.
+        #  3 Ignore this and let settings always persist.
 
 
     def Store_Settings(self):
         '''
-        Update the global Settings with the current selections,
+        Update all global Settings with the current selections,
         either overwriting or restoring defaults.
         This should be called after a script runs, in case it did
         local settings edits.
         '''
-        for field, widget in self.field_widget_dict.items():
+        # Work through all the widgets with their settings fields.
+        for field in self.field_widget_dict:
+            self.Update_Settings_Field(field)
+        # Reset the Settings, so that it will do path checks again
+        # when next used; this should be relatively harmless if
+        # a non-path setting was changed.
+        Settings.Reset()
+        return
 
-            if isinstance(widget, QtWidgets.QLineEdit):
-                # TODO: How to know when to Path convert, and if it is
-                #  a valid path?
-                # -Maybe have a Settings function to polish paths, or just
-                #  re-call the Settings Delayed_Init code.
-                # Only save if text is present.
-                if widget.text():
-                    setattr(Settings, field, widget.text())
-                else:
-                    setattr(Settings, field, widget.default)
 
-            elif isinstance(widget, QtWidgets.QButtonGroup):
-                # Use the value, None/True/False.
-                value = widget.checkedButton().py_value
-                if value != None:
-                    setattr(Settings, field, value)
-                else:
-                    setattr(Settings, field, widget.default)
+    def Update_Settings_Field(self, field):
+        '''
+        Update the Settings with the current widget for the given field.
+        '''
+        widget = self.field_widget_dict[field]
+
+        # Handle based on widget type.
+        if isinstance(widget, QtWidgets.QLineEdit):
+            # TODO: How to know when to Path convert, and if it is
+            #  a valid path?
+            # -Maybe have a Settings function to polish paths, or just
+            #  re-call the Settings Delayed_Init code.
+            # Only save if text is present.
+            if widget.text():
+                setattr(Settings, field, widget.text())
+            else:
+                setattr(Settings, field, widget.default)
+
+        elif isinstance(widget, QtWidgets.QButtonGroup):
+            # Use the value, None/True/False.
+            value = widget.checkedButton().py_value
+            if value != None:
+                setattr(Settings, field, value)
+            else:
+                setattr(Settings, field, widget.default)
         return
 
 
@@ -230,8 +274,20 @@ class Widget_Settings(QtWidgets.QGroupBox):
         return
 
 
-    def Handle_Widget_Actions(self, *args):
+    def Handle_Widget_Modification_Signals(self, field):
         '''
         Handle events when widgets are modified.
-        TODO
         '''
+        self.modified = True
+
+        # Update the field that was edited.
+        self.Update_Settings_Field(field)
+
+        # Reset the Settings, so that it will do path checks again
+        # when next used; this should be relatively harmless if
+        # a non-path setting was changed.
+        Settings.Reset()
+
+        # For now, don't worry about resaving yet; that isn't normally
+        # needed until the gui is closed.
+        return

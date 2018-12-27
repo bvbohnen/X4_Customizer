@@ -1,4 +1,14 @@
 
+# TODO: cleanup imports
+from pathlib import Path
+
+from PyQt5.uic import loadUiType
+from PyQt5 import QtWidgets, QtCore, QtGui
+
+from Framework import Settings
+from ..Shared import Tab_Page_Widget
+
+    
 from pathlib import Path
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox
@@ -10,29 +20,56 @@ from Framework import Main
 
 from ...Transforms.Live_Editor import Live_Editor
 
-class Script_Actions:
+
+# Load the .ui file into a reuseable base class.
+# This will return the designer generated class ("form"), and
+# the Qt base class it is based on (QWidget in this case).
+# http://pyqt.sourceforge.net/Docs/PyQt5/designer.html
+gui_file = Path(__file__).parents[1] / 'x4c_gui_script_tab.ui'
+generated_class, qt_base_class = loadUiType(str(gui_file))
+
+
+class Script_Window(Tab_Page_Widget, generated_class):
     '''
-    Support class for saving, loading, and running script files,
-    supporting the main gui window.
-    
-    Attributes:
-    * parent
-      - The parent QMainWindow.
+    Window used for editing the customizer input script.
+    Intended to be used just once for now, though more can theoretically
+    be added for different scripts (if the 'run script' button is moved
+    into the tabs).
+
+    Widget names:
+    * hsplitter
+    * vsplitter
+    * widget_documentation
+    * widget_plugins
     * widget_script
-      - The widget holding the script.
+
+    Attributes:
+    * window
+      - The parent main window holding this tab.
     * current_script_path
       - Path for the currently open script.
     * last_dialog_path
       - Path last used in the Load or Save dialog boxes, to be reused.
     '''
-    def __init__(self, parent, widget_script):
-        self.parent = parent
-        self.widget_script = widget_script
+    def __init__(self, parent, window):
+        super().__init__(parent, window)
+        
         self.current_script_path = None
-        self.last_dialog_path = home_path / 'Scripts'        
-        return
+        self.last_dialog_path = home_path / 'Scripts'
 
-    
+        # Hook up to some main window actions.        
+        window.action_New        .triggered.connect( self.Action_New_Script    )
+        window.action_Open       .triggered.connect( self.Action_Open_Script   )
+        window.action_Save       .triggered.connect( self.Action_Save_Script   )
+        window.action_Save_As    .triggered.connect( self.Action_Save_Script_As)
+        window.action_Run_Script .triggered.connect( self.Action_Run_Script    )
+        
+        # Set 1:1 splitter ratios.
+        self.hsplitter.setSizes([1,1])
+        self.vsplitter.setSizes([1,1])
+        return
+       
+
     def Check_If_Save_Needed(self):
         '''
         Checks if the current script needs to be saved, and possibly opens
@@ -70,7 +107,7 @@ class Script_Actions:
         if not self.Check_If_Save_Needed():
             return
         self.widget_script.New_Script()
-        self.parent.Print('New script started')
+        self.window.Print('New script started')
         return
 
         
@@ -84,7 +121,7 @@ class Script_Actions:
             return
 
         # Create a file selection dialog, using a QFileDialog object.
-        file_dialogue = QtWidgets.QFileDialog(self.parent)
+        file_dialogue = QtWidgets.QFileDialog(self.window)
         # Require selecting an existing file.
         file_dialogue.setFileMode(QtWidgets.QFileDialog.ExistingFile)
             
@@ -118,9 +155,9 @@ class Script_Actions:
             self.widget_script.setPlainText(text)
             self.current_script_path = file_path
             self.widget_script.Clear_Modified()
-            self.parent.Print('Loaded script from "{}"'.format(file_path))
+            self.window.Print('Loaded script from "{}"'.format(file_path))
         except Exception:
-            self.parent.Print('Failed to load script from "{}"'.format(file_path))
+            self.window.Print('Failed to load script from "{}"'.format(file_path))
         # TODO: maybe update window name.
         return
 
@@ -158,7 +195,7 @@ class Script_Actions:
         '''
 
         # Create a file selection dialogue, using a QFileDialog object.
-        file_dialogue = QtWidgets.QFileDialog(self.parent)
+        file_dialogue = QtWidgets.QFileDialog(self.window)
 
         # Allow selection of any file (as oppposed to existing file).
         file_dialogue.setFileMode(QtWidgets.QFileDialog.AnyFile)
@@ -201,7 +238,7 @@ class Script_Actions:
         # Clear the modified flag.
         self.widget_script.Clear_Modified()
 
-        self.parent.Print('Saved script to "{}"'.format(file_path))
+        self.window.Print('Saved script to "{}"'.format(file_path))
         
         # Return True on succesful save.
         return True
@@ -210,16 +247,26 @@ class Script_Actions:
         
     ##########################################################################
     # Thread handling.
-    # TODO: maybe break out into a Thread_Handler class, particularly
-    # if other thread types will be added.
+       
+    def Script_Prelaunch(self):
+        '''
+        Code to run just prior to a script being launched.
+        Resets the file system, saves live editor patches, etc.
+        '''
+        # Clear out the file system from any prior run changes.
+        File_System.Reset()        
+        # Save the Live_Editor patches, since they may get loaded
+        #  by a plugin for xml application.
+        Live_Editor.Save_Patches()
+        return
+
     
     def Action_Run_Script(self):
         '''
         Runs the currently loaded script.
         '''
-        # Do nothing if a script is running.
-        if self.parent.worker_thread.isRunning():
-            return
+        # Grey out the run action.
+        self.window.action_Run_Script.setEnabled(False)
 
         # Save the script to a file.
         saved = self.Action_Save_Script()
@@ -227,55 +274,82 @@ class Script_Actions:
         if not saved:
             return
 
-        # Reset the Settings, so that it will do path checks again.
-        Settings.Reset()
-        # Ensure the settings are updated from gui values.
-        self.parent.widget_settings.Store_Settings()
-
-        # Clear out the file system from any prior run changes.
-        File_System.Reset()
-        
-        # Save the Live_Editor patches, since they may get loaded
-        #  by a plugin for xml application.
-        Live_Editor.Save_Patches()
-        
         # Set up its command, to run a script.
         # The easiest way to do this is to just call Main.Run, and let
         # it handle the dynamic import.
         # Use command line style args for this, for now.
         # It should be safe to always enable argpass, since the top
         # argparser -h isn't useful.
-        self.parent.worker_thread.Set_Function(
+        self.Queue_Thread(
             Main.Run,
             # A single string arg, command line style.
-            str(self.current_script_path) + ' -argpass'
+            str(self.current_script_path) + ' -argpass',
+            prelaunch_function = self.Script_Prelaunch,
             )
-        # Listen for the 'finished' signal.
-        self.parent.worker_thread.finished.connect(self.Handle_Thread_Finished)
-
-        self.parent.worker_thread.start()
-        # Grey out the run action.
-        self.parent.action_Run_Script.setEnabled(False)
-
         return
-
-
-    def Handle_Thread_Finished(self):
+        
+    
+    def Handle_Thread_Finished(self, return_value):
         '''
         Clean up after a Run Script thread has finished.
         '''
-        self.parent.action_Run_Script.setEnabled(True)
-        self.parent.worker_thread.finished.disconnect(self.Handle_Thread_Finished)
+        super().Handle_Thread_Finished()
 
-        # When done, restore Settings back to the gui values.
-        # This may not be strictly necessary.
-        self.parent.widget_settings.Store_Settings()
+        # When done, restore Settings back to the gui values, in case
+        # the script temporarily modified them.
+        self.window.tabs_dict['Settings'].widget_settings.Store_Settings()
 
         # TODO: detect errors in the script and note them; for now, the
         # thread or framework will tend to print them out.
-        self.parent.Print('Script Run completed')
+        self.window.Print('Script Run completed')
 
         # Tell any live edit tables to refresh their current values,
         # since the script may have changed them.
-        self.parent.widget_weapons.Soft_Refresh()
+        Live_Editor.Reset_Current_Item_Values()
+        for widget in self.window.Get_Tab_Widgets('Edit_Table_Window'):
+            widget.widget_tree_view.Soft_Refresh()
+        
+        # Turn the button back on.
+        self.window.action_Run_Script.setEnabled(True)
         return
+
+    
+    def Save_Session_Settings(self, settings):
+        '''
+        Save aspects of the current sessions state.
+        '''
+        super().Save_Session_Settings(settings)
+        settings.setValue('current_script_path', str(self.current_script_path))
+        settings.setValue('last_dialog_path'   , str(self.last_dialog_path))
+        return
+
+
+    def Load_Session_Settings(self, settings):
+        '''
+        Save aspects of the prior sessions state.
+        '''
+        super().Load_Session_Settings(settings)
+        # Note: need to capture 'None' strings and convert them.
+        # Paths need to be cast to a Path if not None.
+        stored_value = settings.value('last_dialog_path', None)
+        if stored_value not in [None, 'None']:
+            self.last_dialog_path = Path(stored_value)
+        
+        # Try to load the prior script.
+        stored_value = settings.value('current_script_path', None)
+        if stored_value not in [None, 'None']:
+            self.current_script_path = Path(stored_value)
+            self.Load_Script_File(self.current_script_path)
+        else:
+            self.Action_New_Script()
+        return
+
+
+    def Close(self):
+        '''
+        Prompt to save the open app.
+        This will prevent closing if "cancel" was selected.
+        '''
+        if not self.Check_If_Save_Needed():
+            return False
+        return True

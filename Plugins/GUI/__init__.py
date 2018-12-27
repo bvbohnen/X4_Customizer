@@ -8,7 +8,7 @@ No other module should make references into this subpackage,
 only to the top level.
 '''
 try:
-    import PyQt5
+    import PyQt5    
     _pyqt_found = True
 except Exception:
     _pyqt_found = False
