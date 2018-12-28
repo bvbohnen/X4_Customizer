@@ -1,5 +1,5 @@
 
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui, QtCore
 
 class Widget_Edit_Item(QtWidgets.QLineEdit):
     '''
@@ -213,7 +213,9 @@ class Widget_Edit_Item(QtWidgets.QLineEdit):
             self.setText('')
 
         return
-
+    
+    # Add a signal for requesting the parent window redraw.
+    redraw_request = QtCore.pyqtSignal()
 
     def Handle_editingFinished(self):
         '''
@@ -230,8 +232,15 @@ class Widget_Edit_Item(QtWidgets.QLineEdit):
         if self.item != None:
             # This will handle clearing and refreshing dependents.
             self.item.Set_Edited_Value(self.text())
-        return
 
+            # If this item was a reference, the entire table should
+            # be redrawn to swap it out for the new ref'd object.
+            # Do this last, because when this finishes the item
+            # will have been swapped out.
+            if self.item.is_reference:
+                self.redraw_request.emit()
+        return
+    
 
     def setText(self, text):
         '''

@@ -235,9 +235,9 @@ class Worker_Thread_Handler(QtCore.QThread):
             ))
         try:
             self.return_value = function(*args, **kwargs)
+
         except Exception as ex:
             self.Print(str(ex))
-            # Maybe in dev mode can double print.
             if Settings.developer:
                 self.Print(traceback.format_exc())
 

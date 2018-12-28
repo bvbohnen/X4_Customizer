@@ -8,104 +8,97 @@ from .Live_Editor_class import Live_Editor
 from .Edit_Tables import Edit_Table, Edit_Table_Group
 from .Edit_Object import Edit_Object
 from .Edit_Items  import Edit_Item, Display_Item
+from .Edit_Tree_View import Edit_Tree_View, Object_View
+
+# Convenience macro renaming.
+from .Edit_Object import Edit_Item_Macro    as E
+from .Edit_Object import Display_Item_Macro as D
 
 from ..Weapons import Get_All_Weapons
 from ..Support import Float_to_String
 
 
-def Get_Weapon_Bullet_Edit_Objects():
+def _Build_Bullet_Objects():
     '''
-    Returns a list of Edit_Objects for all weapons.
-    All created edit_objects for weapons and bullets are added to
-    the Live_Editor.
+    Generates Edit_Objects for all found bullets.
+    Meant for calling from the Live_Editor.
     '''
     t_file = File_System.Load_File('t/0001-L044.xml')
-
-    # Get the weapon collection objects, that hold the
-    # file references to the weapon, its component, and its bullet.
-    weapons = Get_All_Weapons()
-
+    
+    # Look up bullet files.
+    # These can be in two locations.
+    File_System.Load_Files('assets/props/WeaponSystems/*.xml')
+    File_System.Load_Files('assets/fx/weaponFx/*.xml')
+    bullet_files = File_System.Get_Asset_Files_By_Class('macros',
+                    'bullet','missile','bomb','mine','countermeasure')
+    
     # First pass will just fill in bullet objects,
     # making them available during weapon lookups on the next pass.
     # Be careful to make each bullet once.
-    for weapon in weapons:
-
-        name = weapon.bullet_file.asset_name
-        # Skip if the bullet already recorded.
-        if Live_Editor.Get_Object(name) != None:
-            continue
+    for bullet_file in bullet_files:
+        name = bullet_file.asset_name
 
         # Create an Edit_Object for the bullet.
         # Use the asset name from the bullet file.
         bullet_edit_object = Edit_Object(name)
 
         # Fill in its edit items.
-        bullet_edit_object.Make_Edit_Items(
-            weapon.bullet_file,
-            bullet_xpath_fields)
-
-        # Fill in bullet specific display items.
-        # These are ones that can be computed independent of the
-        # weapon firing the bullet.
-        bullet_edit_object.Make_Display_Items(
-            bullet_display_fields)
-
-        # Record it in the Live_Editor.
-        Live_Editor.Add_Object(bullet_edit_object)
-
-
-    # Now do a pass for the weapons themselves.
-    weapon_edit_objects = []
-    for weapon in weapons:
+        bullet_edit_object.Make_Items(bullet_file, bullet_item_macros)
         
+        # Send it back to the live editor for recording.
+        yield bullet_edit_object
+    return
+
+
+def _Build_Weapon_Objects():
+    '''
+    Generates Edit_Objects for all found weapons.
+    Meant for calling from the Live_Editor.
+    '''
+    t_file = File_System.Load_File('t/0001-L044.xml')
+    
+    # Get the weapon collection objects, that hold the
+    # file references to the weapon, its component, and its bullet.
+    # Note: bullet links may get outdated, so this is mostly used
+    # for the weapon/component link logic.
+    # TODO: localize the wanted logic.
+    weapons = Get_All_Weapons()
+
+    # Make sure the bullets are created, so they can be referenced.
+    Live_Editor.Get_Category_Objects('bullets')
+
+    for weapon in weapons:        
         name = weapon.weapon_file.asset_name
-
-        # Reuse a prior version if the weapon already recorded.
-        prior_object = Live_Editor.Get_Object(name) 
-        if prior_object != None:            
-            weapon_edit_objects.append(prior_object)
-            continue
-
+        
         # Create an Edit_Object for the weapon.
         weapon_edit_object = Edit_Object(name)
 
         # Fill in its normal edit items.
-        weapon_edit_object.Make_Edit_Items(
-            weapon.weapon_file,
-            weapon_xpath_fields)
-
-
+        weapon_edit_object.Make_Items(weapon.weapon_file, weapon_item_macros)
+               
         # Also add extra bits from its components file.
-        # These field lists need to fill in the connection node xpath term.
-        connection_xpath = weapon.Get_Tags_Xpath()
-        this_weapon_component_xpath_fields = []
-        for entry in weapon_component_xpath_fields:
-            this_entry = [x.replace('connection_xpath', connection_xpath)
-                            if isinstance(x, str) else x 
-                            for x in entry]
-            this_weapon_component_xpath_fields.append(this_entry)
-        
-        weapon_edit_object.Make_Edit_Items(
+        # These macros need to fill in the connection node xpath term.
+        weapon_edit_object.Make_Items(
             weapon.component_file,
-            this_weapon_component_xpath_fields)
-
-
-        # Look up the reference bullet file and link to it.
-        weapon_edit_object.Add_Reference(
-            Live_Editor.Get_Object(weapon.bullet_file.asset_name))
-
-        # Fill in display items, that can pull from the weapon, bullet
-        # or component.
-        weapon_edit_object.Make_Display_Items(weapon_display_fields)
-
-        # Record it, to the return list and the Live_Editor.
-        weapon_edit_objects.append(weapon_edit_object)
-        Live_Editor.Add_Object(weapon_edit_object)
+            weapon_component_item_macros, 
+            xpath_replacements = {'connection_xpath' : weapon.Get_Tags_Xpath()})
         
+        ## Look up the reference bullet file and link to it.
+        ## TODO: update this to be version specific, or just to let some
+        ## special Edit_Ref_Item objects handle it somehow automatically.
+        #bullet_object = Live_Editor.Get_Object('bullets', weapon.bullet_file.asset_name)
+        #for version in ['vanilla','patched','current','edited']:
+        #    weapon_edit_object.Add_Reference(version, bullet_object)
+            
+        # Send it back to the live editor for recording.
+        yield weapon_edit_object
 
-    # Can now return the weapon edit objects.
-    return weapon_edit_objects
+    return
 
+
+# Register the builder functions with the editor.
+Live_Editor.Record_Category_Objects_Builder('bullets', _Build_Bullet_Objects)
+Live_Editor.Record_Category_Objects_Builder('weapons', _Build_Weapon_Objects)
 
 
 # Various custom Display_Items.
@@ -117,6 +110,7 @@ def Display_Update_Weapon_Name(
         t_name_entry,
         component
     ):
+    'Look up weapon name.'
     # If no t_name_entry available, use the component name.
     if not t_name_entry:
         return component
@@ -132,6 +126,7 @@ def Display_Update_Bullet_RoF(
         ammunition_reload_time,
         ammunition_rounds
     ):
+    'Calculate rate of fire. TODO: turret weapon fire rate terms.'
     # If only reload_rate available, use it directly.
     if reload_rate and not reload_time and not ammunition_reload_time:
         return reload_rate
@@ -154,173 +149,198 @@ def Display_Update_Bullet_RoF(
 
 
 def Display_Update_Bullet_Range(
-        lifetime,
-        speed
+        bullet_lifetime,
+        bullet_speed,
+        bullet_range
     ):
-    if lifetime and speed:
-        return Float_to_String(float(lifetime) * float(speed))
+    'Update range. TODO: missile range.'
+    # Use bullet range if given, else compute.
+    if bullet_range:
+        return bullet_range
+    if bullet_lifetime and bullet_speed:
+        return Float_to_String(float(bullet_lifetime) * float(bullet_speed))
     return ''
 
 
-def Display_Update_Bullet_Burst_DPS(
-        fire_rate,
-        damage,
-        amount,
-    ):
+def _Merge(a,b):
+    'Pick either of two values that is not empty, if possible.'
+    return a if a else b if b else ''
+
+def Display_Update_Bullet_Merged_Damage( damage, explosion_damage ):
+    'Merge bullet and explosion damage, for later compute.'
+    return _Merge(damage, explosion_damage)
+
+def Display_Update_Bullet_Merged_Damage_Shield( damage_shield, explosion_damage_shield ):
+    'Merge bullet and explosion damage, for later compute.'
+    return _Merge(damage_shield, explosion_damage_shield)
+
+def Display_Update_Bullet_Merged_Damage_Hull( damage_hull, explosion_damage_hull ):
+    'Merge bullet and explosion damage, for later compute.'
+    return _Merge(damage_hull, explosion_damage_hull)
+
+def Display_Update_Bullet_Merged_Amount( amount, missile_amount ):
+    'Merge bullet and missile amount, for later compute.'
+    return _Merge(amount, missile_amount)
+
+
+def _Calc_Dps(fire_rate, damage, amount):
+    'Shared dps calculation code.'
     if fire_rate and damage:
         multiplier = float(fire_rate)
         if amount:
             multiplier *= float(amount)
         return Float_to_String(multiplier * float(damage))
     return ''
-    
+
+
+def Display_Update_Bullet_Burst_DPS(
+        fire_rate,
+        merge_damage,
+        damage_repair,
+        merge_amount,
+    ):
+    'Calculate burst dps (ignoring heat).'
+    # No damage if this is a repair weapon.
+    return '0' if damage_repair == '1' else _Calc_Dps(fire_rate, merge_damage, merge_amount)
+
 def Display_Update_Bullet_Burst_DPS_Shield(
         fire_rate,
-        damage_shield,
-        amount,
+        merge_damage_shield,
+        damage_repair,
+        merge_amount,
     ):
-    if fire_rate and damage_shield:
-        multiplier = float(fire_rate)
-        if amount:
-            multiplier *= float(amount)
-        return Float_to_String(multiplier * float(damage_shield))
-    return ''
+    'Calculate burst shield dps (ignoring heat).'
+    return '0' if damage_repair == '1' else _Calc_Dps(fire_rate, merge_damage_shield, merge_amount)
 
 def Display_Update_Bullet_Burst_DPS_Hull(
         fire_rate,
-        damage_hull,
-        amount,
-    ):
-    if fire_rate and damage_hull:
-        multiplier = float(fire_rate)
-        if amount:
-            multiplier *= float(amount)
-        return Float_to_String(multiplier * float(damage_hull))
-    return ''
-
-def Display_Update_Bullet_Burst_DPS_Repair(
-        fire_rate,
+        merge_damage_hull,
         damage_repair,
-        amount,
+        merge_amount,
     ):
-    if fire_rate and damage_repair:
-        multiplier = float(fire_rate)
-        if amount:
-            multiplier *= float(amount)
-        return Float_to_String(multiplier * float(damage_repair))
-    return ''
+    'Calculate burst hull dps (ignoring heat).'
+    return '0' if damage_repair == '1' else _Calc_Dps(fire_rate, merge_damage_hull, merge_amount)
+
+def Display_Update_Bullet_Repair_Rate(
+        fire_rate,
+        merge_damage_hull,
+        damage_repair,
+        merge_amount,
+    ):
+    'Calculate burst repair rate (ignoring heat).'
+    # Use the hull damage field for repair amount.
+    return '0' if damage_repair != '1' else _Calc_Dps(fire_rate, merge_damage_hull, merge_amount)
 
 
 
 # Fields from the weapon macro file to look for and convert to Edit_Items.
-# Given as (local name, xpath to node, attribute name, display name).
-weapon_xpath_fields = [
-    ('t_name_entry'         , './/identification'       , 'name'      ),
-    ('codename'             , './macro'                 , 'name'      , {'read_only': True}),
-    ('weapon_class'         , './macro'                 , 'class'     ),
-    ('component'            , './/component'            , 'ref'       ),
-    ('rotation_speed'       , './/rotationspeed'        , 'max'       ),
-    ('bullet_codename'      , './/bullet'               , 'class'     , {'read_only': True}),
-    ('hull'                 , './/hull'                 , 'max'       ),
+weapon_item_macros = [
+    D('name'                 , Display_Update_Weapon_Name                 , 'Name', ''),
+    E('t_name_entry'         , './/identification'       , 'name'         , 'T Name Entry', ''),
+    E('codename'             , './macro'                 , 'name'         , 'Weapon Codename', '', read_only = True),
+    E('weapon_class'         , './macro'                 , 'class'        , 'Class', '', read_only = True),
+    # TODO: should this be treated as a reference, and component files
+    # parsed as separate objects?
+    E('component'            , './/component'            , 'ref'          , 'Component', '', read_only = True, hidden = True),
+    E('rotation_speed'       , './/rotationspeed'        , 'max'          , 'Rot. Speed', ''),
+    E('rotation_acceleration', './/rotationacceleration' , 'max'          , 'Rot. Accel.', ''),
 
-    # Typical for lasers.
-    ('rotation_acceleration', './/rotationacceleration' , 'max'       ),
-    ('heat_overheat'        , './/heat'                 , 'overheat'  ),
-    ('heat_cool_delay'      , './/heat'                 , 'cooldelay' ),
-    ('heat_cool_rate'       , './/heat'                 , 'coolrate'  ),
-    ('heat_reenable'        , './/heat'                 , 'reenable'  ),
+    E('heat_overheat'        , './/heat'                 , 'overheat'     , 'Overheat', 'Max heat before firing stops'),
+    E('heat_cool_delay'      , './/heat'                 , 'cooldelay'    , 'Cool Delay', ''),
+    E('heat_cool_rate'       , './/heat'                 , 'coolrate'     , 'Cool Rate', ''),
+    E('heat_reenable'        , './/heat'                 , 'reenable'     , 'Reenable', 'Time to start firing again after overheating'),
 
-    # For turrets.
-    ('reload_rate'          , './/reload'               , 'rate'      ),
-    ('reload_time'          , './/reload'               , 'time'      ),
+    E('reload_rate'          , './/reload'               , 'rate'         , 'Reload Rate', ''),
+    E('reload_time'          , './/reload'               , 'time'         , 'Reload Time', ''),
 
-    # For missile turrets.
-    ('ammunition'           , './/ammunition'           , 'tags'      ),
-    ('storage_capacity'     , './/storage'              , 'capacity'  ),
+    E('hull'                 , './/hull'                 , 'max'          , 'Hull', ''),
+    E('ammunition_tags'      , './/ammunition'           , 'tags'         , 'Ammo Tags', ''),
+    E('storage_capacity'     , './/storage'              , 'capacity'     , 'Storage', ''),
+
+    E('bullet_codename'      , './/bullet'               , 'class'        , 'Bullet Codename', '',  is_reference = True),
     ]
 
 
 # Components will have a blank term in their xpath, needing
 # to be filled in from parsing the weapon xml.
-weapon_component_xpath_fields = [
-    ('connection_name'       , 'connection_xpath'       , 'name'  , {'read_only': True}),
-    ('connection_tags'       , 'connection_xpath'       , 'tags'  , {'read_only': True}),
+weapon_component_item_macros = [
+    E('connection_name'       , 'connection_xpath'       , 'name'         , 'Connection Name', ''  , read_only = True),
+    E('connection_tags'       , 'connection_xpath'       , 'tags'         , 'Connection Tags', ''  , read_only = True),
     ]
 
-# Fields that will be Display_Items, computing their value from other items.
-weapon_display_fields = [
-    ('name'           , Display_Update_Weapon_Name      ),
+bullet_item_macros = [
+    D('dps_base'                  , Display_Update_Bullet_Burst_DPS       , 'DPS', ''),
+    D('dps_shield'                , Display_Update_Bullet_Burst_DPS_Shield, '+Shield', ''),
+    D('dps_hull'                  , Display_Update_Bullet_Burst_DPS_Hull  , '+Hull', ''),
+    D('repair_rate'               , Display_Update_Bullet_Repair_Rate     , 'Repair Rate', ''),
+    D('fire_rate'                 , Display_Update_Bullet_RoF             , 'Rate of Fire', ''),
+    D('range'                     , Display_Update_Bullet_Range           , 'Range', ''),
+
+    E('damage'                    , './/damage'          , 'value'        , 'Damage', ''),
+    E('damage_shield'             , './/damage'          , 'shield'       , '+Shield', ''),
+    E('damage_hull'               , './/damage'          , 'hull'         , '+Hull', ''),
+    E('damage_repair'             , './/damage'          , 'repair'       , 'Repair', 'Set to 1 to flip to repairing.'),
+    E('reload_rate'               , './/reload'          , 'rate'         , 'Reload Rate', 'For burst weapons, time between shots in the burst'),
+    E('reload_time'               , './/reload'          , 'time'         , 'Reload Time', 'For non-burst weapons, time between shots'),
+    E('ammunition_rounds'         , './/ammunition'      , 'value'        , 'Burst Rounds', 'For burst weapons, number of shots per burst.'),
+    E('ammunition_reload_time'    , './/ammunition'      , 'reload'       , 'Interburst Time', 'For burst weapons, time from the end of a burst to the start of the next.'),
+    E('bullet_speed'              , './/bullet'          , 'speed'        , 'Bullet Speed', ''),
+    E('bullet_lifetime'           , './/bullet'          , 'lifetime'     , 'Bullet Lifetime', ''),
+    E('bullet_range'              , './/bullet'          , 'range'        , 'Bullet Range', ''),
+
+    E('heat'                      , './/heat'            , 'value'        , '+Heat', 'Heat added per bullet (or burst of bullets)'),
+    E('bullet_amount'             , './/bullet'          , 'amount'       , 'Bullet Amount', ''),
+    E('barrel_amount'             , './/bullet'          , 'barrelamount' , 'Bullet Barrel Amount', ''),
+    E('bullet_timediff'           , './/bullet'          , 'timediff'     , 'Bullet Time Diff', ''),
+    E('bullet_angle'              , './/bullet'          , 'angle'        , 'Bullet Angle', ''),
+    E('bullet_max_hits'           , './/bullet'          , 'maxhits'      , 'Bullet Max Hits', ''),
+    E('bullet_ricochet'           , './/bullet'          , 'ricochet'     , 'Bullet Ricochet', ''),
+    E('bullet_scale'              , './/bullet'          , 'scale'        , 'Bullet Scale', ''),
+    E('bullet_attach'             , './/bullet'          , 'attach'       , 'Bullet Attach', ''),
+
+    E('explosion_damage'          , './/explosiondamage' , 'value'        , 'Explosion Damage', ''),
+    E('explosion_damage_shield'   , './/explosiondamage' , 'shield'       , 'Explosion +Shield', ''),
+    E('explosion_damage_hull'     , './/explosiondamage' , 'hull'         , 'Explosion +Hull', ''),
+    E('missile_amount'            , './/missile'         , 'amount'       , 'Missile Amount', ''),
+    E('missile_barrel_amount'     , './/missile'         , 'barrelamount' , 'Missile Barrel Amount', ''),
+    E('missile_lifetime'          , './/missile'         , 'lifetime'     , 'Missile Lifetime', ''),
+    E('missile_range'             , './/missile'         , 'range'        , 'Missile Missile Range', ''),
+    E('missile_guided'            , './/missile'         , 'guided'       , 'Missile Guided', ''),
+    E('missile_retarget'          , './/missile'         , 'retarget'     , 'Missile Retarget', ''),
+    E('missile_hull'              , './/hull'            , 'max'          , 'Missile Hull', ''),
+    E('lock_time'                 , './/lock'            , 'time'         , 'Missile Lock Time', ''),
+    E('lock_range'                , './/lock'            , 'range'        , 'Missile Lock Range', ''),
+    E('lock_angle'                , './/lock'            , 'angle'        , 'Missile Lock Angle', ''),
+    E('counter_resilience'        , './/countermeasure'  , 'resilience'   , 'Missile Resiliance', 'Missile resiliance against countermeasures'),
+
+    E('bullet_codename'           , './macro'            , 'name'         , 'Bullet Codename', '' , read_only = True),
+    
+    # Hidden compute terms.
+    D('merge_damage'              , Display_Update_Bullet_Merged_Damage        , hidden = True),
+    D('merge_damage_shield'       , Display_Update_Bullet_Merged_Damage_Shield , hidden = True),
+    D('merge_damage_hull'         , Display_Update_Bullet_Merged_Damage_Hull   , hidden = True),
+    D('merge_amount'              , Display_Update_Bullet_Merged_Amount        , hidden = True),
+    
     ]
 
-# Xpath and display fields for bullets/missiles/etc., taken from
-# the bullet macro file.
-bullet_xpath_fields = [
-    # Typical for bullets.
-    ('bullet_codename'           , './macro'            , 'name'         ),
-    ('ammunition_rounds'         , './/ammunition'      , 'value'        ),
-    ('ammunition_reload_time'    , './/ammunition'      , 'reload'       ),
-    ('speed'                     , './/bullet'          , 'speed'        ),
-    ('lifetime'                  , './/bullet'          , 'lifetime'     ),
-    ('range'                     , './/bullet'          , 'range'        ),
-    ('amount'                    , './/bullet'          , 'amount'       ),
-    ('barrel_amount'             , './/bullet'          , 'barrelamount' ),
-    ('bullet_timediff'           , './/bullet'          , 'timediff'     ),
-    ('bullet_angle'              , './/bullet'          , 'angle'        ),
-    ('bullet_max_hits'           , './/bullet'          , 'maxhits'      ),
-    ('bullet_ricochet'           , './/bullet'          , 'ricochet'     ),
-    ('bullet_scale'              , './/bullet'          , 'scale'        ),
-    ('bullet_attach'             , './/bullet'          , 'attach'       ),
-    ('heat'                      , './/heat'            , 'value'        ),
-    ('reload_rate'               , './/reload'          , 'rate'         ),
-    ('reload_time'               , './/reload'          , 'time'         ),
-    ('damage'                    , './/damage'          , 'value'        ),
-    ('damage_shield'             , './/damage'          , 'shield'       ),
-    ('damage_hull'               , './/damage'          , 'hull'         ),
-    ('damage_repair'             , './/damage'          , 'repair'       ),
-            
-    # typical for missiles.          
-    ('amount'                    , './/missile'         , 'amount'       ),
-    ('barrel_amount'             , './/missile'         , 'barrelamount' ),
-    ('lifetime'                  , './/missile'         , 'lifetime'     ),
-    ('range'                     , './/missile'         , 'range'        ),
-    ('missile_guided'            , './/missile'         , 'guided'       ),
-    ('missile_retarget'          , './/missile'         , 'retarget'     ),
-    ('damage'                    , './/explosiondamage' , 'value'        ),
-    ('damage_shield'             , './/explosiondamage' , 'shield'       ),
-    ('damage_hull'               , './/explosiondamage' , 'hull'         ),
-    ('missile_hull'              , './/hull'            , 'max'          ),
-    ('lock_time'                 , './/lock'            , 'time'         ),
-    ('lock_range'                , './/lock'            , 'range'        ),
-    ('lock_angle'                , './/lock'            , 'angle'        ),
-    ('counter_resilience'        , './/countermeasure'  , 'resilience'   ),
-    ]
-
-bullet_display_fields = [
-    ('fire_rate'      , Display_Update_Bullet_RoF                ),
-    ('range'          , Display_Update_Bullet_Range              ),
-    ('dps_base'       , Display_Update_Bullet_Burst_DPS          ),
-    ('dps_shield'     , Display_Update_Bullet_Burst_DPS_Shield   ),
-    ('dps_hull'       , Display_Update_Bullet_Burst_DPS_Hull     ),
-    ('dps_repair'     , Display_Update_Bullet_Burst_DPS_Repair   ),
-    ]
 
 
-
-def _Get_Weapon_Edit_Table_Group():
+def _Build_Weapon_Object_Tree_View():
     '''
-    Returns a new Edit_Table_Group holding the Edit_Tables for the
-    different weapon types.  Intended for direct call from the Live_Editor;
-    other users should get it from there.
+    Constructs an Edit_Tree_View object for use in displaying
+    weapon data.
     '''
+    
     name = 'weapons'
 
     # Set up a new table and record it.
-    edit_table_group = Edit_Table_Group('weapons')
+    object_tree_view = Edit_Tree_View('weapons')
 
     # Get all of the weapon objects.
-    weapon_objects = Get_Weapon_Bullet_Edit_Objects()
+    weapon_objects = Live_Editor.Get_Category_Objects('weapons')
 
-    # Organize by weapon_class.
+    # Organize top level by weapon_class.
+    # TODO: maybe nice labels for these.
     class_objects_dict = defaultdict(list)
     for weapon_object in weapon_objects:
         # TODO: think about which value version to use, vanilla or
@@ -331,95 +351,31 @@ def _Get_Weapon_Edit_Table_Group():
                            .Get_Item('weapon_class')
                            .Get_Value('current') ] .append( weapon_object )
 
-    # Create a table for each weapon class, alphabetical order for now.
-    for weapon_class, weapon_objects in sorted(class_objects_dict.items()):
+    # TODO: nested organization by size.
 
-        # Set up a new table.
-        edit_table = Edit_Table(weapon_class)
-        edit_table_group.Add_Table(edit_table)
+    def Get_Name(weapon_object):
+        'Returns the current "name" of the object.'
+        return weapon_object.Get_Item('name').Get_Value('current')
+
+    # Create a nesting for each weapon class, alphabetical order for now.
+    for weapon_class, weapon_objects in sorted(class_objects_dict.items()):
+        # Create the tree node.
+        this_node = OrderedDict()
+        object_tree_view.tree[weapon_class] = this_node
 
         # Give it all the weapon objects, sorted in name order.
-        for weapon_object in sorted(
-                weapon_objects, 
-                key = lambda x: x.Get_Item('name').Get_Value('current')):
-            edit_table.Add_Object(weapon_object)
+        for weapon_object in sorted( weapon_objects, key = lambda x: Get_Name(x)):
 
-        # Set the name ordering. This will be the same for all tables,
-        # since the Edit_Table will trim out unused fields.
+            # Pack into an object viewer; assign no labels just yet.
+            object_view = Object_View(weapon_object)
+            this_node[Get_Name(weapon_object)] = object_view
 
-        # Lay out the display name ordering.
-        edit_table.item_names_ordered_dict = OrderedDict([
-            ('name'                      , 'Name'),
-            ('t_name_entry'              , 'T Name Entry'),
+        # For all objects at this node, apply a filtered set of labels.
+        # -Switching to relying on object built-in names.
+        object_tree_view.Apply_Filtered_Labels(this_node)#, weapon_item_names_ordered_dict)
 
-            ('dps_base'                  , 'DPS'),
-            ('dps_shield'                , '+Shield'),
-            ('dps_hull'                  , '+Hull'),
-            ('dps_repair'                , '+Repair'),
-
-
-            # For missiles, ammo is either dumbfire or guided, but that
-            # is captured in missile_guided.
-            #('ammunition'                , ''),
-
-        
-            ('fire_rate'                 , 'Fire Rate'),    
-            ('speed'                     , 'Speed'),
-            ('range'                     , 'Range'),
-            ('lifetime'                  , 'Lifetime'),
-    
-            ('damage'                    , 'Damage'),
-            ('damage_shield'             , '+Shield'),
-            ('damage_hull'               , '+Hull'),
-            ('damage_repair'             , '+Repair'),
-
-            ('reload_time'               , 'Reload Time'),
-            ('reload_rate'               , 'Reload Rate'),
-            ('ammunition_reload_time'    , 'Interburst Time'),
-            ('ammunition_rounds'         , 'Burst Rounds'),
-
-            ('amount'                    , 'Bullet Amount'),
-            ('barrel_amount'             , 'Bullet Barrel Amount'),
-
-            ('bullet_timediff'           , 'Bullet Time Diff'),
-            ('bullet_angle'              , 'Bullet Angle'),
-            ('bullet_max_hits'           , 'Bullet Max Hits'),
-            ('bullet_ricochet'           , 'Bullet Ricochet'),
-            ('bullet_scale'              , 'Bullet Scale'),
-            ('bullet_attach'             , 'Bullet Attach'),
-
-            # TODO: compute speed.
-            ('missile_guided'            , 'Guided'),
-            ('missile_retarget'          , 'Retarget'),
-    
-            ('missile_hull'              , 'Hull(missile)'),
-            ('lock_time'                 , 'Lock Time'),
-            ('lock_range'                , 'Lock Range'),
-            ('lock_angle'                , 'Lock Angle'),
-            ('counter_resilience'        , 'Resiliance'),
-    
-            ('heat'                      , '+Heat'),
-            ('heat_overheat'             , 'Overheat'),
-            ('heat_cool_delay'           , 'Cool Delay'),
-            ('heat_cool_rate'            , 'Cool Rate'),
-            ('heat_reenable'             , 'Reenable'),
-    
-            ('rotation_speed'            , 'Rot. Speed'),
-            ('rotation_acceleration'     , 'Rot. Accel.'),
-            ('storage_capacity'          , 'Storage'),
-    
-            ('hull'                      , 'Hull'),
-            ('weapon_class'              , 'Class'),
-            ('codename'                  , 'Weapon Codename'),
-            ('bullet_codename'           , 'Bullet Codename'),
-            ('connection_name'           , 'Connection Name'),
-            ('connection_tags'           , 'Connection Tags'),
-            
-        ])
-
-    return edit_table_group
+    return object_tree_view
 
 
 # Register the builder function with the editor.
-Live_Editor.Record_Table_Group_Builder(
-    'weapons', _Get_Weapon_Edit_Table_Group)
+Live_Editor.Record_Tree_View_Builder('weapons', _Build_Weapon_Object_Tree_View)

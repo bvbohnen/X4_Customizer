@@ -446,6 +446,7 @@ def Get_All_Weapons():
                     'weapon','missilelauncher','turret',
                     'missileturret',
                     'bomblauncher')
+
     # Wrap into Weapon class objects to fill in links to other xml.
     return [Weapon(x) for x in weapon_files]
 

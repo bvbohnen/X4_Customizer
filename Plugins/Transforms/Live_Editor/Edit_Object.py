@@ -1,8 +1,26 @@
 
 
 import inspect
-from collections import OrderedDict
-from .Edit_Items import Edit_Item, Display_Item
+from collections import OrderedDict, defaultdict
+from .Edit_Items import Edit_Item, Display_Item, Placeholder_Item
+from .Edit_Items import version_names
+
+from collections import namedtuple
+# Macro tuples for aiding in construction of items.
+Edit_Item_Macro = namedtuple('Edit_Item_Macro', 
+    ['name', 'xpath', 'attribute', 
+     'display_name', 'description', 
+     'read_only', 'is_reference', 'hidden' ], 
+     # Note: defaults apply to the last so many terms.
+     defaults = [False, False, False])
+
+Display_Item_Macro = namedtuple('Display_Item_Macro', 
+    ['name', 'display_function', 
+     'display_name', 'description', 
+     'read_only', 'hidden' ], 
+     defaults = ['','', True, False])
+
+
 
 class Edit_Object:
     '''
@@ -14,24 +32,48 @@ class Edit_Object:
     multiple xml files, depending on what is represented.
 
     Attributes:
+    * parent
+      - Live_Editor holding this object.
     * name
       - String, name for this object, generally taken from game
         files in some way ('id' or 'name' attribute of some node).
+    * category
+      - String, category of this object as used in the Live_Editor.
     * items_dict
       - Dict, keyed by arbitrary item name (eg. 'dps'), holding
         Edit_Item and Display_Item objects belonging to this object.
-    * refs_dict
-      - OrderedDict, keyed by object name, holding other objects closely
-        related to this object, whose items will be displayed along
-        with this object's items.
-      - These will be searched for item_names in the order they were added.
-      - TODO: think about the best way to update this if an Edit_Item
-        that sets the reference is changed.
+    * item_version_object_refs
+      - Dict, keyed by item name, then keyed by version, holding
+        the Edit_Object the item references (or None if not found).
+    * category_item_name_list
+      - List of strings, item names in preferred display order for
+        this category of objects.
+      - This should always match for objects of the same category, 
+        even if one or both of them do not having matching items.
+      - Used to aid in display of multiple parallel objects.
     '''
-    def __init__(self, name):
+    def __init__(self, name, category = None, parent = None):
+        self.parent = parent
         self.name = name
+        self.category = category
+        self.category_item_name_list = None
         self.items_dict = {}
-        self.refs_dict = OrderedDict()
+        self.item_version_object_refs = defaultdict(dict)
+        return
+
+
+    def Delayed_Init(self):
+        '''
+        Once all items are filled in, set initial dependencies
+        and references.
+        '''
+        for version in version_names:
+            self.Update_Item_Dependencies(version)
+            # To setup refs, just stride over items and make sure they have
+            # pulled all of their values.
+            for item in self.Get_Items():
+                item.Get_Value(version)
+        return
 
 
     def Add_Item(self, item):
@@ -39,134 +81,314 @@ class Edit_Object:
         Add an item to this object.
         '''
         self.items_dict[item.name] = item
+        return
 
 
-    def Add_Reference(self, edit_object):
+    def Update_Reference(self, item_name, version, ref_name):
         '''
-        Adds a reference to another Edit_Object. Triggers an error
-        if this object is already a reference of that object;
-        circular refs are not supported at this time.
+        Update the reference to another edit object, overwriting
+        any prior ref for the same item.
         '''
-        assert self.name not in edit_object.refs_dict
-        self.refs_dict[edit_object.name] = edit_object
+        # Look up the object in the Live_Editor; it may be None
+        # if there is a problem (eg. the user typed in an invalid name).
+        ref_object = self.parent.Get_Object(ref_name)
+        # Record it.
+        self.item_version_object_refs[item_name][version] = ref_object
+        # Update dependencies of display items.
+        self.Update_Item_Dependencies(version)
+        return
 
 
-    def Get_Items(self):
+    def Gen_All_References(self, version):
+        '''
+        Generates all referenced Edit_Objects, recursively.
+        '''
+        for subdict in self.item_version_object_refs.values():
+            ref_object = subdict[version]
+            if ref_object != None:
+                yield ref_object
+                yield from ref_object.Gen_All_References[version]
+        return
+
+
+    def Update_Item_Dependencies(self, version):
+        '''
+        Updates dependencies for owned display items, primarily for use
+        at startup and when references change.
+        '''
+        # First, delink all dependencies, to prune dependent lists.
+        # Eg. don't want an old dependency to think a local display
+        # item is still dependent on it.
+        for item in self.Get_Items():
+            # Only looking to update display items.
+            if not isinstance(item, Display_Item):
+                continue
+
+            # Loop over its existing dependencies, if any.
+            for dep in item.version_dependencies[version]:
+                if dep != None:
+                    # Delink from that item.
+                    dep.version_dependents[version].remove(item)
+
+            # Now clear the list.
+            item.version_dependencies[version].clear()
+
+
+        # Now do a pass to fill in deps, both directions.
+        for item in self.Get_Items():
+            # Only looking to update display items.
+            if not isinstance(item, Display_Item):
+                continue
+
+            # Loop over the dep item names.
+            for dep_name in item.dependency_names:
+
+                # Look up the item; this may be from a reference.
+                dep_item = self.Get_Item(dep_name, version)
+
+                # Record it, even if None.
+                item.version_dependencies[version].append(dep_item)
+
+                # If not none, add the dependent link.
+                if dep_item != None:
+                    dep_item.version_dependents[version].append(item)
+
+        return
+
+
+    def Get_Items(self, allow_placeholders = False):
         '''
         Returns a list of items belonging to this object.
+        
+        * allow_placeholders
+          - Bool, if True then Placeholder_Items may be returned.
         '''
-        return list(self.items_dict.values())
+        return [x for x in self.items_dict.values()
+                # Prune out placeholders, conditionally.
+                if allow_placeholders or not isinstance(x, Placeholder_Item)]
 
 
-    def Get_All_Items(self):
+    def Get_All_Items(self, allow_placeholders = False):
         '''
-        Returns a list of all items in this object or any
-        of its references.
+        Returns a list of all items in this object or any of its references,
+        across all versions.
+        
+        * allow_placeholders
+          - Bool, if True then Placeholder_Items may be returned.
         '''
-        ret_list = list(self.items_dict.values())
-        for ref_object in self.refs_dict.values():
-            ret_list += ref_object.Get_All_Items()
+        ret_list = self.Get_Items()
+        for item_name, subdict in self.item_version_object_refs.items():
+            for ref_object in subdict.values():
+                ret_list += ref_object.Get_All_Items()
         return ret_list
 
 
-    def Get_Item(self, item_name):
+    def Get_Item(self, item_name, version = 'current', allow_placeholders = False):
         '''
         Look up and return the item matching the given name.
         Item may be pulled from this object or one of its references.
         If the item_name isn't found, returns None.
+        If an item is found but has a blank value
+
+        * version
+          - When the item is not found locally, this is the version of
+            references to use in ref lookups.
+        * allow_placeholders
+          - Bool, if True then a Placeholder_Item object may be returned.
         '''
         # Start with local lookup.
         if item_name in self.items_dict:
-            return self.items_dict[item_name]
+            item = self.items_dict[item_name]
+
+            # Skip if a disallowed placeholder.
+            if not allow_placeholders and isinstance(item, Placeholder_Item):
+                pass
+            # Otherwise, can return it.
+            else:
+                return self.items_dict[item_name]
+
         # Check references.
-        for ref_object in self.refs_dict.values():
+        for subdict in self.item_version_object_refs.values():
+            ref_object = subdict[version]
             # If it found an item, return it.
-            item = ref_object.Get_Item(item_name)
+            item = ref_object.Get_Item(item_name, version)
             if item != None:
                 return item
+
         # Couldn't find a match.
         return None
 
     
-    def Make_Edit_Items(
+    def Make_Items(
             self,
             game_file,
-            control_list
+            macro_list,
+            xpath_replacements = None
         ):
         '''
-        Creates and records a list of Edit_Items constructed from the given
-        xml game_file with the given control_list.
-        Each entry in the control_list is a tuple of:
-        (item name, xpath, xml_attribute, display name, kwargs)
-        Entries are skipped if the xpath is not found, though they are
-        still created if the attribute is not found.
+        Creates and records a list of Edit_Items and Display_Items
+        constructed from the given xml game_file with the given macro list.
+
+        TODO: automatically add references.
+        * game_file
+          - XML_File used to check xpaths.
+          - Macros are skipped if the xpath is not found, though they are
+            still created if the attribute is not found.
+        * macro_list
+          - List of Edit_Item_Macro and Display_Item_Macro objects.
+        * xpath_replacements
+          - Dict holding replacements for macro xpath placeholders.
+          - Added to deal with weapon component connection tags, which
+            have varying xml node tags, so that they can all use the
+            same macro.
         '''
         virtual_path = game_file.virtual_path
         xml_root = game_file.Get_Root_Readonly()
     
-        for entry in control_list:
-            name, xpath, xml_attribute = entry[0:3]
-            # Kwargs are optional.
-            kwargs = {} if len(entry) < 4 else entry[3]
+        for macro in macro_list:
+            
+            if isinstance(macro, Edit_Item_Macro):
+                
+                # Replace the xpath if needed.
+                xpath = macro.xpath
+                if xpath_replacements != None and xpath in xpath_replacements:
+                    xpath = xpath_replacements[xpath]
+                
+                # Use a placeholder if the node is not found; there is
+                #  currently no support for adding a node like there is for
+                #  creating an attribute.
+                node = xml_root.find(xpath)
+                if node == None:
+                    self.Add_Item( Placeholder_Item(
+                        parent       = self,
+                        name         = macro.name,
+                        display_name = macro.display_name,
+                        description  = macro.description,
+                        hidden       = macro.hidden,
+                        ))
+                else:
+                    # Create the item.
+                    self.Add_Item( Edit_Item(
+                        parent       = self,
+                        virtual_path = virtual_path,
+                        name         = macro.name,
+                        display_name = macro.display_name,
+                        description  = macro.description,
+                        xpath        = xpath,
+                        attribute    = macro.attribute,
+                        read_only    = macro.read_only,
+                        is_reference = macro.is_reference,
+                        hidden       = macro.hidden,
+                        ))
 
+            else:                
+                # Look up the dependency names.
+                # Parse dependencies from the function arg names.
+                # Note: these could come from other Edit_Objects, found
+                #  through a reference.
+                dependency_names = [
+                    x for x in inspect.signature(macro.display_function).parameters]
 
-            # Skip if node not found; there is currently no support
-            # for adding a node like there is for creating an attribute.
-            node = xml_root.find(xpath)
-            if node == None:
-                continue
-
-            # Create the item.
-            self.Add_Item( Edit_Item(
-                name = name,
-                virtual_path = virtual_path,
-                xpath = xpath,
-                attribute = xml_attribute,
-                **kwargs
-                ))
+                
+                # Create the item.
+                self.Add_Item( Display_Item(
+                    parent           = self,
+                    name             = macro.name,
+                    display_name     = macro.display_name,
+                    description      = macro.description,
+                    dependency_names = dependency_names,
+                    display_function = macro.display_function,
+                    read_only        = macro.read_only,
+                    hidden           = macro.hidden,
+                    ))
         return
 
-
-    def Make_Display_Items(
-            self,
-            control_list
+    
+    def Get_Display_Version_Items_Dict(
+            self, 
+            skipped_item_names = None,
+            include_refs = True
         ):
         '''
-        Creates and records a list of Display_Items constructed from the
-        given Edit_Object and control_list.
-        Each entry in the control_list is a tuple of:
-        (item name, display_function, display name, kwargs)
-        Dependencies should be given as a list of item names, which will match
-        to items already recorded in this Edit_Object or one of its
-        references.
-        Note: this may end up being unused in favor of custom class objects
-        that fill in their methods.
+        Returns a dict keyed by version name and holding lists of
+        items, taken from here or first level references.
+        Lists may include Placeholder_Items or None entries, though
+        the same spot in each list will always have at least one item.
+
+        Lists will be in sync, such that every item from the same
+        position in the lists will have the same item name and
+        display label (or be None).
+
+        * skipped_item_names
+          - List of strings, names of items to skip.
+        * include_refs
+          - Bool, if True then first level references are included,
+            else they are skipped.
         '''
-        for entry in control_list:
-            name, display_function = entry[0:2]
-            # Kwargs are optional.
-            kwargs = {} if len(entry) < 3 else entry[2]
+        version_items = defaultdict(list)
+        # Make this a list for easy usage.
+        if skipped_item_names == None:
+            skipped_item_names = []
+        
+        # Start with the top level items, which are always the same
+        # across versions. Include placeholders for now.
+        for version in version_names:
+            for item in self.Get_Items(allow_placeholders = True):
+                # Skip if a skipped name.
+                if item.name in skipped_item_names:
+                    continue
+                # Skip if hidden.
+                if item.hidden:
+                    continue
+                version_items[version].append(item)
 
-            # Look up the dependency items.
-            # Parse dependencies from the function arg names.
-            # Note: these could come from other Edit_Objects, found through
-            # a reference.
-            dependencies = []
-            for dep_name in inspect.signature(display_function).parameters:
-                dep_item = self.Get_Item(dep_name)
-                #-Removed; allow None dependencies for cases where the
-                # display will simply not be computable or needs to
-                # use an alt calc or default.
-                #if dep_item == None:
-                #    raise AssertionError(('Failed to look up dependency item'
-                #    ' named "{}" in object "{}".').format(dep_name, self.name))
-                dependencies.append(dep_item)
+        # Loop over references, by item name.
+        for item_name, subdict in self.item_version_object_refs.items():
+            # Different versions may have refs to different objects,
+            # though they should all be of the same type and with
+            # the same item names.  Eg. switching from bullet to
+            # missile still will pull from the generic bullet
+            # names.
+            for version in version_names:
+                ref_object = subdict[version]
+                # Skip missing refs.
+                if ref_object == None:
+                    continue
+                
+                # Check each of its items.
+                for item in ref_object.Get_Items(allow_placeholders = True):
+                    # Skip some names.
+                    if item.name in skipped_item_names:
+                        continue
+                    # Skip if hidden.
+                    if item.hidden:
+                        continue
+                    version_items[version].append(item)
+                        
+            # Since some versions may have had missing refs, the lists
+            # could be out of sync. Pad with Nones to sync them.
+            list_length = max(len(x) for x in version_items.values())
+            for version in version_names:
+                this_list = version_items[version]
+                while len(this_list) < list_length:
+                    this_list.append(None)
 
-            # Create the item.
-            self.Add_Item( Display_Item(
-                name = name,
-                dependencies = dependencies,
-                display_function = display_function,
-                **kwargs
-                ))
-        return
+
+        # Do some verification.
+        # All labels should be in sync, all indexes should have a non-None
+        # item.
+        for item_row in zip(*version_items.values()):
+            assert any(x != None for x in item_row)
+            # Name check is a little trickier.
+            name = None
+            for item in item_row:
+                if item == None:
+                    continue
+                # Record the first name seen.
+                if name == None:
+                    name = item.name
+                # Else verify.
+                else:
+                    assert name == item.name
+
+        return version_items

@@ -66,6 +66,9 @@
     <Compile Include="Transforms\Live_Editor\Edit_Tables.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Transforms\Live_Editor\Edit_Tree_View.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Transforms\Live_Editor\Weapons.py">
       <SubType>Code</SubType>
     </Compile>

@@ -20,15 +20,21 @@ class Live_Editor_class:
     probably json, probably in the output extension folder.
 
     Attributes:
-    * objects_dict
-      - Dict, keyed by object name, holding every created Edit_Object,
-        both those used in tables and others used as references.
-    * table_group_dict
-      - Dict holding Edit_Table_Group objects, keyed by their name.
-    * table_group_builders
-      - Dict, keyed by supported table_group name, holding the
-        functions which will build the groups.
-      - Used to autobuild table groups when a group is requested that
+    * category_objects_dict
+      - Dict of dicts, holding every created Edit_Object.
+      - Outer key is supported category name ('weapons','bullets', etc.),
+        inner key is the object name.
+    * category_objects_builders
+      - Dict, keyed by supported object category name, holding the
+        iterable functions which will create the objects.
+    * tree_view_dict
+      - Dict holding Edit_Tree_View objects, keyed by their name.
+      - Note: this is replacing table groups, in general.
+        TODO: delete table groups once fully converted.
+    * tree_view_builders
+      - Dict, keyed by supported tree_view name, holding the
+        functions which will build the trees.
+      - Used to autobuild tree views when a view is requested that
         isn't available.
       - Other modules should register their builder functions with
         the Live_Editor at their import time, so that the editor
@@ -42,9 +48,10 @@ class Live_Editor_class:
         and updated before writing out to json.
     '''
     def __init__(self):
-        self.objects_dict = {}
-        self.table_group_dict = {}
-        self.table_group_builders = {}
+        self.category_objects_dict = {}
+        self.category_objects_builders = {}
+        self.tree_view_dict = {}
+        self.tree_view_builders = {}
         self.patches_dict = {}
         return
 
@@ -53,25 +60,41 @@ class Live_Editor_class:
         '''
         Resets the live editor.
         '''
-        self.objects_dict     .clear()
-        self.table_group_dict .clear()
-        self.patches_dict     .clear()
-        # Leave the table builders alone.
+        self.category_objects_dict .clear()
+        self.tree_view_dict        .clear()
+        self.patches_dict          .clear()
+        # Leave the tree builders alone.
         return
 
 
-    def Add_Object(self, edit_object):
+    def _Add_Object(self, category, edit_object):
         '''
-        Record a new Edit_Object.
+        Record a new Edit_Object, and finish its setup.
+        The object should have all items recorded by this point.
         Error if the name is already taken; this is a generally
         unexpected situation, and should be handled specially
         if it comes up, for now.
+        Error if the category is missing, indicating an object
+        was added from outside the expected builder function.
         '''
-        assert edit_object.name not in self.objects_dict
-        self.objects_dict[edit_object.name] = edit_object
+        # Verify there is no name collision in any category.
+        assert all(edit_object.name not in x 
+                   for x in self.category_objects_dict.values())
+        # Record to the given category.
+        self.category_objects_dict[category][edit_object.name] = edit_object
+
+        # Fill its category and parent attributes.
+        edit_object.category = category
+        edit_object.parent   = self
+        # Do an initial depedency filling.
+        edit_object.Delayed_Init()
+
         # Check for patches to apply.
         # This will need to check each item, since they may be sourced
         # from different original files.
+        # Note: for robustness against changes to base item names or
+        # xpaths, support matching based on one or the other of those
+        # terms.
         for item in edit_object.Get_Items():
             # Skip if not an Edit_Item.
             if not isinstance(item, Edit_Item):
@@ -91,49 +114,70 @@ class Live_Editor_class:
         '''
         Returns an Edit_Object of the given name, or None if not found.
         '''
-        return self.objects_dict.get(name, None)
+        for subdict in self.category_objects_dict.values():
+            if name in subdict:
+                return subdict[name]
+        return None
 
 
-    def Record_Table_Group_Builder(self, name, build_function):
+    def Record_Tree_View_Builder(self, name, build_function):
         '''
-        Records the build function for a Table_Group of the given name.
+        Records the build function for a Edit_Tree_View of the given name.
         '''
-        self.table_group_builders[name] = build_function
+        self.tree_view_builders[name] = build_function
+        return
+
+    
+    def Record_Category_Objects_Builder(self, category, build_function):
+        '''
+        Records the build function for a Edit_Objects of the given category.
+        '''
+        self.category_objects_builders[category] = build_function
+        return
 
 
-    def Add_Table_Group(self, edit_table_group):
+    def Get_Tree_View(self, name, rebuild = False):
         '''
-        Record a new Edit_Table.
-        '''
-        self.table_group_dict[edit_table_group.name] = edit_table_group
-        
-
-    def Get_Table_Group(self, name, rebuild = False):
-        '''
-        Returns an Table_Group of the given name, building it if needed
-        and a builder is available, or returns None otherwise.
+        Returns an Edit_Tree_View of the given name, building it if needed
+        and a builder is available; error if the builder isn't found.
 
         * rebuild
           - Bool, if True then the table group will be rebuilt even if
             it already exists.
           - May be useful if the xml may have changed since the last build.
         '''
-        group = self.table_group_dict.get(name, None)
-        if ((group == None or rebuild) 
-        and self.table_group_builders.get(name, None) != None):
-            # Call the builder function and store the group.
-            group = self.table_group_builders[name]()
-            self.Add_Table_Group(group)
-        return group
+        if name not in self.tree_view_dict or rebuild:
+            # Call the builder function and store the view.
+            edit_tree_view = self.tree_view_builders[name]()
+            self.tree_view_dict[edit_tree_view.name] = edit_tree_view
+        return self.tree_view_dict[edit_tree_view.name]
+
+
+    def Get_Category_Objects(self, category, rebuild = False):
+        '''
+        Returns a list of Edit_Objects from the given category.
+        Builds the category objects if they haven't been built yet.
+        '''
+        if category not in self.category_objects_dict or rebuild:
+            # Set up a category for the objects, also clearing
+            #  out any existing objects.
+            self.category_objects_dict[category] = {}
+
+            # Add the objects in.
+            for object in self.category_objects_builders[category]():
+                self._Add_Object(category, object)
+
+        return list(self.category_objects_dict[category].values())
 
 
     def Gen_Items(self):
         '''
         Generator which will yield all items from all objects.
         '''
-        for edit_object in self.objects_dict.values():
-            for item in edit_object.Get_Items():
-                yield item
+        for subdict in self.category_objects_dict.values():
+            for edit_object in subdict.values():
+                for item in edit_object.Get_Items():
+                    yield item
         return
 
 

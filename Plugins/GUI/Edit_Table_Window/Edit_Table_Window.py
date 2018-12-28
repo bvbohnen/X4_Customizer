@@ -101,7 +101,7 @@ class Edit_Table_Window(Tab_Page_Widget, generated_class):
         # This will fill in new items that may get created by the
         # user script.
         self.Queue_Thread(
-            Live_Editor.Get_Table_Group,
+            Live_Editor.Get_Tree_View,
             self.table_name, 
             rebuild = True,
             )
@@ -113,8 +113,9 @@ class Edit_Table_Window(Tab_Page_Widget, generated_class):
         Catch the returned table_group and updated the widgets.
         '''
         super().Handle_Thread_Finished()
-        # Pass the table group down to the tree viewer.
-        self.widget_tree_view.Set_Table_Group(return_value)
-        # Turn the button back on.
+        # Turn the button back on, before handling the response
+        # (in case it gets an error, this lets it be rerun).
         self.widget_Table_Update.setEnabled(True)
+        # Pass the Edit_Tree_View down to the tree viewer.
+        self.widget_tree_view.Set_Tree_View(return_value)
         return

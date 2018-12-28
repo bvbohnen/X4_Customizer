@@ -260,6 +260,9 @@ def Run(*args):
         # In dev mode, print the exception traceback.
         if Settings.developer:
             Print(traceback.format_exc())
+            # Raise it again, just in case vs can helpfully break
+            # at the problem point. (This won't help with the gui up.)
+            raise ex
         #else:
         #    Print('Enable developer mode for exception stack trace.')
         

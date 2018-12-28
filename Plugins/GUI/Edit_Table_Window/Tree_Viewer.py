@@ -1,4 +1,5 @@
 
+from collections import OrderedDict
 from PyQt5 import QtWidgets
 
 from ...Transforms.Live_Editor import Live_Editor
@@ -14,41 +15,41 @@ class Widget_X4_Table_Tree(QtWidgets.QTreeWidget):
     TODO: move some of this logic up to the tab page widget.
 
     Attributes:
-    * table_group
-      - Edit_Table_Group object, holding 1 or more tables to display.
-      - The first row holds column headers; the first column holds the
-        preferred display name of the entry.
     * widget_item_info
       - QGroupBox widget that will display the item info.
       - Should be set up by the parent after initial init.
-    * last_selected_item_text
+    * last_selected_item_label
       - Text name of the last selected item.
       - Unlike the built-in QTreeWidget version, this will only hold
         active items, not table headers.
     * last_selected_item
-      - The last selected item itself, associated with last_selected_item_text.
+      - The last selected item itself, associated with last_selected_item_label.
+    * item_dict
+      - Dict, keyed by label, of QTreeWidgetItem leaf nodes.
+      - Used to get an item from last_selected_item_label.
+      - Note: this could be unsafe if a label is used more than once,
+        so avoid using it for anything critical; currently it is just
+        used to restore item selection after a tree rebuild.
+      - TODO: maybe set this to track through nested nodes, by joining
+        labels together.
     '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.currentItemChanged.connect(self.Handle_currentItemChanged)
-        self.table_group = None
-        self.last_selected_item_text = None
+        self.last_selected_item_label = None
         self.last_selected_item = None
         self.widget_item_info = None
         return
 
 
-    def Set_Table_Group(self, table_group):
+    def Set_Tree_View(self, edit_tree_view):
         '''
-        Updates the display of the tree to show the table_group
+        Updates the display of the tree to show the edit_tree_view
         contents.
         '''
-        # Load in the table group from the thread results.
-        self.table_group = table_group
-
         # If something went wrong, None was returned; just stop here
         # and let whatever exception message get printed.
-        if self.table_group == None:
+        if edit_tree_view == None:
             self.window.Print('Get_Table_Group failed.')
             return
 
@@ -59,50 +60,16 @@ class Widget_X4_Table_Tree(QtWidgets.QTreeWidget):
         self.clear()
 
         # Set up the tree view.
-        # Each table will form a separate top tree node.
-        # Further categorization is possible within each table; TODO.
-        # Record the active items made into a dict, keyed by text label.
-        item_dict = {}
-        for edit_table in self.table_group.Get_Tables():
-            # Set up the header.
-            header = QtWidgets.QTreeWidgetItem()
-            # Attach the widget item to the parent tree.
-            self.addTopLevelItem(header)            
-            # Set the name in column 0.
-            header.setText(0, edit_table.name)
-            # If the label is clicked, it should get ignored elsewhere
-            # due to not having extra annotations.
+        self.item_dict = {}
+        # Call the recursive tree builder, starting with self as
+        # the root tree node.
+        self._Fill_Tree_Node(self, edit_tree_view.Get_Tree())        
 
-            # Construct the 2d table of edit_items.
-            item_table = edit_table.Get_Table()
-            # First row is column headers.
-            column_headers = item_table[0]
-            # Work through the rows, skipping the first.
-            for index_m1, row in enumerate(item_table[1:]):
-                
-                # Make a new leaf item.
-                item = QtWidgets.QTreeWidgetItem()
-                # Attach the widget item to the parent.
-                header.addChild(item)
-
-                # Display using the first column item, generally
-                # expected to be the display name.
-                item.setText(0, row[0].Get_Value('current'))
-
-                item_dict[item.text(0)] = item
-            
-                # For convenience, annotate the item with its table index.
-                # This is real index (including the column headers row).
-                item.table_index = index_m1 +1
-                # Also annotate with the originating item table
-                # and edit_table (in case one or the other is useful later).
-                item.edit_table  = edit_table
-                item.item_table  = item_table
-
-
-        # Try to find the item matching the last selected item's text.
-        if self.last_selected_item_text in item_dict:
-            item = item_dict[self.last_selected_item_text]
+        # Try to find the item matching the last selected item's text,
+        # and restore its selection.
+        if self.last_selected_item_label in self.item_dict:
+            # Look up the item.
+            item = self.item_dict[self.last_selected_item_label]
             # Select it (highlights the line).
             self.setCurrentItem(item, True)
             # Set it for display.
@@ -110,18 +77,61 @@ class Widget_X4_Table_Tree(QtWidgets.QTreeWidget):
 
         # Do a soft refresh, so that the current values of items
         # will update, and redraws the table.
-        # TODO: maybe only be needed for reselecting an item (eg. nest
+        # TODO: may only be needed for reselecting an item (eg. nest
         # in the above 'if' statement) if script runs already call
         # the soft refresh reliably to handle current value changes.
         self.Soft_Refresh()
 
-        # Display info on the first item by default.
-        # -Removed, needs update.
-        #self.widget_item_info.Update(self.table[0], self.table[1])
+        # Leave unexpended by default.
+        # TODO: maybe expand based on number of items or layers of
+        # nesting.
+        #self.expandAll()
             
-        # Expand by default if there is only one table.
-        if len(self.table_group.Get_Tables()) == 1:
-            self.expandAll()
+        return
+
+
+    def _Fill_Tree_Node(self, parent_widget, edit_tree_node):
+        '''
+        Recursive function to fill in the gui item children for the given
+        tree view node (an OrderedDict).
+        '''
+        # Loop over the edit_tree_node children.
+        for label, next_edit_node in edit_tree_node.items():
+            
+            # Make a new gui item.
+            widget = QtWidgets.QTreeWidgetItem()
+
+            # Set the label in column 0.
+            widget.setText(0, label)
+
+            # Attach the widget item to the parent tree.
+            # If the parent is the top level tree, it uses a different
+            # method for hookup.
+            if isinstance(parent_widget, QtWidgets.QTreeWidget):
+                parent_widget.addTopLevelItem(widget)
+            else:
+                parent_widget.addChild(widget)
+
+
+            # If this is a category (a dict), recursively fill in its children.
+            if isinstance(next_edit_node, OrderedDict):
+                # Note that it is a label, for easy skipping when clicked.
+                widget.is_label = True
+
+                # Note: if the label is clicked, it should get ignored
+                #  elsewhere due to not having extra annotations.
+                # Recursive call to fill in its children.
+                self._Fill_Tree_Node(widget, next_edit_node)
+
+            # Otherwise, treat as a leaf item holding an Object_View.
+            else:
+                widget.is_label = False
+
+                # Record the item by name for later lookup.
+                self.item_dict[label] = widget
+
+                # Apply annotations for convenience.
+                widget.object_view = next_edit_node
         return
 
 
@@ -129,22 +139,12 @@ class Widget_X4_Table_Tree(QtWidgets.QTreeWidget):
         '''
         A different item was clicked on.
         '''
-        # Ignore if it doesn't have a table index (eg. could be a
-        # category header).
-        if not hasattr(new_item, 'table_index'):
+        # Ignore clicks on labels.
+        if new_item.is_label:
             return
 
-        # Record the text of this item, for possible restoration
-        # across sessions or other useful lookups.
-        self.last_selected_item_text = new_item.text(0)
-        self.last_selected_item = new_item
-
-        # Pull out two lists: column headers and item data.
-        fields    = new_item.item_table[0]
-        items     = new_item.item_table[new_item.table_index]
-
-        # Set the display widget to update.
-        self.widget_item_info.Update(fields, items)
+        # Pass the object_view to the display widget.
+        self.widget_item_info.Update(new_item.object_view)
         return
 
 
