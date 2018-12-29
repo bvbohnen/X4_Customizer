@@ -1,7 +1,7 @@
 
 from collections import defaultdict
 from Framework import Transform_Wrapper, Settings, Plugin_Log, Load_File
-from .Live_Editor_class import Live_Editor
+from Framework import Live_Editor
 
 
 @Transform_Wrapper(category = 'Live_Editor')

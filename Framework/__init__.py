@@ -103,6 +103,9 @@ from .Common.Exceptions import *
 from . import File_Manager
 from .File_Manager import Load_File, File_System
 
+from . import Live_Editor_Components
+from .Live_Editor_Components import Live_Editor
+
 # The Gui wants a few more imports to work when compiled.
 from . import Main
 from . import Make_Documentation

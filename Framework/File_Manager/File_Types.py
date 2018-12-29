@@ -8,6 +8,7 @@ from lxml import etree as ET
 from copy import deepcopy
 from collections import OrderedDict, defaultdict
 import re
+from fnmatch import fnmatch
 
 from .. import Common
 Settings = Common.Settings
@@ -26,6 +27,8 @@ def New_Game_File(binary, **kwargs):
         # Check for special file types.
         if virtual_path.startswith('t/'):
             return XML_Text_File(binary = binary, **kwargs)
+        elif virtual_path == 'libraries/wares.xml':
+            return XML_Wares_File(binary = binary, **kwargs)
         else:
             # Default generic xml.
             return XML_File(binary = binary, **kwargs)
@@ -284,6 +287,19 @@ class XML_File(Game_File):
         return
 
 
+    def Get_Xpath_Nodes(self, xpath, version = 'current'):
+        '''
+        Returns a list of nodes found using the given xpath on the given
+        version of the xml root. Defaults to the 'current' version.
+        Nodes should be considered read only.
+        Subclasses may offer special handling of this to speed up
+        xpath searches on large xml files with regular structure.
+        '''
+        root = self.Get_Root_Readonly(version)
+        nodes = root.findall(xpath)
+        return nodes
+
+
     # Note: xml only needs diffing if it originates from somewhere else,
     #  and isn't new.
     # TODO: set up a flag for new, non-diff xml files. For now, all need
@@ -372,7 +388,69 @@ class XML_File(Game_File):
 class XML_Text_File(XML_File):
     '''
     XML file holding game text.
+    This provides functionality for looking up text references.
+
+    Attributes:
+    * page_text_dict
+      - Dict, keyed by 'page[id]' then 't[id]', holding the current
+        text values.
+      - Added to speed up performance compared to looking up
+        text each time in the xml with xpath.
+    * requests_until_refresh
+      - Int, how many text lookup requests may occurred since the
+        last page_text_dict reset (due to modification) before
+        an automatic refresh is triggerred.
+      - Used to prevent refreshing too often when fine grain
+        modifications occur.
     '''
+    '''
+    Note: for writing out wares to html, 16% of the long runtime
+    was spent on xpath lookups of ware names, hence the effort
+    to speed this process up.
+    '''
+    # Static value for how many requests are allowed before a refresh.
+    # One request may count multiple times if there are recursive
+    # text lookups, so don't make this too sensitive.
+    # Note: number is an intuitive guess, and wasn't tested for optimality.
+    # Note: setting 0 here will disable the refreshes.
+    requests_until_refresh_limit = 30
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.page_text_dict = defaultdict(dict)
+        self.requests_until_refresh = self.requests_until_refresh_limit
+        return
+
+
+    def Refresh_Cache(self):
+        '''
+        Reads the xml and sets up the page_text_dict.
+        This will need a rerun when the xml gets modified and a new
+        Read is requested, if it is to be beneficial.
+        '''
+        self.page_text_dict.clear()
+        for page_node in self.Get_Root_Readonly().getchildren():
+            if page_node.tag != 'page':
+                continue
+            page_id = page_node.get('id')
+            for t_node in page_node.getchildren():
+                if t_node.tag != 't':
+                    continue
+                self.page_text_dict[page_id][t_node.get('id')] = t_node.text
+        return
+
+
+    def Update_Root(self, *args, **kwargs):
+        '''
+        Clears the page_text_dict when root is updated.
+        '''
+        super().Update_Root(*args, **kwargs)
+        self.page_text_dict.clear()
+        # Set the refresh countdown.
+        self.requests_until_refresh = self.requests_until_refresh_limit
+        return
+
+
     # TODO: maybe a version that takes separate page and id terms.
     def Read(self, text = None, page = None, id = None):
         '''
@@ -387,11 +465,17 @@ class XML_Text_File(XML_File):
           - Int or string, page and id separated; give for direct
             dereference instead of a full text string.
         '''
+        # Maybe do a refresh of the page_text_dict.
+        if self.requests_until_refresh > 0:
+            self.requests_until_refresh -= 1
+            if self.requests_until_refresh <= 0:
+                self.Refresh_Cache()
+
         # If page and id given, pack them in a string to reuse the
         # following code. Probably don't need to worry about performance
         # of this.
         if text == None:
-            text = '{{{},{}}}'.fromat(page,id)
+            text = '{{{},{}}}'.format(page,id)
                        
         # Remove any comments, in parentheses.
         if '(' in text:
@@ -408,8 +492,11 @@ class XML_Text_File(XML_File):
         text = text.replace('\\','')
 
         # If lookups are present, deal with them recursively.
+        # TODO: isn't this always the case with the current setup?
+        #  -Maybe remove this check.
         if '{' in text:
-            root = self.Get_Root_Readonly()
+            if not self.page_text_dict or 1:
+                root = self.Get_Root_Readonly()
 
             # RE pattern used:
             #  .*    : Match a series of chars.
@@ -419,30 +506,168 @@ class XML_Text_File(XML_File):
             #          separators (eg. the text lookups).
             new_text = ''
             for term in re.split('({.*?})', text):
+                # Skip empty terms (eg. when there is no text before the 
+                # first '{').
+                if not term:
+                    continue
+
                 # Check if it is a nested lookup.
                 if term.startswith('{'):
-
+            
                     # Split it apart.
                     page, id = (term.replace(' ','').replace('{','')
                                 .replace('}','').split(','))
-
+            
                     # Look up the initial replacement.
-                    node = root.find('.//page[@id="{}"]/t[@id="{}"]'.format(page, id))
-                    if node == None:                                 
-                        return
-                    replacement_text = node.text
-
+                    # Use xpath if the page_text_dict is not ready,
+                    # else use the dict for faster lookup.
+                    if self.page_text_dict:
+                        try:
+                            replacement_text = self.page_text_dict[page][id]
+                        except KeyError:
+                            return
+                    else:
+                        node = root.find('.//page[@id="{}"]/t[@id="{}"]'.format(page, id))
+                        if node == None:
+                            return
+                        replacement_text = node.text
+            
                     # In case this replacement has nested terms,
                     # recursively process it, and append to the running
                     # result.
                     new_text += self.Read(replacement_text)
                 else:
+                    # There was no lookup for this term; just append
+                    # it back to the text string.
                     new_text += term
-            text = new_text
 
+            # Overwrite the text with the replacements.
+            text = new_text
+            
         return text
 
     
+class XML_Wares_File(XML_File):
+    '''
+    The libraries/wares.xml file. This has some functionality for
+    speeding up xpath reads.
+
+    Attributes:
+    * version_ware_node_dict
+      - Dict, keyed by version then by 'ware[id]', holding the node for
+        each ware.
+      - Added to speed up performance compared to looking up
+        nodes each time in the xml with xpath, when the xpaths
+        have ware id qualifiers.
+    * requests_until_refresh
+      - Int, how many text lookup requests may occurred since the
+        last ware_node_dict reset (due to modification) before
+        an automatic refresh is triggerred.
+      - Used to prevent refreshing too often when fine grain
+        modifications occur.
+    '''
+    '''
+    Note: this caching dropped the wares live editor object parsing
+    from 18 seconds down to 2, compared to using the full xpath
+    every time.
+    '''
+    requests_until_refresh_limit = 5
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        assert self.virtual_path == 'libraries/wares.xml'
+        self.version_ware_node_dict = defaultdict(dict)
+        self.requests_until_refresh = self.requests_until_refresh_limit
+        return
+    
+
+    def Refresh_Cache(self):
+        '''
+        Reads the xml and sets up the ware_node_dict.
+        This will need a rerun when the xml gets modified and a new
+        Get_Xpath_Nodes is requested, if it is to be beneficial.
+        The 'vanilla' and 'patched' versions will be filled once
+        and never cleared.
+        '''
+        for version in ['vanilla','patched','current']:
+            # Leave the non-current versions alone if they are
+            # already filled in.
+            if version != 'current' and self.version_ware_node_dict[version]:
+                continue
+            # Convenience renaming.
+            this_dict = self.version_ware_node_dict[version]
+            this_dict.clear()
+            # Loop over the wares.
+            for ware_node in self.Get_Root_Readonly(version).getchildren():
+                if ware_node.tag != 'ware':
+                    continue
+                # Store it by id.
+                this_dict[ware_node.get('id')] = ware_node
+        return
+
+
+    def Update_Root(self, *args, **kwargs):
+        '''
+        Clears version_ware_node_dict['current'] when root is updated.
+        '''
+        super().Update_Root(*args, **kwargs)
+        self.version_ware_node_dict['current'].clear()
+        # Set the refresh countdown.
+        self.requests_until_refresh = self.requests_until_refresh_limit
+        return
+    
+
+    def Get_Xpath_Nodes(self, xpath, version = 'current'):
+        '''
+        Returns a list of nodes found using the given xpath on the given
+        version of the xml root. Defaults to the 'current' version.
+        Nodes should be considered read only.
+
+        If the xpath starts with the pattern './ware[@id="*"]/*', its
+        lookup will be accelerated.
+        '''
+        # Maybe do a refresh of the version_ware_node_dict.
+        if self.requests_until_refresh > 0:
+            self.requests_until_refresh -= 1
+            if self.requests_until_refresh <= 0:
+                # This will fill in all versions, which shouldn't
+                # have much overhead vs just one version, and saves
+                # this from having to have separate version countdowns.
+                self.Refresh_Cache()
+
+        # Check if the cache is ready.
+        if self.version_ware_node_dict[version]:
+
+            # Check the xpath start.
+            if xpath.startswith('./ware[@id="'):
+                # Split out the id.
+                id, remainder = xpath.replace('./ware[@id="','').split('"]',1)
+
+                # If the remainder is empty or a '/', can continue,
+                # otherwise do a normal xpath since there are more
+                # qualifiers.
+                if not remainder or remainder[0] == '/':
+
+                    # Look up the node from the cache.
+                    ware_node = self.version_ware_node_dict[version].get(id)
+                    # Return an empty list on no match.
+                    if ware_node == None:
+                        return []
+
+                    # If there is a remainder, reform it into a further
+                    # xpath starting from the ware node.
+                    if remainder:
+                        new_xpath = '.' + remainder
+                        nodes = ware_node.findall(new_xpath)
+                        return nodes
+                    # Otherwise, just return this ware.
+                    else:
+                        return [ware_node]                               
+
+        # If here, do a normal lookup.
+        return super().Get_Xpath_Nodes(xpath, version)
+
+
 # TODO: split this into separate text and binary versions.
 class Misc_File(Game_File):
     '''

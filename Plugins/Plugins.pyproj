@@ -22,7 +22,14 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="GUI\Main_Window\Styles.py">
+    <Compile Include="Analyses\Live_Editor_Builders\Wares.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Analyses\Live_Editor_Builders\Weapons.py" />
+    <Compile Include="Analyses\Live_Editor_Builders\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GUI\Styles.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GUI\Edit_Table_Window\Edit_Item.py">
@@ -51,44 +58,15 @@
     <Compile Include="GUI\Shared\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Transforms\Live_Editor\Apply_Patches.py">
+    <Compile Include="Transforms\Misc.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Transforms\Live_Editor\Edit_Object.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Transforms\Live_Editor\Edit_Items.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Transforms\Live_Editor\Live_Editor_class.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Transforms\Live_Editor\Edit_Tables.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Transforms\Live_Editor\Edit_Tree_View.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Transforms\Live_Editor\Weapons.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Transforms\Live_Editor\__init__.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Analyses\Print_Ware_Stats.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Analyses\Print_Weapon_Stats.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Analyses\Write_Tables.py">
+    <Compile Include="Analyses\Print_Object_Stats.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Analyses\__init__.py" />
-    <Compile Include="GUI\Main_Window\Session_Memory.py" />
-    <Compile Include="GUI\Main_Window\Main_Window.py" />
-    <Compile Include="GUI\Main_Window\Worker_Thread_Handler.py" />
-    <Compile Include="GUI\Main_Window\__init__.py" />
+    <Compile Include="GUI\Main_Window.py" />
+    <Compile Include="GUI\Worker_Thread_Handler.py" />
     <Compile Include="GUI\Script_Window\Syntax_Highlighter.py" />
     <Compile Include="GUI\Shared\Widget_Documentation.py" />
     <Compile Include="GUI\Script_Window\Widget_Plugins.py" />
@@ -126,13 +104,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Analyses\" />
+    <Folder Include="Analyses\Live_Editor_Builders\" />
     <Folder Include="GUI\Edit_Table_Window\" />
     <Folder Include="GUI\Shared\" />
     <Folder Include="GUI\Script_Window\" />
     <Folder Include="GUI\Settings_Window\" />
-    <Folder Include="Transforms\Live_Editor\" />
     <Folder Include="GUI\" />
-    <Folder Include="GUI\Main_Window\" />
     <Folder Include="Utilities\" />
     <Folder Include="Transforms\" />
   </ItemGroup>

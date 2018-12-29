@@ -1,21 +1,18 @@
 
+
 from itertools import chain
 from collections import OrderedDict, defaultdict
 
 from Framework import File_System, Settings
-
-from .Live_Editor_class import Live_Editor
-from .Edit_Tables import Edit_Table, Edit_Table_Group
-from .Edit_Object import Edit_Object
-from .Edit_Items  import Edit_Item, Display_Item
-from .Edit_Tree_View import Edit_Tree_View, Object_View
+from Framework.Live_Editor_Components import *
 
 # Convenience macro renaming.
-from .Edit_Object import Edit_Item_Macro    as E
-from .Edit_Object import Display_Item_Macro as D
+E = Edit_Item_Macro
+D = Display_Item_Macro
 
-from ..Weapons import Get_All_Weapons
-from ..Support import Float_to_String
+# TODO: maybe remove dependency on the Weapons transform code.
+from ...Transforms.Weapons import Get_All_Weapons
+from ...Transforms.Support import Float_to_String
 
 
 def _Build_Bullet_Objects():
@@ -32,9 +29,6 @@ def _Build_Bullet_Objects():
     bullet_files = File_System.Get_Asset_Files_By_Class('macros',
                     'bullet','missile','bomb','mine','countermeasure')
     
-    # First pass will just fill in bullet objects,
-    # making them available during weapon lookups on the next pass.
-    # Be careful to make each bullet once.
     for bullet_file in bullet_files:
         name = bullet_file.asset_name
 
@@ -94,11 +88,6 @@ def _Build_Weapon_Objects():
         yield weapon_edit_object
 
     return
-
-
-# Register the builder functions with the editor.
-Live_Editor.Record_Category_Objects_Builder('bullets', _Build_Bullet_Objects)
-Live_Editor.Record_Category_Objects_Builder('weapons', _Build_Weapon_Objects)
 
 
 # Various custom Display_Items.
@@ -201,7 +190,7 @@ def Display_Update_Bullet_Burst_DPS(
     ):
     'Calculate burst dps (ignoring heat).'
     # No damage if this is a repair weapon.
-    return '0' if damage_repair == '1' else _Calc_Dps(fire_rate, merge_damage, merge_amount)
+    return '' if damage_repair == '1' else _Calc_Dps(fire_rate, merge_damage, merge_amount)
 
 def Display_Update_Bullet_Burst_DPS_Shield(
         fire_rate,
@@ -210,7 +199,7 @@ def Display_Update_Bullet_Burst_DPS_Shield(
         merge_amount,
     ):
     'Calculate burst shield dps (ignoring heat).'
-    return '0' if damage_repair == '1' else _Calc_Dps(fire_rate, merge_damage_shield, merge_amount)
+    return '' if damage_repair == '1' else _Calc_Dps(fire_rate, merge_damage_shield, merge_amount)
 
 def Display_Update_Bullet_Burst_DPS_Hull(
         fire_rate,
@@ -219,7 +208,7 @@ def Display_Update_Bullet_Burst_DPS_Hull(
         merge_amount,
     ):
     'Calculate burst hull dps (ignoring heat).'
-    return '0' if damage_repair == '1' else _Calc_Dps(fire_rate, merge_damage_hull, merge_amount)
+    return '' if damage_repair == '1' else _Calc_Dps(fire_rate, merge_damage_hull, merge_amount)
 
 def Display_Update_Bullet_Repair_Rate(
         fire_rate,
@@ -229,7 +218,7 @@ def Display_Update_Bullet_Repair_Rate(
     ):
     'Calculate burst repair rate (ignoring heat).'
     # Use the hull damage field for repair amount.
-    return '0' if damage_repair != '1' else _Calc_Dps(fire_rate, merge_damage_hull, merge_amount)
+    return '' if damage_repair != '1' else _Calc_Dps(fire_rate, merge_damage_hull, merge_amount)
 
 
 
@@ -257,7 +246,7 @@ weapon_item_macros = [
     E('ammunition_tags'      , './/ammunition'           , 'tags'         , 'Ammo Tags', ''),
     E('storage_capacity'     , './/storage'              , 'capacity'     , 'Storage', ''),
 
-    E('bullet_codename'      , './/bullet'               , 'class'        , 'Bullet Codename', '',  is_reference = True),
+    E('bullet_codename'      , './/bullet'               , 'class'        , 'Bullet Codename (ref)', '',  is_reference = True),
     ]
 
 
@@ -330,10 +319,7 @@ def _Build_Weapon_Object_Tree_View():
     Constructs an Edit_Tree_View object for use in displaying
     weapon data.
     '''
-    
-    name = 'weapons'
-
-    # Set up a new table and record it.
+    # Set up a new table.
     object_tree_view = Edit_Tree_View('weapons')
 
     # Get all of the weapon objects.
@@ -367,8 +353,9 @@ def _Build_Weapon_Object_Tree_View():
         for weapon_object in sorted( weapon_objects, key = lambda x: Get_Name(x)):
 
             # Pack into an object viewer; assign no labels just yet.
-            object_view = Object_View(weapon_object)
-            this_node[Get_Name(weapon_object)] = object_view
+            label = Get_Name(weapon_object)
+            object_view = Object_View(label, weapon_object)
+            this_node[label] = object_view
 
         # For all objects at this node, apply a filtered set of labels.
         # -Switching to relying on object built-in names.
@@ -377,5 +364,3 @@ def _Build_Weapon_Object_Tree_View():
     return object_tree_view
 
 
-# Register the builder function with the editor.
-Live_Editor.Record_Tree_View_Builder('weapons', _Build_Weapon_Object_Tree_View)

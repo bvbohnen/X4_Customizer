@@ -1,6 +1,7 @@
 
 from collections import defaultdict
-from Framework import Load_File
+from .. import File_Manager
+from ..File_Manager import Load_File
 
 # Static list of version names used.
 version_names = ['vanilla','patched','current','edited']
@@ -97,6 +98,9 @@ class _Base_Item:
             dep.Reset_Value(version)
         return
         
+    def Init_References(self):
+        'Dummy function'
+        return
     
 class Placeholder_Item(_Base_Item):
     '''
@@ -185,6 +189,9 @@ class Display_Item(_Base_Item):
                 value = self.display_function(*values)
             except Exception:
                 value = 'error'
+            # Convert None to an empty string.
+            if value == None:
+                value = ''
             self.version_value_dict[version] = value
         return self.version_value_dict[version]
     
@@ -222,7 +229,7 @@ class Edit_Item(_Base_Item):
     * virtual_path
       - Path for the game file being edited.
     * xpath
-      - Xpath to the node being edited.
+      - Full xpath to the node being edited, relative to the file root.
       - Note: the attribute does not have to exist in the node prior
         to editing, for cases where an attribute will be added.
     * attribute
@@ -261,7 +268,58 @@ class Edit_Item(_Base_Item):
         # Just to be safe, there should only be 3 commas, none from
         # the xpath or attribute.
         assert self.key.count(',') == 3
+        # Init the values right away after creation, to get xpath
+        # parsing out of the way.
+        self.Init_Values()
+        return
 
+
+    def Refresh_Value_From_File(self, version):
+        '''
+        Initialize a single version's value.
+        For use at creation and after value resets, eg. when the
+        'current' is reset after a script run.
+        '''
+        # Grab the game file with the source info.
+        game_file = Load_File(self.virtual_path)
+
+        # Look up the xpath node; should be just one.
+        nodes = game_file.Get_Xpath_Nodes(self.xpath, version = version)
+        if len(nodes) != 1:
+            raise AssertionError(
+                'Error: Found {} nodes for file "{}", xpath "{}".'
+                .format(len(nodes), self.virtual_path, self.xpath))
+
+        # Pull out the field info.
+        # Note: may be empty, in which case use an empty string.
+        value = nodes[0].get(self.attribute, default = '')
+        # Record it.
+        self.version_value_dict[version] = value
+        return
+
+
+    def Init_Values(self):
+        '''
+        Do an initial parsing for all values from the source xml.
+        '''
+        for version in ['vanilla','patched','current']:
+            self.Refresh_Value_From_File(version)
+        # The edited value still copy from patched.
+        self.version_value_dict['edited'] = self.version_value_dict['patched']
+        return
+
+
+    def Init_References(self):
+        '''
+        Initialize any references for the versions, if this is a reference
+        item. Only call this after all possibly referenced objects have
+        been added to the Live_Editor.
+        '''
+        # Update the parent object reference, if needed.
+        if self.is_reference:
+            for version in version_names:
+                value = self.version_value_dict[version]
+                self.parent.Update_Reference(self.name, version, value)
         return
 
 
@@ -278,29 +336,10 @@ class Edit_Item(_Base_Item):
                 #  got messy with display items that couldn't do calculations
                 #  off of blank input. Also, that style wouldn't pick up on
                 #  deleted attributes very well.
-                value = self.Get_Value('patched')
+                self.version_value_dict[version] = self.Get_Value('patched')
             else:
-                # TODO: consider leaving 'current' blank if the xml node
-                # does not have a modified root yet (eg. when first starting
-                # up, before running any plugins). This might not work so
-                # well when pre-running some plugins, though.
+                self.Refresh_Value_From_File(version)
 
-                # Grab the game file with the source info.
-                game_file = Load_File(self.virtual_path)            
-                xml_root = game_file.Get_Root_Readonly(version)
-
-                # Look up the xpath node; should be just one.
-                nodes = xml_root.findall(self.xpath)
-                if len(nodes) != 1:
-                    raise AssertionError(
-                        'Error: Found {} nodes for file "{}", xpath "{}".'
-                        .format(len(nodes), self.virtual_path, self.xpath))
-
-                # Pull out the field info.
-                # Note: may be empty, in which case use an empty string.
-                value = nodes[0].get(self.attribute, default = '')
-
-            self.version_value_dict[version] = value            
             # Update the parent object reference, if needed.
             if self.is_reference:
                 self.parent.Update_Reference(self.name, version, value)

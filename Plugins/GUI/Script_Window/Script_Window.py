@@ -17,8 +17,7 @@ from Framework import Settings
 from Framework import File_System
 from Framework.Common import home_path
 from Framework import Main
-
-from ...Transforms.Live_Editor import Live_Editor
+from Framework import Live_Editor
 
 
 # Load the .ui file into a reuseable base class.

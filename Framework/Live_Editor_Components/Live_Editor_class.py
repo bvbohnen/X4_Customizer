@@ -2,7 +2,7 @@
 from collections import namedtuple
 import json
 
-from Framework import Settings, Print
+from ..Common import Settings, Print
 from .Edit_Items import Edit_Item, Display_Item
 
 # Use a named tuple to track custom patches.
@@ -58,12 +58,17 @@ class Live_Editor_class:
         
     def Reset(self):
         '''
-        Resets the live editor.
+        Resets the live editor records of objects and object views.
+        Patches will be recorded for the pre-reset state, and carried
+        to post-reset. The output file is not updated.
         '''
+        # Save the patches from the current state.
+        self.Update_Patches()
+        # Leave the tree builders alone; they never need reset.
+        # Leave patches alone; want their state to be kept.
+        # Only really need to reset objects and tree views.
         self.category_objects_dict .clear()
         self.tree_view_dict        .clear()
-        self.patches_dict          .clear()
-        # Leave the tree builders alone.
         return
 
 
@@ -150,7 +155,7 @@ class Live_Editor_class:
             # Call the builder function and store the view.
             edit_tree_view = self.tree_view_builders[name]()
             self.tree_view_dict[edit_tree_view.name] = edit_tree_view
-        return self.tree_view_dict[edit_tree_view.name]
+        return self.tree_view_dict[name]
 
 
     def Get_Category_Objects(self, category, rebuild = False):

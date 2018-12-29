@@ -3,6 +3,7 @@
 from pathlib import Path
 import datetime
 from collections import defaultdict
+from lxml import etree as ET
 
 from .Source_Reader import Source_Reader_class
 from .Cat_Writer import Cat_Writer
@@ -12,7 +13,6 @@ from ..Common import File_Missing_Exception
 from ..Common import Customizer_Log_class
 from ..Common import Change_Log, Print
 from ..Common import home_path
-from lxml import etree as ET
 
 
 class File_System_class:
@@ -52,8 +52,15 @@ class File_System_class:
         loaded and, when macros, added to class_macro_dict.
     '''
     def __init__(self):
-        # Let the Reset method fill everything in.
-        self.Reset()
+        self.game_file_dict = {}
+        self.old_log = Customizer_Log_class()
+        self.init_complete = False
+        self.source_reader = Source_Reader_class()
+        # Set this up as a defaultdict of defaultdicts of lists,
+        # for easy initialization on new tags or classes.
+        self.asset_class_dict = defaultdict(lambda: defaultdict(list))
+        self.asset_name_dict = {}
+        self._patterns_loaded = set()
         return
     
 
@@ -83,18 +90,22 @@ class File_System_class:
         '''
         Resets the file system, clearing out prior loaded files,
         returning to non-initialized state, etc.
+        This will also reset the Live_Editor, since it is out of date.
         '''
-        # This will recreate things even when not needed, for
-        # core reuse with init.
-        self.game_file_dict = {}
-        self.old_log = Customizer_Log_class()
         self.init_complete = False
+        self.game_file_dict.clear()
+        self.asset_class_dict.clear()
+        self.asset_name_dict.clear()
+        self._patterns_loaded.clear()
+        # Pending a reset option for these, just recreate the objects.
+        self.old_log = Customizer_Log_class()
         self.source_reader = Source_Reader_class()
-        # Set this up as a defaultdict of defaultdicts of lists,
-        # for easy initialization on new tags or classes.
-        self.asset_class_dict = defaultdict(lambda: defaultdict(list))
-        self.asset_name_dict = {}
-        self._patterns_loaded = set()
+
+        # Also reset the live editor. It should rebuild itself from
+        # whatever new game files are loaded, to catch source changes.
+        # Use a delayed import, due to an annoying circular import issue.
+        from ..Live_Editor_Components import Live_Editor
+        Live_Editor.Reset()
         return
 
 

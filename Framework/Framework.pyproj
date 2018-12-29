@@ -61,10 +61,19 @@
     <Compile Include="File_Manager\XML_Diff.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="File_Manager\XML_Shadow_Dict.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="File_Manager\__init__.py" />
     <Compile Include="File_Manager\Source_Reader.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Live_Editor_Components\Edit_Items.py" />
+    <Compile Include="Live_Editor_Components\Edit_Object.py" />
+    <Compile Include="Live_Editor_Components\Edit_Tables.py" />
+    <Compile Include="Live_Editor_Components\Edit_Tree_View.py" />
+    <Compile Include="Live_Editor_Components\Live_Editor_class.py" />
+    <Compile Include="Live_Editor_Components\__init__.py" />
     <Compile Include="Make_Documentation.py">
       <SubType>Code</SubType>
     </Compile>
@@ -89,6 +98,7 @@
   <ItemGroup>
     <Folder Include="Common\" />
     <Folder Include="File_Manager\" />
+    <Folder Include="Live_Editor_Components\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

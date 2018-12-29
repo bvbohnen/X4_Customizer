@@ -93,6 +93,7 @@ class Widget_X4_Table_Item_Info(QtWidgets.QGroupBox):
 
             # Init checked state to on.
             # TODO: maybe save this as part of a session.
+            # TODO: this comes up unchecked on a new tab?
             checkbox.setChecked(True)
 
             # Connect up its action.
@@ -150,6 +151,13 @@ class Widget_X4_Table_Item_Info(QtWidgets.QGroupBox):
         #row = self.layout().rowCount()
         column = self.widget_keys.index(key)
         self.layout().addWidget(widget, row, column)
+
+        # Column headers want to expand excessively if there aren't
+        # many rows; try to keep their size down here.
+        # TODO: find a better solution; this balances the rows, but
+        # still has vertical stretch when there are few rows.
+        widget.setSizePolicy(QtWidgets.QSizePolicy.Minimum,
+                             QtWidgets.QSizePolicy.Minimum)
 
         # Start out hidden.
         widget.setVisible(False)
@@ -237,8 +245,8 @@ class Widget_X4_Table_Item_Info(QtWidgets.QGroupBox):
         for widget_list in self.widgets_dict.values():
             for row, widget in enumerate(widget_list):
 
-                # Low rows become visible.
-                if row < row_count:
+                # Low rows become visible; adjust by 1 for the headers.
+                if row < row_count +1:
                     widget.setVisible(True)
                     widget.in_use = True
                 else:

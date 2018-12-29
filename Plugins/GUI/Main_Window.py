@@ -23,24 +23,22 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from Framework import Settings
 from Framework import Print
 from Framework import Change_Log
+from Framework import Live_Editor
 
-from .Session_Memory import Session_Memory
 from .Worker_Thread_Handler import Worker_Thread_Handler
 from . import Styles
 from Framework.Common import home_path
 
-from ..Edit_Table_Window import Edit_Table_Window
-from ..Settings_Window import Settings_Window
-from ..Script_Window import Script_Window
+from .Edit_Table_Window import Edit_Table_Window
+from .Settings_Window import Settings_Window
+from .Script_Window import Script_Window
 
-
-from ...Transforms.Live_Editor import Live_Editor
 
 # Load the .ui file into a reuseable base class.
 # This will return the designer generated class ("form"), and
 # the Qt base class it is based on (QWidget in this case).
 # http://pyqt.sourceforge.net/Docs/PyQt5/designer.html
-gui_file = Path(__file__).parents[1] / 'x4c_gui_layout.ui'
+gui_file = Path(__file__).parent / 'x4c_gui_layout.ui'
 generated_class, qt_base_class = loadUiType(str(gui_file))
 
 
@@ -79,7 +77,6 @@ class GUI_Main_Window(qt_base_class, generated_class):
         self.application = application
         self.current_font = None
         self.current_style = None
-        #self.session_memory = Session_Memory(self)
         self.tabs_dict = {}
         self.tab_indices_dict = {}
         
@@ -110,6 +107,7 @@ class GUI_Main_Window(qt_base_class, generated_class):
         self.Create_Tab(Script_Window    , 'Script')
         self.Create_Tab(Settings_Window  , 'Settings')
         self.Create_Tab(Edit_Table_Window, 'Weapons', table_name = 'weapons')
+        self.Create_Tab(Edit_Table_Window, 'Wares', table_name = 'wares')
 
 
         # Connect actions to handlers.

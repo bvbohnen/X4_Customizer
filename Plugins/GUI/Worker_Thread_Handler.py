@@ -1,14 +1,12 @@
 
 import traceback
-from collections import namedtuple
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtCore
 from Framework import Print
 from Framework import Settings
-from Framework import File_System
-from ...Transforms.Live_Editor import Live_Editor
 
 # Use a named tuple to work requests.
+from collections import namedtuple
 Work_Request = namedtuple(
     'Work_Request', 
     ['prelaunch_function', 'callback_function', 

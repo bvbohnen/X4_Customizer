@@ -1,0 +1,310 @@
+
+
+from itertools import chain
+from collections import OrderedDict, defaultdict
+from multiprocessing import Pool, cpu_count
+
+from Framework import File_System, Settings, Load_File
+from Framework.Live_Editor_Components import *
+
+# Convenience macro renaming.
+E = Edit_Item_Macro
+D = Display_Item_Macro
+
+# TODO: maybe remove dependency on the Weapons transform code.
+from ...Transforms.Weapons import Get_All_Weapons
+from ...Transforms.Support import Float_to_String
+
+# Note: multiprocessing is used here to speed up ware parsing,
+# but it doesn't work as-is with lxml because it wants to pickle
+# the elements to copy between threads.
+# The copyreg package can be used to define pickling/depickling functions
+# for arbitrary objects.
+import copyreg
+from lxml import etree as ET
+
+def LXML_Element_Pickler(element):
+    'Pickle an lxml element.'
+    xml_string = ET.tostring(element, encoding = 'unicode')
+    # Return format is a little funky; based on documentation.
+    return LXML_Element_Depickler, (xml_string,)
+
+def LXML_Element_Depickler(xml_string):
+    'Depickle an lxml element.'
+    # For whatever reason a number (of bytes?) gets stuck
+    # on the end of the string when input to here, messing up reconstruction.
+    # No proper documentation mentions this behavior of copyreg.
+    # As a workaround, manually remove the copyreg appended junk.
+    # This will scrap everything after the last >.
+    xml_string = xml_string.rsplit('>',1)[0] + '>'
+    return ET.fromstring(xml_string)
+
+# Set up the pickler with copyreg.
+copyreg.pickle(ET._Element, LXML_Element_Pickler, LXML_Element_Depickler)
+
+
+
+def _Build_Ware_Objects():
+    '''
+    Generates Edit_Objects for all found wares.
+    Meant for calling from the Live_Editor.
+    '''
+    #t_file = Load_File('t/0001-L044.xml')
+    # Look up the ware file.
+    wares_file = Load_File('libraries/wares.xml')
+    xml_root = wares_file.Get_Root_Readonly()
+    
+    # Get the ware nodes; only first level children.
+    ware_nodes = wares_file.Get_Root_Readonly().findall('./ware')
+        
+    if 1:
+        # Try out multiprocessing to speed this up.
+        # Observations, letting python split up ware nodes"
+        # - Time goes from ~20 to ~30 seconds with 1 worker.
+        # - Down to ~10 seconds with 6 workers; not much gain.
+        # To possibly reduce data copy overhead, split up the ware nodes
+        # manually into lists, and send a single full list to each worker.
+        # - Down to 7-8 seconds from doing this.
+        # - Still not great, but more than 2x speedup, so it's something.
+        # - Note: for different process counts, best was at system
+        #   max threads, with higher counts not losing much time.
+        # - Can let the Pool handle the thread counting automatically,
+        #   and it does get close, though that doesn't help with picking
+        #   the work unit size.
+        # - Update: after making production nodes conditional, normal
+        #   runs went 20 to ~4.5 seconds, and this went down to ~2.5.
+
+        # Pick the process runs needed to do all the work.
+        # Leave 1 thread free for system stuff.
+        num_processes = max(1, cpu_count() -1)
+        max_nodes_per_worker = len(ware_nodes) // num_processes +1
+        slices = []
+        start = 0
+        while start < len(ware_nodes):
+            # Compute the end point, limiting to the last node.
+            end = start + max_nodes_per_worker
+            if end > len(ware_nodes):
+                end = len(ware_nodes)
+            # Get the slice and store it.
+            slices.append( ware_nodes[start : end] )
+            # Update the start.
+            start = end
+
+        # Use a starmap for this, since it needs to pass both the
+        # wares file and the ware node. Starmap will splat out
+        # the iterables.
+        inputs = [(slice, wares_file) for slice in slices]
+
+        #import time
+        #start_time = time.time()
+        pool = Pool()#processes = num_processes)
+        ware_edit_objects_list = pool.starmap(
+            _Create_Objects, 
+            inputs,
+            )
+        #print('time: ', time.time() - start_time)
+
+        for ware_edit_objects in ware_edit_objects_list:
+            for ware_edit_object in ware_edit_objects:
+                yield ware_edit_object
+
+    else:
+        # Single thread style.
+        #import time
+        #start_time = time.time()
+        objects = _Create_Objects(ware_nodes, wares_file)
+        #print('time: ', time.time() - start_time)
+        # Send them back to the live editor for recording.
+        for object in objects:
+            yield object
+
+    return
+
+
+def _Create_Objects(ware_nodes, wares_file):
+    '''
+    Returns a list of objects for the given ware nodes.
+    '''
+    ret_list = []
+    for ware_node in ware_nodes:
+        # Use the id attribute as the base name.
+        name = ware_node.get('id')
+        assert name != None
+        ware_edit_object = Edit_Object(name)
+        
+        # Do an xpath partial replacement to fill in the path
+        # to the node from the file base.
+        xpath_prefix = './ware[@id="{}"]'.format(name)
+                    
+        # Find production nodes, get their macros (can be multiple).
+        # Note: doing this conditionally instead of using pre-created
+        # macros reduced run time from 20 to 4 seconds. Most nodes
+        # do not have the full 3 production subnodes, nor 3 wares
+        # per production.
+        extra_macros = []
+        for prod_index, prod_node in enumerate(ware_node.findall('./production')):
+            # Offset indices by 1, for display names and for xpaths.
+            extra_macros += Get_Production_Macros(xpath_prefix, prod_index +1)            
+            # Loop over wares.
+            for ware_index, prod_ware_node in enumerate(prod_node.findall('./primary/ware')):
+                extra_macros += Get_Production_Ware_Macros(xpath_prefix, prod_index +1, ware_index +1)
+
+        # Fill in the edit items from macros.
+        ware_edit_object.Make_Items(
+            wares_file, 
+            ware_item_macros + extra_macros,
+            xpath_replacements = {'PREFIX': xpath_prefix}
+            )
+        ret_list.append(ware_edit_object)
+    return ret_list
+
+
+def _Build_Ware_Object_Tree_View():
+    '''
+    Constructs an Edit_Tree_View object for use in displaying
+    ware data.
+    '''
+    # Set up a new table.
+    object_tree_view = Edit_Tree_View('wares')
+
+    # Get all of the objects.
+    ware_objects = Live_Editor.Get_Category_Objects('wares')
+
+    # Organize by group, then by transport type.
+    for ware_object in ware_objects:
+        # Use the parsed name to label it.
+        name      = ware_object.Get_Item('name')     .Get_Value('current')
+        group     = ('' if ware_object.Get_Item('group') == None 
+                    else ware_object.Get_Item('group').Get_Value('current'))
+        transport = ('' if ware_object.Get_Item('transport') == None 
+                    else ware_object.Get_Item('transport').Get_Value('current'))
+
+        # Categories may have failed due to lack of a node, or an
+        # empty attribute. Provide defaults to avoid empty labels.
+        if not group:
+            group = 'ungrouped'
+        if not transport:
+            transport = 'no transport'
+
+        object_tree_view.Add_Object(name, ware_object, group, transport)
+        
+    # Sort the tree in place when done.
+    object_tree_view.Sort_Branches()
+
+    # Apply default label filtering.
+    object_tree_view.Apply_Filtered_Labels()
+
+    return object_tree_view
+
+
+
+
+# TODO: this gets called 4 times for the 4 versions, which
+# seems overkill if the text file doesn't change.
+# Maybe consider a special flag for items that are the same
+# across versions, so they only do one lookup.
+def Display_Update_Ware_Name(
+        t_name_entry,
+        id
+    ):
+    'Look up ware name.'
+    # If no t_name_entry available, use the id name.
+    if not t_name_entry:
+        return id
+    else:
+        t_file = File_System.Load_File('t/0001-L044.xml')
+        # Let the t-file Read handle the lookup.
+        name = t_file.Read(t_name_entry)
+        return name
+    
+
+def Display_Update_Factory_Name(
+        t_factory
+    ):
+    'Look up factory name.'
+    if t_factory:
+        t_file = File_System.Load_File('t/0001-L044.xml')
+        # Let the t-file Read handle the lookup.
+        return t_file.Read(t_factory)
+    return
+
+
+def Display_Update_Price_Spread(
+        price_min,
+        price_max,
+    ):
+    '''
+    Calc % difference from min to max price.
+    '''
+    if price_min and price_max:
+        price_min = float(price_min)
+        price_max = float(price_max)
+        if price_min != 0:
+            return str(int(round((price_max / price_min - 1) * 100))) + '%'
+    return
+    
+
+# Fields from the weapon macro file to look for and convert to Edit_Items.
+# These xpaths will need partial replacements for the base node offset,
+# since multiple wares are defined in the same file.
+ware_item_macros = [
+    D('name'                  , Display_Update_Ware_Name                    , 'Name', ''),
+    E('t_name_entry'          , 'PREFIX'                 , 'name'           , 'T Name Entry', ''),
+    E('id'                    , 'PREFIX'                 , 'id'             , 'ID', ''),
+    E('group'                 , 'PREFIX'                 , 'group'          , 'Group', ''),
+    E('transport'             , 'PREFIX'                 , 'transport'      , 'Transport', ''),
+    E('price_min'             , 'PREFIX/price'           , 'min'            , 'Price Min', ''),
+    E('price_avg'             , 'PREFIX/price'           , 'average'        , 'Price Avg', ''),
+    E('price_max'             , 'PREFIX/price'           , 'max'            , 'Price Max', ''),
+    D('price_spread'          , Display_Update_Price_Spread                 , 'Price Spread', ''),    
+    E('volume'                , 'PREFIX'                 , 'volume'         , 'Volume', ''),
+    E('tags'                  , 'PREFIX'                 , 'tags'           , 'Tags', ''),
+    D('factory'               , Display_Update_Factory_Name                 , 'Factory', ''),
+    E('t_factory'             , 'PREFIX'                 , 'factoryname'    , 'T Factory', ''),
+    ]
+
+
+# Trying out semi-dynamic functions to build the macros.
+# TODO: better method.
+def Get_Production_Macros(xpath_prefix, production_index):
+    'Make production node macros. Index should start at 1.'
+    x = xpath_prefix
+    p = production_index
+    return [
+    E('prod_{}_name'  .format(p), '{}/production[{}]'.format(x,p), 'name'  , 'Prod.{} T Name'  .format(p), ''),
+    E('prod_{}_method'.format(p), '{}/production[{}]'.format(x,p), 'method', 'Prod.{} Method'.format(p), ''),
+    E('prod_{}_time'  .format(p), '{}/production[{}]'.format(x,p), 'time'  , 'Prod.{} Time'  .format(p), ''),
+    E('prod_{}_amount'.format(p), '{}/production[{}]'.format(x,p), 'amount', 'Prod.{} #'.format(p), ''),
+    ]
+
+def Get_Production_Ware_Macros(xpath_prefix, production_index, ware_index):
+    'Make production ware node macros. Indices should start at 1.'
+    x = xpath_prefix
+    p = production_index
+    w = ware_index
+    return [
+    E('prod_{}_ware_{}_id'    .format(p,w), '{}/production[{}]/primary/ware[{}]'.format(x,p,w), 'ware'  , 'Prod.{} Ware {} ID'    .format(p,w), ''),
+    E('prod_{}_ware_{}_amount'.format(p,w), '{}/production[{}]/primary/ware[{}]'.format(x,p,w), 'amount', 'Prod.{} Ware {} #'.format(p,w), ''),
+    ]
+
+#-Removed; pick macros dynamically; doing it blind is 4-5x slower since
+# most of these don't apply to a given ware.
+#def _Fill_Production_Macros():
+#    '''
+#    Fill in production nodes (can be multiple).
+#    Generic versions; may get outdated.
+#    '''
+#    # TODO: maybe use an intermediate structure for this to help compute
+#    # profit margin on production once top level wares filled in.
+#
+#    # Limit to fixed counts for now, since the macro approach is blind
+#    # to existing properties.
+#    # TODO: something dynamic.
+#    # These will use 1 based indices (easier for xpaths).
+#    for p in range(1,4+1):        
+#        ware_item_macros.extend(Get_Production_Macros('PREFIX', p))
+#        for w in range(1,4+1):            
+#            ware_item_macros.extend(Get_Production_Ware_Macros('PREFIX', p,w))
+#    return
+#_Fill_Production_Macros()
+

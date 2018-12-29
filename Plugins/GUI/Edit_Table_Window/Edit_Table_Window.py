@@ -6,7 +6,7 @@ from PyQt5.uic import loadUiType
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 from ..Shared import Tab_Page_Widget
-from ...Transforms.Live_Editor import Live_Editor
+from Framework import Live_Editor
 
 # Load the .ui file into a reuseable base class.
 # This will return the designer generated class ("form"), and

@@ -2,10 +2,11 @@
 
 import inspect
 from collections import OrderedDict, defaultdict
+from collections import namedtuple
+
 from .Edit_Items import Edit_Item, Display_Item, Placeholder_Item
 from .Edit_Items import version_names
 
-from collections import namedtuple
 # Macro tuples for aiding in construction of items.
 Edit_Item_Macro = namedtuple('Edit_Item_Macro', 
     ['name', 'xpath', 'attribute', 
@@ -19,7 +20,6 @@ Display_Item_Macro = namedtuple('Display_Item_Macro',
      'display_name', 'description', 
      'read_only', 'hidden' ], 
      defaults = ['','', True, False])
-
 
 
 class Edit_Object:
@@ -69,10 +69,9 @@ class Edit_Object:
         '''
         for version in version_names:
             self.Update_Item_Dependencies(version)
-            # To setup refs, just stride over items and make sure they have
-            # pulled all of their values.
-            for item in self.Get_Items():
-                item.Get_Value(version)
+        # Do the initial reference setup for items.
+        for item in self.Get_Items():
+            item.Init_References()
         return
 
 
@@ -238,9 +237,13 @@ class Edit_Object:
           - List of Edit_Item_Macro and Display_Item_Macro objects.
         * xpath_replacements
           - Dict holding replacements for macro xpath placeholders.
+          - May be full or partial replacements; care should be
+            taken to ensure the replaced terms are unique.
           - Added to deal with weapon component connection tags, which
             have varying xml node tags, so that they can all use the
             same macro.
+          - Also useful for files which hold multiple objects, to
+            be able to insert a per-object xpath prefix.
         '''
         virtual_path = game_file.virtual_path
         xml_root = game_file.Get_Root_Readonly()
@@ -251,8 +254,11 @@ class Edit_Object:
                 
                 # Replace the xpath if needed.
                 xpath = macro.xpath
-                if xpath_replacements != None and xpath in xpath_replacements:
-                    xpath = xpath_replacements[xpath]
+                if xpath_replacements != None:
+                    # Check for any partial replacement opportunities.
+                    for old, new in xpath_replacements.items():
+                        if old in xpath:
+                            xpath = xpath.replace(old, new)
                 
                 # Use a placeholder if the node is not found; there is
                 #  currently no support for adding a node like there is for
@@ -307,7 +313,8 @@ class Edit_Object:
     def Get_Display_Version_Items_Dict(
             self, 
             skipped_item_names = None,
-            include_refs = True
+            include_refs = True,
+            version = None
         ):
         '''
         Returns a dict keyed by version name and holding lists of
@@ -324,15 +331,25 @@ class Edit_Object:
         * include_refs
           - Bool, if True then first level references are included,
             else they are skipped.
+        * version
+          - Optional string, the version to include in the response.
+          - When not given, all versions are included.
         '''
         version_items = defaultdict(list)
-        # Make this a list for easy usage.
+
+        # Make item names a list for easy usage.
         if skipped_item_names == None:
             skipped_item_names = []
+
+        # Pick the versions to be included.
+        if version == None:
+            version_list = version_names
+        else:
+            version_list = [version]
         
         # Start with the top level items, which are always the same
         # across versions. Include placeholders for now.
-        for version in version_names:
+        for version in version_list:
             for item in self.Get_Items(allow_placeholders = True):
                 # Skip if a skipped name.
                 if item.name in skipped_item_names:
@@ -349,7 +366,7 @@ class Edit_Object:
             # the same item names.  Eg. switching from bullet to
             # missile still will pull from the generic bullet
             # names.
-            for version in version_names:
+            for version in version_list:
                 ref_object = subdict[version]
                 # Skip missing refs.
                 if ref_object == None:
@@ -368,7 +385,7 @@ class Edit_Object:
             # Since some versions may have had missing refs, the lists
             # could be out of sync. Pad with Nones to sync them.
             list_length = max(len(x) for x in version_items.values())
-            for version in version_names:
+            for version in version_list:
                 this_list = version_items[version]
                 while len(this_list) < list_length:
                     this_list.append(None)
