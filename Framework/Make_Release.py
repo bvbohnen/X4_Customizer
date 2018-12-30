@@ -150,9 +150,13 @@ def Make(*args):
             # brief search it seems lzma is the newest and strongest.
             # Result: seems to work well, dropping the ~90M qt version
             # down to ~25M.
-            compression = zipfile.ZIP_LZMA,
+            # Note: LZMA is the 7-zip format, not native to windows.
+            #compression = zipfile.ZIP_LZMA,
+            # Deflate is the most commonly supported format.
+            # With max compression, this is ~36M, so still kinda okay.
+            compression = zipfile.ZIP_DEFLATED,
             # Compression level only matters for bzip2 and deflated.
-            #compresslevel = 5
+            compresslevel = 9 # 9 is max for deflated
             )
 
     # Add all files to the zip, with an extra nesting folder to

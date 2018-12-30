@@ -101,11 +101,17 @@ class File_System_class:
         self.old_log = Customizer_Log_class()
         self.source_reader = Source_Reader_class()
 
+        #-Removed; the live editor doesn't maintain hard links to
+        #  loaded files, so it can keep its state (albeit it might
+        #  be missing new objects and such); resets of the live editor
+        #  will be handled elsewhere if/when wanted.
+        #  (Also, resetting here breaks its automatic cell update
+        #  after script runs.
         # Also reset the live editor. It should rebuild itself from
         # whatever new game files are loaded, to catch source changes.
         # Use a delayed import, due to an annoying circular import issue.
-        from ..Live_Editor_Components import Live_Editor
-        Live_Editor.Reset()
+        #from ..Live_Editor_Components import Live_Editor
+        #Live_Editor.Reset()
         return
 
 
@@ -275,9 +281,10 @@ class File_System_class:
         # Find all files generated on a prior run, that still appear to be
         #  from that run (eg. were not changed externally), and remove
         #  them.
+        # TODO: clean up empty folders.
         for path in self.old_log.Get_File_Paths_From_Last_Run():
             if path.exists():
-                path.unlink()            
+                path.unlink()
         return
             
 

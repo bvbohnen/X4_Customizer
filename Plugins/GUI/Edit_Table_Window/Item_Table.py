@@ -3,6 +3,12 @@ from PyQt5 import QtWidgets
 
 from .Edit_Item import Widget_Edit_Item
 
+'''
+TODO: try out QTableView with a QStandardItemModel, as it provides some
+nice table functionality (maybe), formatting (would be nice), and
+perhaps useful experience for setting up other tab types.
+'''
+
 class Widget_X4_Table_Item_Info(QtWidgets.QGroupBox):
     '''
     Viewer for a selected table entry's attribute names with edit_items

@@ -25,6 +25,13 @@ def Apply_Live_Editor_Patches(
     # TODO: think about how safe this is, or if it could overwrite
     # meaningful existing state.
     Live_Editor.Load_Patches(file_name)
+    
+    # TODO: fork the xml game files at this point, keeping a copy
+    # of the pre-patch state, so that live editor pages loaded
+    # after this point and properly display the xml version from
+    # before the hand edits and later transforms.
+    # This may need to be done wherever pre-edit transform testing
+    # is handled.
 
     # Work through the patches.
     # To do a cleaner job loading/saving game files, categorize
@@ -38,16 +45,19 @@ def Apply_Live_Editor_Patches(
         # any of these steps.
 
         # Load the file.
-        game_file = Load_File(patch.virtual_path)
+        game_file = Load_File(virtual_path)
         if game_file == None:
             Plugin_Log.Print(('Warning: Apply_Live_Editor_Patches could'
                             ' not find file "{}"'
                             ).format(virtual_path))
             continue
 
+        # Modify it in one pass.
+        root = game_file.Get_Root()
+
         for patch in patch_list:
-            # Look up the edited node.
-            node = game_file.Get_Root_Readonly().find(patch.xpath)
+            # Look up the edited node; assume just one xpath match.
+            node = root.find(patch.xpath)
             if node == None:
                 Plugin_Log.Print(('Warning: Apply_Live_Editor_Patches could'
                                 ' not find node "{}" in file "{}"'
@@ -62,4 +72,9 @@ def Apply_Live_Editor_Patches(
             else:
                 node.set(patch.attribute, patch.value)
 
+        # Put changes back.
+        # TODO: maybe delay this until all patches get applied, putting
+        # back before returning.
+        game_file.Update_Root(root)
+                
     return

@@ -172,10 +172,17 @@ class Widget_Script(QtWidgets.QPlainTextEdit):
         '''
         Create a new script.
         '''
+        # Set up a default header, the function to apply hand edits,
+        # and a function to write results.
         lines = [
-            '# X4 Customizer input script',
+            '# X4 Customizer input script.',
             'from Plugins import *',
             '',
+            '# Apply hand edits from the GUI tables.',
+            'Apply_Live_Editor_Patches()',
+            '',
+            '# Write modified files to the output extension.',
+            'Write_To_Extension()',
             ]
         self.setPlainText('\n'.join(lines))
         self.Clear_Modified()

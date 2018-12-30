@@ -226,6 +226,8 @@ def Make(*args):
         '        r"fnmatch",',
         # Inspect is used in the Live_Editor to ease some code writing.
         '        r"inspect",',
+        # Multiprocessing can be used by plugins for speedups.
+        '        r"multiprocessing",',
         # Add pyqt for the gui plugin.
         # Pyinstaller needs a lot of help on this one when not being
         # given the original source files (which are in plugins).

@@ -1,6 +1,5 @@
 
 from collections import defaultdict
-from .. import File_Manager
 from ..File_Manager import Load_File
 
 # Static list of version names used.
@@ -102,6 +101,7 @@ class _Base_Item:
         'Dummy function'
         return
     
+
 class Placeholder_Item(_Base_Item):
     '''
     Special placeholder version of an item, for capturing the
@@ -157,7 +157,7 @@ class Display_Item(_Base_Item):
             self, 
             display_function, 
             dependency_names,
-            read_only = True, # Customize default.
+            read_only = True, # Customized default.
             **kwargs
         ):
         super().__init__(read_only = read_only, **kwargs)
@@ -225,7 +225,15 @@ class Edit_Item(_Base_Item):
     Container for a single editable item, eg. one field in the xml.
     Initializor takes paths to the field, and fills in values automatically.
 
-    Attributes:
+    Init parameters:
+    * game_file
+      - The Game_File object that holds the item being edited, in
+        its various versions, to be used for the initial init.
+      - This may be from a multiprocessing copy, and will not be
+        kept in case it gets out of sync with transformed xml
+        state.
+
+    New attributes:
     * virtual_path
       - Path for the game file being edited.
     * xpath
@@ -248,21 +256,27 @@ class Edit_Item(_Base_Item):
         to some other object, eg. is a bullet name.
       - Will trigger a reference object update in the parent object
         when this value is changed.
+    * xml_node_id
+      - String, the id of an xml element that the patched version of this
+        item was initialized from.
+      - Used to aid in matching to live editor patches from a prior run.
     '''
     def __init__(
             self,
+            game_file,
             virtual_path,
             xpath,
             attribute,
             is_reference = False,
-            read_only = False, # Customize default.
+            read_only = False, # Customized default.
             **kwargs
         ):
         super().__init__(read_only = read_only, **kwargs)
-        self.is_reference       = is_reference
         self.virtual_path       = virtual_path
         self.xpath              = xpath
         self.attribute          = attribute
+        self.xml_node_id        = None
+        self.is_reference       = is_reference
         self.key                = '{},{},{},{}'.format(
             self.name, virtual_path, xpath, attribute)
         # Just to be safe, there should only be 3 commas, none from
@@ -270,18 +284,26 @@ class Edit_Item(_Base_Item):
         assert self.key.count(',') == 3
         # Init the values right away after creation, to get xpath
         # parsing out of the way.
-        self.Init_Values()
+        self.Init_Values(game_file = game_file)
         return
 
 
-    def Refresh_Value_From_File(self, version):
+    def Refresh_Value_From_File(self, version, game_file = None):
         '''
         Initialize a single version's value.
         For use at creation and after value resets, eg. when the
         'current' is reset after a script run.
+
+        * version
+          - String, the value version to refresh.
+        * game_file
+          - Optional Game_File, this will be used instead of a
+            fresh Load_File if given.
+          - Added because of multiprocessing wanting to create a new
+            file system otherwise.
         '''
-        # Grab the game file with the source info.
-        game_file = Load_File(self.virtual_path)
+        if game_file == None:
+            game_file = Load_File(self.virtual_path)
 
         # Look up the xpath node; should be just one.
         nodes = game_file.Get_Xpath_Nodes(self.xpath, version = version)
@@ -295,16 +317,39 @@ class Edit_Item(_Base_Item):
         value = nodes[0].get(self.attribute, default = '')
         # Record it.
         self.version_value_dict[version] = value
+
+        # Record the patched node for reference.
+        if version == 'patched':
+            # There should be an id in the node tail.
+            if not nodes[0].tail:
+                from lxml import etree as ET
+                print('Edit_Item failed a node tail check, ', self.key)
+                print(ET.tostring(nodes[0]))
+                assert False
+            self.xml_node_id = nodes[0].tail
         return
 
 
-    def Init_Values(self):
+    def Init_Values(self, game_file):
         '''
         Do an initial parsing for all values from the source xml.
+
+        * game_file
+          - The Game_File to pull initial values from.
         '''
         for version in ['vanilla','patched','current']:
-            self.Refresh_Value_From_File(version)
-        # The edited value still copy from patched.
+            self.Refresh_Value_From_File(version, game_file = game_file)
+        # The edited value will copy from patched for now.
+        # TODO: think about pre-edit transforms and how to capture
+        #  their values, such that patch creation knows when this node
+        #  was edited from the output of those transforms.
+        # Using the patched version doesn't work; it lacks transforms.
+        # Using the current version doesn't work; if the live edit table
+        #  is loaded after a full script run, it will have pre- and post-
+        #  edit transforms.
+        # Consider adding a 5th version, partially transformed; the
+        #  xml will need a way to track this (eg. forking xml game
+        #  files when live editor patches are applied).
         self.version_value_dict['edited'] = self.version_value_dict['patched']
         return
 
@@ -342,7 +387,8 @@ class Edit_Item(_Base_Item):
 
             # Update the parent object reference, if needed.
             if self.is_reference:
-                self.parent.Update_Reference(self.name, version, value)
+                self.parent.Update_Reference(self.name, version, 
+                                             self.version_value_dict[version])
 
         return self.version_value_dict[version]
     

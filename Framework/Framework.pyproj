@@ -61,9 +61,6 @@
     <Compile Include="File_Manager\XML_Diff.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="File_Manager\XML_Shadow_Dict.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="File_Manager\__init__.py" />
     <Compile Include="File_Manager\Source_Reader.py">
       <SubType>Code</SubType>

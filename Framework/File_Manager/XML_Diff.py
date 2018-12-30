@@ -96,6 +96,37 @@ import time # Used for some profiling.
 from ..Common import Plugin_Log, Print
 from ..Common.Exceptions import XML_Patch_Exception
 
+
+# Note: multiprocessing is used to speed up ware parsing,
+# but it doesn't work as-is with lxml because multiprocessing wants to pickle
+# the elements to copy between threads, which lxml does not support.
+# The copyreg package can be used to define pickling/depickling functions
+# for arbitrary objects, and will pipe xml to/from a string.
+import copyreg
+
+def LXML_Element_Pickler(element):
+    'Pickle an lxml element.'
+    xml_string = ET.tostring(element, encoding = 'unicode')
+    # Return format is a little funky; based on documentation.
+    return LXML_Element_Depickler, (xml_string,)
+
+def LXML_Element_Depickler(xml_string):
+    'Depickle an lxml element.'
+    # Note: the node ids were attached to tails, but lxml bugs up
+    #  when parsing a top element that has a tail.
+    # As a workaround, manually remove the tail text, and reapply
+    #  it at the end. It needs to be preserved since the copied
+    #  node may be from inside a tree.
+    xml_bulk, tail = xml_string.rsplit('>',1)
+    xml_bulk += '>'
+    element = ET.fromstring(xml_bulk)
+    element.tail = tail
+    return element
+
+# Set up the pickler with copyreg.
+copyreg.pickle(ET._Element, LXML_Element_Pickler, LXML_Element_Depickler)
+
+
 # Statically track the number of node id values assigned, and just
 # keep incrementing this.
 _running_id = 0
@@ -103,7 +134,10 @@ def Fill_Node_IDs(xml_node):
     '''
     For all elements, fill their tail property with a unique integer
     node_id. Values remain unique throughput the python session.
-    If an id string is already in the tail, it will be left unchanged.
+    Ids are unique across xml documents annotated.
+    If an id string is already in the tail, it will be left unchanged,
+    so it should be safe to call this on already annotated xml to
+    fill out ids for new nodes.
     '''
     global _running_id
     # Loop over the nodes, including comments.

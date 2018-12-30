@@ -114,6 +114,7 @@ class GUI_Main_Window(qt_base_class, generated_class):
         self.action_Quit        .triggered.connect(self.Action_Quit)
         self.action_Change_Font .triggered.connect(self.Action_Change_Font)
         self.action_View_Output .triggered.connect(self.Action_View_Output)
+        # TODO: Quit without saving
             
 
         # Set up the styles menu.
@@ -130,9 +131,6 @@ class GUI_Main_Window(qt_base_class, generated_class):
         #  (for whatever reason).
         self.tabWidget.setCurrentIndex(0)
                 
-        # Load the Live_Editor patches.
-        Live_Editor.Load_Patches()
-
         # Display the GUI upon creation.
         self.show()
         return

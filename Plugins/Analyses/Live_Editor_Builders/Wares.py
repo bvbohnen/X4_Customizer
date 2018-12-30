@@ -3,8 +3,9 @@
 from itertools import chain
 from collections import OrderedDict, defaultdict
 from multiprocessing import Pool, cpu_count
+import time
 
-from Framework import File_System, Settings, Load_File
+from Framework import File_System, Settings, Load_File, Print
 from Framework.Live_Editor_Components import *
 
 # Convenience macro renaming.
@@ -15,38 +16,10 @@ D = Display_Item_Macro
 from ...Transforms.Weapons import Get_All_Weapons
 from ...Transforms.Support import Float_to_String
 
-# Note: multiprocessing is used here to speed up ware parsing,
-# but it doesn't work as-is with lxml because it wants to pickle
-# the elements to copy between threads.
-# The copyreg package can be used to define pickling/depickling functions
-# for arbitrary objects.
-import copyreg
-from lxml import etree as ET
-
-def LXML_Element_Pickler(element):
-    'Pickle an lxml element.'
-    xml_string = ET.tostring(element, encoding = 'unicode')
-    # Return format is a little funky; based on documentation.
-    return LXML_Element_Depickler, (xml_string,)
-
-def LXML_Element_Depickler(xml_string):
-    'Depickle an lxml element.'
-    # For whatever reason a number (of bytes?) gets stuck
-    # on the end of the string when input to here, messing up reconstruction.
-    # No proper documentation mentions this behavior of copyreg.
-    # As a workaround, manually remove the copyreg appended junk.
-    # This will scrap everything after the last >.
-    xml_string = xml_string.rsplit('>',1)[0] + '>'
-    return ET.fromstring(xml_string)
-
-# Set up the pickler with copyreg.
-copyreg.pickle(ET._Element, LXML_Element_Pickler, LXML_Element_Depickler)
-
-
 
 def _Build_Ware_Objects():
     '''
-    Generates Edit_Objects for all found wares.
+    Returns a list of Edit_Objects for all found wares.
     Meant for calling from the Live_Editor.
     '''
     #t_file = Load_File('t/0001-L044.xml')
@@ -57,22 +30,65 @@ def _Build_Ware_Objects():
     # Get the ware nodes; only first level children.
     ware_nodes = wares_file.Get_Root_Readonly().findall('./ware')
         
+    start_time = time.time()
+
     if 1:
-        # Try out multiprocessing to speed this up.
-        # Observations, letting python split up ware nodes"
-        # - Time goes from ~20 to ~30 seconds with 1 worker.
-        # - Down to ~10 seconds with 6 workers; not much gain.
-        # To possibly reduce data copy overhead, split up the ware nodes
-        # manually into lists, and send a single full list to each worker.
-        # - Down to 7-8 seconds from doing this.
-        # - Still not great, but more than 2x speedup, so it's something.
-        # - Note: for different process counts, best was at system
-        #   max threads, with higher counts not losing much time.
-        # - Can let the Pool handle the thread counting automatically,
-        #   and it does get close, though that doesn't help with picking
-        #   the work unit size.
-        # - Update: after making production nodes conditional, normal
-        #   runs went 20 to ~4.5 seconds, and this went down to ~2.5.
+        '''
+        Try out multiprocessing to speed this up.
+
+        Observations, letting python split up ware nodes"
+        - Time goes from ~20 to ~30 seconds with 1 worker.
+        - Down to ~10 seconds with 6 workers; not much gain.
+
+        To possibly reduce data copy overhead, split up the ware nodes
+        manually into lists, and send a single full list to each worker.
+        - Down to 7-8 seconds from doing this.
+        - Still not great, but more than 2x speedup, so it's something.
+        - Note: for different process counts, best was at system
+          max threads, with higher counts not losing much time.
+        - Can let the Pool handle the thread counting automatically,
+          and it does get close, though that doesn't help with picking
+          the work unit size.
+        - Update: after making production nodes conditional, normal
+          runs went 20 to ~4.5 seconds, and this went down to ~2.5.
+        
+        Later observations:
+        - The node ids tagged onto xml element tails seem to be
+          transferred okay through pickling, except the one on the
+          root node that has to be pruned.
+
+        - The file system appears to get completely replicated for
+          every thread, such that the wares file gets node ids
+          applied once globally and once per thread.
+          The global node ids are higher than the threads since they
+          are offset somewhat by any prior loaded xml, while the threads
+          all start from 0.
+
+        - This node id discrepency means the loaded elements mess up
+          the live editor patch matching, where editing maja snails
+          ends up changing marines.
+
+        - How can the stupid python threading be prevented from making
+          such a dumb complete system copy that doesn't even catch
+          everything? Eg. it should at least be copying the original
+          node ids, not starting from scratch.
+          - It seems like it goes:
+            - Item gets created with paths
+            - Item runs value init
+            - Value init calls Load_File, expecting it to be a quick
+              dict lookup.
+            - Multiprocessing barfs on itself and makes a new copy
+              of the file system that does not have the wanted
+              file loaded, and has to reload it from disk (with
+              diff patching).
+
+        - Workaround: change how object building works, such that
+          items are linked directly to their source game file and
+          do not have to do a file system load.
+          Further, tweak the pickler to keep the tag on the top
+          element copied.
+          Result: things seem to work okay now.
+        '''
 
         # Pick the process runs needed to do all the work.
         # Leave 1 thread free for system stuff.
@@ -95,30 +111,20 @@ def _Build_Ware_Objects():
         # the iterables.
         inputs = [(slice, wares_file) for slice in slices]
 
-        #import time
-        #start_time = time.time()
         pool = Pool()#processes = num_processes)
-        ware_edit_objects_list = pool.starmap(
+        ware_edit_objects = sum(pool.starmap(
             _Create_Objects, 
             inputs,
-            )
-        #print('time: ', time.time() - start_time)
-
-        for ware_edit_objects in ware_edit_objects_list:
-            for ware_edit_object in ware_edit_objects:
-                yield ware_edit_object
-
+            ), [])
+        
     else:
         # Single thread style.
-        #import time
-        #start_time = time.time()
-        objects = _Create_Objects(ware_nodes, wares_file)
-        #print('time: ', time.time() - start_time)
-        # Send them back to the live editor for recording.
-        for object in objects:
-            yield object
+        ware_edit_objects = _Create_Objects(ware_nodes, wares_file)
+            
+    Print('Ware Edit_Objects creation took {:0.2f} seconds'.format(
+        time.time() - start_time))
 
-    return
+    return ware_edit_objects
 
 
 def _Create_Objects(ware_nodes, wares_file):

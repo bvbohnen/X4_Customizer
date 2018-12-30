@@ -7,6 +7,10 @@ from pathlib import Path
 import argparse
 import traceback
 
+# Special code needs to be run for multiprocessing to
+# work in the compiled version on windows.
+from multiprocessing import Process, freeze_support
+
 # To support packages cross-referencing each other, set up this
 # top level as a package, findable on the sys path.
 # TODO: this is a little redundant with Home_Path, but it is unclear
@@ -269,4 +273,10 @@ def Run(*args):
     return
 
 if __name__ == '__main__':
-    Run(*sys.argv[1:])
+    # Multiprocessing requires these functions be run right after entry.
+    # Note: this breaks the normal VS debugging, so only do it when frozen.
+    if getattr(sys, 'frozen', False):
+        freeze_support()
+        Process(target = Run).start(*sys.argv[1:])
+    else:
+        Run(*sys.argv[1:])

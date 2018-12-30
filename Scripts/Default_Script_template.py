@@ -3,7 +3,8 @@ Template file for specifying user's transforms through the Run_Script option.
 When Run_Script.bat launched without an input script specified, 
 "User_Transforms.py" will be run by default.
 
-Note: the GUI added in v1.2 automates some of these steps.
+Note: the GUI added in v1.2 automates or removes the necessity of 
+some of these steps. This is mainly for the legacy Run_Script.bat approach.
 
 Instructions:
 1)  Copy or rename this file to "Default_Script.py".
@@ -20,8 +21,7 @@ Instructions:
 To remove transforms, either:
 a)  Comment out undesired transforms and rerun the input script.
 b)  Run Clean_Script.bat.
-c)  Using the python source, run 
-    "python Framework/Main.py -clean".
+c)  Using the python source, run "python Framework/Main.py -clean".
 d)  Manually delete the generated extension.
 '''
 

@@ -280,6 +280,22 @@ class XML_File(Game_File):
         or ElementTree. Flags this file as modified. Requires the root
         element type be unchanged.
         '''
+        # Error checks: make sure the returned element isn't any of the
+        # existing nodes, which would indicate it was pulled as a
+        # read only root.
+        if (element_root is self.patched_root 
+            or element_root is self.original_root 
+            or element_root is self.modified_root
+            # Backup check in case node ids go awry; the modified root
+            # should have been created.
+            or self.modified_root == None):
+            raise AssertionError('Attempted to Update_Root with a read-only'
+                                 ' existing root.')
+        # Ensure tags match up.
+        # TODO: consider ensuring the node ids match up; though that
+        # wouldn't support complete xml replacements, it can catch
+        # xml being written back from a different file (unless that
+        # should be allowed).
         assert element_root.tag == self.modified_root.tag
         # Assume the xml changed from the patched version.
         self.modified = True
@@ -289,11 +305,12 @@ class XML_File(Game_File):
 
     def Get_Xpath_Nodes(self, xpath, version = 'current'):
         '''
-        Returns a list of nodes found using the given xpath on the given
-        version of the xml root. Defaults to the 'current' version.
-        Nodes should be considered read only.
+        Returns a list of read-only nodes found using the given xpath on
+        the given version of the xml root. Defaults to the 'current' version.
+        Nodes should not be modified.
         Subclasses may offer special handling of this to speed up
-        xpath searches on large xml files with regular structure.
+        xpath searches on large xml files with regular structure
+        for doing value lookups.
         '''
         root = self.Get_Root_Readonly(version)
         nodes = root.findall(xpath)
@@ -636,6 +653,7 @@ class XML_Wares_File(XML_File):
                 self.Refresh_Cache()
 
         # Check if the cache is ready.
+        ware_nodes = None
         if self.version_ware_node_dict[version]:
 
             # Check the xpath start.
@@ -650,22 +668,20 @@ class XML_Wares_File(XML_File):
 
                     # Look up the node from the cache.
                     ware_node = self.version_ware_node_dict[version].get(id)
-                    # Return an empty list on no match.
-                    if ware_node == None:
-                        return []
+                    if ware_node != None:
+                        # If there is a remainder, reform it into a further
+                        #  xpath starting from the ware node.
+                        if remainder:
+                            new_xpath = '.' + remainder
+                            ware_nodes = ware_node.findall(new_xpath)
+                        # Otherwise, just return this ware.
+                        else:
+                            ware_nodes = [ware_node]                               
 
-                    # If there is a remainder, reform it into a further
-                    # xpath starting from the ware node.
-                    if remainder:
-                        new_xpath = '.' + remainder
-                        nodes = ware_node.findall(new_xpath)
-                        return nodes
-                    # Otherwise, just return this ware.
-                    else:
-                        return [ware_node]                               
-
-        # If here, do a normal lookup.
-        return super().Get_Xpath_Nodes(xpath, version)
+        # If nothing was found in the cache, do a normal lookup.
+        if not ware_nodes:
+            ware_nodes = super().Get_Xpath_Nodes(xpath, version)            
+        return ware_nodes
 
 
 # TODO: split this into separate text and binary versions.

@@ -8,6 +8,8 @@ from .Edit_Items import Edit_Item, Display_Item, Placeholder_Item
 from .Edit_Items import version_names
 
 # Macro tuples for aiding in construction of items.
+# TODO: maybe convert to classes, to make it easier to copy base
+# macros and edit fields programatically.
 Edit_Item_Macro = namedtuple('Edit_Item_Macro', 
     ['name', 'xpath', 'attribute', 
      'display_name', 'description', 
@@ -228,7 +230,6 @@ class Edit_Object:
         Creates and records a list of Edit_Items and Display_Items
         constructed from the given xml game_file with the given macro list.
 
-        TODO: automatically add references.
         * game_file
           - XML_File used to check xpaths.
           - Macros are skipped if the xpath is not found, though they are
@@ -276,6 +277,7 @@ class Edit_Object:
                     # Create the item.
                     self.Add_Item( Edit_Item(
                         parent       = self,
+                        game_file    = game_file,
                         virtual_path = virtual_path,
                         name         = macro.name,
                         display_name = macro.display_name,

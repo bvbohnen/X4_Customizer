@@ -32,6 +32,8 @@ class Widget_X4_Table_Tree(QtWidgets.QTreeWidget):
         used to restore item selection after a tree rebuild.
       - TODO: maybe set this to track through nested nodes, by joining
         labels together.
+    * branch_dict
+      - Dict, keyed by label, holding QTreeWidgetItem branch nodes.
     '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -39,6 +41,8 @@ class Widget_X4_Table_Tree(QtWidgets.QTreeWidget):
         self.last_selected_item_label = None
         self.last_selected_item = None
         self.widget_item_info = None
+        self.item_dict = {}
+        self.branch_dict = {}
         return
 
 
@@ -53,6 +57,13 @@ class Widget_X4_Table_Tree(QtWidgets.QTreeWidget):
             self.window.Print('Get_Table_Group failed.')
             return
 
+        # Record the expansion state of items.
+        # The goal is that all labels currently expanded will get
+        # automatically reexpanded after a refresh.
+        expanded_labels = [label for label, item in self.branch_dict.items() 
+                           if item.isExpanded()]
+
+
         # Clear out old table items.
         # Note: existing items cannot easily be reused, since their
         # tree structure might change (eg. it's not always a flat list).
@@ -60,7 +71,8 @@ class Widget_X4_Table_Tree(QtWidgets.QTreeWidget):
         self.clear()
 
         # Set up the tree view.
-        self.item_dict = {}
+        self.item_dict.clear()
+        self.branch_dict.clear()
         # Call the recursive tree builder, starting with self as
         # the root tree node.
         self._Fill_Tree_Node(self, edit_tree_view.Get_Tree())        
@@ -81,12 +93,14 @@ class Widget_X4_Table_Tree(QtWidgets.QTreeWidget):
         # in the above 'if' statement) if script runs already call
         # the soft refresh reliably to handle current value changes.
         self.Soft_Refresh()
+        
+        # Reexpand nodes based on label matching.
+        for label, item in self.branch_dict.items():
+            if label in expanded_labels:
+                item.setExpanded(True)
+                
+        # TODO: save expansion state across sessions.
 
-        # Leave unexpended by default.
-        # TODO: maybe expand based on number of items or layers of
-        # nesting.
-        #self.expandAll()
-            
         return
 
 
@@ -117,6 +131,9 @@ class Widget_X4_Table_Tree(QtWidgets.QTreeWidget):
             if isinstance(next_edit_node, OrderedDict):
                 # Note that it is a label, for easy skipping when clicked.
                 widget.is_label = True
+                
+                # Record the item by name for later lookup.
+                self.branch_dict[label] = widget
 
                 # Note: if the label is clicked, it should get ignored
                 #  elsewhere due to not having extra annotations.
@@ -139,10 +156,16 @@ class Widget_X4_Table_Tree(QtWidgets.QTreeWidget):
         '''
         A different item was clicked on.
         '''
+        # Note: it appears when the tree refreshes this event
+        # triggers with None as the selection, so catch that case.
+        if new_item == None:
+            return
         # Ignore clicks on labels.
         if new_item.is_label:
             return
 
+        # Record it for refresh restoration.
+        self.last_selected_item = new_item
         # Pass the object_view to the display widget.
         self.widget_item_info.Update(new_item.object_view)
         return

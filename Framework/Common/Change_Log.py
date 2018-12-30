@@ -72,6 +72,16 @@ Change Log:
      a bug when running from outside the main directory.
  * 1.3.1
    - Fix a couple small bugs that crept in.
+ * 1.4
+   - Added wares to the GUI live editor.
+   - Support added in the GUI for changing a laser's bullet.
+   - Used several tricks to accelerate wares.xml parsing (multithreading,
+     xpath bypassing, etc.) to accelerate Print_Ware_Stats and GUI display.
+   - Background work to reorganize gui code for easy tab expansion,
+     and tab thread requests will now queue up for service.
+   - Further development of the Live_Editor, supporting object tree
+     views and dynamically updating inter-object references.
+   - Various debugging.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

@@ -18,6 +18,8 @@ from Framework import File_System
 from Framework.Common import home_path
 from Framework import Main
 from Framework import Live_Editor
+from Framework import Plugin_Log
+
 
 
 # Load the .ui file into a reuseable base class.
@@ -106,6 +108,8 @@ class Script_Window(Tab_Page_Widget, generated_class):
         if not self.Check_If_Save_Needed():
             return
         self.widget_script.New_Script()
+        self.current_script_path = None
+        self.widget_script.Clear_Modified()
         self.window.Print('New script started')
         return
 
@@ -151,12 +155,14 @@ class Script_Window(Tab_Page_Widget, generated_class):
         '''
         try:
             text = file_path.read_text()
-            self.widget_script.setPlainText(text)
-            self.current_script_path = file_path
-            self.widget_script.Clear_Modified()
-            self.window.Print('Loaded script from "{}"'.format(file_path))
         except Exception:
             self.window.Print('Failed to load script from "{}"'.format(file_path))
+            return
+
+        self.widget_script.setPlainText(text)
+        self.current_script_path = file_path
+        self.widget_script.Clear_Modified()
+        self.window.Print('Loaded script from "{}"'.format(file_path))
         # TODO: maybe update window name.
         return
 
@@ -293,10 +299,16 @@ class Script_Window(Tab_Page_Widget, generated_class):
         Clean up after a Run Script thread has finished.
         '''
         super().Handle_Thread_Finished()
+        # Turn the button back on.
+        self.window.action_Run_Script.setEnabled(True)
 
         # When done, restore Settings back to the gui values, in case
         # the script temporarily modified them.
         self.window.tabs_dict['Settings'].widget_settings.Store_Settings()
+
+        # Close any transform log that might be open, to flush it
+        # out and also reset it for a later run.
+        Plugin_Log.Close()
 
         # TODO: detect errors in the script and note them; for now, the
         # thread or framework will tend to print them out.
@@ -308,8 +320,6 @@ class Script_Window(Tab_Page_Widget, generated_class):
         for widget in self.window.Get_Tab_Widgets('Edit_Table_Window'):
             widget.widget_tree_view.Soft_Refresh()
         
-        # Turn the button back on.
-        self.window.action_Run_Script.setEnabled(True)
         return
 
     

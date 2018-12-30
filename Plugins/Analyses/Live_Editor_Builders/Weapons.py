@@ -2,8 +2,9 @@
 
 from itertools import chain
 from collections import OrderedDict, defaultdict
+import time
 
-from Framework import File_System, Settings
+from Framework import File_System, Settings, Print
 from Framework.Live_Editor_Components import *
 
 # Convenience macro renaming.
@@ -17,7 +18,7 @@ from ...Transforms.Support import Float_to_String
 
 def _Build_Bullet_Objects():
     '''
-    Generates Edit_Objects for all found bullets.
+    Returns a list of Edit_Objects for all found bullets.
     Meant for calling from the Live_Editor.
     '''
     t_file = File_System.Load_File('t/0001-L044.xml')
@@ -29,6 +30,10 @@ def _Build_Bullet_Objects():
     bullet_files = File_System.Get_Asset_Files_By_Class('macros',
                     'bullet','missile','bomb','mine','countermeasure')
     
+    # TODO: maybe multithread this, like was done with wares.
+    start_time = time.time()
+
+    bullet_objects = []
     for bullet_file in bullet_files:
         name = bullet_file.asset_name
 
@@ -37,16 +42,19 @@ def _Build_Bullet_Objects():
         bullet_edit_object = Edit_Object(name)
 
         # Fill in its edit items.
-        bullet_edit_object.Make_Items(bullet_file, bullet_item_macros)
+        bullet_edit_object.Make_Items(bullet_file, bullet_item_macros)        
+        bullet_objects.append( bullet_edit_object )
         
-        # Send it back to the live editor for recording.
-        yield bullet_edit_object
-    return
+    Print('Bullet Edit_Objects creation took {:0.2f} seconds'.format(
+        time.time() - start_time))
+
+    # Send it back to the live editor for recording.
+    return bullet_objects
 
 
 def _Build_Weapon_Objects():
     '''
-    Generates Edit_Objects for all found weapons.
+    Returns a list of Edit_Objects for all found weapons.
     Meant for calling from the Live_Editor.
     '''
     t_file = File_System.Load_File('t/0001-L044.xml')
@@ -61,6 +69,10 @@ def _Build_Weapon_Objects():
     # Make sure the bullets are created, so they can be referenced.
     Live_Editor.Get_Category_Objects('bullets')
 
+    # TODO: maybe multithread this, like was done with wares.
+    start_time = time.time()
+
+    weapon_objects = []
     for weapon in weapons:        
         name = weapon.weapon_file.asset_name
         
@@ -84,10 +96,13 @@ def _Build_Weapon_Objects():
         #for version in ['vanilla','patched','current','edited']:
         #    weapon_edit_object.Add_Reference(version, bullet_object)
             
-        # Send it back to the live editor for recording.
-        yield weapon_edit_object
+        weapon_objects.append(weapon_edit_object)
+        
+    Print('Weapon Edit_Objects creation took {:0.2f} seconds'.format(
+        time.time() - start_time))
 
-    return
+    # Send it back to the live editor for recording.
+    return weapon_objects
 
 
 # Various custom Display_Items.
@@ -124,11 +139,20 @@ def Display_Update_Bullet_RoF(
     if not reload_rate and reload_time and not ammunition_reload_time:
         return Float_to_String(1/float(reload_time))
 
-    # If reload_rate and ammunition_reload_time available, mix them.
-    if reload_rate and not reload_time and ammunition_reload_time:
+
+    # If this is set up for bursting but only 1 shot per burst,
+    #  it may not have a reload_rate; default reload_rate to 1
+    #  in this case so something can be computed easily below.
+    if ammunition_rounds == '1' and not reload_rate:
+        reload_rate = '1'
+
+    # If reload_rate and ammunition_reload_time available, mix them
+    # for a burst weapon.
+    if (reload_rate and not reload_time 
+        and ammunition_reload_time and ammunition_rounds):
         # Note: game calculates this wrongly as of ~1.5, multiplying
         # the ammunition_rounds-1 by reload_rate instead of 1/reload_rate.
-        # This will do it correctly.
+        # This will do it correctly (hopefully).
         burst_time = 1/float(reload_rate) * (float(ammunition_rounds)-1)
         time = float(ammunition_reload_time) + burst_time
         return Float_to_String(1/time)
@@ -223,6 +247,7 @@ def Display_Update_Bullet_Repair_Rate(
 
 
 # Fields from the weapon macro file to look for and convert to Edit_Items.
+# Switch to full xpaths to hopefully speed up lxml processing time.
 weapon_item_macros = [
     D('name'                 , Display_Update_Weapon_Name                 , 'Name', ''),
     E('t_name_entry'         , './/identification'       , 'name'         , 'T Name Entry', ''),
@@ -231,7 +256,7 @@ weapon_item_macros = [
     # TODO: should this be treated as a reference, and component files
     # parsed as separate objects?
     E('component'            , './/component'            , 'ref'          , 'Component', '', read_only = True, hidden = True),
-    E('rotation_speed'       , './/rotationspeed'        , 'max'          , 'Rot. Speed', ''),
+    E('rotation_speed'       , './macro/properties/rotationspeed'        , 'max'          , 'Rot. Speed', ''),
     E('rotation_acceleration', './/rotationacceleration' , 'max'          , 'Rot. Accel.', ''),
 
     E('heat_overheat'        , './/heat'                 , 'overheat'     , 'Overheat', 'Max heat before firing stops'),

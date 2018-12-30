@@ -6,6 +6,7 @@ This tool offers a framework for modding the X4 and extension game files
 programmatically, guided by user selected plugins (analyses, transforms,
 utilities). Features include:
 
+  * GUI to improve accessibility, designed using Qt.
   * Integrated catalog read/write support.
   * XML diff patch read/write support.
   * Automatic detection and loading of enabled extensions.
@@ -22,33 +23,21 @@ utilities). Features include:
   * Utilities offer extension error checking and cat pack/unpack support.
 
 This tool is available as runnable Python source code (tested on 3.7 with the
-lxml package) or as a compiled executable for 64-bit Windows.
+lxml and PyQt5 packages) or as a compiled executable for 64-bit Windows.
 
-The control script:
 
-  * This tool works by executing a user supplied python script specifying any
-    system paths, settings, and desired plugins to run.
+Running the compiled release:
 
-  * The key control script sections are:
-    - "from Plugins import *" to make all major functions available.
-    - Call Settings() to change paths and set non-default options; this
-      can also be done through a setttings.json file.
-    - Call a series of plugins with desired input parameters.
-    - Call to Write_Extension() to write any modified files
-      if transforms were used.
-    
-  * The quickest way to set up the control script is to copy and edit
-    the "Scripts/Default_Script_template.py" file, renaming
-    it to "Default_Script.py" for recognition by Launch_X4_Customizer.bat.
-
-Usage for compiled version:
-
-  * "Launch_X4_Customizer.bat [script_name] [args]"
+  * "Start_Gui.bat"
+    - This starts up the Customizer GUI.
+    - Equivelent to running "bin/X4_Customizer.exe"
+  * "Run_Script.bat [script_name] [args]"
+    - This runs a script directly without loading the GUI.
     - Call from the command line for full options (-h for help), or run
       directly to execute the default script at "Scripts/Default_Script.py".
     - Script name may be given without a .py extension, and without
       a path if it is in the Scripts folder.
-  * "Clean_X4_Customizer.bat [script_name] [args]"
+  * "Clean_Script.bat [script_name] [args]"
     - Removes files generated in a prior run of the given or default
       control script.
   * "Check_Extensions.bat [args]"
@@ -59,11 +48,68 @@ Usage for compiled version:
   * "Cat_Pack.bat [args]"
     - Runs a command line script which packs catalog files.
 
-Usage for Python source code:
+Running the Python source code:
 
   * "python Framework\Main.py [script_name] [args]"
     - This is the primary entry function for the python source code,
-      and equivalent to using Launch_X4_Customizer.bat.
+      and equivalent to X4_Customizer.exe.
+    - When no script is given, this launches the GUI.
+
+
+The control script:
+
+  * This tool is primarily controlled by a user supplied python script which
+    will specify the desired plugins to run. Generally this acts as a build
+    script to create a custom extension.
+
+  * The key control script sections are:
+    - "from Plugins import *" to make all major functions available.
+    - Optionally call Settings() to change paths and set non-default options;
+      this can also be done through a setttings.json file or through the GUI.
+    - Call a series of plugins with desired input parameters; see plugin
+      documentation for available options.
+    - Call Write_Extension() to write out any modified files, formatted
+      as diff patches.
+    
+  * Scripts of varying complexity are available in the Scripts folder,
+    and may act as examples.
+    
+
+GUI based object editing:
+
+  * In addition to script selected transforms, game information can
+    be directly edited for select objects on the appropriate edit tabs.
+    Tabs include "weapons", "wares", and others as time goes on.
+
+  * Press "Refresh" on the tab to load the game information.
+  * The "vanilla" column shows the object field values for the base
+    version of the game files loaded.
+  * The "patched" column shows field values after other extensions
+    have had their diff patches applied.
+  * The "edited" column is where you may change values manually.
+  * Running a script that includes the Apply_Live_Editor_Patches plugin
+    will apply edits to the game files.
+  * The "current" column will show the post-script field values,
+    and mainly exists for verification of hand edits as well as
+    other transform changes.
+
+
+Writing custom edit code:
+
+  * This framework may be used to write custom file editing routines.
+  * The general steps are: use Load_File() to obtain the patched
+    file contents, use Get_Root() to obtain the current file root xml
+    (which includes any prior transform changes), make any custom edits
+    with the help of the lxml package, and to put the changes back using
+    Update_Root().
+  * Existing plugins offer examples of this approach.
+  * Edits made using the framework will automatically support
+    diff patch generation.
+  * Non-xml file support is more rudimentary, operating on file
+    binary data pending further support for specific formats.
+  * Routines may be written as plugin functions and put up for
+    inclusion in later Customizer releases to share with other users.
+
 '''
 # TODO: maybe add in examples of usage (perhaps tagged to put them
 #  in the full documenation and not the readme).
