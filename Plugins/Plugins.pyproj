@@ -22,6 +22,12 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Analyses\Live_Editor_Builders\Shields.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Analyses\Live_Editor_Builders\Support.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Analyses\Live_Editor_Builders\Wares.py">
       <SubType>Code</SubType>
     </Compile>

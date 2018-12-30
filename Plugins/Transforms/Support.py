@@ -2,6 +2,7 @@
 Various shared support functions for the transforms.
 '''
 
+# TODO: maybe move this to Analyses.
 def Float_to_String(this_float, precision = 2):
     '''
     Returns a float as a string with cleaned up precision decimal places.

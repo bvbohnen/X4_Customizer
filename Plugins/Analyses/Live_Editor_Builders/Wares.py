@@ -1,19 +1,14 @@
 
 
-from itertools import chain
-from collections import OrderedDict, defaultdict
 from multiprocessing import Pool, cpu_count
 import time
 
-from Framework import File_System, Settings, Load_File, Print
+from Framework import File_System, Load_File, Print
 from Framework.Live_Editor_Components import *
-
 # Convenience macro renaming.
 E = Edit_Item_Macro
 D = Display_Item_Macro
 
-# TODO: maybe remove dependency on the Weapons transform code.
-from ...Transforms.Weapons import Get_All_Weapons
 from ...Transforms.Support import Float_to_String
 
 

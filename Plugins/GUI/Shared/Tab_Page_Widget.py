@@ -150,8 +150,11 @@ class Tab_Page_Widget(QtWidgets.QWidget):
             # Get checkbox status.
             if isinstance(widget, QtWidgets.QCheckBox):
                 try:
-                    value = settings.value('checked') == 'true'
-                    widget.setChecked(value)
+                    value = settings.value('checked')
+                    if value == 'true':
+                        widget.setChecked(True)
+                    elif value == 'false':
+                        widget.setChecked(False)
                 except Exception:
                     pass
 

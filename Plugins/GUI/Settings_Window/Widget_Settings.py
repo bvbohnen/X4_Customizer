@@ -136,9 +136,7 @@ class Widget_Settings(QtWidgets.QGroupBox):
                     Setup_Modification_Listener(widget, field)
 
                     # Record the field:widget pair.
-                    # Indent the field a little to set it behind
-                    # the category label.
-                    self.field_widget_dict['  ' + field] = widget
+                    self.field_widget_dict[field] = widget
                     widget.default = default
 
                 # Set up a new layout row.
@@ -217,6 +215,9 @@ class Widget_Settings(QtWidgets.QGroupBox):
         '''
         Update the Settings with the current widget for the given field.
         '''
+        if field not in self.field_widget_dict:
+            self.window.Print('Error when setting field {}'.format(field))
+            return
         widget = self.field_widget_dict[field]
 
         # Handle based on widget type.

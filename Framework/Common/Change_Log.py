@@ -82,6 +82,9 @@ Change Log:
    - Further development of the Live_Editor, supporting object tree
      views and dynamically updating inter-object references.
    - Various debugging.
+ * 1.4.1
+   - Fixed bug when changing paths in the gui.
+   - Added Shields and Bullets tabs to the gui.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

@@ -108,6 +108,8 @@ class GUI_Main_Window(qt_base_class, generated_class):
         self.Create_Tab(Settings_Window  , 'Settings')
         self.Create_Tab(Edit_Table_Window, 'Weapons', table_name = 'weapons')
         self.Create_Tab(Edit_Table_Window, 'Wares', table_name = 'wares')
+        self.Create_Tab(Edit_Table_Window, 'Shields', table_name = 'shields')
+        self.Create_Tab(Edit_Table_Window, 'Bullets', table_name = 'bullets')
 
 
         # Connect actions to handlers.
