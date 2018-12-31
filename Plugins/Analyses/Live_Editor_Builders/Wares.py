@@ -1,4 +1,9 @@
-
+'''
+Build ware objects.
+Due to the xml file size, this has some problems with long runtime.
+Extra complexity added to multithread and to dynamically detect
+some fields.
+'''
 
 from multiprocessing import Pool, cpu_count
 import time
@@ -12,6 +17,7 @@ D = Display_Item_Macro
 from ...Transforms.Support import Float_to_String
 
 
+@Live_Editor_Object_Builder('wares')
 def _Build_Ware_Objects():
     '''
     Returns a list of Edit_Objects for all found wares.
@@ -160,45 +166,6 @@ def _Create_Objects(ware_nodes, wares_file):
     return ret_list
 
 
-def _Build_Ware_Object_Tree_View():
-    '''
-    Constructs an Edit_Tree_View object for use in displaying
-    ware data.
-    '''
-    # Set up a new table.
-    object_tree_view = Edit_Tree_View('wares')
-
-    # Get all of the objects.
-    ware_objects = Live_Editor.Get_Category_Objects('wares')
-
-    # Organize by group, then by transport type.
-    for ware_object in ware_objects:
-        # Use the parsed name to label it.
-        name      = ware_object.Get_Item('name')     .Get_Value('current')
-        group     = ('' if ware_object.Get_Item('group') == None 
-                    else ware_object.Get_Item('group').Get_Value('current'))
-        transport = ('' if ware_object.Get_Item('transport') == None 
-                    else ware_object.Get_Item('transport').Get_Value('current'))
-
-        # Categories may have failed due to lack of a node, or an
-        # empty attribute. Provide defaults to avoid empty labels.
-        if not group:
-            group = 'ungrouped'
-        if not transport:
-            transport = 'no transport'
-
-        object_tree_view.Add_Object(name, ware_object, group, transport)
-        
-    # Sort the tree in place when done.
-    object_tree_view.Sort_Branches()
-
-    # Apply default label filtering.
-    object_tree_view.Apply_Filtered_Labels()
-
-    return object_tree_view
-
-
-
 
 # TODO: this gets called 4 times for the 4 versions, which
 # seems overkill if the text file doesn't change.
@@ -265,10 +232,8 @@ ware_item_macros = [
     ]
 
 
-# Trying out semi-dynamic functions to build the macros.
-# TODO: better method.
 def Get_Production_Macros(xpath_prefix, production_index):
-    'Make production node macros. Index should start at 1.'
+    'Make production node macros. Indices should start at 1.'
     x = xpath_prefix
     p = production_index
     return [
@@ -287,25 +252,3 @@ def Get_Production_Ware_Macros(xpath_prefix, production_index, ware_index):
     E('prod_{}_ware_{}_id'    .format(p,w), '{}/production[{}]/primary/ware[{}]'.format(x,p,w), 'ware'  , 'Prod.{} Ware {} ID'    .format(p,w), ''),
     E('prod_{}_ware_{}_amount'.format(p,w), '{}/production[{}]/primary/ware[{}]'.format(x,p,w), 'amount', 'Prod.{} Ware {} #'.format(p,w), ''),
     ]
-
-#-Removed; pick macros dynamically; doing it blind is 4-5x slower since
-# most of these don't apply to a given ware.
-#def _Fill_Production_Macros():
-#    '''
-#    Fill in production nodes (can be multiple).
-#    Generic versions; may get outdated.
-#    '''
-#    # TODO: maybe use an intermediate structure for this to help compute
-#    # profit margin on production once top level wares filled in.
-#
-#    # Limit to fixed counts for now, since the macro approach is blind
-#    # to existing properties.
-#    # TODO: something dynamic.
-#    # These will use 1 based indices (easier for xpaths).
-#    for p in range(1,4+1):        
-#        ware_item_macros.extend(Get_Production_Macros('PREFIX', p))
-#        for w in range(1,4+1):            
-#            ware_item_macros.extend(Get_Production_Ware_Macros('PREFIX', p,w))
-#    return
-#_Fill_Production_Macros()
-

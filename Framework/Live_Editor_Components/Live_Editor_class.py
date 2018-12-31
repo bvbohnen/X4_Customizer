@@ -7,6 +7,25 @@ from .Edit_Items import Edit_Item, Display_Item
 from ..File_Manager import Load_File
 
 
+from functools import wraps
+
+# Two layer decorators; outer layer captures misc args, and returns
+# an inner layer that captures the function being wrapped.
+def Live_Editor_Object_Builder(category):
+    'Wrapper function for Edit_Object builders for the Live Editor.'
+    def inner_decorator(function):
+        Live_Editor.Record_Category_Objects_Builder(category, function)
+        return function
+    return inner_decorator
+
+def Live_Editor_Tree_View_Builder(name):
+    'Wrapper function for Edit_Tree_View builders for the Live Editor.'
+    def inner_decorator(function):
+        Live_Editor.Record_Tree_View_Builder(name, function)
+        return function
+    return inner_decorator
+
+
 class Custom_Patch:
     '''
     Patch captuing a hand edited value that was changed from default.

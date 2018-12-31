@@ -1,22 +1,26 @@
-
-import time
-
-from Framework import File_System, Print
+'''
+Build weapon and bullet objects.
+TODO: maybe add more analysis functions to weapons, and split to
+a separate file.
+'''
+from Framework import File_System
 from Framework.Live_Editor_Components import *
 # Convenience macro renaming.
 E = Edit_Item_Macro
 D = Display_Item_Macro
 
 from .Support import Create_Objects_From_Asset_Files
-
 from ...Transforms.Support import Float_to_String
 
 
+##############################################################################
+
+@Live_Editor_Object_Builder('bullets')
 def _Build_Bullet_Objects():
     '''
     Returns a list of Edit_Objects for all found bullets.
     Meant for calling from the Live_Editor.
-    '''    
+    ''' 
     # Look up bullet files.
     # These can be in two locations.
     File_System.Load_Files('assets/props/WeaponSystems/*.xml')
@@ -24,51 +28,6 @@ def _Build_Bullet_Objects():
     game_files = File_System.Get_Asset_Files_By_Class('macros',
                     'bullet','missile','bomb','mine','countermeasure')
     return Create_Objects_From_Asset_Files(game_files, bullet_item_macros)
-    
-    object_list = []
-    for game_file in game_files:
-        name = game_file.asset_name
-
-        # Create an Edit_Object for the bullet.
-        # Use the asset name from the bullet file.
-        edit_object = Edit_Object(name)
-        object_list.append( edit_object )
-
-        # Fill in its edit items.
-        edit_object.Make_Items(game_file, bullet_item_macros)
-        
-    # Send it back to the live editor for recording.
-    return object_list
-
-
-def _Build_Weapon_Objects():
-    '''
-    Returns a list of Edit_Objects for all found weapons.
-    Meant for calling from the Live_Editor.
-    '''
-    # Make sure the bullets are created, so they can be referenced.
-    Live_Editor.Get_Category_Objects('bullets')
-    game_files = File_System.Get_Asset_Files_By_Class('macros',
-                    'weapon','missilelauncher','turret',
-                    'missileturret', 'bomblauncher')
-    return Create_Objects_From_Asset_Files(game_files, weapon_item_macros)
-
-    object_list = []
-    for game_file in game_files:
-        name = game_file.asset_name
-
-        # Create an Edit_Object using the asset name.
-        edit_object = Edit_Object(name)
-        object_list.append( edit_object )
-        
-        # Fill in standard terms.
-        Fill_Macro_Object_Standard_Items(game_file, edit_object)
-
-        # Fill in shield terms.
-        edit_object.Make_Items(game_file, weapon_item_macros)
-        
-    # Send it back to the live editor for recording.
-    return object_list
 
 
 def Display_Update_Bullet_RoF(
@@ -192,29 +151,6 @@ def Display_Update_Bullet_Repair_Rate(
     return '' if damage_repair != '1' else _Calc_Dps(fire_rate, merge_damage_hull, merge_amount)
 
 
-
-# Fields from the weapon macro file to look for and convert to Edit_Items.
-# Switch to full xpaths to hopefully speed up lxml processing time.
-weapon_item_macros = [
-    E('rotation_speed'       , './macro/properties/rotationspeed'        , 'max'          , 'Rot. Speed', ''),
-    E('rotation_acceleration', './/rotationacceleration' , 'max'          , 'Rot. Accel.', ''),
-
-    E('heat_overheat'        , './/heat'                 , 'overheat'     , 'Overheat', 'Max heat before firing stops'),
-    E('heat_cool_delay'      , './/heat'                 , 'cooldelay'    , 'Cool Delay', ''),
-    E('heat_cool_rate'       , './/heat'                 , 'coolrate'     , 'Cool Rate', ''),
-    E('heat_reenable'        , './/heat'                 , 'reenable'     , 'Reenable', 'Time to start firing again after overheating'),
-
-    E('reload_rate'          , './/reload'               , 'rate'         , 'Reload Rate', ''),
-    E('reload_time'          , './/reload'               , 'time'         , 'Reload Time', ''),
-
-    E('hull'                 , './/hull'                 , 'max'          , 'Hull', ''),
-    E('ammunition_tags'      , './/ammunition'           , 'tags'         , 'Ammo Tags', ''),
-    E('storage_capacity'     , './/storage'              , 'capacity'     , 'Storage', ''),
-
-    E('bullet_codename'      , './/bullet'               , 'class'        , 'Bullet Codename (ref)', '',  is_reference = True),
-    ]
-
-
 bullet_item_macros = [
     D('dps_base'                  , Display_Update_Bullet_Burst_DPS       , 'DPS', ''),
     D('dps_shield'                , Display_Update_Bullet_Burst_DPS_Shield, '+Shield', ''),
@@ -271,70 +207,42 @@ bullet_item_macros = [
     ]
 
 
+##############################################################################
 
-def _Build_Bullet_Object_Tree_View():
+@Live_Editor_Object_Builder('weapons')
+def _Build_Weapon_Objects():
     '''
-    Constructs an Edit_Tree_View object for use in displaying
-    bullet data.
+    Returns a list of Edit_Objects for all found weapons.
+    Meant for calling from the Live_Editor.
     '''
-    # Set up a new table.
-    object_tree_view = Edit_Tree_View('bullets')
-
-    # Get all of the objects.
-    objects_list = Live_Editor.Get_Category_Objects('bullets')
-
-    # Organize by class, then by size.
-    for object in objects_list:
-        # Use the bullet_codename to label it.
-        name      = object.Get_Item('bullet_codename').Get_Value('current')
-        # No categorization for now.
-        object_tree_view.Add_Object(name, object)
-        
-    # Sort the tree in place when done.
-    object_tree_view.Sort_Branches()
-
-    # Apply default label filtering.
-    object_tree_view.Apply_Filtered_Labels()
-
-    return object_tree_view
+    # Make sure the bullets are created, so they can be referenced.
+    Live_Editor.Get_Category_Objects('bullets')
+    game_files = File_System.Get_Asset_Files_By_Class('macros',
+                    'weapon','missilelauncher','turret',
+                    'missileturret', 'bomblauncher')
+    return Create_Objects_From_Asset_Files(game_files, weapon_item_macros)
 
 
+# Fields from the weapon macro file to look for and convert to Edit_Items.
+# Switch to full xpaths to hopefully speed up lxml processing time.
+weapon_item_macros = [
+    E('rotation_speed'       , './macro/properties/rotationspeed'        , 'max'          , 'Rot. Speed', ''),
+    E('rotation_acceleration', './/rotationacceleration' , 'max'          , 'Rot. Accel.', ''),
+
+    E('heat_overheat'        , './/heat'                 , 'overheat'     , 'Overheat', 'Max heat before firing stops'),
+    E('heat_cool_delay'      , './/heat'                 , 'cooldelay'    , 'Cool Delay', ''),
+    E('heat_cool_rate'       , './/heat'                 , 'coolrate'     , 'Cool Rate', ''),
+    E('heat_reenable'        , './/heat'                 , 'reenable'     , 'Reenable', 'Time to start firing again after overheating'),
+
+    E('reload_rate'          , './/reload'               , 'rate'         , 'Reload Rate', ''),
+    E('reload_time'          , './/reload'               , 'time'         , 'Reload Time', ''),
+
+    E('hull'                 , './/hull'                 , 'max'          , 'Hull', ''),
+    E('ammunition_tags'      , './/ammunition'           , 'tags'         , 'Ammo Tags', ''),
+    E('storage_capacity'     , './/storage'              , 'capacity'     , 'Storage', ''),
+
+    E('bullet_codename'      , './/bullet'               , 'class'        , 'Bullet Codename (ref)', '',  is_reference = True),
+    ]
 
 
-def _Build_Weapon_Object_Tree_View():
-    '''
-    Constructs an Edit_Tree_View object for use in displaying
-    weapon data.
-    '''
-    # Set up a new table.
-    object_tree_view = Edit_Tree_View('weapons')
-
-    # Get all of the objects.
-    objects_list = Live_Editor.Get_Category_Objects('weapons')
-
-    # Organize by class, then by size.
-    for object in objects_list:
-        # Use the parsed name to label it.
-        name      = object.Get_Item('name')     .Get_Value('current')
-        wclass     = ('' if object.Get_Item('macro_class') == None 
-                    else object.Get_Item('macro_class').Get_Value('current'))
-
-        # Size needs to be found in the tags.
-        tags = object.Get_Item('connection_tags').Get_Value('current')
-        for size in ['small','medium','large','spacesuit']:
-            if size in tags:
-                break
-            size = '?'
-
-        object_tree_view.Add_Object(name, object, wclass, size)
-        
-    # Sort the tree in place when done.
-    object_tree_view.Sort_Branches()
-
-    # Apply default label filtering.
-    object_tree_view.Apply_Filtered_Labels()
-
-    return object_tree_view
-
-
-
+##############################################################################

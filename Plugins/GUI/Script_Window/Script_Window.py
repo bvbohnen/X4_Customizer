@@ -1,25 +1,16 @@
 
-# TODO: cleanup imports
-from pathlib import Path
-
-from PyQt5.uic import loadUiType
-from PyQt5 import QtWidgets, QtCore, QtGui
-
-from Framework import Settings
-from ..Shared import Tab_Page_Widget
-
-    
 from pathlib import Path
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-
+from PyQt5.uic import loadUiType
+ 
 from Framework import Settings
 from Framework import File_System
 from Framework.Common import home_path
 from Framework import Main
 from Framework import Live_Editor
 from Framework import Plugin_Log
-
+from ..Shared import Tab_Page_Widget   
 
 
 # Load the .ui file into a reuseable base class.

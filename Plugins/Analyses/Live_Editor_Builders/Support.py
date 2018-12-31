@@ -92,27 +92,49 @@ def Create_Objects_From_Asset_Files(
     return object_list
 
 
-def Display_Update_Name(
+def Update_Name(
         t_name_entry,
-        component
+        codename
     ):
     'Look up a text reference name.'
-    # If no t_name_entry available, use the component name.
     if not t_name_entry:
-        return component
+        # If no t_name_entry available, use the codename name.
+        # Component could be used sometimes, since it often is the codename
+        #  without a _macro suffix, but doesn't work quite as well
+        #  since sometimes objects will share a component (causing them
+        #  to have the same name).
+        # This will manually prune the _macro term if found.
+        return codename.replace('_macro','')
     else:
         t_file = File_System.Load_File('t/0001-L044.xml')
         # Let the t-file Read handle the lookup.
         return t_file.Read(t_name_entry)
+    
+def Update_Description(
+        t_descrip_entry,
+    ):
+    'Look up a text reference description.'
+    if not t_descrip_entry:
+        return ''
+    else:
+        t_file = File_System.Load_File('t/0001-L044.xml')
+        # Let the t-file Read handle the lookup.
+        return t_file.Read(t_descrip_entry)
 
 _item_macros = [
-    _D('name'                 , Display_Update_Name                        , 'Name', ''),
-    _E('t_name_entry'         , './/identification'       , 'name'         , 'T Name Entry', ''),
-    _E('codename'             , './macro'                 , 'name'         , 'Codename', '', read_only = True),
-    _E('macro_class'          , './macro'                 , 'class'        , 'Class', '', read_only = True),
-    _E('component'            , './/component'            , 'ref'          , 'Component', '', read_only = True, hidden = True),
+    _D('name'                 , Update_Name                                            , 'Name', ''),
+    _E('t_name_entry'         , './macro/properties/identification'   , 'name'         , 'T Name Entry', ''),
+    # TODO: maybe description; would need to think of
+    # a special way to show this that is legible.
+    _D('description'          , Update_Description                                     , 'Description', ''),
+    _E('t_descrip_entry'      , './macro/properties/identification'   , 'description'  , 'T Desc. Entry', '', hidden = True),
+    _E('codename'             , './macro'                             , 'name'         , 'Codename', '', read_only = True),
+    _E('macro_class'          , './macro'                             , 'class'        , 'Class', '', read_only = True),
+    _E('component'            , './macro/component'                   , 'ref'          , 'Component', '', read_only = True, hidden = True),
     ]
 _component_item_macros = [
     _E('connection_name'       , 'connection_xpath'       , 'name'         , 'Connection Name', ''  , read_only = True),
     _E('connection_tags'       , 'connection_xpath'       , 'tags'         , 'Connection Tags', ''  , read_only = True),
     ]
+
+

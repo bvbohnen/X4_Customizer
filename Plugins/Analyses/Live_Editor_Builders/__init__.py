@@ -11,28 +11,8 @@ Primarily for use in the GUI and printouts.
 # load the build functions.
 __all__ = []
 
-# Do all live editor hookups here, to keep them organized somewhat.
-from .Wares import _Build_Ware_Objects
-from .Wares import _Build_Ware_Object_Tree_View
-
-from .Weapons import _Build_Bullet_Objects
-from .Weapons import _Build_Bullet_Object_Tree_View
-
-from .Weapons import _Build_Weapon_Objects
-from .Weapons import _Build_Weapon_Object_Tree_View
-
-from .Shields import _Build_Shield_Objects
-from .Shields import _Build_Shield_Object_Tree_View
-
-
-
-from Framework import Live_Editor
-Live_Editor.Record_Category_Objects_Builder('bullets', _Build_Bullet_Objects)
-Live_Editor.Record_Category_Objects_Builder('shields', _Build_Shield_Objects)
-Live_Editor.Record_Category_Objects_Builder('wares', _Build_Ware_Objects)
-Live_Editor.Record_Category_Objects_Builder('weapons', _Build_Weapon_Objects)
-
-Live_Editor.Record_Tree_View_Builder('bullets', _Build_Bullet_Object_Tree_View)
-Live_Editor.Record_Tree_View_Builder('shields', _Build_Shield_Object_Tree_View)
-Live_Editor.Record_Tree_View_Builder('wares', _Build_Ware_Object_Tree_View)
-Live_Editor.Record_Tree_View_Builder('weapons', _Build_Weapon_Object_Tree_View)
+# Do imports of all modules so they can register their build functions.
+from . import Components
+from . import Wares
+from . import Weapons
+from . import Views

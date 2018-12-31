@@ -2,10 +2,6 @@
 from collections import OrderedDict
 from PyQt5 import QtWidgets
 
-from Framework import Settings
-from Framework import File_System
-from Framework import Live_Editor
-
 
 class Widget_X4_Table_Tree(QtWidgets.QTreeWidget):
     '''

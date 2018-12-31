@@ -18,7 +18,7 @@ from pathlib import Path
 # http://pyqt.sourceforge.net/Docs/PyQt5/modules.html
 from PyQt5.QtGui import QFont
 from PyQt5.uic import loadUiType
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5 import QtWidgets, QtCore
 
 from Framework import Settings
 from Framework import Print
@@ -30,6 +30,7 @@ from . import Styles
 from Framework.Common import home_path
 
 from .Edit_Table_Window import Edit_Table_Window
+from .Edit_View_Window import Edit_View_Window
 from .Settings_Window import Settings_Window
 from .Script_Window import Script_Window
 
@@ -110,6 +111,10 @@ class GUI_Main_Window(qt_base_class, generated_class):
         self.Create_Tab(Edit_Table_Window, 'Wares', table_name = 'wares')
         self.Create_Tab(Edit_Table_Window, 'Shields', table_name = 'shields')
         self.Create_Tab(Edit_Table_Window, 'Bullets', table_name = 'bullets')
+        self.Create_Tab(Edit_Table_Window, 'Components', table_name = 'components')
+
+        # Testing out a model view window.
+        self.Create_Tab(Edit_View_Window, 'Shields v2', table_name = 'shields')
 
 
         # Connect actions to handlers.

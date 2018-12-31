@@ -53,6 +53,9 @@ class Edit_Tree_View:
     Attributes:
     * name
       - String, internal name of this tree view.
+    * display_name
+      - String, name to use for this tree in name displays, such as
+        gui tabs or when nested under another tree later.
     * tree
       - OrderedDict holding nested OrderedDicts and Object_Views, laying out
         how the tree should be displayed.
@@ -63,8 +66,9 @@ class Edit_Tree_View:
       - A single tree node should never mix OrderedDicts and Object_Views
         in its children (for now).
     '''
-    def __init__(self, name):
+    def __init__(self, name, display_name = None):
         self.name = name
+        self.display_name = display_name if display_name else name
         # Start with an empty ordered dict for the tree top level.
         self.tree = OrderedDict()
         return
@@ -228,6 +232,9 @@ class Edit_Tree_View:
         '''
         if node == None:
             node = self.tree
+        # Note: the node is expected to have stuff in it.
+        if not node:
+            raise AssertionError('Empty branch found in tree')
         # Sample the first element, and check its type.
         # If it is an object, this should be flat.
         return isinstance( next(iter(node.values())), Object_View)
@@ -265,3 +272,13 @@ class Edit_Tree_View:
                 edit_table.Add_Object(object)
 
         return table_group
+
+
+    def Add_Tree(self, other_tree):
+        '''
+        Adds another Edit_Tree_View to this Edit_Tree_View.
+        The label will be the other's display name.
+        '''
+        assert other_tree.display_name
+        self.tree[other_tree.display_name] = other_tree.tree
+        return

@@ -1,9 +1,7 @@
 
 
 from pathlib import Path
-
 from PyQt5.uic import loadUiType
-from PyQt5 import QtWidgets, QtCore, QtGui
 
 from ..Shared import Tab_Page_Widget
 from Framework import Live_Editor

@@ -1,6 +1,6 @@
 
 
-from PyQt5.QtGui import QSyntaxHighlighter, QColor, QFont, QTextCharFormat, QTextCursor
+from PyQt5.QtGui import QSyntaxHighlighter, QColor, QTextCharFormat, QTextCursor
 from PyQt5.QtCore import QRegExp
 
 import Plugins

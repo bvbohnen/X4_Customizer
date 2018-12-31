@@ -1,6 +1,5 @@
 
 from PyQt5 import QtWidgets
-
 from .Edit_Item import Widget_Edit_Item
 
 '''
