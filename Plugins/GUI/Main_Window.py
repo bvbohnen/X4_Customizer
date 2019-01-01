@@ -29,10 +29,13 @@ from .Worker_Thread_Handler import Worker_Thread_Handler
 from . import Styles
 from Framework.Common import home_path
 
-from .Edit_Table_Window import Edit_Table_Window
+# Different tab window types.
+# Include base classes, so they can be used in isinstance checks.
+#from .Edit_Table_Window import Edit_Table_Window
 from .Edit_View_Window import Edit_View_Window
 from .Settings_Window import Settings_Window
 from .Script_Window import Script_Window
+from .Shared import Tab_Page_Widget
 
 
 # Load the .ui file into a reuseable base class.
@@ -43,48 +46,241 @@ gui_file = Path(__file__).parent / 'x4c_gui_layout.ui'
 generated_class, qt_base_class = loadUiType(str(gui_file))
 
 
+class Custom_Settings(QtCore.QSettings):
+    '''
+    QSettings wrapper which will fix responses, mainly translating
+    types appropriately that others are returned as strings.
+    '''
+    replacements_dict = {
+        'true'  : True,
+        'false' : False,
+        }
+    def value(self, field, default = None, type = None):
+        '''
+        Look up and return the value.
+
+        * default
+          - Value to return if fields isn't found.
+        * type
+          - String, type to convert the value into.
+          - Supports 'bool', 'int', others as needed.
+        '''
+        value = super().value(field, None)
+        if value == None:
+            return default
+
+        if type == 'bool':
+            # Start with translating 'true' and 'false'.
+            if value in self.replacements_dict:
+                value = self.replacements_dict[value]
+            # Run through bool() for anything else.
+            return bool(value)
+
+        # Simple int cast.
+        elif type == 'int':
+            return int(value)
+
+        # Normal return value.
+        return value
+
+
+class Tab_Properties:
+    '''
+    Container for per-tab properties at the main window level.
+    These should be saved between sessions, and used to restore
+    tabs in a new session.
+    This tracker will be annotated to any created widget
+    as 'tab_properties'.
+
+    * window
+      - The main window, that should have a widget_tab_container child.
+    * label
+      - String, label for the tab.
+      - May be repeated across tabs, so don't treat as unique.
+    * class_name
+      - String, name of the widget class for the tab.
+      - Eg. 'Script_Window','Settings_Window','Edit_View_Window', etc.
+      - Can be matched to the actual class object to build the tab widget.
+    * kwargs
+      - Dict, any construction arguments to use when building the tab.
+    * widget
+      - The constructed tab widget, after Make_Widget has been called.
+    * unique
+      - Bool, if True then other tabs of the same class_name should
+        not be created, and it should only be hidden instead of deleted.
+      - Not used here, mearly annotation to check elsewhere.
+    * index
+      - Int, the last known index of the tab in the tab container.
+      - May not always be up to date, and mainly is used when hiding
+        and restoring tabs.
+    * hidden
+      - Bool, if True then this widget is in a hidden state, eg. detached
+        from the tab container.
+    '''
+    def __init__(
+            self,
+            window,
+            label = None,
+            class_name = None,
+            kwargs = None
+        ):
+        self.window     = window
+        self.label      = label
+        self.class_name = class_name
+        self.kwargs     = {} if not kwargs else kwargs
+        self.widget     = None
+        self.unique     = False
+        self.index      = None
+        self.hidden     = False
+        return
+
+    def Save_Session_Settings(self, settings):
+        '''
+        Save details of the tab construction to the current QSettings.
+        The appropriate settings group should have been opened already.
+        '''
+        # Try to avoid names that might conflict with what the
+        # widget might save.
+        settings.setValue('tab_label'     , self.label)
+        settings.setValue('tab_class_name', self.class_name)
+        settings.setValue('tab_kwargs'    , self.kwargs)
+        settings.setValue('tab_hidden'    , self.hidden)
+        settings.setValue('tab_unique'    , self.unique)
+        settings.setValue('tab_index'     , self.index)
+        # Pass on the call to the widget itself.
+        self.widget.Save_Session_Settings(settings)
+        return
+
+
+    def Load_Session_Settings(self, settings):
+        '''
+        Restore details of the tab construction from the current QSettings.
+        The appropriate settings group should have been opened already.
+        The tab will be created for the main window before being
+        internally restored.
+        '''
+        self.label      = settings.value('tab_label')
+        self.class_name = settings.value('tab_class_name')
+        self.kwargs     = settings.value('tab_kwargs')
+        self.hidden     = settings.value('tab_hidden', False, type = 'bool')
+        self.unique     = settings.value('tab_unique', False, type = 'bool')
+        self.index      = settings.value('tab_index', 0, type = 'int')
+        # Checks that the settings had the right stuff.
+        assert self.label
+        assert self.class_name
+        assert isinstance(self.kwargs, dict)
+        self.Get_Widget()
+        self.widget.Load_Session_Settings(settings)
+        return
+
+
+    def Get_Widget(self):
+        '''
+        Returns the associated widget. Constructs it if needed.
+        '''
+        # As a safety, do nothing if the widget exists.
+        if self.widget != None:
+            return self.widget
+
+        # Start by looking up the class name.
+        # It should have been imported into globals.
+        class_builder = globals()[self.class_name]
+
+        # Create it with no parent (do not use the window as parent).
+        self.widget = class_builder(
+            parent = None, window = self.window, **self.kwargs)
+        self.widget.tab_properties = self
+        
+        return self.widget
+
+
+# Testing code from:
+# http://www.mikeyd.com.au/2015/03/12/adding-the-ability-to-close-a-tab-with-mouses-middle-button-to-qts-qtabwidget/_replytocom=837/
+class Custom_Tab_Bar(QtWidgets.QTabBar):
+    '''
+    A customized tab bar for a tab widget, which will emit a
+    tab close request on a middle mouse button click.
+    To be attached to a tab widget using .setTabBar(Custom_Tab_Bar()).
+
+    Note: hook directly into the tab bar tabCloseRequested signal,
+    and not that of the tab widget, since it will suppress the signal
+    when close buttons are disabled.
+    '''
+    def mouseReleaseEvent(self, event):
+        'Intercept mouse button releases.'
+        # Check the button pressed for middle mouse.
+        if event.button() == QtCore.Qt.MidButton:
+            # Emit the tab close signal.
+            # Send with it the tab index, pulled using tabAt
+            # the mouse press location.
+            tab_index = self.tabAt(event.pos())
+            self.tabCloseRequested.emit(tab_index)
+        # Continue with normal button handling.
+        # This should be safe; the tab won't get removed until after
+        # the emit is handled, after this function returns.
+        super().mouseReleaseEvent(event)
+        return
+
+
 class GUI_Main_Window(qt_base_class, generated_class):
     '''
     Custom Gui class object, as a child of the QMainWindow class.
 
+    Widget names:
+    * widget_tab_container
+    * widget_output_dock
+
     Attributes:
     * application
       - Link back to the parent QApplication object.
+    * startup_complete
+      - Bool, False during init, True afterward.
     * current_font
       - QFont object specifying the current primary display font.
       - This may differ from the main window .font().
     * current_style
       - Name of the current QStyle in use.
     * session_memory
-      - QSettings object which will handle saving and reloading
-        window settings.
+      - Custom_Settings(QSettings) object which will handle saving and
+        reloading window settings.
+    * tab_properties_list
+      - List holding Tab_Properties objects.
+      - List order will match the actual tab order.
+      - If tabs are ever reordered, this should be updated to match
+        the new order.
     * tabs_dict
       - Dict, keyed by tab name, holding the tab widgets.
       - For convenient lookups from other locations.
-    * tab_indices_dict
-      - Dict, keyed by tab name, holding the index of the given tab.
-      - Mainly for use internally during tab container function calls.
     * worker_thread
       - Worker_Thread_Handler that will be used to run scripts, plugins,
         and other framework functions that might take some time to return.
       - All widgets should share this thread, queueing requests to
         avoid framework collisions.
+    * unique_tabs_dict
+      - Dict, keyed by tab name, holding unique widgets to display as tabs.
+      - These may not actually be present in the tab widget, such as
+        when hidden.
     '''
     def __init__(self, application):
         # Init the QMainWindow.
         super().__init__()
         self.setupUi(self)
 
+        self.startup_complete = False
         self.application = application
         self.current_font = None
         self.current_style = None
-        self.tabs_dict = {}
-        self.tab_indices_dict = {}
+        self.unique_tabs_dict = {}
+
+        # Set up the custom tab bar.
+        self.widget_tab_container.setTabBar(Custom_Tab_Bar())
+        self.widget_tab_container.tabBar().tabCloseRequested.connect(self.Close_Tab)
+        
         
         # Set up a QSettings object, giving it the path to where
         # the settings are stored. Set it as an ini file, since otherwise
         # it wants to make a mess in the registry.
-        self.session_memory = QtCore.QSettings(
+        self.session_memory = Custom_Settings(
                 str(home_path / 'gui_settings.ini'),
                 QtCore.QSettings.IniFormat)
 
@@ -104,24 +300,14 @@ class GUI_Main_Window(qt_base_class, generated_class):
         self.worker_thread.send_message.connect(self.Print)
         
 
-        # Set up initial tabs.
-        self.Create_Tab(Script_Window    , 'Script')
-        self.Create_Tab(Settings_Window  , 'Settings')
-        self.Create_Tab(Edit_Table_Window, 'Weapons', table_name = 'weapons')
-        self.Create_Tab(Edit_Table_Window, 'Wares', table_name = 'wares')
-        self.Create_Tab(Edit_Table_Window, 'Shields', table_name = 'shields')
-        self.Create_Tab(Edit_Table_Window, 'Bullets', table_name = 'bullets')
-        self.Create_Tab(Edit_Table_Window, 'Components', table_name = 'components')
-
-        # Testing out a model view window.
-        self.Create_Tab(Edit_View_Window, 'Shields v2', table_name = 'shields')
-
-
         # Connect actions to handlers.
-        self.action_Quit        .triggered.connect(self.Action_Quit)
-        self.action_Change_Font .triggered.connect(self.Action_Change_Font)
-        self.action_View_Output .triggered.connect(self.Action_View_Output)
+        self.action_Quit          .triggered.connect(self.Action_Quit)
+        self.action_Change_Font   .triggered.connect(self.Action_Change_Font)
+        self.action_View_Settings .triggered.connect(self.Action_View_Settings)
+        self.action_View_Script   .triggered.connect(self.Action_View_Script)
+        self.action_View_Output   .triggered.connect(self.Action_View_Output)
         # TODO: Quit without saving
+
             
 
         # Set up the styles menu.
@@ -129,17 +315,65 @@ class GUI_Main_Window(qt_base_class, generated_class):
         self.Init_Styles()
         # Set a default font, prior to loading prior settings.
         self.Init_Font()
+        # Init some tab options.
+        self.Init_Live_Editor_Tab_Options()
 
         # Restore the settings.
         self.Load_Session_Settings()
         
-        # Set the tab widget to the first tab, since the functions above
-        #  will cause it to want to switch to the graph tab 
-        #  (for whatever reason).
-        self.tabWidget.setCurrentIndex(0)
+
+        # Set up initial tabs, if they weren't restored.
+        # These should always be present, even if hidden, and can be
+        # referenced by other tabs if needed.
+        # TODO: maybe rename existing tabs if found, to be able to
+        #  clarify across version changes.
+        # Note: these insert at index 0, so have the last one be the
+        #  tab that should go first.
+        for index, (class_name, label) in enumerate([
+                # Trying out naming this different than Settings, to avoid
+                # confusion with the gui "settings" menu.
+                ('Settings_Window' ,'Config'),
+                # Main script window. TODO: try calling "Main Script"
+                ('Script_Window'   ,'Script'),
+            ]):
+
+            # Need to create it if it is not tracked.
+            if not self.unique_tabs_dict[class_name]:
+
+                # Place it near the left of the tab bar.
+                # This can be handy if adding new unique tabs to an older
+                # session, so they go on the left.
+                # The user can still move them away, and get their moved
+                # position restored through session settings.
+                widget = self.Create_Tab(class_name, label, index = 0)
                 
-        # Display the GUI upon creation.
+                # Flag as unique.
+                widget.tab_properties.unique     = True
+
+                # Record it for hiding/showing.
+                self.unique_tabs_dict[class_name] = widget
+
+            else:
+                widget = self.unique_tabs_dict[class_name]
+                # Need to update using an index, annoyingly.
+                index = self.widget_tab_container.indexOf(widget)
+                # Refine the label.
+                self.widget_tab_container.setTabText(index, label)
+               
+
+        # TODO: maybe resort the above to be at the start of the
+        # tab listing, but that isn't critical for now.
+
+        # Display the GUI.
         self.show()
+
+        # Kick off a file system refresh.
+        self.Refresh_File_System()
+
+        # Flag startup as completed.
+        # This will allow later created tabs to refresh themselves
+        # when added.
+        self.startup_complete = True
         return
 
         
@@ -168,48 +402,204 @@ class GUI_Main_Window(qt_base_class, generated_class):
     ##########################################################################
     # Tab related actions.
 
-    def Create_Tab(self, widget_class, label, **kwargs):
+    def Init_Live_Editor_Tab_Options(self):
         '''
-        Create a new tab holding a widget_class object, with  the
-        given tab label. Any extra kwargs are passed.
+        Check the live editor for registers edit_tree_view builder
+        functions, and use them to set up the edit tab options
+        on the menu.
         '''
-        # Create the content widget.
-        # Give no parent yet, else it blobs over the main window.
-        window = widget_class(parent = None, window = self, **kwargs)
-
-        # Make the new tab.
-        tab_index = self.tabWidget.addTab(window, label)
-        
-        # Store the widget and index, for use elsewhere.
-        self.tabs_dict[label] = window
-        self.tab_indices_dict[label] = tab_index
+        table_names = Live_Editor.Get_Available_Tree_Names()
+        for name in sorted(table_names):
+            # Remove any underscores and uppercase the table name.
+            title = name.replace('_',' ').title()
+            action = self.menuEdit.addAction(title)
+            
+            # Set up the trigger.
+            # See Init_Styles for further comments on this.
+            action.triggered.connect(
+                lambda qtjunk, 
+                # Record the live editor function to call.
+                class_name = 'Edit_View_Window',
+                label = title,
+                # Put the table name in the kwargs.
+                kwargs = {'table_name' : name} : 
+                self.Create_Tab(class_name, label, **kwargs))
         return
 
 
-    def Get_Tab_Widgets(self, filter = None):
+    def Create_Tab(self, class_name, label, index = None, **kwargs):
+        '''
+        Create a new tab holding a widget_class object, with  the
+        given tab label. Any extra kwargs are passed.
+        Returns the created widget.
+        '''
+        # Store the tab information for rebuilding on reload.
+        tab_properties = Tab_Properties(
+            self,
+            label,
+            class_name,
+            kwargs )
+        widget = tab_properties.Get_Widget()
+        return self.Create_Tab_From_Widget(widget, index)
+
+
+    def Create_Tab_From_Widget(self, widget, index = None):
+        '''
+        Create a new tab based on the given widget.
+        Switches focus to the new tab, and kicks off its initial
+        data filling if startup is complete.
+        '''
+        # Polish the index, keeping in range.
+        tab_count = self.widget_tab_container.count()
+        if index == None or index > tab_count:
+            index = tab_count
+
+        # Add it to the tab container.
+        tab_index = self.widget_tab_container.insertTab(
+            index, widget, widget.tab_properties.label)
+        
+        # Update the font on the new tab.
+        self.Update_Font()
+
+        # Switch focus.
+        self.widget_tab_container.setCurrentIndex(tab_index)
+
+        # Start processing.
+        if self.startup_complete:
+            widget.Reset_From_File_System()
+        return
+
+
+    def Get_Tab_Widgets(self, *filters):
         '''
         Returns a list of tab page widgets.
 
-        * filter
-          - Optional, strings or tuple of strings, names of the
-            classes to be returned.
-          - Eg. ('Settings_Window', 'Script_Window')
+        * filters
+          - Optional strings, names of the classes to be returned.
+          - Eg. Get_Tab_Widgets('Settings_Window', 'Script_Window')
+          - Subclasses of the filtered classes will be returned.
         '''
         # If a filter given, swap it over to actual classes
         # for doing an isinstance check.
         # These should all be imported already to this module.
-        if isinstance(filter, str):
-            filter = globals()[filter]
-        elif isinstance(filter, (tuple, list)):
-            filter = tuple([globals()[x] for x in filter])
+        filters = tuple([globals()[x] for x in filters])
 
         ret_list = []
-        for label, widget in self.tabs_dict.items():
+        for index in range(self.widget_tab_container.count()):
+            widget = self.widget_tab_container.widget(index)
             # Skip non-matching class types.
-            if filter and not isinstance(widget, filter):
+            if filters and not isinstance(widget, filters):
                 continue
             ret_list.append(widget)
+
         return ret_list
+
+
+    def Close_Tab(self, index):
+        '''
+        Either hide or close the specified tab.
+        '''
+        # Start by looking up the tab page.
+        widget = self.widget_tab_container.widget(index)
+
+        # If this is a unique page, just hide it.
+        # TODO: maybe check for its class_name being in the
+        # unique dict instead, if that is safer.
+        if widget.tab_properties.unique:
+            self.Show_Hide_Tab(widget.tab_properties.class_name)
+        else:
+            # Remove it.
+            self.widget_tab_container.removeTab(index)
+            # Flag qt to delete the widget.
+            widget.deleteLater()
+        return
+
+
+    def Show_Hide_Tab(self, class_name, show_only = False, hide_only = False):
+        '''
+        Shows or hides a tab of the given class_name, which is
+        expected to be in unique_tabs_dict.
+
+        * show_only
+          - Bool, if True then the tab will be shown but not hidden.
+        * hide_only
+          - Bool, if True then the tab will be hidden but not shown.
+        '''
+        # Apparently the only way to do this is to remove the tab page
+        # entirely from the tab container, or add it back in.
+        # Start by finding it on the tab bar; this may fail it
+        # it is not present.
+        widgets = self.Get_Tab_Widgets(class_name)
+
+        # Hide it if needed.
+        if widgets and not show_only:
+            widget = widgets[0]
+            # Grab the index.
+            index = self.widget_tab_container.indexOf(widget)
+
+            # Remove from the bar and record the index.
+            self.widget_tab_container.removeTab(index)
+            widget.tab_properties.index = index
+            # Flag as hidden for session save/restore.
+            widget.tab_properties.hidden = True
+
+            # Error check; this widget should be known.
+            assert widget is self.unique_tabs_dict[class_name]
+
+        # Show it if needed.
+        elif not widgets and not hide_only:
+            widget = self.unique_tabs_dict[class_name]
+            # Restore it as its prior index.
+            self.Create_Tab_From_Widget(widget, widget.tab_properties.index)
+            widget.tab_properties.hidden = False
+            # In case font changed while it was hidden, update fonts.
+            self.Update_Font()
+        return
+
+
+    def Action_View_Settings(self):
+        '''
+        Show or hide the settings tab.
+        '''
+        self.Show_Hide_Tab('Settings_Window')
+        return
+
+
+    def Action_View_Script(self):
+        '''
+        Show or hide the script tab.
+        '''
+        self.Show_Hide_Tab('Script_Window')
+        return
+    
+    ##########################################################################
+    # Reset related functions.
+
+    def Refresh_File_System(self):
+        '''
+        Resets/refreshes the File_System and related components.
+        This will kick off data loading on all edit tabs.
+        Meant for use at startup if Settings appear to have proper
+        paths, or for when paths change.
+        TODO: maybe a menu option as well.
+        '''
+        # TODO: check validity of Settings.
+        if not Settings.Paths_Are_Valid():
+            return
+
+        # Want to prioritize the currently viewed tab.
+        current_tab = self.widget_tab_container.currentWidget()
+        current_tab.Reset_From_File_System()
+
+        # Go through all tabs.
+        for tab in self.Get_Tab_Widgets():
+            # Skip the current_tab since it was already handled.
+            if tab is current_tab:
+                continue
+            # Kick off the refresh.
+            # These will queue up, so should be safe.
+            tab.Reset_From_File_System()
+        return
 
 
     ##########################################################################
@@ -251,11 +641,16 @@ class GUI_Main_Window(qt_base_class, generated_class):
         return
 
 
-    def Update_Font(self, new_font):
+    def Update_Font(self, new_font = None):
         '''
         Update up the font to use in the various windows.
+        If called with no arg, this refreshes the current font,
+        useful for when new tabs are created.
         '''
-        self.current_font = new_font
+        if new_font == None:
+            new_font = self.current_font
+        else:
+            self.current_font = new_font
                 
         # Set up a slightly smaller version of the current font.
         small_font = QFont()
@@ -284,6 +679,7 @@ class GUI_Main_Window(qt_base_class, generated_class):
         # Add submenu items for the style names.
         for name in sorted(Styles.Get_Style_Names()):
             action = self.menuStyle.addAction(name)
+            
             # Annotate the action with the style name, for easy 
             # handling when triggered.
             action.style_name = name
@@ -376,7 +772,12 @@ class GUI_Main_Window(qt_base_class, generated_class):
         self.Save_Session_Settings()
 
         # Save the Live_Editor changes.
-        Live_Editor.Save_Patches()
+        # This can fail if the settings don't have a proper output path.
+        try:
+            Live_Editor.Save_Patches()
+        except AssertionError:
+            # Ignore for now.
+            pass
 
         super().close()
         return True
@@ -401,18 +802,27 @@ class GUI_Main_Window(qt_base_class, generated_class):
         # These functions appear to handle pos, size, and dock widget
         # size, for the main window. They do not capture any
         # internal widget positions (eg. splitters).
-        settings.setValue('geometry', self.saveGeometry())
-        settings.setValue('state'   , self.saveState())
-        settings.setValue('font'    , self.current_font)
-        settings.setValue('style'   , self.current_style)
+        settings.setValue('geometry'  , self.saveGeometry())
+        settings.setValue('state'     , self.saveState())
+        settings.setValue('font'      , self.current_font)
+        settings.setValue('style'     , self.current_style)
+        settings.setValue('tab_index' , self.widget_tab_container.currentIndex())
         settings.endGroup()
         
-        # Save state from tab pages.
-        for label, widget in self.tabs_dict.items():
-            settings.beginGroup('Tab_Page_{}'.format(label))
-            widget.Save_Session_Settings(settings)
-            settings.endGroup()
 
+        # Save state from tab pages.
+        # Note: this will only save visible tabs; to ensure hidden
+        # tabs get saved, they can be reshown first.
+        for tab_name in self.unique_tabs_dict.keys():
+            self.Show_Hide_Tab(tab_name, show_only = True)
+
+        # Now go through the tabs, all types.
+        for index, widget in enumerate(self.Get_Tab_Widgets()):
+            # Use the tab_properties to handle saving.
+            settings.beginGroup('Tab_{}'.format(index))
+            widget.tab_properties.Save_Session_Settings(settings)
+            settings.endGroup()
+            
         # Note: there is a .sync() method that writes the file, but
         # it is apparently handled automatically on shutdown.
         return
@@ -425,36 +835,70 @@ class GUI_Main_Window(qt_base_class, generated_class):
         # Convenience renaming.
         settings = self.session_memory
 
-        # Look up existing settings; change nothing if none found.
-        # Note: setting the default for .value() to None causes some
-        # default object to be returned, so just use a .contains()
-        # check instead.
-        # Use a settings group for scalability, in case other windows
-        # need to also be saved in the future.
-        group = 'Main_Window'
-        settings.beginGroup(group)
-        for field, method in [
-            ('geometry', self.restoreGeometry),
-            ('state'   , self.restoreState),
-            ('font'    , self.Update_Font),
-            ('style'   , self.Update_Style),
-            ]:
-            if not settings.contains(field):
-                continue
-            # Just in case the ini format is wrong, skip over problematic
-            # setting values.
-            try:
-                method(settings.value(field))
-            except Exception:
-                self.Print(('Failed to restore prior setting: "{}:{}"'
-                            .format(group, field)))
-        settings.endGroup()
-        
-        # Load state from tab pages.
-        for label, widget in self.tabs_dict.items():
-            settings.beginGroup('Tab_Page_{}'.format(label))
-            widget.Load_Session_Settings(settings)
+        # Loop over the groups; there are an unspecified number due
+        # to variable tab amounts being open.
+        for group in settings.childGroups():
+            settings.beginGroup(group)
+
+            if group == 'Main_Window':
+                # Look up existing settings; change nothing if none found.
+                # Note: setting the default for .value() to None causes some
+                # default object to be returned, so just use a .contains()
+                # check instead. TODO: double check if this is true for pyqt.
+                # Use a settings group for scalability, in case other windows
+                # need to also be saved in the future.
+                for field, method in [
+                        ('geometry', self.restoreGeometry),
+                        ('state'   , self.restoreState),
+                        ('font'    , self.Update_Font),
+                        ('style'   , self.Update_Style),
+                    ]:
+                    if not settings.contains(field):
+                        continue
+                    # Just in case the ini format is wrong, skip over
+                    # problematic setting values.
+                    try:
+                        method(settings.value(field))
+                    except Exception:
+                        self.Print(('Failed to restore prior setting: "{}:{}"'
+                                    .format(group, field)))
+
+            elif group.startswith('Tab_'):
+
+                # Note: if save/restore is changed across versions, this
+                # restoration might fail, so wrap it for safety and have
+                # it fail with assertion errors.
+                try:
+                    # Start by packing into a tab_properties.
+                    tab_properties = Tab_Properties(self)
+
+                    # Restore it; this will make the widget as well.
+                    tab_properties.Load_Session_Settings(settings)
+
+                    # Record unique tabs right away, to keep a reference
+                    # to them if not showing yet.
+                    if tab_properties.unique:
+                        self.unique_tabs_dict[
+                            tab_properties.class_name] = tab_properties.widget
+
+                    # Create the tab if it isn't set to hidden.
+                    if not tab_properties.hidden:
+                        self.Create_Tab_From_Widget(tab_properties.Get_Widget())
+
+                except AssertionError:
+                    self.Print(('Failed to restore "{}"'.format(group)))
+
             settings.endGroup()
-            
+                    
+        
+        # Once all tabs are created, restore the tab widget index.
+        settings.beginGroup('Main_Window')
+        try:
+            index = settings.value('tab_index', 0, type = 'int')
+            self.widget_tab_container.setCurrentIndex(index)
+        except Exception:
+            pass
+        settings.endGroup()
+                
         return
         

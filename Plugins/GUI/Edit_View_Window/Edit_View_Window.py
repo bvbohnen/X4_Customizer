@@ -38,8 +38,9 @@ class Edit_View_Window(Tab_Page_Widget, generated_class):
       - String, name of the table to display, as understood by the
         Live_Editor.
     * tree_model
-      - QStandardItemModel wrapping a Edit_Tree_View.
+      - Edit_Tree_Model controlling the widget_treeView.
     * table_model
+      - Edit_Table_Model controlling the widget_tableView.
     '''
     def __init__(self, parent, window, table_name):
         super().__init__(parent, window)
@@ -80,8 +81,11 @@ class Edit_View_Window(Tab_Page_Widget, generated_class):
         # if paths are set up in settings.
         
         # Force the initial splitter position.
-        # TODO: this still sets a ratio of 1:1 for some reason.
-        self.hsplitter.setSizes([1,4])
+        # Note: these are pixel sizes, that then stretch to fill the
+        # width, but internally it upsizes these based on the original
+        # box min sizes (apparently), so just set the sizes to something
+        # huge to ensure the ratios go through.
+        self.hsplitter.setSizes([1000,4000])
         
         self.Init_Checkboxes()
         return
@@ -131,7 +135,8 @@ class Edit_View_Window(Tab_Page_Widget, generated_class):
         items. A call to Live_Editor.Reset_Current_Item_Values should
         preceed this, shared across all pages being refreshed.
         '''
-        self.widget_tree_view.Soft_Refresh()
+        self.table_model.Redraw()
+        return
 
 
     def Action_Make_Table_Group(self):
@@ -153,6 +158,14 @@ class Edit_View_Window(Tab_Page_Widget, generated_class):
         return
 
 
+    def Reset_From_File_System(self):
+        '''
+        Trigger regather of the table group on reset.
+        '''
+        self.Action_Make_Table_Group()
+        return
+
+
     def Handle_Thread_Finished(self, return_value):
         '''
         Catch the returned table_group and updated the widgets.
@@ -167,4 +180,17 @@ class Edit_View_Window(Tab_Page_Widget, generated_class):
         #self.table_model.Set_Edit_Tree_View(return_value)
         return
 
-    
+
+    def Close(self):
+        '''
+        Prepare this window for closing, either at shutdown or
+        on tab closure.
+        '''
+        # Since models across tabs are sharing Edit_Items, and
+        # hence Q_Item_Groups, and those recycle QStandardItems,
+        # each model should have all of its items detached before
+        # closing (to avoid "underlying C/C++ object has been deleted"
+        # errors).
+        # This is only needed for tables, for now.
+        self.table_model.Release_Items()
+        return

@@ -297,4 +297,3 @@ class Widget_X4_Table_Item_Info(QtWidgets.QGroupBox):
         # Record the view for redraws.
         self.current_object_view = object_view                                           
         return
-

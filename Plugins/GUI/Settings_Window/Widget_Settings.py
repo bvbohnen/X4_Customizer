@@ -125,8 +125,9 @@ class Widget_Settings(QtWidgets.QGroupBox):
                     self.field_widget_dict[field] = button_group
                     button_group.default = default
 
+
                 # Non-bools are either Paths, strings, or None (for optional
-                # paths or strings). All can be handled the same way.
+                # paths or strings).
                 else:
                     widget = QtWidgets.QLineEdit()
                     # Treat default text as a placeholder.
@@ -138,6 +139,19 @@ class Widget_Settings(QtWidgets.QGroupBox):
                     # Record the field:widget pair.
                     self.field_widget_dict[field] = widget
                     widget.default = default
+                    
+                    # Can pick out paths based on their prefix.
+                    if field.startswith('path_'):
+                        # This will wrap the text box in a group with
+                        # a horizontal layout and a button to open the
+                        # file dialog.
+                        group = QtWidgets.QGroupBox()
+                        this_layout = QtWidgets.QHBoxLayout()
+                        group.setLayout(this_layout)
+                        button = QtWidgets.QPushButton('D')
+                        this_layout.addWidget(button)
+                        this_layout.addWidget(widget)
+                        widget = group
 
                 # Set up a new layout row.
                 layout.addRow(field, widget)

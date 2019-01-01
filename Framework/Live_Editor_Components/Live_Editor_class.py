@@ -1,5 +1,5 @@
 
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 import json
 
 from ..Common import Settings, Print
@@ -125,7 +125,7 @@ class Live_Editor_class:
         harmless as long as the patches_key_dict is checked first.
     '''
     def __init__(self):
-        self.category_objects_dict = {}
+        self.category_objects_dict = defaultdict(dict)
         self.category_objects_builders = {}
         self.tree_view_dict = {}
         self.tree_view_builders = {}
@@ -163,9 +163,10 @@ class Live_Editor_class:
         # Only do this once.
         if self.init_complete:
             return
-        self.init_complete = True
         self.Load_Patches()
         # TODO: anything else needed here.
+        # Only flag as complete if Load_Patches worked.
+        self.init_complete = True
         return
 
 
@@ -247,6 +248,13 @@ class Live_Editor_class:
         self.tree_view_builders[name] = build_function
         return
 
+
+    def Get_Available_Tree_Names(self):
+        '''
+        Returns a list of names of buildable Edit_Tree_Views.
+        '''
+        return self.tree_view_builders.keys()
+
     
     def Record_Category_Objects_Builder(self, category, build_function):
         '''
@@ -279,7 +287,10 @@ class Live_Editor_class:
         Builds the category objects if they haven't been built yet.
         Runs Delayed_Init on the first call that builds objects.
         '''
-        if category not in self.category_objects_dict or rebuild:
+        # Don't test for the category key, just for there being
+        # items, since the key tends to get created even if item
+        # gathering fails.
+        if not self.category_objects_dict[category] or rebuild:
             self.Delayed_Init()
             # Set up a category for the objects, also clearing
             #  out any existing objects.
@@ -310,6 +321,8 @@ class Live_Editor_class:
         '''
         for item in self.Gen_Items():
             item.Reset_Value('current')
+            #-This shouldn't be needed...
+            #item.Get_Value('current')
         return
 
 

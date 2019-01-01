@@ -131,7 +131,7 @@ class Worker_Thread_Handler(QtCore.QThread):
         if work_request.prelaunch_function != None:
             try:
                 work_request.prelaunch_function()
-            except Exception:
+            except Exception as ex:
                 self.Print(ex)
                 self.Print('Error in thread prelaunch function "{}"'.format(
                     work_request.prelaunch_function.__name__))

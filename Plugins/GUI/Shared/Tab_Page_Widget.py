@@ -41,6 +41,16 @@ class Tab_Page_Widget(QtWidgets.QWidget):
         return
 
 
+    def Reset_From_File_System(self):
+        '''
+        This will be called after a file system reset (or at the
+        end of gui init), to start the tab doing any processing
+        to fill or refill itself.
+        Subclasses should overwrite this and fill it in.
+        '''
+        return
+
+
     def Handle_Thread_Finished(self, return_value = None):
         '''
         Default handler for completed threads.

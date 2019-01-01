@@ -43,6 +43,9 @@
     </Compile>
     <Compile Include="GUI\Edit_View_Window\Edit_View_Window.py" />
     <Compile Include="GUI\Edit_View_Window\Edit_Tree_Model.py" />
+    <Compile Include="GUI\Edit_View_Window\Q_Item_Group.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="GUI\Edit_View_Window\__init__.py" />
     <Compile Include="GUI\Styles.py">
       <SubType>Code</SubType>

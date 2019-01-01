@@ -40,6 +40,10 @@ class _Base_Item:
     * widget
       - Qt Widget with a setText method that is attached to
         the edited version of this item.
+      - TODO: remove once switch to q_item_group is complete.
+    * q_item_group
+      - Q_Item_Group that points at this item, potentially
+        holding multiple Q_Edit_Item and updating them all at once.
     * version_dependents
       - Dict, keye by version, with lists of Display_Item objects
         that depend on this item.
@@ -68,8 +72,10 @@ class _Base_Item:
         self.read_only = read_only
         self.hidden = hidden
         self.widget = None
+        self.q_item_group = None
         self.version_value_dict = {}
         self.version_dependents = defaultdict(list)
+
 
     def Set_Widget(self, widget):
         '''
@@ -78,20 +84,38 @@ class _Base_Item:
         self.widget = widget
         
 
+    def Set_Q_Item_Group(self, q_item_group):
+        '''
+        Attach this item to the Q_Edit_Item_Group, or detach if None.
+        In general, detachment is never expected.
+        '''
+        self.q_item_group = q_item_group
+
+
     def Reset_Value(self, version):
         '''
         Resets the given version of the value to None, triggering
         a recompute later. Also resets dependents.
         If a widget is attached, the 'edited' version of the value
         will be recomputed and sent to the widget.
+        If a q_item_group is attached, it will be told to do a fresh
+        update.
         '''
         self.version_value_dict[version] = None
+
         if self.widget != None and version == 'edited':
             # Update the widget text using setText.
             value = self.Get_Value(version)
             if value == None:
                 value = ''
             self.widget.setText(value)
+            
+        if self.q_item_group != None:
+            # Update the q_item_group text using Update; it
+            # will call Get_Value automatically, among maybe
+            # other functions (eg. Is_Modified), and does so
+            # for all q_items involved.
+            self.q_item_group.Update(version)
 
         for dep in self.version_dependents[version]:
             dep.Reset_Value(version)
@@ -100,6 +124,9 @@ class _Base_Item:
     def Init_References(self):
         'Dummy function'
         return
+    def Is_Reference(self):
+        'Returns False.'
+        return False
     
 
 class Placeholder_Item(_Base_Item):
@@ -433,6 +460,9 @@ class Edit_Item(_Base_Item):
             return True
         return False
 
+    def Is_Reference(self):
+        'Returns True if this item refers to another object.'
+        return self.is_reference
 
     def Get_Patch(self):
         '''

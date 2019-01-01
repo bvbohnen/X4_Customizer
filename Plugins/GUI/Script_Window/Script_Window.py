@@ -59,6 +59,11 @@ class Script_Window(Tab_Page_Widget, generated_class):
         # Set 1:1 splitter ratios.
         self.hsplitter.setSizes([1,1])
         self.vsplitter.setSizes([1,1])
+
+        # Always start a new script on init.
+        # This can be overwritten by prior session settings, but those
+        # won't be available on a first run.
+        self.Action_New_Script()
         return
        
 
@@ -295,7 +300,7 @@ class Script_Window(Tab_Page_Widget, generated_class):
 
         # When done, restore Settings back to the gui values, in case
         # the script temporarily modified them.
-        self.window.tabs_dict['Settings'].widget_settings.Store_Settings()
+        self.window.Get_Tab_Widgets('Settings_Window')[0].widget_settings.Store_Settings()
 
         # Close any transform log that might be open, to flush it
         # out and also reset it for a later run.
@@ -303,13 +308,13 @@ class Script_Window(Tab_Page_Widget, generated_class):
 
         # TODO: detect errors in the script and note them; for now, the
         # thread or framework will tend to print them out.
-        self.window.Print('Script Run completed')
+        self.window.Print('Script run returned')
 
         # Tell any live edit tables to refresh their current values,
         # since the script may have changed them.
         Live_Editor.Reset_Current_Item_Values()
-        for widget in self.window.Get_Tab_Widgets('Edit_Table_Window'):
-            widget.widget_tree_view.Soft_Refresh()
+        for widget in self.window.Get_Tab_Widgets('Edit_View_Window'):
+            widget.Soft_Refresh()
         
         return
 
@@ -340,8 +345,6 @@ class Script_Window(Tab_Page_Widget, generated_class):
         if stored_value not in [None, 'None']:
             self.current_script_path = Path(stored_value)
             self.Load_Script_File(self.current_script_path)
-        else:
-            self.Action_New_Script()
         return
 
 

@@ -2,7 +2,7 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
 #from .Edit_Item import Widget_Edit_Item
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QBrush
-
+from .Q_Item_Group import Q_Item_Group
 
 class Edit_Table_Model(QStandardItemModel):
     '''
@@ -32,7 +32,9 @@ class Edit_Table_Model(QStandardItemModel):
         
         # Set the column headers.
         self.setHorizontalHeaderLabels(self.column_headers)
-
+        # Allow drag/dropping.
+        self.qt_view.setAcceptDrops(True)
+        
         # Set the columns to resize.
         # This is an annoying chain of lookups, in keeping with
         # model/views being overcomplicated.
@@ -90,14 +92,23 @@ class Edit_Table_Model(QStandardItemModel):
 
     def Handle_itemChanged(self, item):
         '''
-        This is called when an item's data is changed, either
-        at creation (should ignore) or by user editing (should
-        catch).
+        This is called when an item's data is changed, either at creation
+        (should ignore) or by user editing (should catch).
+        
         '''
         # Ignore during the object draw process.
         if self.current_object_view == None:
             return
-        # TODO
+        
+        # Skip generic items.
+        # These can show up when there are missing references, with
+        #  the table auto inserting dummy items into those cells.
+        if not hasattr(item, 'q_item_group'):
+            return
+
+        # Pass this off to the item group, which will udpate this
+        # item and any others attached to the same Edit_Item.
+        item.q_item_group.Value_Changed(item)
         return
 
 
@@ -110,12 +121,12 @@ class Edit_Table_Model(QStandardItemModel):
         '''
         # Set this to None while drawing, to prevent spurious redraws.
         self.current_object_view = None
-
+        
         # Gather the dict, keyed by version, holding item lists.
         version_items_list_dict = object_view.Get_Display_Version_Items_Dict()
 
         # From this, get the labels and descriptions for each row.
-        # Some rows may be partially None, to avoid those when picking
+        # Some rows may be partially None, so avoid those when picking
         #  sampled items.
         labels       = []
         descriptions = []
@@ -126,6 +137,15 @@ class Edit_Table_Model(QStandardItemModel):
             labels      .append(item.display_name)
             descriptions.append(item.description)
         row_count = len(labels)
+        
+
+        # The model will currently have 'ownership' of prior items,
+        # and will delete them when resized or new items attached.
+        # To prevent deletion, so that the Q_Item_Group isn't left
+        # throwing "underlying C/C++ object has been deleted" errors,
+        # use the 'take' methods to remove items from this model
+        # without deleting them.
+        self.Release_Items()
 
         # Resize to the right number of rows.
         # Could also clear(), but that would require regenerating rows
@@ -152,116 +172,120 @@ class Edit_Table_Model(QStandardItemModel):
                 # but references can mismatch.
                 item = version_items_list_dict[version][row]
 
-                q_item = QStandardItem(item.Get_Value(version))
-                q_item.edit_item = item
-                q_item.version = version
-                self.Polish_Item(q_item)
+                # If there is no underlying item, such as when a reference
+                # is missing, can leave the spot blank.
+                if item == None:
+                    continue
+
+                # If the item has no q_item_group, make one.
+                if not item.q_item_group:
+                    item.q_item_group = Q_Item_Group(item)
+
+                # Get a new QStandardItem from the group.
+                q_item = item.q_item_group.New_Q_Item(version)
                 self.setItem(row, col, q_item)
 
-                # Others are handled through their class method.
-                #widget.Set_Item(item)
 
+        # For some reason the column visibilities get messed up by
+        # the model when items are changed (not even in a consistent
+        # way), so fix them here.
+        self.Update_Column_Visibilities()
+        
+        # Record the object view, which also turns on change detection.
+        self.current_object_view = object_view
+        
+        # Expand rows based on their contents, particularly to make
+        # descriptions readable.
+        # Side note: this appears to bug up on the first display, not
+        # giving enough room, until an item is not-edited or the
+        # object is changed. Completely unclear why, except maybe
+        # qt bugginess.
+        self.Resize_Rows()
 
-        # This may be unnecessary, but do it anyway.
-        #self.Update_Column_Visibilities()
+        return
+
+    
+    def Redraw(self):
+        '''
+        Redraw this model from the current_object_view.  To be used
+        when object references are changed, so that cells can be
+        swapped to their new items.
+        Skips if called on a window that hasn't drawn anything yet.
+        '''
+        if self.current_object_view != None:
+            self.Update(self.current_object_view)
         return
 
 
-    def Polish_Item(self, item):
+    def Resize_Rows(self):
         '''
-        Polish an item with formatting, editability, etc.
-        TODO: move to QStandardItem subclass, maybe.
+        Resizes the table rows to their contents.
+        For use when descriptions or other large text blocks are changed,
+        but can be called somewhat blindly on changes.
         '''
-        # Set up editability.
-        if item.edit_item.read_only or item.version != 'edited':
-            item.setEditable(False)
-            # TODO: shade this.
-            brush = QBrush(QtCore.Qt.SolidPattern)
-            brush.setColor(QtGui.QColor(247, 247, 247))
-            item.setBackground( brush )
-        else:
-            item.setEditable(True)
-
-        # TODO: live editing polish, eg. highlights on modified items?
+        self.qt_view.resizeRowsToContents()
         return
 
-        ## Start with row expansion, as needed.
-        ## Don't count the widget headers for this.
-        #while row_count > len(self.widgets_dict['fields'])-1:
-        #    row = len(self.widgets_dict['fields'])
-        #
-        #    # Set up a new layout row with 5 columns.
-        #    # Loop over the lists to append to.
-        #    for key, widget_list in self.widgets_dict.items():
-        #
-        #        # Create a widget based on field name.
-        #        if key == 'fields':
-        #            widget = QtWidgets.QLabel(self)
-        #        else:
-        #            # Give the edit_item widgets their value version.
-        #            widget = Widget_Edit_Item(self, version = key)
-        #            # Hook into its redraw signal.
-        #            widget.redraw_request.connect(self.Handle_Widget_Redraw_Request)
-        #
-        #        # Record to the local list and to the qt layout.
-        #        widget_list.append(widget)
-        #        self.Add_Layout_Widget(widget, row, key)
-        #
-        #
-        ## Hide any excess from the last update.
-        ## Note: when redrawing a view, doing a full hide + reshow
-        ## causes the scroll bar to jump to the bottom of the layout.
-        ## To avoid this problem, be conservative with the visibility
-        ## changes here.
-        #for widget_list in self.widgets_dict.values():
-        #    for row, widget in enumerate(widget_list):
-        #
-        #        # Low rows become visible; adjust by 1 for the headers.
-        #        if row < row_count +1:
-        #            widget.setVisible(True)
-        #            widget.in_use = True
-        #        else:
-        #            # High rows invisible.
-        #            widget.setVisible(False)
-        #            # Annotate as not being in_use.
-        #            # This helps when columns are shown/hidden to have a
-        #            # way to remember which cells are too far down.
-        #            widget.in_use = False
-        #
-        #
-        ## If there are any items being displayed, unhide the column headers.
-        #if labels:
-        #    for widget_list in self.widgets_dict.values():
-        #        widget_list[0].setVisible(True)
-        #
-        #
-        ## Can now fill in the display info.
-        #for row in range(row_count):
-        #
-        #    # Loop over the widget columns.
-        #    for key, widget_list in self.widgets_dict.items():
-        #        
-        #        # Pick out the widget being updated.
-        #        widget = widget_list[row +1]
-        #
-        #        # The fields widget gets label text directly.
-        #        if key == 'fields':
-        #            widget.setText(labels[row])
-        #            widget.setToolTip(descriptions[row])                
-        #        else:
-        #            # Grab the right item for the column.
-        #            # Top level object items will always match across
-        #            # versions, but references can mismatch.
-        #            item = version_items_list_dict[key][row]
-        #            # Others are handled through their class method.
-        #            widget.Set_Item(item)
-        #
-        #
-        ## When done, maybe hide some columns again based on check boxes.
-        #self.Update_Column_Visibilities()
-        #
-        ## Record the view for redraws.
-        #self.current_object_view = object_view                                           
-        #return
+
+    def Release_Items(self):
+        '''
+        Prepare this model for deletion by detaching all items produced
+        by a Q_Item_Group, such that they can reused by other tabs.
+        Items will be replaced with generic QStandardItems, to
+        preserve scroll bar position.
+        '''
+        for row in range(self.rowCount()):
+            for col in range(len(self.column_keys)):
+                # Sample the item and see if it has an attached
+                # q_item_group.
+                item = self.item(row, col)
+
+                # Skip if the spot was blank.
+                # TODO: it is unclear on why sometimes the table seems
+                # to insert dummy items into unused slots, and other
+                # times returns None.
+                if item == None:
+                    continue
+                # Skip generic items.
+                if not hasattr(item, 'q_item_group'):
+                    continue
+
+                # Remove the item.
+                item = self.takeItem(row, col)
+                # Replace it with a placeholder dummy.
+                self.setItem(row, col, QStandardItem())
+        return
+    
+
+    def mimeData(self, qmodelindex):
+        '''
+        Customize the dragged item to copy its text.
+        '''
+        item = self.itemFromIndex(qmodelindex[0])
+        text = item.text()
+        # Run whatever standard constructor for the mimedata.
+        mimedata = super().mimeData(qmodelindex)
+        # The default mimedata doesn't fill its text field, so
+        # fill it here.
+        mimedata.setText(text)
+        return mimedata
 
 
+    def dropMimeData(self, mimedata, dropaction, row, col, item_index):
+        '''
+        Handle drops of mimedata. This is expected to just copy
+        text and accept the drop.
+        '''
+        # Note: the row/col seem to always to -1,-1, and the
+        # "parent" in documentation is a QModelIndex for the item.
+        # Note: dropaction is just a constant, like '1'; ignore
+        # for now.
+        item = self.itemFromIndex(item_index)
+        if item != None:
+            # Copy over the text set by mimeData.
+            text = mimedata.text()
+            # This should cause the item to signal that its value
+            # changed, will appropriate following model updates.
+            item.setText(text)
+            return True
+        return False

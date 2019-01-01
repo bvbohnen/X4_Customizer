@@ -442,12 +442,14 @@ class Settings_class:
         '''
         Checks the current paths for errors (not existing, etc.), converts
         them to Path objects, creates the output extension folder, etc.
+        Raises AssertionError on any critical problem.
+        Sets _init_complete if no errors are found.
         '''
         # Limit to running just once, though this might get called
-        # on every plugin.
+        # on every plugin. Note: this flag will only get set after
+        # all error checks are passed.
         if self._init_complete:
             return
-        self._init_complete = True
 
         # Start with conversions to full Paths, since the user
         # may have written these with strings.
@@ -485,14 +487,27 @@ class Settings_class:
             else:
                 # Hard error.
                 raise AssertionError(message)
-
-        # Create the output folder if it does not exist,
-        #  so that runtime logging can go here.
-        if not self.Get_Output_Folder().exists():
-            # Add any needed parents as well.
-            self.Get_Output_Folder().mkdir(parents = True)
-
+            
+        # If here, can continue with source file processing.
+        self._init_complete = True
         return
+    
+
+    def Paths_Are_Valid(self):
+        '''
+        Returns True if all paths appear to be valid and ready
+        for game file reading and output writing, else False.
+        '''
+        # If this makes it through Delayed_Init, either on the first
+        # time or because _init_complete is set, then thing should
+        # be good to go.
+        try:
+            self.Delayed_Init()
+        except AssertionError:
+            # A problem was encountered.
+            return False
+        return True
+
 
     # The following functions return paths that might be unsafe
     # if delayed init wasn't run yet.
@@ -508,14 +523,23 @@ class Settings_class:
     
     @_Verify_Init
     def Get_Output_Folder(self):
-        'Returns the path to the output extension folder.'
+        '''
+        Returns the path to the output extension folder.
+        Creates it if it does not exist.
+        '''
         # Pick the user or x4 folder.
         if self.output_to_user_extensions:
             path = self.path_to_user_folder
         else:
             path = self.path_to_x4_folder
         # Offset to the extension.
-        return path / 'extensions' / self.extension_name
+        path = path / 'extensions' / self.extension_name
+        # Create the output folder if it does not exist.
+        if not path.exists():
+            # Add any needed parents as well.
+            path.mkdir(parents = True)
+        return path
+
     
     @_Verify_Init
     def Get_Source_Folder(self):

@@ -127,14 +127,14 @@ _item_macros = [
     # TODO: maybe description; would need to think of
     # a special way to show this that is legible.
     _D('description'          , Update_Description                                     , 'Description', ''),
-    _E('t_descrip_entry'      , './macro/properties/identification'   , 'description'  , 'T Desc. Entry', '', hidden = True),
+    _E('t_descrip_entry'      , './macro/properties/identification'   , 'description'  , 'T Desc. Entry', ''),
     _E('codename'             , './macro'                             , 'name'         , 'Codename', '', read_only = True),
     _E('macro_class'          , './macro'                             , 'class'        , 'Class', '', read_only = True),
-    _E('component'            , './macro/component'                   , 'ref'          , 'Component', '', read_only = True, hidden = True),
+    _E('component'            , './macro/component'                   , 'ref'          , 'Component', '', read_only = True),
     ]
 _component_item_macros = [
-    _E('connection_name'       , 'connection_xpath'       , 'name'         , 'Connection Name', ''  , read_only = True),
-    _E('connection_tags'       , 'connection_xpath'       , 'tags'         , 'Connection Tags', ''  , read_only = True),
+    _E('connection_name'       , 'connection_xpath'       , 'name'         , 'Connection Name', ''),
+    _E('connection_tags'       , 'connection_xpath'       , 'tags'         , 'Connection Tags', ''),
     ]
 
 
