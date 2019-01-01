@@ -1,4 +1,4 @@
-X4 Customizer 1.4.1
+X4 Customizer 1.5
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -129,6 +129,10 @@ Example input file:
 ***
 
 Analyses:
+
+  * Print_Object_Stats
+
+    Print out statistics for objects of a given category. This output will be similar to that viewable in the gui live editor pages, except formed into one or more tables. Produces csv and html output. Will include changes from enabled extensions.
 
   * Print_Ware_Stats
 
@@ -296,3 +300,9 @@ Change Log:
  * 1.4.1
    - Fixed bug when changing paths in the gui.
    - Added Shields and Bullets tabs to the gui.
+ * 1.5
+   - Redesign of the gui Live_Editor tabs.
+   - Added dynamic tab support: create, move, remove, restore.
+   - Tabs will load game information automatically if paths are set up.
+   - Added editing support for engines, scanners, storage, dockingbays.
+   - Various other polish, mostly in the gui.
