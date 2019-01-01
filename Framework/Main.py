@@ -43,6 +43,7 @@ def Run(*args):
     command line args supported.  Excess args will be placed in
     sys.args for called script to argparse if desired.
     '''
+    print(args)
     
     # Rename the settings for convenience.
     Settings = Framework.Settings
@@ -277,6 +278,6 @@ if __name__ == '__main__':
     # Note: this breaks the normal VS debugging, so only do it when frozen.
     if getattr(sys, 'frozen', False):
         freeze_support()
-        Process(target = Run).start(*sys.argv[1:])
+        Process(target = Run, args = sys.argv[1:]).start()
     else:
         Run(*sys.argv[1:])

@@ -55,6 +55,7 @@ class Custom_Settings(QtCore.QSettings):
         'true'  : True,
         'false' : False,
         }
+
     def value(self, field, default = None, type = None):
         '''
         Look up and return the value.
@@ -66,7 +67,9 @@ class Custom_Settings(QtCore.QSettings):
           - Supports 'bool', 'int', others as needed.
         '''
         value = super().value(field, None)
-        if value == None:
+        # Apparently pyqt screwed up comparisons here, and has the
+        # qbytearray == None as True; use 'is' to be safer.
+        if value is None:
             return default
 
         if type == 'bool':
@@ -194,8 +197,7 @@ class Tab_Properties:
         return self.widget
 
 
-# Testing code from:
-# http://www.mikeyd.com.au/2015/03/12/adding-the-ability-to-close-a-tab-with-mouses-middle-button-to-qts-qtabwidget/_replytocom=837/
+
 class Custom_Tab_Bar(QtWidgets.QTabBar):
     '''
     A customized tab bar for a tab widget, which will emit a
@@ -275,7 +277,9 @@ class GUI_Main_Window(qt_base_class, generated_class):
         # Set up the custom tab bar.
         self.widget_tab_container.setTabBar(Custom_Tab_Bar())
         self.widget_tab_container.tabBar().tabCloseRequested.connect(self.Close_Tab)
-        
+        # The custom bar overwrites some settings from qt designer,
+        # so fix them here for now.
+        self.widget_tab_container.setMovable(True)
         
         # Set up a QSettings object, giving it the path to where
         # the settings are stored. Set it as an ini file, since otherwise
@@ -338,7 +342,7 @@ class GUI_Main_Window(qt_base_class, generated_class):
             ]):
 
             # Need to create it if it is not tracked.
-            if not self.unique_tabs_dict[class_name]:
+            if class_name not in self.unique_tabs_dict:
 
                 # Place it near the left of the tab bar.
                 # This can be handy if adding new unique tabs to an older
@@ -448,6 +452,7 @@ class GUI_Main_Window(qt_base_class, generated_class):
         Create a new tab based on the given widget.
         Switches focus to the new tab, and kicks off its initial
         data filling if startup is complete.
+        Returns the widget.
         '''
         # Polish the index, keeping in range.
         tab_count = self.widget_tab_container.count()
@@ -467,7 +472,7 @@ class GUI_Main_Window(qt_base_class, generated_class):
         # Start processing.
         if self.startup_complete:
             widget.Reset_From_File_System()
-        return
+        return widget
 
 
     def Get_Tab_Widgets(self, *filters):
@@ -510,6 +515,8 @@ class GUI_Main_Window(qt_base_class, generated_class):
         else:
             # Remove it.
             self.widget_tab_container.removeTab(index)
+            # Do any local closure it needs.
+            widget.Close()
             # Flag qt to delete the widget.
             widget.deleteLater()
         return
@@ -858,8 +865,9 @@ class GUI_Main_Window(qt_base_class, generated_class):
                     # Just in case the ini format is wrong, skip over
                     # problematic setting values.
                     try:
-                        method(settings.value(field))
-                    except Exception:
+                        value = settings.value(field)
+                        method(value)
+                    except Exception as ex:
                         self.Print(('Failed to restore prior setting: "{}:{}"'
                                     .format(group, field)))
 

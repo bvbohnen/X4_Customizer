@@ -56,9 +56,10 @@ class Script_Window(Tab_Page_Widget, generated_class):
         window.action_Save_As    .triggered.connect( self.Action_Save_Script_As)
         window.action_Run_Script .triggered.connect( self.Action_Run_Script    )
         
-        # Set 1:1 splitter ratios.
-        self.hsplitter.setSizes([1,1])
-        self.vsplitter.setSizes([1,1])
+        # Set default splitter ratios.
+        # Just even splits for now; these mostly only affect a new user.
+        self.hsplitter.setSizes([1000,1000])
+        self.vsplitter.setSizes([1000,1000])
 
         # Always start a new script on init.
         # This can be overwritten by prior session settings, but those
@@ -194,7 +195,8 @@ class Script_Window(Tab_Page_Widget, generated_class):
         then saves the script (if not cancelled).
         Returns True if the script saved succesfully, False if not.
         '''
-
+        # TODO: just use getSaveFileName as a static function, dont
+        #  make a dialog object.
         # Create a file selection dialogue, using a QFileDialog object.
         file_dialogue = QtWidgets.QFileDialog(self.window)
 
@@ -203,7 +205,7 @@ class Script_Window(Tab_Page_Widget, generated_class):
 
         # Get the filename/path from the dialogue.
         #  Note: in qt5 this now returns a tuple of
-        #   (path string, type name with extention as a string).
+        #   (path string, type name with extension as a string).
         #  Only keep the full path here.
         file_selected, _ = file_dialogue.getSaveFileName(
             directory = str(self.last_dialog_path),

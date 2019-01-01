@@ -1,4 +1,5 @@
 
+from pathlib import Path
 from PyQt5 import QtWidgets
 from Framework import Settings
 
@@ -148,10 +149,16 @@ class Widget_Settings(QtWidgets.QGroupBox):
                         group = QtWidgets.QGroupBox()
                         this_layout = QtWidgets.QHBoxLayout()
                         group.setLayout(this_layout)
-                        button = QtWidgets.QPushButton('D')
-                        this_layout.addWidget(button)
                         this_layout.addWidget(widget)
+                        button = QtWidgets.QPushButton('Browse')
+                        this_layout.addWidget(button)
                         widget = group
+
+                        # Hook up the button activation signal, which
+                        # will pass along the config field being changed.
+                        button.clicked.connect(
+                            lambda clicked, 
+                            field = field : self.Open_File_Dialog(field) )
 
                 # Set up a new layout row.
                 layout.addRow(field, widget)
@@ -306,3 +313,32 @@ class Widget_Settings(QtWidgets.QGroupBox):
         # For now, don't worry about resaving yet; that isn't normally
         # needed until the gui is closed.
         return
+
+
+    def Open_File_Dialog(self, field):
+        '''
+        Handle 'browse' button presses.
+        '''
+        # Get the current text in the box, if any, to use as
+        # an initial dir.
+        text = self.field_widget_dict[field].text()
+        if Path(text).exists():
+            start_dir = text
+        else:
+            start_dir = None
+
+        # Get the path from the dialogue.
+        path_str = QtWidgets.QFileDialog.getExistingDirectory(
+            directory = start_dir)
+
+        # If the file path is empty, the user cancelled the dialog.
+        if not path_str:
+            return
+        
+        # Dump the text into the widget.
+        self.field_widget_dict[field].setText(path_str)
+        # Treat it as if modified by user.
+        self.Handle_Widget_Modification_Signals(field)
+        
+        return
+

@@ -85,6 +85,12 @@ Change Log:
  * 1.4.1
    - Fixed bug when changing paths in the gui.
    - Added Shields and Bullets tabs to the gui.
+ * 1.5
+   - Redesign of the gui Live_Editor tabs.
+   - Added dynamic tab support: create, move, remove, restore.
+   - Tabs will load game information automatically if paths are set up.
+   - Added editing support for engines, scanners, storage, dockingbays.
+   - Various other polish, mostly in the gui.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

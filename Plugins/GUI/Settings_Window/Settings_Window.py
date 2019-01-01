@@ -38,7 +38,7 @@ class Settings_Window(Tab_Page_Widget, generated_class):
         self.widget_settings_doc.setPlainText(Settings.__doc__)
                 
         # Init the splitter to 1:1.
-        self.hsplitter.setSizes([1,1])
+        self.hsplitter.setSizes([1000,1000])
         return
     
 

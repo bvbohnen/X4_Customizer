@@ -50,16 +50,16 @@
     <Compile Include="GUI\Styles.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\Edit_Table_Window\Edit_Item.py">
+    <Compile Include="GUI\Edit_Table_Window_old\Edit_Item.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\Edit_Table_Window\Item_Table.py">
+    <Compile Include="GUI\Edit_Table_Window_old\Item_Table.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\Edit_Table_Window\Edit_Table_Window.py">
+    <Compile Include="GUI\Edit_Table_Window_old\Edit_Table_Window.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\Edit_Table_Window\__init__.py">
+    <Compile Include="GUI\Edit_Table_Window_old\__init__.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GUI\Script_Window\Script_Window.py" />
@@ -90,7 +90,7 @@
     <Compile Include="GUI\Script_Window\Widget_Plugins.py" />
     <Compile Include="GUI\Script_Window\Widget_Script.py" />
     <Compile Include="GUI\Settings_Window\Widget_Settings.py" />
-    <Compile Include="GUI\Edit_Table_Window\Tree_Viewer.py" />
+    <Compile Include="GUI\Edit_Table_Window_old\Tree_Viewer.py" />
     <Compile Include="GUI\__init__.py" />
     <Compile Include="Transforms\Director.py">
       <SubType>Code</SubType>
@@ -123,7 +123,7 @@
   <ItemGroup>
     <Folder Include="Analyses\" />
     <Folder Include="Analyses\Live_Editor_Builders\" />
-    <Folder Include="GUI\Edit_Table_Window\" />
+    <Folder Include="GUI\Edit_Table_Window_old\" />
     <Folder Include="GUI\Edit_View_Window\" />
     <Folder Include="GUI\Shared\" />
     <Folder Include="GUI\Script_Window\" />

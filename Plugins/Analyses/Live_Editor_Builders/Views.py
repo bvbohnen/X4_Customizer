@@ -10,6 +10,8 @@ def Build_Object_Tree_View(
         display_name,
         object_categories,
         label_item,
+        flat = False,
+        subcategory_func = None,
     ):
     '''
     Generic builder for a tree view of select objects, with no
@@ -21,7 +23,7 @@ def Build_Object_Tree_View(
       - String, name to use for this tree in name displays, such as
         gui tabs or when nested under another tree later.
     * object_categories
-      - Strings, categories to look up in the live editor.
+      - Strings, categories of objects to look up in the live editor.
       - If multiple given, they will be split into branches.
     * flat
       - Bool, if True and multiple object_categories are present,
@@ -29,6 +31,10 @@ def Build_Object_Tree_View(
     * label_item
       - Name of an item in the objects which will provide the tree label.
       - Often 'name', though could be other terms.
+    * subcategory_func
+      - Optional function which will take the object and return 1 or more
+        strings to use as categories.
+      - These categories will be placed underneath the object_categories.
     '''
     object_tree_view = Edit_Tree_View(name, display_name)
 
@@ -41,18 +47,30 @@ def Build_Object_Tree_View(
 
         for object in objects_list:
             name = object.Get_Item(label_item).Get_Value('current')
-            if flat:
-                object_tree_view.Add_Object(name, object)
-            else:
-                object_tree_view.Add_Object(name, object, category)
+
+            # Get categorization, if any.
+            categories = []
+            if not flat:
+                categories.append(category)
+            if subcategory_func != None:
+                 subcats = subcategory_func(object)
+                 # If only one subcat was returned, list pack it,
+                 # to avoid a string getting every letter treated
+                 # as a subcat level.
+                 if not isinstance(subcats, (tuple, list)):
+                     subcats = [subcats]
+                 categories += subcats
+
+            # Apply the object and categories.
+            object_tree_view.Add_Object(name, object, *categories)
                 
     # Sort the tree in place when done.
     object_tree_view.Sort_Branches()
 
     # Apply default label filtering.
     object_tree_view.Apply_Filtered_Labels()
-
     return object_tree_view
+
 
 
 @Live_Editor_Tree_View_Builder('bullets')
@@ -61,27 +79,20 @@ def _Build_Bullet_Object_Tree_View():
     Constructs an Edit_Tree_View object for use in displaying
     bullet data.
     '''
-    # Set up a new table.
-    object_tree_view = Edit_Tree_View('bullets')
+    def Subcat_func(object):
+        'Set up sub categories.'
+        # Weapon class (separates missiles, bombs, bullets, etc.).
+        wclass = ('' if object.Get_Item('macro_class') == None 
+                else object.Get_Item('macro_class').Get_Value('current'))
+        return wclass
 
-    # Get all of the objects.
-    objects_list = Live_Editor.Get_Category_Objects('bullets')
-
-    # Organize by class, then by size.
-    for object in objects_list:
-        # Use the bullet_codename to label it.
-        name      = object.Get_Item('bullet_codename').Get_Value('current')
-        # No categorization for now.
-        object_tree_view.Add_Object(name, object)
-        
-    # Sort the tree in place when done.
-    object_tree_view.Sort_Branches()
-
-    # Apply default label filtering.
-    object_tree_view.Apply_Filtered_Labels()
-
-    return object_tree_view
-
+    return Build_Object_Tree_View(
+        name              = 'bullets',
+        display_name      = 'Bullets',
+        object_categories = ['bullets'],
+        label_item        = 'bullet_codename',
+        subcategory_func  = Subcat_func,    
+    )
 
 
 @Live_Editor_Tree_View_Builder('weapons')
@@ -90,35 +101,28 @@ def _Build_Weapon_Object_Tree_View():
     Constructs an Edit_Tree_View object for use in displaying
     weapon data.
     '''
-    # Set up a new table.
-    object_tree_view = Edit_Tree_View('weapons')
-
-    # Get all of the objects.
-    objects_list = Live_Editor.Get_Category_Objects('weapons')
-
-    # Organize by class, then by size.
-    for object in objects_list:
-        # Use the parsed name to label it.
-        name      = object.Get_Item('name')     .Get_Value('current')
+    def Subcat_func(object):
+        'Set up sub categories.'
+        # Weapon class (separates missiles, bombs, turrets, etc.).
         wclass     = ('' if object.Get_Item('macro_class') == None 
                     else object.Get_Item('macro_class').Get_Value('current'))
-
+        # Weapon size.
         # Size needs to be found in the tags.
         tags = object.Get_Item('connection_tags').Get_Value('current')
         for size in ['small','medium','large','spacesuit']:
             if size in tags:
                 break
             size = '?'
+        return wclass, size
 
-        object_tree_view.Add_Object(name, object, wclass, size)
-        
-    # Sort the tree in place when done.
-    object_tree_view.Sort_Branches()
+    return Build_Object_Tree_View(
+        name              = 'weapons',
+        display_name      = 'Weapons',
+        object_categories = ['weapons'],
+        label_item        = 'name',
+        subcategory_func  = Subcat_func,    
+    )
 
-    # Apply default label filtering.
-    object_tree_view.Apply_Filtered_Labels()
-
-    return object_tree_view
 
 
 @Live_Editor_Tree_View_Builder('wares')
@@ -127,37 +131,27 @@ def _Build_Ware_Object_Tree_View():
     Constructs an Edit_Tree_View object for use in displaying
     ware data.
     '''
-    # Set up a new table.
-    object_tree_view = Edit_Tree_View('wares')
-
-    # Get all of the objects.
-    ware_objects = Live_Editor.Get_Category_Objects('wares')
-
-    # Organize by group, then by transport type.
-    for ware_object in ware_objects:
-        # Use the parsed name to label it.
-        name      = ware_object.Get_Item('name')     .Get_Value('current')
-        group     = ('' if ware_object.Get_Item('group') == None 
-                    else ware_object.Get_Item('group').Get_Value('current'))
-        transport = ('' if ware_object.Get_Item('transport') == None 
-                    else ware_object.Get_Item('transport').Get_Value('current'))
-
+    def Subcat_func(object):
+        'Set up sub categories.'
+        group     = ('' if object.Get_Item('group') == None 
+                    else object.Get_Item('group').Get_Value('current'))
+        transport = ('' if object.Get_Item('transport') == None 
+                    else object.Get_Item('transport').Get_Value('current'))
         # Categories may have failed due to lack of a node, or an
         # empty attribute. Provide defaults to avoid empty labels.
         if not group:
             group = 'ungrouped'
         if not transport:
             transport = 'no transport'
+        return group, transport
 
-        object_tree_view.Add_Object(name, ware_object, group, transport)
-        
-    # Sort the tree in place when done.
-    object_tree_view.Sort_Branches()
-
-    # Apply default label filtering.
-    object_tree_view.Apply_Filtered_Labels()
-
-    return object_tree_view
+    return Build_Object_Tree_View(
+        name              = 'wares',
+        display_name      = 'Wares',
+        object_categories = ['wares'],
+        label_item        = 'name',
+        subcategory_func  = Subcat_func,    
+    )
 
 
 
@@ -167,34 +161,55 @@ def _Build_Shield_Object_Tree_View():
     Constructs an Edit_Tree_View object for use in displaying
     shield data.
     '''
-    # Set up a new tree.
-    object_tree_view = Edit_Tree_View('shields')
-
-    # Get all of the objects.
-    objects_list = Live_Editor.Get_Category_Objects('shields')
-
-    # Organize by class, then by size.
-    for object in objects_list:
-        # Use the parsed name to label it.
-        name      = object.Get_Item('name')     .Get_Value('current')
-
+    def Subcat_func(object):
+        'Set up sub categories.'
         # Size needs to be found in the tags.
         tags = object.Get_Item('connection_tags').Get_Value('current').split()
         for size in ['small','medium','large','extralarge']:
             if size in tags:
                 break
             size = '?'
+        return size
 
-        object_tree_view.Add_Object(name, object, size)
-        
-    # Sort the tree in place when done.
-    object_tree_view.Sort_Branches()
+    return Build_Object_Tree_View(
+        name              = 'shields',
+        display_name      = 'Shields',
+        object_categories = ['shields'],
+        label_item        = 'name',
+        subcategory_func  = Subcat_func,    
+    )
 
-    # Apply default label filtering.
-    object_tree_view.Apply_Filtered_Labels()
+# TODO:
+# engines (thrusters)
+# storage
 
-    return object_tree_view
+@Live_Editor_Tree_View_Builder('engines')
+def _Build_Engine_Object_Tree_View():
+    '''
+    Constructs an Edit_Tree_View object for use in displaying
+    engine data.
+    '''
+    def Subcat_func(object):
+        'Set up sub categories.'
+        # Size needs to be found in the tags.
+        tags = object.Get_Item('connection_tags').Get_Value('current').split()
+        for size in ['small','medium','large','extralarge','spacesuit']:
+            if size in tags:
+                break
+            size = 'unsized'
+        for type in ['engine','thruster']:
+            if type in tags:
+                break
+            type = '?'
+        return type, size
 
+    return Build_Object_Tree_View(
+        name              = 'engines',
+        display_name      = 'Engines',
+        object_categories = ['engines'],
+        label_item        = 'name',
+        subcategory_func  = Subcat_func,    
+    )
 
 
 @Live_Editor_Tree_View_Builder('components')
@@ -206,12 +221,14 @@ def _Build_Components_Object_Tree_View():
     # Set up a new tree.
     object_tree_view = Edit_Tree_View('components', 'Components')
 
-    # Get the shields tree, with some internal sorting.
+    # Collect from existing trees.
     object_tree_view.Add_Tree(
         Live_Editor.Get_Tree_View('shields'))
+    object_tree_view.Add_Tree(
+        Live_Editor.Get_Tree_View('engines'))
 
     # Generic other components as they get added.
-    for category in ['scanners','dockingbays','engines','storage']:
+    for category in ['scanners','dockingbays','storage']:
         object_tree_view.Add_Tree(
             Build_Object_Tree_View(
                 name = category,

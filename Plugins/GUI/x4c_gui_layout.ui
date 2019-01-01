@@ -18,6 +18,18 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_3">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
     <item row="0" column="0">
      <widget class="QTabWidget" name="widget_tab_container">
       <property name="sizePolicy">
@@ -34,12 +46,6 @@
       </property>
       <property name="currentIndex">
        <number>-1</number>
-      </property>
-      <property name="tabsClosable">
-       <bool>true</bool>
-      </property>
-      <property name="movable">
-       <bool>true</bool>
       </property>
      </widget>
     </item>
@@ -133,6 +139,18 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
      <item>
       <widget class="QTextEdit" name="widget_output">
        <property name="sizePolicy">

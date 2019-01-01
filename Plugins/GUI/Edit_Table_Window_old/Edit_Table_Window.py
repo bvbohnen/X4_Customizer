@@ -66,10 +66,7 @@ class Edit_Table_Window(Tab_Page_Widget, generated_class):
         # Trigger button for loading the table.
         self.widget_Table_Update.clicked.connect(self.Action_Make_Table_Group)
         
-        # Force the initial splitter position, because qt designer is
-        #  dumb as a rock about splitters.
-        # Give extra space to the right side, since it has 5 columns.
-        # TODO: look into this; it still splits 1:1.
+        # Force the initial splitter position.
         self.hsplitter.setSizes([1,4])
 
         # Call delayed init on the item info viewer, since it
