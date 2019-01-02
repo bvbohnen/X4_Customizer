@@ -85,7 +85,7 @@ class Edit_View_Window(Tab_Page_Widget, generated_class):
         # width, but internally it upsizes these based on the original
         # box min sizes (apparently), so just set the sizes to something
         # huge to ensure the ratios go through.
-        self.hsplitter.setSizes([1000,3000])
+        self.hsplitter.setSizes([1000,2000])
         
         self.Init_Checkboxes()
         return
@@ -186,6 +186,7 @@ class Edit_View_Window(Tab_Page_Widget, generated_class):
         Prepare this window for closing, either at shutdown or
         on tab closure.
         '''
+        super().Close()
         # Since models across tabs are sharing Edit_Items, and
         # hence Q_Item_Groups, and those recycle QStandardItems,
         # each model should have all of its items detached before

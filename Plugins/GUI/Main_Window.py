@@ -372,7 +372,10 @@ class GUI_Main_Window(qt_base_class, generated_class):
         self.show()
 
         # Kick off a file system refresh.
-        self.Refresh_File_System()
+        # Skip this when not using threads, since it extends gui startup
+        # by too much.
+        if not Settings.disable_threading:
+            self.Refresh_File_System()
 
         # Flag startup as completed.
         # This will allow later created tabs to refresh themselves

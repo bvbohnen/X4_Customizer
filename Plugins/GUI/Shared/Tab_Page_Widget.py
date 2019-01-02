@@ -15,12 +15,17 @@ class Tab_Page_Widget(QtWidgets.QWidget):
     * thread_request_active
       - Bool, True while this widget has a work thread request pending.
       - New requests will be ignored while this is True.
+    * thread_request
+      - The Work_Request object created by the thread handler when
+        a request was made.
+      - Only filled while a request is active.
     '''
     def __init__(self, parent, window):
         super().__init__(parent)
 
         self.window = window
         self.thread_request_active = False
+        self.thread_request = None
         
         # Call the generated setup function, inherited from the qt form.
         # This will fill in the various widgets from designer.
@@ -62,6 +67,16 @@ class Tab_Page_Widget(QtWidgets.QWidget):
         return
 
 
+    def Unqueue_Thread(self):
+        '''
+        If a thread is currently queued, remove it from the queue.
+        This doesn't stop a running thread.
+        '''
+        if self.thread_request_active:
+            self.window.worker_thread.Unqueue_Thread(self.thread_request)
+        return
+
+
     def Queue_Thread(
             self,
             work_function,
@@ -92,7 +107,7 @@ class Tab_Page_Widget(QtWidgets.QWidget):
             return
 
         self.thread_request_active = True
-        self.window.worker_thread.Queue_Thread(
+        self.thread_request = self.window.worker_thread.Queue_Thread(
             # Give the work_function and *args as positional args,
             # to match up with the Queue_Thread signature.
             work_function,
@@ -185,6 +200,8 @@ class Tab_Page_Widget(QtWidgets.QWidget):
         Returns True on success, False to cancel the close.
         By default, this calls Save.
         '''
+        # Stop any thread requests.
+        self.Unqueue_Thread()
         # Save any information.
         self.Save()
         return True

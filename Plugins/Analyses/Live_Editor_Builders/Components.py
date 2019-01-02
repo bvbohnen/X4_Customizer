@@ -82,8 +82,11 @@ dockingbay_item_macros = [
 
 @Live_Editor_Object_Builder('storage')
 def _Build_Storage_Objects():
-    File_System.Load_Files('assets/props/StorageModules/*.xml')
-    game_files = File_System.Get_Asset_Files_By_Class('macros','storage')
+    # These are a bit scattered, some in the units folder and
+    # some in storagemodules. Use a name pattern match for this.
+    game_files = File_System.Get_All_Indexed_Files('macros','storage_*')
+    #File_System.Load_Files('assets/props/StorageModules/*.xml')
+    #game_files = File_System.Get_Asset_Files_By_Class('macros','storage')
     return Create_Objects_From_Asset_Files(game_files, storage_item_macros)
 
 

@@ -112,7 +112,11 @@ class Edit_Table:
             # Collect lists of items from each object.
             for object in self.objects_dict.values():
                 # Grab the items for this version.
-                items = object.Get_Display_Version_Items_Dict(version = version)[version]
+                items = object.Get_Display_Version_Items_Dict(
+                    version = version,
+                    # The descriptions can be long, so skip them.
+                    skipped_item_names = ['description']
+                    )[version]
                 # Add to the table.
                 table.append(items)
                 

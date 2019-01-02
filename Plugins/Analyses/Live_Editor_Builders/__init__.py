@@ -13,6 +13,7 @@ __all__ = []
 
 # Do imports of all modules so they can register their build functions.
 from . import Components
+from . import Ships
 from . import Wares
 from . import Weapons
 from . import Views

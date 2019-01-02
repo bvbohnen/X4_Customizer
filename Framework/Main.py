@@ -42,9 +42,7 @@ def Run(*args):
     which specifies file paths and the transforms to run. Some other
     command line args supported.  Excess args will be placed in
     sys.args for called script to argparse if desired.
-    '''
-    print(args)
-    
+    '''    
     # Rename the settings for convenience.
     Settings = Framework.Settings
     

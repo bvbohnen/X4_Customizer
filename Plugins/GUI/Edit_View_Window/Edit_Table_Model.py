@@ -73,6 +73,8 @@ class Edit_Table_Model(QStandardItemModel):
             # If this column checkbox is checked, unhide, else hide.
             self.qt_view.setColumnHidden(
                 index, not self.column_visibility_dict[column_name])
+        # Row widths changed, so resize.
+        self.Resize_Rows()
         return
     
     
@@ -150,8 +152,8 @@ class Edit_Table_Model(QStandardItemModel):
         # Resize to the right number of rows.
         # Could also clear(), but that would require regenerating rows
         # and also destroys the column headers.
-        # TODO: delink existing q_items from edit_items as needed;
-        #  this will probably be done during q_item setup.
+        # TODO: figure out why this resets the scroll bar to the top,
+        # or a way to preserve the bar.
         self.setRowCount(row_count)
         
         # Apply the labels.

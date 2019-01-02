@@ -355,6 +355,7 @@ class Script_Window(Tab_Page_Widget, generated_class):
         Prompt to save the open app.
         This will prevent closing if "cancel" was selected.
         '''
+        super().Close()
         if not self.Check_If_Save_Needed():
             return False
         return True

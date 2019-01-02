@@ -23,6 +23,26 @@ Display_Item_Macro = namedtuple('Display_Item_Macro',
      'read_only', 'hidden' ], 
      defaults = ['','', True, False])
 
+# To support xml items that appear in lists of duplicates,
+# grouping support will be available.
+# This will work as part of a list of macros, in the style:
+# [
+# Item_Group_Macro(stuff, ...)
+# Edit_Item_Macros(...)
+# ...
+# Item_Group_Macro(/stuff, ...)
+# ]
+# This forms a mini language, for which the processing function will
+# note the opening of a group, record its name and xpath prefixes,
+# and recursively deal with the innards (prefixing them as needed)
+# based on matching group xml nodes found.
+# The macro group is closed with the closing tag, '/stuff'.
+# Macro groups may be nested, hence the recursive implementation.
+Item_Group_Macro = namedtuple('Item_Group_Macro',
+    ['name', 'xpath', 'tag', 'display_name'],
+    # Last 3 terms are optional, not used in group closing tags.
+    defaults = ['','',''])
+
 
 class Edit_Object:
     '''
@@ -93,7 +113,7 @@ class Edit_Object:
         # Look up the object in the Live_Editor; it may be None
         # if there is a problem (eg. the user typed in an invalid name).
         ref_object = self.parent.Get_Object(ref_name)
-        # Record it.
+        # Record it. Note: if not found, this clears the prior ref.
         self.item_version_object_refs[item_name][version] = ref_object
         # Update dependencies of display items.
         self.Update_Item_Dependencies(version)
@@ -103,6 +123,7 @@ class Edit_Object:
     def Gen_All_References(self, version):
         '''
         Generates all referenced Edit_Objects, recursively.
+        Skips empty entries.
         '''
         for subdict in self.item_version_object_refs.values():
             ref_object = subdict[version]
@@ -190,7 +211,9 @@ class Edit_Object:
         Item may be pulled from this object or one of its references.
         If the item_name isn't found, returns None.
         If an item is found but has a blank value
-
+        
+        * item_name
+          - String, the item's name.
         * version
           - When the item is not found locally, this is the version of
             references to use in ref lookups.
@@ -211,6 +234,9 @@ class Edit_Object:
         # Check references.
         for subdict in self.item_version_object_refs.values():
             ref_object = subdict[version]
+            # Skip empty refs.
+            if ref_object == None:
+                continue
             # If it found an item, return it.
             item = ref_object.Get_Item(item_name, version)
             if item != None:
@@ -218,6 +244,25 @@ class Edit_Object:
 
         # Couldn't find a match.
         return None
+
+
+    def Get_Item_Value(self, item_name, version = 'current', default = ''):
+        '''
+        Finds an item of the given name for the given version, and
+        returns its version value. If the item is not found,
+        returns an empty string or the given default.
+        
+        * item_name
+          - String, the item's name.
+        * version
+          - Version of the item (used in reference lookup) and value.
+        * default
+          - Optional, return value if the item is missing.
+        '''
+        item = self.Get_Item(item_name, version)
+        if item == None:
+            return default
+        return item.Get_Value(version)
 
     
     def Make_Items(
@@ -235,7 +280,9 @@ class Edit_Object:
           - Macros are skipped if the xpath is not found, though they are
             still created if the attribute is not found.
         * macro_list
-          - List of Edit_Item_Macro and Display_Item_Macro objects.
+          - List of Edit_Item_Macro and Display_Item_Macro objects,
+            or pairs of Item_Group_Macro objects that will repeat over
+            the intermediate other macros.
         * xpath_replacements
           - Dict holding replacements for macro xpath placeholders.
           - May be full or partial replacements; care should be
@@ -246,14 +293,55 @@ class Edit_Object:
           - Also useful for files which hold multiple objects, to
             be able to insert a per-object xpath prefix.
         '''
-        virtual_path = game_file.virtual_path
-        xml_root = game_file.Get_Root_Readonly()
+        # Bounce to the recursive function, unpacking the initial
+        # root node.
+        self._Make_Items_Recursive(
+            game_file = game_file,
+            xml_node = game_file.Get_Root_Readonly(),
+            # Copy the list, so the function can pop items off it privately.
+            macro_list = list(macro_list),
+            xpath_replacements = xpath_replacements )
+        return
+
     
-        for macro in macro_list:
+    def _Make_Items_Recursive(
+            self,
+            game_file,
+            xml_node,
+            macro_list,
+            name_prefix         = '',
+            xpath_prefix        = '',
+            display_name_prefix = '',
+            xpath_replacements  = None
+        ):
+        '''
+        Recursive item builder. This will call itself when dealing
+        with item groups.
+
+        * game_file
+          - Game file macros are applied to.
+        * xml_node
+          - Base xml node to process macros xpaths against.
+        * macro_list
+          - Macros to process at this level.
+          - This should be a unique list that can be modified.
+        * xpath_prefix
+          - String, xpath prefix to apply to any nested item xpaths.
+        * name_prefix
+          - String, prefix to apply to any item names.
+        * display_name_prefix
+          - String, prefix to apply to any item display names.
+        * xpath_replacements
+          - Dict of xpath term replacements.
+        '''
+        # To deal with macro groups, this will pop off macros as they are
+        # consumed, where groups pop off all macros in their group
+        # at once.
+        while macro_list:
+            macro = macro_list.pop(0)
             
-            if isinstance(macro, Edit_Item_Macro):
-                
-                # Replace the xpath if needed.
+            # Replace the xpath if needed.
+            if hasattr(macro, 'xpath'):
                 xpath = macro.xpath
                 if xpath_replacements != None:
                     # Check for any partial replacement opportunities.
@@ -261,15 +349,83 @@ class Edit_Object:
                         if old in xpath:
                             xpath = xpath.replace(old, new)
                 
+                # Prefix the xpath for recording, though not
+                # for lookups at this node.
+                # In this case, a node lookup will begin like './stuff'
+                # or just '.', where a prefix is meant to replace the '.'.
+                if xpath_prefix:
+                    assert xpath.startswith('.')
+                    abs_xpath = xpath.replace('.',xpath_prefix,1)
+                else:
+                    abs_xpath = xpath
+
+            # Extend the name and display name.
+            name         = name_prefix + macro.name
+            display_name = display_name_prefix + macro.display_name
+
+
+            # Deal with the macros based on type.
+            if isinstance(macro, Item_Group_Macro):
+
+                # Collect the following macros up until the group closer,
+                # which is the same name prefixed with '/'.
+                # This loop pops one macro at a time, recording it if
+                # is not the closer, stopping the loop otherwise, such
+                # that the closer is consumed from the macro_list.
+                nested_macros = []
+                next_macro = macro_list.pop(0)
+                while next_macro.name != '/' + macro.name:
+                    nested_macros.append(next_macro)
+                    next_macro = macro_list.pop(0)
+                    
+                # Look up the xml node being expanded.
+                group_node = xml_node.find(xpath)
+                # If it wasn't found, skip this macro group entirely.
+                # Note: placeholders aren't added for groups, for now,
+                # unlike raw edit_items.
+                if group_node == None:
+                    continue
+
+                # Find the xml children with the tag being grouped.
+                child_nodes = group_node.findall(macro.tag)
+
+                for index, child_node in enumerate(child_nodes):
+                    # Pick an extention for item names, to uniquify
+                    # them based on index.
+                    extension = '_{}_'.format(index)
+
+                    # Tweak the xpath; this will be to the group node,
+                    # then to this child, with nexted macros being
+                    # relative to the child.
+                    # Note: xpath indices are 1-based, so offset by 1.
+                    child_xpath_prefix = '{}/{}[{}]'.format(abs_xpath, macro.tag, index+1)
+
+                    self._Make_Items_Recursive(
+                        game_file           = game_file,
+                        xml_node            = child_node,
+                        # Give a copy of the macros to each child, for
+                        # them to consume internally.
+                        macro_list          = list(nested_macros),
+                        xpath_prefix        = child_xpath_prefix,
+                        name_prefix         = name + extension,
+                        display_name_prefix = display_name + extension,
+                        )
+            
+            elif isinstance(macro, Edit_Item_Macro):
+                
                 # Use a placeholder if the node is not found; there is
                 #  currently no support for adding a node like there is for
                 #  creating an attribute.
-                node = xml_root.find(xpath)
+                # TODO: consider how to deal with this if the xpath is
+                #  valid for only one version of the filep; perhaps an
+                #  Edit_Item should always be created, and it will just
+                #  deal with missing nodes internally.
+                node = xml_node.find(xpath)
                 if node == None:
                     self.Add_Item( Placeholder_Item(
                         parent       = self,
-                        name         = macro.name,
-                        display_name = macro.display_name,
+                        name         = name,
+                        display_name = display_name,
                         description  = macro.description,
                         hidden       = macro.hidden,
                         ))
@@ -278,11 +434,11 @@ class Edit_Object:
                     self.Add_Item( Edit_Item(
                         parent       = self,
                         game_file    = game_file,
-                        virtual_path = virtual_path,
-                        name         = macro.name,
-                        display_name = macro.display_name,
+                        virtual_path = game_file.virtual_path,
+                        name         = name,
+                        display_name = display_name,
                         description  = macro.description,
-                        xpath        = xpath,
+                        xpath        = abs_xpath,
                         attribute    = macro.attribute,
                         read_only    = macro.read_only,
                         is_reference = macro.is_reference,
@@ -296,33 +452,38 @@ class Edit_Object:
                 #  through a reference.
                 dependency_names = [
                     x for x in inspect.signature(macro.display_function).parameters]
-
-                
+                                
                 # Create the item.
                 self.Add_Item( Display_Item(
                     parent           = self,
-                    name             = macro.name,
-                    display_name     = macro.display_name,
+                    name             = name,
+                    display_name     = display_name,
                     description      = macro.description,
                     dependency_names = dependency_names,
                     display_function = macro.display_function,
                     read_only        = macro.read_only,
                     hidden           = macro.hidden,
                     ))
+
         return
 
-    
+
     def Get_Display_Version_Items_Dict(
             self, 
             skipped_item_names = None,
             include_refs = True,
-            version = None
+            version = None,
+            include_ref_separators = True,
         ):
         '''
         Returns a dict keyed by version name and holding lists of
         items, taken from here or first level references.
         Lists may include Placeholder_Items or None entries, though
         the same spot in each list will always have at least one item.
+        
+        If a row has Placeholder_Items with is_reference==True, they
+        were added to put spacing before a reference section, with
+        a label indicating which field they are expanding on.
 
         Lists will be in sync, such that every item from the same
         position in the lists will have the same item name and
@@ -336,6 +497,9 @@ class Edit_Object:
         * version
           - Optional string, the version to include in the response.
           - When not given, all versions are included.
+        * include_ref_separators
+          - If the extra row of placeholders should be included before a
+            reference section.
         '''
         version_items = defaultdict(list)
 
@@ -361,18 +525,25 @@ class Edit_Object:
                     continue
                 version_items[version].append(item)
 
-        # Loop over references, by item name.
-        for item_name, subdict in self.item_version_object_refs.items():
-            # Different versions may have refs to different objects,
-            # though they should all be of the same type and with
-            # the same item names.  Eg. switching from bullet to
-            # missile still will pull from the generic bullet
-            # names.
+        # Loop over references, by item name, alphabetical.
+        # TODO: consider inserting these where their original field was placed.
+        for item_name, subdict in sorted(self.item_version_object_refs.items()):
+
+            # TODO: pick a nice display name label.
+            padding = Placeholder_Item(display_name = '', is_separator = True)
+
+            # Different versions may have refs to different objects, though
+            # they should all be of the same type and with the same item
+            # names.  Eg. switching from bullet to missile still will pull
+            # from the generic bullet names.
             for version in version_list:
                 ref_object = subdict[version]
                 # Skip missing refs.
                 if ref_object == None:
                     continue
+
+                # Add the padding item.
+                version_items[version].append(padding)
                 
                 # Check each of its items.
                 for item in ref_object.Get_Items(allow_placeholders = True):

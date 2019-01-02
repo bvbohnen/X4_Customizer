@@ -181,8 +181,11 @@ class Live_Editor_class:
         was added from outside the expected builder function.
         '''
         # Verify there is no name collision in any category.
-        assert all(edit_object.name not in x 
-                   for x in self.category_objects_dict.values())
+        if not all(edit_object.name not in x 
+                   for x in self.category_objects_dict.values()):
+            raise AssertionError(('Object name "{}" is already in use')
+                                 .format(edit_object.name))
+
         # Record to the given category.
         self.category_objects_dict[category][edit_object.name] = edit_object
 

@@ -22,19 +22,34 @@ def New_Game_File(binary, **kwargs):
     All inputs should be given as keyword args.
     '''
     virtual_path = kwargs['virtual_path']
+
     # Check for xml files.
     if virtual_path.endswith('.xml'):
+
+        # Default generic xml.
+        class_type = XML_File
+
         # Check for special file types.
         if virtual_path.startswith('t/'):
-            return XML_Text_File(binary = binary, **kwargs)
+            class_type = XML_Text_File
+
         elif virtual_path == 'libraries/wares.xml':
-            return XML_Wares_File(binary = binary, **kwargs)
-        else:
-            # Default generic xml.
-            return XML_File(binary = binary, **kwargs)
+            class_type = XML_Wares_File
+
+        # Macros and components are in index/, but mousecursors is in
+        # libraries and doesn't have full paths.
+        # TODO: maybe drop support for mousecursors.
+        elif (virtual_path.startswith('index/') 
+        or virtual_path == 'libraries/mousecursors.xml'):
+            class_type = XML_Index_File
+
     else:
         # Generic binary file.
-        return Misc_File(binary = binary, **kwargs)
+        class_type = Misc_File
+
+    # Build and return the game file.
+    return class_type(binary = binary, **kwargs)
+
 
 
 class Game_File:
@@ -423,14 +438,15 @@ class XML_Text_File(XML_File):
     '''
     Note: for writing out wares to html, 16% of the long runtime
     was spent on xpath lookups of ware names, hence the effort
-    to speed this process up.
+    to speed this process up. (This may have been influenced
+    by using a .// style xpath, since reduced to ./ style.)
     '''
     # Static value for how many requests are allowed before a refresh.
     # One request may count multiple times if there are recursive
     # text lookups, so don't make this too sensitive.
     # Note: number is an intuitive guess, and wasn't tested for optimality.
     # Note: setting 0 here will disable the refreshes.
-    requests_until_refresh_limit = 30
+    requests_until_refresh_limit = 20
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -445,7 +461,11 @@ class XML_Text_File(XML_File):
         This will need a rerun when the xml gets modified and a new
         Read is requested, if it is to be beneficial.
         '''
-        self.page_text_dict.clear()
+        # Stop the counter.
+        self.requests_until_refresh = 0
+        # Skip early if the dict is already filled in.
+        if self.page_text_dict:
+            return
         for page_node in self.Get_Root_Readonly().getchildren():
             if page_node.tag != 'page':
                 continue
@@ -544,7 +564,7 @@ class XML_Text_File(XML_File):
                         except KeyError:
                             return
                     else:
-                        node = root.find('.//page[@id="{}"]/t[@id="{}"]'.format(page, id))
+                        node = root.find('./page[@id="{}"]/t[@id="{}"]'.format(page, id))
                         if node == None:
                             return
                         replacement_text = node.text
@@ -564,6 +584,104 @@ class XML_Text_File(XML_File):
         return text
 
     
+class XML_Index_File(XML_File):
+    '''
+    XML file holding a an index (effectively dict) of name:path pairs.
+    Expected to be used for macros, components, and mousecursors.
+    This will append a '.xml' extension to the looked up paths, since
+    it is missing from the x4 source file paths.
+
+    Attributes:
+    * name_path_dict
+      - Dict, keyed by entry name, with the virtual_path to an
+        xml source file.
+    * requests_until_refresh
+      - Int, how many text lookup requests may occurred since the
+        last page_text_dict reset (due to modification) before
+        an automatic refresh is triggerred.
+      - Used to prevent refreshing too often when fine grain
+        modifications occur.
+    '''
+    requests_until_refresh_limit = 5
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.name_path_dict = {}
+        self.requests_until_refresh = self.requests_until_refresh_limit
+        return
+
+    def Refresh_Cache(self):
+        '''
+        Reads the xml and sets up the name_path_dict.
+        This will need a rerun when the xml gets modified and a new
+        Get is requested, if it is to be beneficial.
+        '''
+        # Stop the counter.
+        self.requests_until_refresh = 0
+        # Skip early if the dict is already filled in.
+        if self.name_path_dict:
+            return
+        # Root is an <index> node, children are <entry> nodes.
+        for entry_node in self.Get_Root_Readonly().getchildren():
+            if entry_node.tag != 'entry':
+                continue
+            self.name_path_dict[entry_node.get('name')] = entry_node.get('value') + '.xml'
+        return
+
+
+    def Update_Root(self, *args, **kwargs):
+        '''
+        Clears the page_text_dict when root is updated.
+        '''
+        super().Update_Root(*args, **kwargs)
+        self.name_path_dict.clear()
+        # Set the refresh countdown.
+        self.requests_until_refresh = self.requests_until_refresh_limit
+        return
+
+
+    def Find(self, name):
+        '''
+        Returns the indexed path matching the given name, or None
+        if the name is not found.
+        '''
+        # Maybe do a refresh of the name_path_dict.
+        if self.requests_until_refresh > 0:
+            self.requests_until_refresh -= 1
+            if self.requests_until_refresh <= 0:
+                self.Refresh_Cache()
+
+        # Do a normal or xpath lookup, depending on cache status.
+        if self.name_path_dict:
+            return self.name_path_dict.get(name, None)
+        else:
+            root = self.Get_Root_Readonly()
+            node = root.find('./entry[@name="{}"]'.format(name))
+            if node != None:
+                value = node.get('value', None)
+                if value != None:
+                    return value + '.xml'
+        return None
+
+
+    def Findall(self, pattern):
+        '''
+        Find and returns a set of all values matching the given key
+        pattern, with wildcard support.
+        Eg. Findall('ship_*') is expected to find every ship file path.
+        Duplicates are ignored.
+        '''
+        # Use the cached dict for this; ensure it is filled in.
+        self.Refresh_Cache()
+
+        # Seach the keys.
+        ret_list = set()
+        for key, value in self.name_path_dict.items():
+            if fnmatch(key, pattern):
+                ret_list.add(value)
+        return ret_list
+
+
 class XML_Wares_File(XML_File):
     '''
     The libraries/wares.xml file. This has some functionality for
@@ -606,14 +724,14 @@ class XML_Wares_File(XML_File):
         The 'vanilla' and 'patched' versions will be filled once
         and never cleared.
         '''
+        # Stop the counter.
+        self.requests_until_refresh = 0
         for version in ['vanilla','patched','current']:
-            # Leave the non-current versions alone if they are
-            # already filled in.
-            if version != 'current' and self.version_ware_node_dict[version]:
+            # Skip if already filled in.
+            if self.version_ware_node_dict[version]:
                 continue
             # Convenience renaming.
             this_dict = self.version_ware_node_dict[version]
-            this_dict.clear()
             # Loop over the wares.
             for ware_node in self.Get_Root_Readonly(version).getchildren():
                 if ware_node.tag != 'ware':

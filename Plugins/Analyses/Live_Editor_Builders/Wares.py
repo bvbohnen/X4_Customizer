@@ -33,6 +33,8 @@ def _Build_Ware_Objects():
         
     start_time = time.time()
 
+    # TODO: maybe condition this on if Settings.disable_threading is
+    # set or not.
     if 1:
         '''
         Try out multiprocessing to speed this up.

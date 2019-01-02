@@ -157,6 +157,54 @@ class File_System_class:
             ret_list += self.asset_class_dict[tag][name]
         return ret_list
     
+    
+    def Get_Indexed_File(self, index, name):
+        '''
+        Returns a Game_File found on a path read from the given
+        index matching the given name. Loads the file if needed.
+
+        * index
+          - String, one of 'macros','components'.
+        * name
+          - Name to look up, without path or extension.
+        '''
+        # Bounce over to the pattern based lookup.
+        game_files = self.Get_All_Indexed_Files(index, name)
+        # Expect 0 or 1 files returned.
+        if game_files:
+            return game_files[0]
+        return None
+
+
+    def Get_All_Indexed_Files(self, index, pattern):
+        '''
+        Returns a list of Game_Files found on paths in the given
+        index matching the given pattern.
+        Loads the files as needed. Broken links are skipped.
+        Duplicate links are ignored.
+
+        * index
+          - String, one of 'macros','components'.
+        * pattern
+          - Name pattern to look up, with wildcards, without path
+            or extension.
+        '''
+        assert index in ['macros','components']#,'mousecursors']
+        # Start by loading the libraries/macros.xml index.
+        index_xml = self.Load_File('index/{}.xml'.format(index))
+
+        # Use its convenient Get function.
+        virtual_paths = index_xml.Findall(pattern)
+        ret_list = []
+        for path in virtual_paths:
+            # If there is no file of this name, or it is empty,
+            # skip it; there seem to be broken links in the
+            # index files.
+            game_file = self.Load_File(path, error_if_not_found = False)
+            if game_file != None:
+                ret_list.append(game_file)
+        return ret_list
+
 
     def Load_File(
             self,

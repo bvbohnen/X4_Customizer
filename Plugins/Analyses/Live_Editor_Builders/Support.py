@@ -17,8 +17,8 @@ def Get_Macro_Component_File(macro_file):
     TODO: maybe support an attempt at autoloading one directory up.
     '''
     root = macro_file.Get_Root_Readonly()
-    component_name = root.find('.//component').get('ref')
-    component_file = File_System.Get_Asset_File(component_name)
+    component_name = root.find('./macro/component').get('ref')
+    component_file = File_System.Get_Indexed_File('components', component_name)
     return component_file
 
 
@@ -27,6 +27,7 @@ def Get_Component_Connection_Xpath(game_file):
     Returns an xpath to the "connection" node holding the main component
     "tags" attribute; it will be the one with a "component" term.
     If none found, returns None.
+    TODO: return multiple component matches, if found.
     '''
     # Note: this connection doesn't have a standard name, but can
     # be identified by a "component" term in the tags.
@@ -108,7 +109,9 @@ def Update_Name(
     else:
         t_file = File_System.Load_File('t/0001-L044.xml')
         # Let the t-file Read handle the lookup.
-        return t_file.Read(t_name_entry)
+        name = t_file.Read(t_name_entry)
+        # TODO: maybe replace with something when the name is blank.
+        return name
     
 def Update_Description(
         t_descrip_entry,

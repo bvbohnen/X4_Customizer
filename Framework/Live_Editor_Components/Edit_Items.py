@@ -58,8 +58,8 @@ class _Base_Item:
     '''
     def __init__(
             self, 
-            parent,
-            name, 
+            parent = None,
+            name = None, 
             display_name = '',
             description = '',
             read_only = False,
@@ -134,10 +134,16 @@ class Placeholder_Item(_Base_Item):
     Special placeholder version of an item, for capturing the
     display information when there is no value to show.
     Used to make it easier to sync displays across multiple objects.
+    
+    New Attributes:
+    * is_separator
+      - Bool, if True then this placeholder exists simply to add
+        a separator to displayed item lists.
     '''
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, is_separator = False, **kwargs):
         super().__init__(*args, **kwargs)
         self.read_only = True
+        self.is_separator = is_separator
 
     # Some dummy functions, so that users don't always have
     # to check for this class and skip over it.

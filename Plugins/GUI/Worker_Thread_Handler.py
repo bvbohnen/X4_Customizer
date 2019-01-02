@@ -80,6 +80,7 @@ class Worker_Thread_Handler(QtCore.QThread):
         ):
         '''
         Queue up a function to be run when the thread is next free.
+        Returns the Work_Request object.
 
         * work_function
           - The function to call in the thread, such as a plugin or
@@ -115,6 +116,19 @@ class Worker_Thread_Handler(QtCore.QThread):
             self.Start_Work_Request(request)
         else:
             self.request_queue.append(request)
+        return request
+
+
+    def Unqueue_Thread(self, request):
+        '''
+        Remove the given Work_Request from the queue, if present.
+        If the request is running, it will continue until finishing
+        but will not have its callback function called.
+        '''
+        if request in self.request_queue:
+            self.request_queue.remove(request)
+        if request is self.current_request:
+            self.current_request = None
         return
 
 

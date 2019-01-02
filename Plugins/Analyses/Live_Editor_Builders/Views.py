@@ -82,8 +82,7 @@ def _Build_Bullet_Object_Tree_View():
     def Subcat_func(object):
         'Set up sub categories.'
         # Weapon class (separates missiles, bombs, bullets, etc.).
-        wclass = ('' if object.Get_Item('macro_class') == None 
-                else object.Get_Item('macro_class').Get_Value('current'))
+        wclass = object.Get_Item_Value('macro_class')
         return wclass
 
     return Build_Object_Tree_View(
@@ -104,11 +103,10 @@ def _Build_Weapon_Object_Tree_View():
     def Subcat_func(object):
         'Set up sub categories.'
         # Weapon class (separates missiles, bombs, turrets, etc.).
-        wclass     = ('' if object.Get_Item('macro_class') == None 
-                    else object.Get_Item('macro_class').Get_Value('current'))
+        wclass = object.Get_Item_Value('macro_class')
         # Weapon size.
         # Size needs to be found in the tags.
-        tags = object.Get_Item('connection_tags').Get_Value('current')
+        tags = object.Get_Item_Value('connection_tags').split()
         for size in ['small','medium','large','spacesuit']:
             if size in tags:
                 break
@@ -125,6 +123,31 @@ def _Build_Weapon_Object_Tree_View():
 
 
 
+@Live_Editor_Tree_View_Builder('ships')
+def _Build_Ship_Object_Tree_View():
+    '''
+    Constructs an Edit_Tree_View object for use in displaying
+    ship data.
+    '''
+    def Subcat_func(object):
+        'Set up sub categories.'
+        # Ship class captures size.
+        sclass = object.Get_Item_Value('macro_class')
+        # Purpose is fight/trade
+        purpose = object.Get_Item_Value('purpose_primary', default = 'purposeless')
+        # Type is bomber/etc.
+        ship_type = object.Get_Item_Value('ship_type', default = 'typeless')
+        return purpose, sclass, ship_type
+
+    return Build_Object_Tree_View(
+        name              = 'ships',
+        display_name      = 'Ships',
+        object_categories = ['ships'],
+        label_item        = 'name',
+        subcategory_func  = Subcat_func,    
+    )
+
+
 @Live_Editor_Tree_View_Builder('wares')
 def _Build_Ware_Object_Tree_View():
     '''
@@ -133,16 +156,8 @@ def _Build_Ware_Object_Tree_View():
     '''
     def Subcat_func(object):
         'Set up sub categories.'
-        group     = ('' if object.Get_Item('group') == None 
-                    else object.Get_Item('group').Get_Value('current'))
-        transport = ('' if object.Get_Item('transport') == None 
-                    else object.Get_Item('transport').Get_Value('current'))
-        # Categories may have failed due to lack of a node, or an
-        # empty attribute. Provide defaults to avoid empty labels.
-        if not group:
-            group = 'ungrouped'
-        if not transport:
-            transport = 'no transport'
+        group     = object.Get_Item_Value('group', default = 'ungrouped')
+        transport = object.Get_Item_Value('transport', default = 'no transport')
         return group, transport
 
     return Build_Object_Tree_View(
@@ -164,7 +179,7 @@ def _Build_Shield_Object_Tree_View():
     def Subcat_func(object):
         'Set up sub categories.'
         # Size needs to be found in the tags.
-        tags = object.Get_Item('connection_tags').Get_Value('current').split()
+        tags = object.Get_Item_Value('connection_tags').split()
         for size in ['small','medium','large','extralarge']:
             if size in tags:
                 break
@@ -192,7 +207,7 @@ def _Build_Engine_Object_Tree_View():
     def Subcat_func(object):
         'Set up sub categories.'
         # Size needs to be found in the tags.
-        tags = object.Get_Item('connection_tags').Get_Value('current').split()
+        tags = object.Get_Item_Value('connection_tags').split()
         for size in ['small','medium','large','extralarge','spacesuit']:
             if size in tags:
                 break
