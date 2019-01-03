@@ -14,6 +14,18 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,0,0,0,0">
      <property name="sizeConstraint">
@@ -90,8 +102,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>112</width>
-         <height>195</height>
+         <width>114</width>
+         <height>204</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout_5">

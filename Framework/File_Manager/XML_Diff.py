@@ -171,8 +171,7 @@ def Print(xml_node, **kwargs):
 def Apply_Patch(original_node, patch_node, error_prefix = None):
     '''
     Apply a diff patch to the target xml node.
-    Returns the modified node, possibly a changed-in-place original_node
-    but maybe a complete replacement.
+    Returns the modified node, a changed-in-place original_node.
 
     If the patch_node is a 'diff', performs diff patching.
     Otherwise the patch_node must have the same tag as original_node,

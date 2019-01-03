@@ -2,6 +2,7 @@
 from pathlib import Path
 from PyQt5 import QtWidgets
 from Framework import Settings
+from ..Shared.Misc import Set_Icon
 
 class Widget_Settings(QtWidgets.QGroupBox):
     '''
@@ -149,16 +150,25 @@ class Widget_Settings(QtWidgets.QGroupBox):
                         group = QtWidgets.QGroupBox()
                         this_layout = QtWidgets.QHBoxLayout()
                         group.setLayout(this_layout)
-                        this_layout.addWidget(widget)
-                        button = QtWidgets.QPushButton('Browse')
+
+                        button = QtWidgets.QPushButton()
+                        # Give a nice icon.
+                        Set_Icon(button, 'SP_DirIcon')
+
+                        # Stick the icon on one side or the other.
+                        # Can go with left side, since icons are small,
+                        # though text would want to go on the right.
                         this_layout.addWidget(button)
-                        widget = group
+                        this_layout.addWidget(widget)
 
                         # Hook up the button activation signal, which
                         # will pass along the config field being changed.
                         button.clicked.connect(
                             lambda clicked, 
                             field = field : self.Open_File_Dialog(field) )
+                        
+                        # Rename the top widget for adding to the row.
+                        widget = group
 
                 # Set up a new layout row.
                 layout.addRow(field, widget)

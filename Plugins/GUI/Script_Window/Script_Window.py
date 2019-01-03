@@ -315,8 +315,7 @@ class Script_Window(Tab_Page_Widget, generated_class):
         # Tell any live edit tables to refresh their current values,
         # since the script may have changed them.
         Live_Editor.Reset_Current_Item_Values()
-        for widget in self.window.Get_Tab_Widgets('Edit_View_Window'):
-            widget.Soft_Refresh()
+        self.window.Soft_Refresh()
         
         return
 

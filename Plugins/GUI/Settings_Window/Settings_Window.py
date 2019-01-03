@@ -36,6 +36,9 @@ class Settings_Window(Tab_Page_Widget, generated_class):
                 
         # Set up initial documentation for settings.
         self.widget_settings_doc.setPlainText(Settings.__doc__)
+        
+        # Attach the main window to the settings widget.
+        self.widget_settings.window = window
                 
         # Init the splitter to 1:1.
         self.hsplitter.setSizes([1000,1000])

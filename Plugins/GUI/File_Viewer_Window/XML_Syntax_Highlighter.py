@@ -3,46 +3,10 @@
 from PyQt5.QtGui import QSyntaxHighlighter, QColor, QTextCharFormat, QTextCursor
 from PyQt5.QtCore import QRegExp
 
-import Plugins
-
-def Get_Plugin_Names():
-    'Return a list with all plugin names.'
-    name_list = []
-    for item_name in dir(Plugins):
-        item = getattr(Plugins, item_name)
-
-        # Can check for the _plugin_type attribute, attached
-        #  by the decorator.
-        if not getattr(item, '_plugin_type', None):
-            continue
-        name_list.append(item_name)
-    return name_list
-
-
-'''
-Apparently, after some source code poking, QSyntaxHighlighter takes 
-the QTextDocument as an input during init, will attach its contentsChange
-signal to a local _q_reformatBlocks function, which in turn gathers up a
-block of text and calls highlightBlock automatically.
-'''
-'''
-The general matching approach will differ from examples seen (and differ
-from some python highlighting found online) to be more robust.
-In particular, regex matching rules will be grouped together into
-a macro-expression to be checked all at once, such that once a high
-priority rule gets matched, its highlighting will take prededence over
-all later rules over the match range.
-This avoids a problem in the examples where, eg., keywords would get
-highlighted inside comments.
-'''
-class Script_Syntax_Highlighter(QSyntaxHighlighter):
+class XML_Syntax_Highlighter(QSyntaxHighlighter):
     '''
-    Apply syntax highlighting to python script files.
-    This will be mostly python style highlights, with maybe some
-    tweaks for plugin names.
-    Note: this will connect to the document's contentsChange signal;
-    any other functions connected to this signal should be connected
-    before the highlighter is attached if they might edit the text.
+    Apply syntax highlighting to xml files.
+    TODO: also color lines with a difference between versions.
 
     Attributes:
     * enabled
@@ -61,29 +25,20 @@ class Script_Syntax_Highlighter(QSyntaxHighlighter):
       - When a block quote is active, the current block will
         be assigned the index for the corresponding quote type
         that opened it.
+      - May be extended to cover multiline quotes.
     '''
     # Define some colors for terms.
     # Pick colors from https://www.december.com/html/spec/colorsvg.html
     type_color_dict = {
-        'keyword' : 'blue',
-        'comment' : 'darkGreen',
-        'string'  : 'crimson',
-        'plugin'  : 'blueviolet',
-        }
-
-    # Python keywords.
-    keywords = (
-        'False'   ,  'class'    ,  'finally' ,  'is'       , 'return'
-        'None'    ,  'continue' ,  'for'     ,  'lambda'   , 'try'
-        'True'    ,  'def'      ,  'from'    ,  'nonlocal' , 'while'
-        'and'     ,  'del'      ,  'global'  ,  'not'      , 'with'
-        'as'      ,  'elif'     ,  'if'      ,  'or'       , 'yield'
-        'assert'  ,  'else'     ,  'import'  ,  'pass'     ,
-        'break'   ,  'except'   ,  'in'      ,  'raise'    ,
-        )
+        'keyword'   : 'blue',
+        'comment'   : 'darkGreen',
+        'string'    : 'purple',
+        'attribute' : 'crimson',
+        }    
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.block_quote_index_closer_dict = {}
         self.enabled = True
         
         # Set up the cursor, attached to the document.
@@ -92,40 +47,26 @@ class Script_Syntax_Highlighter(QSyntaxHighlighter):
         # Set up the various rules.
         rules = []
         
-        # Comment detection.
-        # Just a # until the end of the line.
-        # Note: match this first, before others.
-        rules.append((r'#[^\n]*', self.type_color_dict['comment']))
-                
+        # Comment detection, eg. <!-- and -->
 
-        # Strings.
-        # Start with triple quotes as highest priority.
         # Since highlighting is done a line at a time (newline separated),
         #  this will be a little tricky to carry state across lines, but
         #  can be done with previousBlockState and setCurrentBlockState.
         
-        # Triple quotes on a single line, optional 'r' prefix.
-        # Handling escapes is a headache, so ignore that for now;
-        # it will probably never come up.
-        for char in ["'",'"']:
-            rules.append((r'(?:\br)?{0}{0}{0}(?:.*){0}{0}{0}'
-                          .format(char), self.type_color_dict['string']))
+
+        # Open and close on a single line.
+        rules.append((r'<!--(?:.*)-->', self.type_color_dict['comment']))
             
         # Same, but proceeding until the end of the line.
         # These have some special handling to cross line boundaries
         # later. Note: newline could maybe be omitted, since the regex
         # runs one line at a time, but can keep it for safety.
-        for char in ["'",'"']:
-            rules.append((r'(?:\br)?{0}{0}{0}(?:[^\n]*)'
-                          .format(char), self.type_color_dict['string']))
+        rules.append((r'<!--(?:[^\n]*)', self.type_color_dict['comment']))
 
-        # Special closing rules: any character until the closing triple
-        # quote. These are specially handled, different than other rules.
+        # Special closing rule.
+        # This is specially handled, different than other rules.
         # Record the indices of these rules.
-        self.block_quote_index_closer_dict = {
-            len(rules) -2 : QRegExp(r"(?:.*)'''"),
-            len(rules) -1 : QRegExp(r'(?:.*)"""'),
-            }
+        self.block_quote_index_closer_dict[len(rules)-1] = QRegExp(r"(?:.*)-->")
 
         # Normal quoted strings, on a single line, possibly with nesting
         # that is backslashed.
@@ -149,15 +90,22 @@ class Script_Syntax_Highlighter(QSyntaxHighlighter):
             rules.append((r'(?:\br)?{0}(?:[^{0}\\]|\\.)*{0}'
                           .format(char), self.type_color_dict['string']))
             
+        # TODO: maybe line-crossing quotes.
+        # Similar to comments or the python multiline quotes, so mostly
+        # just skipped here for laziness.
 
-        # Keywords and plugins are straightforward.
-        for word in self.keywords:
-            # \b : matches blank space before/after a word.
-            rules.append((r'\b{}\b'.format(word), self.type_color_dict['keyword']))
-        for word in Get_Plugin_Names():
-            rules.append((r'\b{}\b'.format(word), self.type_color_dict['plugin']))
-
-
+        # Node tags.
+        # These are <tag> and </tag> and <tag/> and <tag ....>.
+        # Look for char strings, "\w+", around the carrot options;
+        # just copy out rules instead of making one complex one.
+        rules.append((r'<\w+>', self.type_color_dict['keyword']))
+        rules.append((r'<\w+/>', self.type_color_dict['keyword']))
+        rules.append((r'<\w+' , self.type_color_dict['keyword']))
+        rules.append((r'</\w+' , self.type_color_dict['keyword']))
+               
+        # Attribute tags.
+        # \s for space, \w+ for a word, followed by =.
+        rules.append((r'\s\w+=' , self.type_color_dict['attribute']))
 
         # Gather the regex patterns into a single macro pattern,
         # with capture groups for indexing final matches.
@@ -209,8 +157,7 @@ class Script_Syntax_Highlighter(QSyntaxHighlighter):
 
 
         # Start by detecting if a block quote was active.
-        # Block state will be 0 by default, or the index of the active
-        # quote type otherwise.
+        # Block state will be 0 by default, or 1 for an open quote.
         prior_state = self.previousBlockState()
         if prior_state in self.block_quote_index_closer_dict:
 

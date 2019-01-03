@@ -203,7 +203,8 @@ class XML_File(Game_File):
             self.original_root = xml_root
 
         # Init the patched version to the original.
-        self.patched_root = self.original_root
+        # Deepcopy this, since patching will edit it in place.
+        self.patched_root = deepcopy(self.original_root)
         self.modified_root = None
 
         # The root tag should never be changed by mods, so can
@@ -390,7 +391,7 @@ class XML_File(Game_File):
 
         # Diff patches have a series of add, remove, replace nodes.
         # Operated on the patched_root, leaving the original_root untouched.
-        modified_node = XML_Diff.Apply_Patch(
+        XML_Diff.Apply_Patch(
             original_node = self.patched_root, 
             patch_node    = other_xml_file.patched_root,
             # For any errors, print out the file name, the patch extension
@@ -400,13 +401,10 @@ class XML_File(Game_File):
                 self.virtual_path,
                 other_xml_file.extension_name )
             )
-                
-        # Record this as the new patched root.
-        self.patched_root = modified_node
 
-        # Record the extension holding the patch, as a source for
-        #  this file.
-        self.source_extension_names.extend(other_xml_file.source_extension_names)        
+        # Record the extension holding the patch, as a source for this file.
+        self.source_extension_names.extend(other_xml_file.source_extension_names)
+        
         # TODO: for extension dependencies, maybe also track which
         #  nodes were modified by the extension (so that if they are
         #  further modified by transforms then that extension can be

@@ -46,6 +46,15 @@ class Tab_Page_Widget(QtWidgets.QWidget):
         return
 
 
+    def Soft_Refresh(self):
+        '''
+        Perform a partial refresh after a script has run, to update
+        any 'current' views of game files.
+        Subclasses should overwrite this and fill it in.
+        '''
+        return
+
+
     def Reset_From_File_System(self):
         '''
         This will be called after a file system reset (or at the

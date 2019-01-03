@@ -235,7 +235,7 @@ def Run(*args):
             # Use the basename to get rid of any path, and prefix
             #  to ensure the name is unique (don't want to collide
             #  with other loaded modules).
-            'control_script_' + args.control_script.name.replace(' ','_'), 
+            'control_script_' + args.control_script.name.replace(' ','_'),
             # Just grab the name; it should be found on included paths.
             str(args.control_script)
             ).load_module()

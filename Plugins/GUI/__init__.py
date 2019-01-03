@@ -12,8 +12,8 @@ try:
     _pyqt_found = True
 except Exception:
     _pyqt_found = False
-
     
+
 def Start_GUI():
     '''
     Start up the GUI using PyQt and loading the gui.ui file.
@@ -22,21 +22,5 @@ def Start_GUI():
     if not _pyqt_found:
         print('PyQt5 not found; Gui is disabled.')
         return
-
-    from PyQt5 import QtWidgets
-    # Create a new Qt gui object.
-    qt_app = QtWidgets.QApplication([])
-
-    # Create the custom gui window itself, and set it to be shown.
-    # Presumably this will get attached automatically to the 
-    # QApplication object.
-    # To be able to changes styles, give this a link back to the app.
-    from . import Main_Window
-    window = Main_Window.GUI_Main_Window(qt_app)
-
-    # Launch the QApplication; this will halt execution until the gui exits.
-    return_value = qt_app.exec()
-
-    # There is no post-gui cleanup for now, so just return.
-    return return_value
-
+    from .Main_Window import Start_GUI
+    return Start_GUI()

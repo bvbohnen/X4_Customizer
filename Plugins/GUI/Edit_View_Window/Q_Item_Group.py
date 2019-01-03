@@ -3,7 +3,7 @@ from collections import defaultdict
 from PyQt5.QtGui import QStandardItem, QBrush
 from PyQt5 import QtCore, QtGui
 
-from Framework.Live_Editor_Components import Display_Item
+from Framework.Live_Editor_Components import Edit_Item, Display_Item, Placeholder_Item
 
 
 class Q_Item_Group:
@@ -79,6 +79,80 @@ class Q_Item_Group:
         return
 
 
+    # Color brushes as class attributes.
+    # Color names available:
+    #  https://www.december.com/html/spec/colorsvg.html
+    brush_back_standard      = QBrush(QtCore.Qt.SolidPattern)
+    brush_back_display_item  = QBrush(QtCore.Qt.SolidPattern)
+    brush_back_readonly      = QBrush(QtCore.Qt.SolidPattern)    
+    brush_back_separator     = QBrush(QtCore.Qt.SolidPattern)
+
+    brush_fore_standard      = QBrush(QtCore.Qt.SolidPattern)
+    brush_fore_modified      = QBrush(QtCore.Qt.SolidPattern)
+
+    brush_back_standard      .setColor(QtGui.QColor('white'))
+    brush_back_display_item  .setColor(QtGui.QColor('antiquewhite'))
+    brush_back_readonly      .setColor(QtGui.QColor(247, 247, 247))
+    brush_back_separator     .setColor(QtGui.QColor('lightblue'))
+    
+    brush_fore_standard      .setColor(QtGui.QColor('black'))
+    brush_fore_modified      .setColor(QtGui.QColor('crimson'))
+
+
+    def Get_Label_Color(self):
+        '''
+        Returns a tuple of QBrush objects, (foreground, background),
+        to apply to labelling items, to be used by the Edit_Table_Model.
+        '''
+        foreground_brush = self.brush_fore_standard
+        # TODO: maybe color based on the 'edited' version status.
+
+        # TODO: think of a good way to determine when labels are to
+        # referenced items (eg. not the primary object in the table
+        # display) and color appropriately. Perhaps by taking
+        # an 'is_ref' input argument, to use in color setup, and
+        # fed from the model.
+        
+        if isinstance(self.edit_item, Display_Item):
+            background_brush = self.brush_back_display_item
+
+        if (isinstance(self.edit_item, Placeholder_Item) 
+        and self.edit_item.is_separator):
+            background_brush = self.brush_back_separator
+        else:
+            background_brush = self.brush_back_standard
+
+        return foreground_brush, background_brush
+
+
+    def Get_Cell_Color(self, editable, modified):
+        '''
+        Returns a tuple of QBrush objects, (foreground, background),
+        to apply to cells of the given version, to be used locally.
+        '''
+        
+        # Background coloring.
+        # Display only
+        if isinstance(self.edit_item, Display_Item):
+            background_brush = self.brush_back_display_item
+        # Separators
+        elif (isinstance(self.edit_item, Placeholder_Item)
+        and self.edit_item.is_separator):
+            background_brush = self.brush_back_separator
+        # Read only
+        elif not editable:
+            background_brush = self.brush_back_readonly
+        else:
+            background_brush = self.brush_back_standard
+
+        # Text coloring.
+        foreground_brush = self.brush_fore_standard
+        if modified:
+            foreground_brush = self.brush_fore_modified
+
+        return foreground_brush, background_brush
+
+
     def Update(self, version, value_changed = False):
         '''
         Pulls the edit_item value and does a fresh update of all q_items.
@@ -95,26 +169,12 @@ class Q_Item_Group:
             and only True for user edits.
         '''
         value = self.edit_item.Get_Value(version)
+
         # Can edit only for the 'edited' version of non-read_only items.
         editable = self.edit_item.read_only == False and version == 'edited'
         modified = self.edit_item.Is_Modified() and version == 'edited'
 
-        # Pick the box coloring.
-        background_brush = QBrush(QtCore.Qt.SolidPattern)
-        foreground_brush = QBrush(QtCore.Qt.SolidPattern)
-        
-        if isinstance(self.edit_item, Display_Item):
-            background_brush.setColor(QtGui.QColor('antiquewhite'))            
-        elif not editable:
-            background_brush.setColor(QtGui.QColor(247, 247, 247))
-        else:
-            background_brush.setColor(QtGui.QColor('white'))
-
-        if modified:
-            foreground_brush.setColor(QtGui.QColor('crimson'))
-        else:
-            foreground_brush.setColor(QtGui.QColor('black'))
-
+        foreground_brush, background_brush = self.Get_Cell_Color(editable, modified)
 
         # Note: this will update items that may not be owned by
         # any model currently, which is helpful since new models

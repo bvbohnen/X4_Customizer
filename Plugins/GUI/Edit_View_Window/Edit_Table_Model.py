@@ -157,16 +157,18 @@ class Edit_Table_Model(QStandardItemModel):
         self.setRowCount(row_count)
         
         # Apply the labels.
-        # TODO: maybe reuse existing items, but it probably isn't
-        # worth it.
+        label_list = []
         for row in range(row_count):
             label_item = QStandardItem(labels[row])
             label_item.setToolTip(descriptions[row])
             self.setVerticalHeaderItem(row, label_item)
+            label_list.append(label_item)
                
 
         # Can now fill in the display info.
         for row in range(row_count):
+            # Note the q_item_group for use below.
+            q_item_group = None
             for col, version in enumerate(self.column_keys):
               
                 # Grab the right item for the column.
@@ -176,6 +178,7 @@ class Edit_Table_Model(QStandardItemModel):
 
                 # If there is no underlying item, such as when a reference
                 # is missing, can leave the spot blank.
+                # TODO: maybe disable these cells?
                 if item == None:
                     continue
 
@@ -184,8 +187,15 @@ class Edit_Table_Model(QStandardItemModel):
                     item.q_item_group = Q_Item_Group(item)
 
                 # Get a new QStandardItem from the group.
-                q_item = item.q_item_group.New_Q_Item(version)
+                q_item_group = item.q_item_group
+                q_item = q_item_group.New_Q_Item(version)
                 self.setItem(row, col, q_item)
+
+            # Set the label color for the group.
+            # TODO: localize this more to this table in some way.
+            foreground, background = q_item_group.Get_Label_Color()
+            label_list[row].setForeground(foreground)
+            label_list[row].setBackground(background)
 
 
         # For some reason the column visibilities get messed up by

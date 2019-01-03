@@ -9,6 +9,9 @@ and copy/paste right now.
 TODO: look into style sheets, which can paper over the style
 and are maybe better than offering styles (which tend to be
 pretty similar).
+
+Side note: windows_nt style does not allow coloring the labels
+in a table; try to default to Fusion if available.
 '''
 from PyQt5 import QtWidgets
 
@@ -40,3 +43,5 @@ def Make_Style(style_name):
             return QtWidgets.QStyleFactory.create(style_name)
     except Exception:
         return None
+
+        

@@ -153,3 +153,10 @@ engine_item_macros = [
 
 
 ##############################################################################
+
+@Live_Editor_Object_Builder('cockpits')
+def _Build_Cockpit_Objects():
+    game_files = File_System.Get_All_Indexed_Files('macros','cockpit_*')
+    return Create_Objects_From_Asset_Files(game_files, [])
+
+##############################################################################

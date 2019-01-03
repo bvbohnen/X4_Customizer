@@ -26,16 +26,18 @@ from Framework import Change_Log
 from Framework import Live_Editor
 
 from .Worker_Thread_Handler import Worker_Thread_Handler
-from . import Styles
+from .Shared import Styles
 from Framework.Common import home_path
 
 # Different tab window types.
 # Include base classes, so they can be used in isinstance checks.
 #from .Edit_Table_Window import Edit_Table_Window
-from .Edit_View_Window import Edit_View_Window
-from .Settings_Window import Settings_Window
-from .Script_Window import Script_Window
-from .Shared import Tab_Page_Widget
+from .Edit_View_Window   import Edit_View_Window
+from .Settings_Window    import Settings_Window
+from .Script_Window      import Script_Window
+from .Shared             import Tab_Page_Widget
+from .VFS_Window         import VFS_Window
+from .File_Viewer_Window import File_Viewer_Window
 
 
 # Load the .ui file into a reuseable base class.
@@ -44,6 +46,32 @@ from .Shared import Tab_Page_Widget
 # http://pyqt.sourceforge.net/Docs/PyQt5/designer.html
 gui_file = Path(__file__).parent / 'x4c_gui_layout.ui'
 generated_class, qt_base_class = loadUiType(str(gui_file))
+
+
+# Reference to the main qt window, for use when it is needed
+# but lookups are otherwise awkward.
+qt_application = None
+    
+def Start_GUI():
+    '''
+    Start up the GUI main window. Returns after the gui is closed.
+    '''
+    global qt_application
+    # Create a new Qt gui object.
+    qt_application = QtWidgets.QApplication([])
+
+    # Create the custom gui window itself, and set it to be shown.
+    # Presumably this will get attached automatically to the 
+    # QApplication object.
+    # To be able to changes styles, give this a link back to the app.
+    global main_window
+    main_window = GUI_Main_Window(qt_application)
+
+    # Launch the QApplication; this will halt execution until the gui exits.
+    return_value = qt_application.exec()
+
+    # There is no post-gui cleanup for now, so just return.
+    return return_value
 
 
 class Custom_Settings(QtCore.QSettings):
@@ -334,6 +362,8 @@ class GUI_Main_Window(qt_base_class, generated_class):
         # Note: these insert at index 0, so have the last one be the
         #  tab that should go first.
         for index, (class_name, label) in enumerate([
+                # TODO: make vfs optional, and allow multiple.
+                ('VFS_Window', 'VFS'),
                 # Trying out naming this different than Settings, to avoid
                 # confusion with the gui "settings" menu.
                 ('Settings_Window' ,'Config'),
@@ -585,6 +615,25 @@ class GUI_Main_Window(qt_base_class, generated_class):
     ##########################################################################
     # Reset related functions.
 
+    def Soft_Refresh(self):
+        '''
+        to be called after a script run, performs a Soft_Refresh on all
+        tabs that display 'current' game file information.
+        '''
+        # Want to prioritize the currently viewed tab.
+        current_tab = self.widget_tab_container.currentWidget()
+        current_tab.Soft_Refresh()
+
+        # Go through all tabs.
+        for tab in self.Get_Tab_Widgets():
+            # Skip the current_tab since it was already handled.
+            if tab is current_tab:
+                continue
+            # Kick off the refresh.
+            tab.Soft_Refresh()
+        return
+        
+
     def Refresh_File_System(self):
         '''
         Resets/refreshes the File_System and related components.
@@ -705,6 +754,11 @@ class GUI_Main_Window(qt_base_class, generated_class):
             # wanted term with a default set to the wanted value.
             action.triggered.connect(
                 lambda qtjunk, name = name: self.Action_Change_Style(name))
+
+            # Look for Fusion style, to set as the default, to enable
+            # table label coloring.
+            if name == 'Fusion':
+                self.Action_Change_Style('Fusion')
 
         # Record the current style name; probably default Windows or similar.
         return
@@ -913,3 +967,5 @@ class GUI_Main_Window(qt_base_class, generated_class):
                 
         return
         
+
+    

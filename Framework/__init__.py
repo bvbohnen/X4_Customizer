@@ -147,7 +147,7 @@ from .Common import XML_Misc
 from .Common.Exceptions import *
 
 from . import File_Manager
-from .File_Manager import Load_File, File_System
+from .File_Manager import Load_File, File_System, XML_Diff
 
 from . import Live_Editor_Components
 from .Live_Editor_Components import Live_Editor

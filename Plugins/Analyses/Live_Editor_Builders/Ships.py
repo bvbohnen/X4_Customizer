@@ -12,9 +12,12 @@ from ...Transforms.Support import Float_to_String
 
 @Live_Editor_Object_Builder('ships')
 def _Build_Storage_Objects():
-    # TODO: also load in files needed for references, as needed.
     # Ensure some available refs are loaded.
     Live_Editor.Get_Category_Objects('storage')
+    Live_Editor.Get_Category_Objects('dockingbays')
+    Live_Editor.Get_Category_Objects('cockpits')
+    
+
     game_files = File_System.Get_All_Indexed_Files('macros','ship_*')
     return Create_Objects_From_Asset_Files(game_files, ship_item_macros)
 

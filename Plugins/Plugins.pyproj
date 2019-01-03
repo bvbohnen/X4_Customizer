@@ -50,7 +50,16 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GUI\Edit_View_Window\__init__.py" />
-    <Compile Include="GUI\Styles.py">
+    <Compile Include="GUI\File_Viewer_Window\File_Viewer_Window.py" />
+    <Compile Include="GUI\File_Viewer_Window\XML_Syntax_Highlighter.py" />
+    <Compile Include="GUI\File_Viewer_Window\File_Text_Brower.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GUI\File_Viewer_Window\__init__.py" />
+    <Compile Include="GUI\Shared\Misc.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GUI\Shared\Styles.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GUI\Edit_Table_Window_old\Edit_Item.py">
@@ -79,6 +88,13 @@
     <Compile Include="GUI\Shared\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="GUI\VFS_Window\VFS_List_Model.py" />
+    <Compile Include="GUI\VFS_Window\VFS_Item.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GUI\VFS_Window\VFS_Window.py" />
+    <Compile Include="GUI\VFS_Window\VFS_Tree_Model.py" />
+    <Compile Include="GUI\VFS_Window\__init__.py" />
     <Compile Include="Transforms\Misc.py">
       <SubType>Code</SubType>
     </Compile>
@@ -128,6 +144,8 @@
     <Folder Include="Analyses\Live_Editor_Builders\" />
     <Folder Include="GUI\Edit_Table_Window_old\" />
     <Folder Include="GUI\Edit_View_Window\" />
+    <Folder Include="GUI\File_Viewer_Window\" />
+    <Folder Include="GUI\VFS_Window\" />
     <Folder Include="GUI\Shared\" />
     <Folder Include="GUI\Script_Window\" />
     <Folder Include="GUI\Settings_Window\" />
