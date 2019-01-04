@@ -58,6 +58,16 @@ class VFS_List_Model(QStandardItemModel):
         # Clear out old stuff.
         self.clear()
 
+        # TODO: the vfs_items will end up needing to look into
+        # the file system to pull out some file details, but this
+        # should be threaded for safety so it doesn't interfere
+        # with other threads running (eg. a script resetting
+        # the file system while this is going on).
+        # Perhaps this can delegate to a helper function that
+        # will annotate a group of vfs_item files with the information
+        # of interest, and only on the first time this folder is
+        # opened and if it has file children.
+
         # Get the parent item, to enable going back up.
         parent_q_item = vfs_item.Get_Parent_Q_Item()
         if parent_q_item != None:

@@ -19,6 +19,8 @@ class Tab_Page_Widget(QtWidgets.QWidget):
       - The Work_Request object created by the thread handler when
         a request was made.
       - Only filled while a request is active.
+    * callback_function
+      - The callback function for the current or most recent thread.
     * print_thread_args
       - Bool, if True then threads will print their args when launched.
       - Set False for tabs that have complex thread args.
@@ -30,6 +32,7 @@ class Tab_Page_Widget(QtWidgets.QWidget):
         self.thread_request_active = False
         self.thread_request = None
         self.print_thread_args = True
+        self.callback_function = None
         
         # Call the generated setup function, inherited from the qt form.
         # This will fill in the various widgets from designer.
@@ -74,9 +77,18 @@ class Tab_Page_Widget(QtWidgets.QWidget):
         Default handler for completed threads.
         Subclasses should wrap this will their own response handling logic,
         but still call this with super().
+        Alternatively, subclasses can provide callback_functions to
+        the thread queue, and avoid overwriting this.
         '''
-        # Only need to clear the activity flag here, for now.
+        # Clear this flag right away, in case the callback function
+        # wants to launch another thread.
         self.thread_request_active = False
+        if self.callback_function:
+            # Buffer up the callback function, so that a new
+            # queued thread can store its own callback.
+            temp = self.callback_function
+            self.callback_function = None
+            temp(return_value)
         return
 
 
@@ -95,6 +107,7 @@ class Tab_Page_Widget(QtWidgets.QWidget):
             work_function,
             *args,
             prelaunch_function = None,
+            callback_function = None,
             **kwargs,
         ):
         '''
@@ -110,6 +123,11 @@ class Tab_Page_Widget(QtWidgets.QWidget):
             the thread is launched, after any prior thread has finished.
           - Special actions like File_System resets should be done
             here.
+        * callback_function
+          - Optional, requester function that will be called after
+            the thread completes, during the local Handle_Thread_Finished.
+          - Will be given the return_value.
+          - An alternative to overwriting the Handle_Thread_Finished function.
         '''
         # Skip when a request still pending.
         # While this could potentially allow queing multiple requests,
@@ -120,6 +138,8 @@ class Tab_Page_Widget(QtWidgets.QWidget):
             return
 
         self.thread_request_active = True
+        # Capture the callback function and handle it locally.
+        self.callback_function = callback_function
         self.thread_request = self.window.worker_thread.Queue_Thread(
             # Give the work_function and *args as positional args,
             # to match up with the Queue_Thread signature.

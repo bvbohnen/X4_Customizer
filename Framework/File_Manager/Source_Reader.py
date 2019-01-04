@@ -505,7 +505,8 @@ class Source_Reader_class:
                     )
 
         # Now sort the extension order to satisfy dependencies.
-        self.Sort_Extensions()            
+        self.Sort_Extensions()
+        
         return
 
 

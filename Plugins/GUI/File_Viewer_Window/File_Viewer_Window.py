@@ -58,8 +58,15 @@ class File_Viewer_Window(Tab_Page_Widget, generated_class):
         # Disable arg printing for threads; text blocks are sent
         # over and flood the output.
         self.print_thread_args = False
+
         # Show the path in a label widget.
-        self.widget_label_path.setText(virtual_path)
+        # Note: this has a problem with getting to wide and making the
+        # entire gui stretch. To limit it a little, only grab the
+        # path and not the file name.
+        if '/' in virtual_path:
+            self.widget_label_path.setText(virtual_path.rsplit('/',1)[0]+'/')
+        else:
+            self.widget_label_path.setText('')
 
         self.version_checkbox_dict = {}
         self.version_textbox_dict  = {}
@@ -166,18 +173,18 @@ class File_Viewer_Window(Tab_Page_Widget, generated_class):
           - If None, all are refreshed.
         '''
         if not versions:
-            versions = self.version_title_order.keys()
+            # Temp var to pass to next function.
+            self._versions = self.version_title_order.keys()
 
         # Disable the buttons while working.
         self.widget_button_compare.setEnabled(False)
         self.widget_button_reload.setEnabled(False)
 
+        # -Removed
         # Reset the live editor table group that is be re-requested.
         # This will fill in new items that may get created by the
         # user script.
-        # -Removed
         #self.Queue_Thread(self._Threaded_Refresh)
-
         # The above isn't working very well at all, with qt doing
         #  some awkward stuff when a thread touches a widget,
         #  which it needs to do to trigger the highlighter (or if there
@@ -188,12 +195,23 @@ class File_Viewer_Window(Tab_Page_Widget, generated_class):
         #  those will be fed to the normal highlighter in the main
         #  thread.
         
-        game_file = File_System.Load_File(self.virtual_path, 
-                                          error_if_not_found = False)
+        # Queue up the thread to read the file.
+        self.Queue_Thread(File_System.Load_File, 
+                          self.virtual_path,
+                          error_if_not_found = False,
+                          callback_function = self.Handle_Game_File)
+        return
+
+    def Handle_Game_File(self, game_file):
+        '''
+        Capture thread Game_File response.
+        '''
         if game_file == None:
             self.window.Print(('Error loading file for path "{}"'
                               ).format(self.virtual_path))
             return
+        # Capture the temp var.
+        versions = self._versions
 
         # Get a dict of version:text blocks, the basic input to 
         # the thread to run.
@@ -220,7 +238,8 @@ class File_Viewer_Window(Tab_Page_Widget, generated_class):
             
         # Queue up the thread.
         self.Queue_Thread(self.Get_Text_Highlights, 
-                          version_lines_dict = version_lines_dict)
+                          version_lines_dict = version_lines_dict,
+                          callback_function = self.Apply_Highlights)
 
         # Try to find a different solution for now.
         #self._Threaded_Refresh()
@@ -286,13 +305,10 @@ class File_Viewer_Window(Tab_Page_Widget, generated_class):
         return version_macros_list_dict
 
 
-    # TODO: split this somehow if also threading comparisons.
-    def Handle_Thread_Finished(self, version_macros_list_dict):
+    def Apply_Highlights(self, version_macros_list_dict):
         '''
         Finish up after a refresh of the text boxes.
         '''
-        super().Handle_Thread_Finished()
-
         # Turn the buttons back on.
         self.widget_button_compare.setEnabled(True)
         self.widget_button_reload.setEnabled(True)

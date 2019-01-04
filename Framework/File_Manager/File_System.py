@@ -112,7 +112,6 @@ class File_System_class:
         returning to non-initialized state, etc.
         This will also reset the Live_Editor, since it is out of date.
         '''
-        self.init_complete = False
         self.game_file_dict.clear()
         self.asset_class_dict.clear()
         self.asset_name_dict.clear()
@@ -132,6 +131,14 @@ class File_System_class:
         # Use a delayed import, due to an annoying circular import issue.
         #from ..Live_Editor_Components import Live_Editor
         #Live_Editor.Reset()
+        
+        # To add safety against threading mistakes, where two are
+        # trying to init and run at once, clear this flag at
+        # the end of init and not earlier (so a second thread has
+        # more trouble racing ahead of the first that is still in
+        # init). Long term, care should be taken with thread to
+        # avoid needing this.
+        self.init_complete = False
         return
 
 

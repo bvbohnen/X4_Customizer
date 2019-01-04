@@ -302,7 +302,7 @@ class Script_Window(Tab_Page_Widget, generated_class):
 
         # When done, restore Settings back to the gui values, in case
         # the script temporarily modified them.
-        self.window.Get_Tab_Widgets('Settings_Window')[0].widget_settings.Store_Settings()
+        self.window.Store_Settings()
 
         # Close any transform log that might be open, to flush it
         # out and also reset it for a later run.

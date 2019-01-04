@@ -249,8 +249,9 @@ class Edit_Object:
     def Get_Item_Value(self, item_name, version = 'current', default = ''):
         '''
         Finds an item of the given name for the given version, and
-        returns its version value. If the item is not found,
-        returns an empty string or the given default.
+        returns its version value. If the item is not found or has
+        an empty string value,this  returns an empty string or the
+        given default.
         
         * item_name
           - String, the item's name.
@@ -260,9 +261,12 @@ class Edit_Object:
           - Optional, return value if the item is missing.
         '''
         item = self.Get_Item(item_name, version)
-        if item == None:
+        if not item:
             return default
-        return item.Get_Value(version)
+        value = item.Get_Value(version)
+        if not value:
+            return default
+        return value
 
     
     def Make_Items(

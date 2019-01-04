@@ -537,20 +537,28 @@ class GUI_Main_Window(qt_base_class, generated_class):
     def Get_Tab_Widgets(self, *filters):
         '''
         Returns a list of tab page widgets.
+        This will include hidden widgets that aren't in the
+        tab container currently.
 
         * filters
           - Optional strings, names of the classes to be returned.
           - Eg. Get_Tab_Widgets('Settings_Window', 'Script_Window')
           - Subclasses of the filtered classes will be returned.
         '''
+        # Start by collecting the widgets.
+        widget_set = set()
+        for widget in self.unique_tabs_dict.values():
+            widget_set.add(widget)
+        for index in range(self.widget_tab_container.count()):
+            widget_set.add( self.widget_tab_container.widget(index))
+
         # If a filter given, swap it over to actual classes
         # for doing an isinstance check.
         # These should all be imported already to this module.
         filters = tuple([globals()[x] for x in filters])
 
         ret_list = []
-        for index in range(self.widget_tab_container.count()):
-            widget = self.widget_tab_container.widget(index)
+        for widget in widget_set:
             # Skip non-matching class types.
             if filters and not isinstance(widget, filters):
                 continue
@@ -591,15 +599,20 @@ class GUI_Main_Window(qt_base_class, generated_class):
         * hide_only
           - Bool, if True then the tab will be hidden but not shown.
         '''
+        widget = self.unique_tabs_dict[class_name]
+
         # Apparently the only way to do this is to remove the tab page
         # entirely from the tab container, or add it back in.
-        # Start by finding it on the tab bar; this may fail it
+        # Start by finding it on the tab bar; this may fail if
         # it is not present.
-        widgets = self.Get_Tab_Widgets(class_name)
-
+        if any(widget is self.widget_tab_container.widget(index) 
+                for index in range(self.widget_tab_container.count())):
+            currently_shown = True
+        else:
+            currently_shown = False
+            
         # Hide it if needed.
-        if widgets and not show_only:
-            widget = widgets[0]
+        if currently_shown and not show_only:
             # Grab the index.
             index = self.widget_tab_container.indexOf(widget)
 
@@ -613,7 +626,7 @@ class GUI_Main_Window(qt_base_class, generated_class):
             assert widget is self.unique_tabs_dict[class_name]
 
         # Show it if needed.
-        elif not widgets and not hide_only:
+        elif not currently_shown and not hide_only:
             widget = self.unique_tabs_dict[class_name]
             # Restore it as its prior index.
             self.Create_Tab_From_Widget(widget, widget.tab_properties.index)
@@ -623,21 +636,13 @@ class GUI_Main_Window(qt_base_class, generated_class):
         return
 
 
-    def Action_View_Settings(self):
+    def Store_Settings(self):
         '''
-        Show or hide the settings tab.
+        Tells the settings widget to Store_Settings.
         '''
-        self.Show_Hide_Tab('Settings_Window')
-        return
-
-
-    def Action_View_Script(self):
-        '''
-        Show or hide the script tab.
-        '''
-        self.Show_Hide_Tab('Script_Window')
-        return
-
+        # TODO: maybe make this part of Soft_Reset or another
+        # standard method.
+        self.unique_tabs_dict['Settings_Window'].widget_settings.Store_Settings()
         
     ##########################################################################
     # Reset related functions.
@@ -673,9 +678,11 @@ class GUI_Main_Window(qt_base_class, generated_class):
         if not Settings.Paths_Are_Valid():
             return
 
-        # Want to prioritize the currently viewed tab.
+        # Want to prioritize the currently viewed tab, if any.
+        # Note: if all tabs are hidden, this will return None.
         current_tab = self.widget_tab_container.currentWidget()
-        current_tab.Reset_From_File_System()
+        if current_tab != None:
+            current_tab.Reset_From_File_System()
 
         # Go through all tabs.
         for tab in self.Get_Tab_Widgets():
@@ -855,7 +862,7 @@ class GUI_Main_Window(qt_base_class, generated_class):
         for widget in self.Get_Tab_Widgets():
             if widget.Close() == False:
                 return False
-
+            
         # Stop any running script.
         self.worker_thread.Close()
 
@@ -902,12 +909,6 @@ class GUI_Main_Window(qt_base_class, generated_class):
         
 
         # Save state from tab pages.
-        # Note: this will only save visible tabs; to ensure hidden
-        # tabs get saved, they can be reshown first.
-        for tab_name in self.unique_tabs_dict.keys():
-            self.Show_Hide_Tab(tab_name, show_only = True)
-
-        # Now go through the tabs, all types.
         for index, widget in enumerate(self.Get_Tab_Widgets()):
             # Use the tab_properties to handle saving.
             settings.beginGroup('Tab_{}'.format(index))
@@ -970,8 +971,8 @@ class GUI_Main_Window(qt_base_class, generated_class):
                     # Record unique tabs right away, to keep a reference
                     # to them if not showing yet.
                     if tab_properties.unique:
-                        self.unique_tabs_dict[
-                            tab_properties.class_name] = tab_properties.widget
+                        self.unique_tabs_dict[tab_properties.class_name] \
+                            = tab_properties.Get_Widget()
 
                     # Create the tab if it isn't set to hidden.
                     if not tab_properties.hidden:

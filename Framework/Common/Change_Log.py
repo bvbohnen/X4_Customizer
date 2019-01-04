@@ -96,6 +96,8 @@ Change Log:
    - Added a virtual file system tab to the gui.
    - Added file viewing tabs to the gui, with xml syntax highlighting
      and diff comparison output.
+ * 1.6.1
+   - Bug fixes for hidden tabs and a threading conflicts.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

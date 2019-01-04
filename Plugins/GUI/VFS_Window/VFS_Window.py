@@ -74,17 +74,25 @@ class VFS_Window(Tab_Page_Widget, generated_class):
         #    rebuild = True,
         #    )
         
-        # This is pretty quick; maybe skip the threading entirely.
         # Pattern this for supported file types; don't want everything
         # because the vfs builder is kinda slow currently.
         # Only support xml for now, as that is what the file viewer
         # supports (others not having multiple version support).
-        virtual_paths = [ x for pattern in ['*.xml']#,'*.lua']
-              for x in File_System.Gen_All_Virtual_Paths(pattern = pattern) ]
+    
+        # Queue up the thread to get the paths.
+        self.Queue_Thread(File_System.Gen_All_Virtual_Paths, 
+                          pattern = '*.xml',
+                          callback_function = self.Handle_Virtual_Paths)
+        return
+
+
+    def Handle_Virtual_Paths(self, virtual_paths):
+        '''
+        Capture thread virtual_paths response.
+        '''
         assert virtual_paths
         self.tree_model.Set_File_Listing(virtual_paths)
         return
-    
 
     def Soft_Refresh(self):
         '''
