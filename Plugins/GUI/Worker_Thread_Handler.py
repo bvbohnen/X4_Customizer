@@ -10,7 +10,7 @@ from collections import namedtuple
 Work_Request = namedtuple(
     'Work_Request', 
     ['prelaunch_function', 'callback_function', 
-     'work_function', 'args', 'kwargs'])
+     'work_function', 'print_args', 'args', 'kwargs'])
 
 
 class Worker_Thread_Handler(QtCore.QThread):
@@ -76,6 +76,7 @@ class Worker_Thread_Handler(QtCore.QThread):
             *args,
             callback_function,
             prelaunch_function = None,
+            print_args = True,
             **kwargs
         ):
         '''
@@ -103,11 +104,16 @@ class Worker_Thread_Handler(QtCore.QThread):
             here.
           - Will be sent no args.
           - Optional.
+        * print_args
+          - Bool, if True (default) then args will be printed in
+            an output log message, else they are skipped.
+          - Callers should set this False if they use long args.
         '''
         request = Work_Request(
                 callback_function  = callback_function,
                 prelaunch_function = prelaunch_function,
                 work_function      = work_function,
+                print_args         = print_args,
                 args               = args,
                 kwargs             = kwargs,
                 )
@@ -235,16 +241,21 @@ class Worker_Thread_Handler(QtCore.QThread):
         function = self.current_request.work_function
         args     = self.current_request.args
         kwargs   = self.current_request.kwargs
+        
+        # Nice little printout for what is being called.
+        # Note: some args can be quite long, so skip anything complex.
+        if self.current_request.print_args:
+            self.Print('Starting thread: {}({}{}{})'.format(
+                function.__name__,
+                ', '.join(args),
+                ', ' if kwargs and args else '',
+                ', '.join(['{} = {}'.format(k,v) for k,v in kwargs.items()])
+                ))
+        else:
+            self.Print('Starting thread: {}(...)'.format(function.__name__))
 
         # Run the function, with a default return value in case it fails.
         self.return_value = None
-        # Nice little printout for what is being called.
-        self.Print('Starting thread: {}({}{}{})'.format(
-            function.__name__,
-            ', '.join(args),
-            ', ' if kwargs and args else '',
-            ', '.join(['{} = {}'.format(k,v) for k,v in kwargs.items()])
-            ))
         try:
             self.return_value = function(*args, **kwargs)
 

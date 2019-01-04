@@ -14,14 +14,14 @@ class VFS_Tree_Model(QStandardItemModel):
     * path_item_dict
       - Dict, keyed by virtual_path, holding all VFS_Items, including
         directories, with a top node at ''.
+    * path_q_item_dict
+      - As above, but holding the generated QTreeWidgetItems.
     * qt_view
       - Tree view in qt showing this model.
+    * last_selected_virtual_path
+      - The virtual_path of the last selected item.
 
     TODO: remove/update as needed.
-    * last_selected_item_label
-      - Text name of the last selected item.
-      - Unlike the built-in QTreeWidget version, this will only hold
-        active items, not table headers.
     * item_dict
       - Dict, keyed by label, of QTreeWidgetItem leaf nodes.
       - Note: this could be unsafe if a label is used more than once.
@@ -31,11 +31,19 @@ class VFS_Tree_Model(QStandardItemModel):
     def __init__(self, window, qt_view):
         super().__init__(window)
         self.path_item_dict = None
-        self.last_selected_item_label = None
+        self.path_q_item_dict = {}
+        self.last_selected_virtual_path = None
         self.qt_view = qt_view
         self.window = window
-        self.item_dict   = {}
-        self.branch_dict = {}        
+        #self.item_dict   = {}
+        #self.branch_dict = {}
+        
+        self.qt_view .setModel(self)
+        
+        # Catch some viewer signals.
+        self.qt_view.selectionModel().selectionChanged.connect(
+            self.Handle_selectionChanged)
+
         return
         
 
@@ -67,12 +75,28 @@ class VFS_Tree_Model(QStandardItemModel):
         top_item = self.path_item_dict['']
 
         # Convert its children to Q items and add them.
-        for q_item in top_item.Get_Child_Q_Items(
+        q_items = top_item.Get_Child_Q_Items(
                 include_folders = True, 
                 recursive = True
-            ):
+            )
+        for q_item in q_items:
             self.appendRow(q_item)
             
+
+        # Record all q_items present, at any level.
+        # This is kinda messy, since apparently qt doesn't have any
+        # function for iterating over children.
+        self.path_q_item_dict.clear()
+        search_items = q_items
+        while search_items:
+            q_item = search_items.pop()
+            # Record this item.
+            self.path_q_item_dict[q_item.vfs_item.virtual_path] = q_item
+            # Queue all children; in column 0.
+            for row in range(q_item.rowCount()):
+                child = q_item.child(row,0)
+                search_items.append(child)
+
 
         ## Try to find the item matching the last selected non-branch item's
         ##  text, and restore its selection.
@@ -96,6 +120,8 @@ class VFS_Tree_Model(QStandardItemModel):
         #        self.qt_view.setExpanded(self.indexFromItem(item), True)
         #        
         ## TODO: save expansion state across sessions.
+
+        # TODO: tell the list view to open the top level, maybe.
         return
 
 
@@ -227,6 +253,7 @@ class VFS_Tree_Model(QStandardItemModel):
         # instead of just giving the item like qtreewidget.
         new_item = self.itemFromIndex(qitemselection.indexes()[0])
         self.Change_Item(new_item)
+        return
 
 
     def Change_Item(self, new_item):
@@ -239,7 +266,7 @@ class VFS_Tree_Model(QStandardItemModel):
             return
 
         # Record it for refresh restoration.
-        self.last_selected_item_label = new_item.text()
+        self.last_selected_virtual_path = new_item.vfs_item.virtual_path
         # Pass the object_view to the display widget.
         self.window.list_model.Update(new_item.vfs_item)
         return
@@ -252,7 +279,27 @@ class VFS_Tree_Model(QStandardItemModel):
         '''
         # Send the selected item off for re-display, if there is
         # a selection.
-        if self.last_selected_item != None:
-            self.Handle_itemChanged(self.last_selected_item)
+        if self.last_selected_virtual_path != None:
+            item = self.path_q_item_dict[self.last_selected_virtual_path]
+            self.Change_Item(item)
+        # TODO: recolor existing items, once coloring support
+        # is added to them.
         return
 
+
+    def Open_Folder(self, vfs_item):
+        '''
+        Expand down to the selected vfs_item matching q_item.
+        Called from the list view when changing levels.
+        If this requests opening root, it will be ignored.
+        '''
+        # Ignore root.
+        if not vfs_item.virtual_path:
+            return
+        q_item = self.path_q_item_dict[vfs_item.virtual_path]
+        self.qt_view.setExpanded(self.indexFromItem(q_item), True)
+
+        # TODO: maybe select it too, though for now skip such
+        # selection since the tree may be intentionally viewing something
+        # other than what is in the list view.
+        return

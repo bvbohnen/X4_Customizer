@@ -10,7 +10,7 @@ from Plugins import *
 Settings(
     path_to_x4_folder = r'C:\Steam\SteamApps\common\X4 Foundations',
     # Include the current output extension in the check.
-    Settings.ignore_output_extension = False,
+    ignore_output_extension = False,
     )
 
 Print_Weapon_Stats()

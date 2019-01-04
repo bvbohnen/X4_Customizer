@@ -103,9 +103,16 @@
      <string>Edit</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menuUtilities">
+    <property name="title">
+     <string>Utility</string>
+    </property>
+    <addaction name="action_VFS"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuRun"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuUtilities"/>
    <addaction name="menuView"/>
    <addaction name="menuSettings"/>
   </widget>
@@ -152,7 +159,7 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QTextEdit" name="widget_output">
+      <widget class="QPlainTextEdit" name="widget_output">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -167,9 +174,6 @@
        </property>
        <property name="acceptDrops">
         <bool>false</bool>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -245,6 +249,11 @@
   <action name="action_View_Settings">
    <property name="text">
     <string>Configuration</string>
+   </property>
+  </action>
+  <action name="action_VFS">
+   <property name="text">
+    <string>Virtual File System</string>
    </property>
   </action>
  </widget>

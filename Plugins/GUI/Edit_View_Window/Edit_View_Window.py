@@ -168,7 +168,7 @@ class Edit_View_Window(Tab_Page_Widget, generated_class):
 
     def Handle_Thread_Finished(self, return_value):
         '''
-        Catch the returned table_group and updated the widgets.
+        Catch the returned table_group and update the widgets.
         '''
         super().Handle_Thread_Finished()
         # Turn the button back on, before handling the response

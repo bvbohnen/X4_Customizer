@@ -82,6 +82,7 @@ class Q_Item_Group:
     # Color brushes as class attributes.
     # Color names available:
     #  https://www.december.com/html/spec/colorsvg.html
+    # TODO: move to using the functions in Misc.
     brush_back_standard      = QBrush(QtCore.Qt.SolidPattern)
     brush_back_display_item  = QBrush(QtCore.Qt.SolidPattern)
     brush_back_readonly      = QBrush(QtCore.Qt.SolidPattern)    

@@ -24,7 +24,12 @@ class VFS_Window(Tab_Page_Widget, generated_class):
     * widget_treeView
     * widget_listView
     * splitter
+    * vsplitter
+    * hsplitter
     * widget_refresh_button - TODO
+    * widget_label_path
+    * widget_label_details
+    * widget_text_details
 
     Attributes:
     * window
@@ -40,25 +45,15 @@ class VFS_Window(Tab_Page_Widget, generated_class):
         super().__init__(parent, window)
 
         # Set up initial, blank models.
-        self.tree_model  = VFS_Tree_Model(self, self.widget_treeView)
+        self.tree_model = VFS_Tree_Model(self, self.widget_treeView)
         self.list_model = VFS_List_Model(self, self.widget_listView)
-        
-        # Hook them into the views.
-        self.widget_treeView .setModel(self.tree_model)
-        self.widget_listView .setModel(self.list_model)
-
-        # Hook up some signals.
-        self.widget_treeView.selectionModel().selectionChanged.connect(
-            self.tree_model.Handle_selectionChanged)
-
-        self.widget_listView.customContextMenuRequested.connect(
-            self.list_model.Handle_contextMenuRequested)
-               
+                       
         # Trigger button for loading the table.
         #self.widget_refresh_button.clicked.connect(self.Action_Make_Table_Group)
                 
         # Force the initial splitter position.
-        self.splitter.setSizes([1000,3000])
+        self.hsplitter.setSizes([1000,3000])
+        self.vsplitter.setSizes([3000,1000])
         
         return
     
@@ -93,10 +88,11 @@ class VFS_Window(Tab_Page_Widget, generated_class):
 
     def Soft_Refresh(self):
         '''
-        Does a partial refresh of the table, redrawing the current
-        items.
+        Does a partial refresh of the table, redrawing the current items.
         '''
-        self.Action_Refresh()
+        # The tree will update the list, so only refresh the tree.
+        self.tree_model.Soft_Refresh()
+        #self.list_model.Soft_Refresh()
         return
     
     def Reset_From_File_System(self):

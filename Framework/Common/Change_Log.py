@@ -91,6 +91,11 @@ Change Log:
    - Tabs will load game information automatically if paths are set up.
    - Added editing support for engines, scanners, storage, dockingbays.
    - Various other polish, mostly in the gui.
+ * 1.6
+   - Added support for basic ship editing.
+   - Added a virtual file system tab to the gui.
+   - Added file viewing tabs to the gui, with xml syntax highlighting
+     and diff comparison output.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

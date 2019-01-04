@@ -26,7 +26,7 @@ from Framework import Change_Log
 from Framework import Live_Editor
 
 from .Worker_Thread_Handler import Worker_Thread_Handler
-from .Shared import Styles
+from .Shared import Styles, Set_Icon
 from Framework.Common import home_path
 
 # Different tab window types.
@@ -296,6 +296,12 @@ class GUI_Main_Window(qt_base_class, generated_class):
         super().__init__()
         self.setupUi(self)
 
+        # This icon is kinda like and X.
+        # TODO: maybe extract the x4 exe icon, though that will only
+        # work on windows.
+        # https://stackoverflow.com/questions/1616342/best-way-to-extract-ico-from-exe-and-paint-with-pyqt
+        Set_Icon(self, 'SP_DialogCloseButton')
+
         self.startup_complete = False
         self.application = application
         self.current_font = None
@@ -325,6 +331,9 @@ class GUI_Main_Window(qt_base_class, generated_class):
         # Note: when running a script, the thread will handle
         # intercepting print statements and emit a signal.
         Print.logging_function = self.Print
+
+        # Set how many lines the output will store.
+        self.widget_output.setMaximumBlockCount(200)
         
         # Add a threading object.
         self.worker_thread = Worker_Thread_Handler(self)
@@ -335,12 +344,31 @@ class GUI_Main_Window(qt_base_class, generated_class):
         # Connect actions to handlers.
         self.action_Quit          .triggered.connect(self.Action_Quit)
         self.action_Change_Font   .triggered.connect(self.Action_Change_Font)
-        self.action_View_Settings .triggered.connect(self.Action_View_Settings)
-        self.action_View_Script   .triggered.connect(self.Action_View_Script)
         self.action_View_Output   .triggered.connect(self.Action_View_Output)
         # TODO: Quit without saving
 
+        # Actions that show/hide unique tabs.
+        for action_name, class_name in [
+            ('action_View_Script'  , 'Script_Window'),
+            ('action_View_Settings', 'Settings_Window'),
+            ]:
+            action = getattr(self, action_name)
+            action.triggered.connect(
+                lambda qtjunk, 
+                class_name = class_name: 
+                self.Show_Hide_Tab(class_name))
             
+        # Actions that go straight to tab openers.
+        for action_name, class_name, label in [
+            ('action_VFS', 'VFS_Window', 'VFS'),
+            ]:
+            action = getattr(self, action_name)
+            action.triggered.connect(
+                lambda qtjunk, 
+                class_name = class_name,
+                label = label : 
+                self.Create_Tab(class_name, label))
+
 
         # Set up the styles menu.
         # This is done programatically, not in the gui file.
@@ -362,8 +390,6 @@ class GUI_Main_Window(qt_base_class, generated_class):
         # Note: these insert at index 0, so have the last one be the
         #  tab that should go first.
         for index, (class_name, label) in enumerate([
-                # TODO: make vfs optional, and allow multiple.
-                ('VFS_Window', 'VFS'),
                 # Trying out naming this different than Settings, to avoid
                 # confusion with the gui "settings" menu.
                 ('Settings_Window' ,'Config'),
@@ -418,7 +444,7 @@ class GUI_Main_Window(qt_base_class, generated_class):
         '''
         Prints a line to the output widget.
         '''
-        self.widget_output.append(line)
+        self.widget_output.appendPlainText(line)
         return
 
 
@@ -611,7 +637,8 @@ class GUI_Main_Window(qt_base_class, generated_class):
         '''
         self.Show_Hide_Tab('Script_Window')
         return
-    
+
+        
     ##########################################################################
     # Reset related functions.
 

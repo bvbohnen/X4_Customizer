@@ -90,6 +90,7 @@ class Game_File:
       - List of strings, the names of the extensions that contributed
         to this file's contents, either directly or through patching.
       - Will always include extension_name if given.
+      - Empty if this is just a vanilla file.
     '''
     def __init__(
             self,
@@ -111,6 +112,31 @@ class Game_File:
         if extension_name:
             self.source_extension_names.append(extension_name)
         return
+
+
+    def Is_Patched(self):
+        '''
+        Returns True if this file is partly or wholy from an extension,
+        else False. It will be considered 'patched' if it was overwritten.
+        '''
+        if self.source_extension_names:
+            return True
+        return False
+
+
+    def Get_Source_Names(self):
+        '''
+        Returns a sorted list of source extension names, or [] if there
+        are none.
+        '''
+        return sorted(self.source_extension_names)
+
+
+    def Is_Modified(self):
+        '''
+        Returns True if this file has been modified by the customizer.
+        '''
+        return self.modified
 
 
     # TODO: maybe merge this into usage locations.

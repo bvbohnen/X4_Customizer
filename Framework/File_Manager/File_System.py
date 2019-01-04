@@ -4,6 +4,7 @@ from pathlib import Path
 import datetime
 from collections import defaultdict
 from lxml import etree as ET
+from functools import wraps
 
 from .Source_Reader import Source_Reader_class
 from .Cat_Writer import Cat_Writer
@@ -61,8 +62,27 @@ class File_System_class:
         self.asset_class_dict = defaultdict(lambda: defaultdict(list))
         self.asset_name_dict = {}
         self._patterns_loaded = set()
+
         return
     
+
+    def _Verify_Init(func):
+        '''
+        Small wrapper on functions that should verify the init
+        check has been done before returning.
+        Similar to what is in Settings.
+        '''
+        # Use functools wraps to preserve the docstring and such.
+        @wraps(func)
+        # All wrapped functions will have self.
+        def func_wrapper(self, *args, **kwargs):
+            # Run delayed init if needed.
+            if not self.init_complete:
+                self.Delayed_Init()
+            # Run the func as normal.
+            return func(self, *args, **kwargs)
+        return func_wrapper
+
 
     def Delayed_Init(self):
         '''
@@ -133,6 +153,37 @@ class File_System_class:
         return
 
 
+    def Reset_File(self, virtual_path):
+        '''
+        Reset a single file, if loaded. Any later Load_File calls
+        will pull a fresh copy from the known source locations.
+        Note: this does not clear out any existing references to
+        the file object that may have been recorded elsewhere.
+        '''
+        if virtual_path not in self.game_file_dict:
+            return
+
+        # Look up the game file.
+        game_file = self.Load_File(virtual_path)
+        # Remove from the main file dict.
+        self.game_file_dict.pop(virtual_path)
+
+        # Also remove from anywhere else that might use it.
+        # These will use a game_file object search.
+        for key, subdict in self.asset_class_dict.items():
+            for key2, sublist in subdict.items():
+                if game_file in sublist:
+                    sublist.remove(game_file)
+
+        for key, value in self.asset_name_dict.items():
+            if value is game_file:
+                # This should be okay to modify the dict if not continuing
+                # the loop further.
+                self.asset_name_dict.pop(key)
+                break
+        return
+
+
     def Get_Asset_File(self, name):
         '''
         Returns a loaded asset XML_File object with the corresponding
@@ -158,6 +209,7 @@ class File_System_class:
         return ret_list
     
     
+    @_Verify_Init
     def Get_Indexed_File(self, index, name):
         '''
         Returns a Game_File found on a path read from the given
@@ -175,7 +227,8 @@ class File_System_class:
             return game_files[0]
         return None
 
-
+    
+    @_Verify_Init
     def Get_All_Indexed_Files(self, index, pattern):
         '''
         Returns a list of Game_Files found on paths in the given
@@ -206,6 +259,17 @@ class File_System_class:
         return ret_list
 
 
+    def File_Is_Loaded(self, virtual_path):
+        '''
+        Returns True if a file of the given virtual_path has been
+        loaded, else False.
+        '''
+        if virtual_path in self.game_file_dict:
+            return True
+        return False
+
+    
+    @_Verify_Init
     def Load_File(
             self,
             virtual_path,
@@ -237,9 +301,6 @@ class File_System_class:
         # (Back slashes show up in some xml attribute paths, so converting
         # here makes those easier to manage.)
         virtual_path = virtual_path.lower().replace('\\','/')
-
-        # Verify Init was called.
-        self.Delayed_Init()
 
         # If the file is not loaded, handle loading.
         if virtual_path not in self.game_file_dict or test_load:
@@ -284,25 +345,24 @@ class File_System_class:
             files.append( self.Load_File(virtual_path) )
         return files
 
-
+    
+    @_Verify_Init
     def Get_Source_Reader(self):
         '''
         Returns the current Source_Reader.
         '''
-        # Ensure init was run.
-        self.Delayed_Init()
         return self.source_reader
 
-
+    
+    @_Verify_Init
     def Get_Extension_Names(self):
         '''
         Returns a list of names of all enabled extensions.
         '''
-        # Ensure init was run.
-        self.Delayed_Init()
         return self.source_reader.Get_Extension_Names()
 
           
+    @_Verify_Init
     def Cleanup(self):
         '''
         Handles cleanup of old transform files.
@@ -314,10 +374,6 @@ class File_System_class:
         Preferably do this late in a run, so that files from a prior run
          are not removed if the new run had an error during a transform.
         '''
-        # It is possible Init was never run if no transforms were provided.
-        # Ensure it gets run here in such cases.
-        self.Delayed_Init()
-
         Print('Cleaning up old files')
 
         # TODO: maybe just completely delete the extension/customizer contents,
@@ -335,7 +391,8 @@ class File_System_class:
                 path.unlink()
         return
             
-
+    
+    @_Verify_Init
     def Add_Source_Folder_Copies(self):
         '''
         Adds Misc_File objects which copy files from the user source
@@ -372,6 +429,7 @@ class File_System_class:
         return
 
                 
+    @_Verify_Init
     def Write_Files(self):
         '''
         Write output files for all source file content used or
@@ -453,7 +511,8 @@ class File_System_class:
 
         return
 
-
+    
+    @_Verify_Init
     def Copy_File(
             self,
             source_virtual_path,
@@ -496,7 +555,8 @@ class File_System_class:
         '''
         return str(datetime.date.today())
     
-
+    
+    @_Verify_Init
     def Gen_All_Virtual_Paths(self, pattern = None):
         '''
         Generator which yields all virtual_path names of all discovered files,
@@ -505,10 +565,6 @@ class File_System_class:
         * pattern
           - String, optional, wildcard pattern to use for matching names.
         '''
-        # It is possible Init was never run if no transforms were provided.
-        # Ensure it gets run here in such cases.
-        self.Delayed_Init()
-
         # Pass the call to the source reader.
         # TODO: swap this around to gathering a set of paths here,
         #  and adding to them new files that get added during runtime.

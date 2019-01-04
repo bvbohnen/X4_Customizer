@@ -4,7 +4,7 @@ from collections import OrderedDict
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 
-from ..Shared.Misc import Set_Icon
+from ..Shared.Misc import Set_Icon, Set_Foreground_Color
 from Framework import File_System
 
 class VFS_Item:
@@ -18,8 +18,12 @@ class VFS_Item:
       - String, path to this folder.
     * parent_path
       - String, virtual_path of the parent folder.
+    * parent
+      - VFS_Item representing the parent folder.
+      - None for the top level.
     * name
       - String, name of this folder or file.
+      - At the top level, this is just 'root'.
     * folders
       - List of VFS_Item objects that are folders under this one.
       - Empty if this is a file.
@@ -39,6 +43,7 @@ class VFS_Item:
         ):
         self.virtual_path = virtual_path
         self.is_folder = is_folder
+        self.parent = None
 
         # Split on the last '/', though it may not be present.
         *parent, self.name = virtual_path.rsplit('/',1)
@@ -47,6 +52,9 @@ class VFS_Item:
         else:
             self.parent_path = ''
 
+        if not self.name:
+            self.name = 'root'
+
         # To reduce weight, only make these lists for folders.
         if is_folder:
             self.folders = []
@@ -54,6 +62,7 @@ class VFS_Item:
             self.file_paths = []
         return
     
+
     def Add_Item(self, vfs_item):
         '''
         Record the child item under this folder.
@@ -63,6 +72,9 @@ class VFS_Item:
             self.folders.append(vfs_item)
         else:
             self.files.append(vfs_item)
+        vfs_item.parent = self
+        return
+
 
     def Get_Folders(self):
         '''
@@ -70,11 +82,13 @@ class VFS_Item:
         '''
         return self.folders
     
+
     def Get_Files(self):
         '''
         Returns all child files.
         '''
         return self.files
+
 
     def Build_Files(self):
         '''
@@ -87,8 +101,9 @@ class VFS_Item:
         if self.files:
             return
         for virtual_path in self.file_paths:
-            self.files.append(VFS_Item(virtual_path, is_folder = False))
+            self.Add_Item(VFS_Item(virtual_path, is_folder = False))
         return
+
 
     def Get_Game_File(self):
         '''
@@ -98,7 +113,8 @@ class VFS_Item:
         if self.is_folder:
             return
         return File_System.Load_File(self.virtual_path)
-
+    
+    
     def Get_Q_Item(
             self, 
             include_folders = False, 
@@ -129,6 +145,21 @@ class VFS_Item:
             Set_Icon(q_item, 'SP_DirIcon')
         else:
             Set_Icon(q_item, 'SP_FileIcon')
+
+        # Color it based on file status.
+        if not self.is_folder:
+            # Special color if both patched and modified.
+            if self.Is_Patched_Modified():
+                color = 'darkviolet'
+            elif self.Is_Modified():
+                color = 'crimson'
+            elif self.Is_Patched():
+                color = 'blue'
+            elif self.Is_Loaded():
+                color = 'black'
+            else:
+                color = 'gray'
+            Set_Foreground_Color(q_item, color)
 
         # Add any children q items.
         for child_q_item in self.Get_Child_Q_Items(
@@ -173,7 +204,100 @@ class VFS_Item:
         if include_files:
             # Make sure files are built.
             self.Build_Files()
-            for subitem in sorted(self.files, key = lambda x : x.name):
+
+            for subitem in sorted(
+                self.files, 
+                # Sort these such that modified/patched/etc. show up first.
+                # Want it to be somewhat exclusively categorized, eg. all
+                #  modified files are grouped together and sorted by name
+                #  and not based on which are patched.
+                # Flip the flags so that a 'True' sorts first.
+                key = lambda x : (  not x.Is_Patched_Modified(),
+                                    not x.Is_Modified(), 
+                                    not x.Is_Patched(), 
+                                    not x.Is_Loaded(), 
+                                    x.name)
+                ):
                 ret_list.append( subitem.Get_Q_Item())
 
         return ret_list
+
+
+    def Get_Parent_Q_Item(self):
+        '''
+        Returns a QStandardItem for this item's parent.
+        It will have no file/folder children.
+        If there is no parent, returns None.
+        '''
+        if self.parent == None:
+            return
+        return self.parent.Get_Q_Item()
+
+
+    def Is_Loaded(self):
+        '''
+        For files, returns True if the File_System has a copy of
+        the file loaded, else False.
+        '''
+        if self.is_folder:
+            return False
+        if File_System.File_Is_Loaded(self.virtual_path):
+            return True
+        return False
+
+
+    def Is_Patched(self):
+        '''
+        For files, returns True if the file is partly or wholly
+        by an extension. This ignores customizer modifications.
+        '''
+        if self.Is_Loaded():
+            if self.Get_Game_File().Is_Patched():
+                return True
+        return False
+
+
+    def Is_Modified(self):
+        '''
+        For files, returns True if the file has been modified by
+        the customizer script.
+        '''
+        if self.Is_Loaded():
+            if self.Get_Game_File().Is_Modified():
+                return True
+        return False
+        
+
+    def Is_Patched_Modified(self):
+        '''
+        For files, teturns True if the file has been modified
+        by the customizer script and was original sourced from
+        an extension.
+        '''
+        return self.Is_Modified() and self.Is_Patched()
+
+
+    def Get_Summary(self):
+        '''
+        Returns a text block with a summary of this item's details.
+        '''
+        lines =['name      : {}'.format(self.name)]
+        if self.is_folder:
+            lines += [
+                'dirs      : {}'.format(len(self.folders)),
+                'files     : {}'.format(len(self.files)),
+                ]
+        else:
+            lines += [
+                'loaded    : {}'.format(self.Is_Loaded()),
+                'patched   : {}'.format(self.Is_Patched()),
+                'modified  : {}'.format(self.Is_Modified()),
+                ]
+            if self.Is_Patched():
+                lines.append(
+                'extensions:')
+                game_file = self.Get_Game_File()
+                for extension_name in game_file.Get_Source_Names():
+                    lines.append('  '+extension_name)
+
+        return '\n'.join(lines)

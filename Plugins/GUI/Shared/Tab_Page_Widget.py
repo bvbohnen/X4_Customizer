@@ -19,6 +19,9 @@ class Tab_Page_Widget(QtWidgets.QWidget):
       - The Work_Request object created by the thread handler when
         a request was made.
       - Only filled while a request is active.
+    * print_thread_args
+      - Bool, if True then threads will print their args when launched.
+      - Set False for tabs that have complex thread args.
     '''
     def __init__(self, parent, window):
         super().__init__(parent)
@@ -26,6 +29,7 @@ class Tab_Page_Widget(QtWidgets.QWidget):
         self.window = window
         self.thread_request_active = False
         self.thread_request = None
+        self.print_thread_args = True
         
         # Call the generated setup function, inherited from the qt form.
         # This will fill in the various widgets from designer.
@@ -123,6 +127,7 @@ class Tab_Page_Widget(QtWidgets.QWidget):
             *args,
             callback_function  = self.Handle_Thread_Finished,
             prelaunch_function = prelaunch_function,
+            print_args = self.print_thread_args,
             **kwargs
             )
 

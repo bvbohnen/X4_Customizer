@@ -19,13 +19,13 @@
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QGridLayout" name="gridLayout_2">
        <property name="spacing">
         <number>3</number>
        </property>
        <item row="0" column="0">
-        <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,0,0,0">
+        <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0,1,0,0,0">
          <property name="sizeConstraint">
           <enum>QLayout::SetMinimumSize</enum>
          </property>
@@ -33,6 +33,20 @@
           <widget class="QPushButton" name="widget_button_compare">
            <property name="text">
             <string>Compare</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="widget_button_reload">
+           <property name="text">
+            <string>Reload</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="widget_label_path">
+           <property name="text">
+            <string>TextLabel</string>
            </property>
           </widget>
          </item>
@@ -59,7 +73,7 @@
             <string>CheckBox</string>
            </property>
            <property name="checked">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -67,6 +81,9 @@
           <widget class="QCheckBox" name="widget_checkBox_2">
            <property name="text">
             <string>CheckBox</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -83,7 +100,7 @@
             <x>0</x>
             <y>0</y>
             <width>864</width>
-            <height>95</height>
+            <height>171</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_4">
@@ -126,21 +143,21 @@
               <item row="0" column="0">
                <widget class="File_Text_Brower" name="widget_textBrowser_0">
                 <property name="lineWrapMode">
-                 <enum>QTextEdit::NoWrap</enum>
+                 <enum>QPlainTextEdit::NoWrap</enum>
                 </property>
                </widget>
               </item>
               <item row="0" column="1">
                <widget class="File_Text_Brower" name="widget_textBrowser_1">
                 <property name="lineWrapMode">
-                 <enum>QTextEdit::NoWrap</enum>
+                 <enum>QPlainTextEdit::NoWrap</enum>
                 </property>
                </widget>
               </item>
               <item row="0" column="2">
                <widget class="File_Text_Brower" name="widget_textBrowser_2">
                 <property name="lineWrapMode">
-                 <enum>QTextEdit::NoWrap</enum>
+                 <enum>QPlainTextEdit::NoWrap</enum>
                 </property>
                </widget>
               </item>
@@ -172,10 +189,27 @@
          <number>0</number>
         </property>
         <property name="spacing">
-         <number>0</number>
+         <number>3</number>
         </property>
         <item row="0" column="0">
-         <widget class="QTextEdit" name="widget_textEdit_compare"/>
+         <widget class="QTextEdit" name="textEdit_compare_left">
+          <property name="lineWrapMode">
+           <enum>QTextEdit::NoWrap</enum>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QTextEdit" name="textEdit_compare_right">
+          <property name="lineWrapMode">
+           <enum>QTextEdit::NoWrap</enum>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -187,7 +221,7 @@
  <customwidgets>
   <customwidget>
    <class>File_Text_Brower</class>
-   <extends>QTextEdit</extends>
+   <extends>QPlainTextEdit</extends>
    <header>Plugins.GUI.File_Viewer_Window</header>
   </customwidget>
  </customwidgets>
