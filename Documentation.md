@@ -1,4 +1,4 @@
-X4 Customizer 1.5
+X4 Customizer 1.6
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -615,3 +615,7 @@ Change Log:
    - Tabs will load game information automatically if paths are set up.
    - Added editing support for engines, scanners, storage, dockingbays.
    - Various other polish, mostly in the gui.
+ * 1.6
+   - Added support for basic ship editing.
+   - Added a virtual file system tab to the gui.
+   - Added file viewing tabs to the gui, with xml syntax highlighting and diff comparison output.
