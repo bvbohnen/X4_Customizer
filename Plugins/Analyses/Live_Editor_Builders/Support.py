@@ -8,6 +8,7 @@ from Framework.Live_Editor_Components import *
 # Convenience macro renaming.
 _E = Edit_Item_Macro
 _D = Display_Item_Macro
+_G = Item_Group_Macro
 
 
 def Get_Macro_Component_File(macro_file):
@@ -141,3 +142,25 @@ _component_item_macros = [
     ]
 
 
+physics_item_macros = [
+    _E('physics_mass'              , './macro/properties/physics'             , 'mass'       , 'Mass'            , ''),
+    _E('physics_inertia_pitch'     , './macro/properties/physics/inertia'     , 'pitch'      , 'Inertia Pitch'   , ''),
+    _E('physics_inertia_yaw'       , './macro/properties/physics/inertia'     , 'yaw'        , 'Inertia Yaw'     , ''),
+    _E('physics_inertia_roll'      , './macro/properties/physics/inertia'     , 'roll'       , 'Inertia Roll'    , ''),
+    _E('physics_drag_forward'      , './macro/properties/physics/drag'        , 'forward'    , 'Drag Forward'    , ''),
+    _E('physics_drag_reverse'      , './macro/properties/physics/drag'        , 'reverse'    , 'Drag Reverse'    , ''),
+    _E('physics_drag_horizontal'   , './macro/properties/physics/drag'        , 'horizontal' , 'Drag Horizontal' , ''),
+    _E('physics_drag_vertical'     , './macro/properties/physics/drag'        , 'vertical'   , 'Drag Vertical'   , ''),
+    _E('physics_drag_pitch'        , './macro/properties/physics/drag'        , 'pitch'      , 'Drag Pitch'      , ''),
+    _E('physics_drag_yaw'          , './macro/properties/physics/drag'        , 'yaw'        , 'Drag Yaw'        , ''),
+    _E('physics_drag_roll'         , './macro/properties/physics/drag'        , 'roll'       , 'Drag Roll'       , ''),
+    ]
+
+connection_item_macros = [    
+    # Loop over connections.
+    _G('connections'               , './macro/connections'                    , 'connection' , 'Connection'          ),
+    _E('name'                      , '.'                                      , 'ref'        , 'Name'            , ''),
+    _E('connector'                 , './macro'                                , 'connection' , 'Connector'       , ''),
+    _E('macro_name'                , './macro'                                , 'ref'        , 'Macro Name'      , '',  is_reference = True),
+    _G('/connections'),
+    ]

@@ -7,6 +7,8 @@ D = Display_Item_Macro
 G = Item_Group_Macro
 
 from .Support import Create_Objects_From_Asset_Files
+from .Support import physics_item_macros
+from .Support import connection_item_macros
 from ...Transforms.Support import Float_to_String
 
 
@@ -16,7 +18,7 @@ def _Build_Storage_Objects():
     Live_Editor.Get_Category_Objects('storage')
     Live_Editor.Get_Category_Objects('dockingbays')
     Live_Editor.Get_Category_Objects('cockpits')
-    
+    # TODO: dynamic connections.
 
     game_files = File_System.Get_All_Indexed_Files('macros','ship_*')
     return Create_Objects_From_Asset_Files(game_files, ship_item_macros)
@@ -34,17 +36,7 @@ ship_item_macros = [
     E('thruster_tags'             , './macro/properties/thruster'            , 'tags'       , 'Thruster Tags'   , ''),
     E('secrecy_level'             , './macro/properties/secrecy'             , 'level'      , 'Secrecy Level'   , ''),
     
-    E('physics_mass'              , './macro/properties/physics'             , 'mass'       , 'Mass'            , ''),
-    E('physics_inertia_pitch'     , './macro/properties/physics/inertia'     , 'pitch'      , 'Inertia Pitch'   , ''),
-    E('physics_inertia_yaw'       , './macro/properties/physics/inertia'     , 'yaw'        , 'Inertia Yaw'     , ''),
-    E('physics_inertia_roll'      , './macro/properties/physics/inertia'     , 'roll'       , 'Inertia Roll'    , ''),
-    E('physics_drag_forward'      , './macro/properties/physics/drag'        , 'forward'    , 'Drag Forward'    , ''),
-    E('physics_drag_reverse'      , './macro/properties/physics/drag'        , 'reverse'    , 'Drag Reverse'    , ''),
-    E('physics_drag_horizontal'   , './macro/properties/physics/drag'        , 'horizontal' , 'Drag Horizontal' , ''),
-    E('physics_drag_vertical'     , './macro/properties/physics/drag'        , 'vertical'   , 'Drag Vertical'   , ''),
-    E('physics_drag_pitch'        , './macro/properties/physics/drag'        , 'pitch'      , 'Drag Pitch'      , ''),
-    E('physics_drag_yaw'          , './macro/properties/physics/drag'        , 'yaw'        , 'Drag Yaw'        , ''),
-    E('physics_drag_roll'         , './macro/properties/physics/drag'        , 'roll'       , 'Drag Roll'       , ''),
+    *physics_item_macros,
 
     E('sounds_ship'               , './macro/properties/sounds/shipdetail'   , 'ref'        , 'Sound Effect'    , ''),
     E('sound_occlusion'           , './macro/properties/sound_occlusion'     , 'inside'     , 'Sound Occlusion' , ''),
@@ -56,12 +48,7 @@ ship_item_macros = [
     E('compatible'                , '.'                                      , 'compatible' , 'Compatible'      , ''),
     G('/software'),
 
-    # Loop over connections.
-    G('connections'               , './macro/connections'                    , 'connection' , 'Connection'          ),
-    E('name'                      , '.'                                      , 'ref'        , 'Name'            , ''),
-    E('connector'                 , './macro'                                , 'connection' , 'Connector'       , ''),
-    E('macro_name'                , './macro'                                , 'ref'        , 'Macro Codename'  , '',  is_reference = True),
-    G('/connections'),
+    *connection_item_macros
     
     ]
 

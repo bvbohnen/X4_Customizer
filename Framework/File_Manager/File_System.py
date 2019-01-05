@@ -5,6 +5,7 @@ import datetime
 from collections import defaultdict
 from lxml import etree as ET
 from functools import wraps
+from fnmatch import fnmatch
 
 from .Source_Reader import Source_Reader_class
 from .Cat_Writer import Cat_Writer
@@ -275,7 +276,21 @@ class File_System_class:
             return True
         return False
 
+
+    def Get_Loaded_Files(self, pattern = None):
+        '''
+        Returns a list of Game_File objects that are currently loaded.
+        Optionally, loads only files with virtual_paths matching
+        the given pattern.
+        '''
+        # Start with the pattern processing.
+        ret_list = []
+        for path, game_file in self.game_file_dict.items():
+            if pattern == None or fnmatch(path, pattern):
+                ret_list.append(game_file)
+        return ret_list
     
+
     @_Verify_Init
     def Load_File(
             self,
@@ -341,9 +356,10 @@ class File_System_class:
         virtual_path wildcard pattern.
         Returns a list of files loaded.
         '''
-        # Limit each pattern to running once.
-        if pattern in self._patterns_loaded:
-            return
+        # -Removed; skipping like this fails to fill the return list.
+        ## Limit each pattern to running once.
+        #if pattern in self._patterns_loaded:
+        #    return
         self._patterns_loaded.add(pattern)
 
         # Load all files matching the pattern.

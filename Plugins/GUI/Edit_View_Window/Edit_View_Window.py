@@ -141,7 +141,7 @@ class Edit_View_Window(Tab_Page_Widget, generated_class):
 
     def Action_Make_Table_Group(self):
         '''
-        Update button was presssed; clear loaded files and rerun
+        Update button was pressed; clear loaded files and rerun
         the plugin to gather the table group and set up the tree.
         '''
         # Disable the button while working.
@@ -164,7 +164,18 @@ class Edit_View_Window(Tab_Page_Widget, generated_class):
         '''
         self.Action_Make_Table_Group()
         return
+    
 
+    def Handle_Signal(self, *flags):
+        '''
+        Respond to signal events.
+        '''
+        if 'file_system_reset' in flags:
+            self.Reset_From_File_System()
+        elif 'files_modified' in flags:
+            self.Soft_Refresh()
+        return
+    
 
     def Handle_Thread_Finished(self, return_value):
         '''

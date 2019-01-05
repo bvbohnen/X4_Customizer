@@ -46,7 +46,7 @@
         <bool>false</bool>
        </attribute>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <property name="spacing">
          <number>3</number>
@@ -77,7 +77,7 @@
        </layout>
       </widget>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout">
        <property name="spacing">
         <number>3</number>
@@ -86,6 +86,9 @@
         <widget class="QListView" name="widget_listView">
          <property name="contextMenuPolicy">
           <enum>Qt::CustomContextMenu</enum>
+         </property>
+         <property name="autoScroll">
+          <bool>false</bool>
          </property>
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>

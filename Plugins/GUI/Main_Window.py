@@ -123,6 +123,7 @@ class Tab_Properties:
     This tracker will be annotated to any created widget
     as 'tab_properties'.
 
+    Attributes:
     * window
       - The main window, that should have a widget_tab_container child.
     * label
@@ -291,6 +292,39 @@ class GUI_Main_Window(qt_base_class, generated_class):
       - These may not actually be present in the tab widget, such as
         when hidden.
     '''
+    '''
+    Scrapped: signals like this get messy: if 'loaded' and 'modified'
+    are emitted (from a tab that did both), listeners will often do
+    a double-refresh (wasteful). Alternatives are to combine signals
+    into one macro signal with a series of flags (kinda clumsy), or
+    to skip signals entirely and just do function calls to the main
+    window (as done before thinking of signals).
+    The function calls also allow prioritizing the viewed tab
+    for updates, and are no more (maybe less) complicated to manage,
+    so signals are skipped in favor of functions.
+
+    Signals (emitted from child tabs, which may emit multiple):
+    * sig_file_system_reset
+      - Emitted when the File_System is reset completely, as well
+        as once at startup to init all tabs.
+      - Tabs should generally do a full refresh if they present
+        data from the file system.
+    * sig_files_modified
+      - Emitted when a tab performed some function that may modify
+        files in the file system.
+      - Tabs should do a soft refresh if they present modified data from
+        the file system.
+    * sig_files_loaded
+      - Emitted when a tab performed a game file loading, but did not
+        do modification.
+      - Tabs only need to reset if they are conditioned on which
+        files are loaded, eg. the VFS.
+    '''
+    # Signal defs.
+    sig_file_system_reset = QtCore.pyqtSignal()
+    sig_files_modified    = QtCore.pyqtSignal()
+    sig_files_loaded      = QtCore.pyqtSignal()
+
     def __init__(self, application):
         # Init the QMainWindow.
         super().__init__()
@@ -430,8 +464,8 @@ class GUI_Main_Window(qt_base_class, generated_class):
         # Kick off a file system refresh.
         # Skip this when not using threads, since it extends gui startup
         # by too much.
-        if not Settings.disable_threading:
-            self.Refresh_File_System()
+        if not Settings.disable_threading and Settings.Paths_Are_Valid():
+            self.Send_Signal('file_system_reset')
 
         # Flag startup as completed.
         # This will allow later created tabs to refresh themselves
@@ -530,7 +564,8 @@ class GUI_Main_Window(qt_base_class, generated_class):
 
         # Start processing.
         if self.startup_complete:
-            widget.Reset_From_File_System()
+            #widget.Reset_From_File_System()
+            widget.Handle_Signal('file_system_reset')
         return widget
 
 
@@ -539,6 +574,8 @@ class GUI_Main_Window(qt_base_class, generated_class):
         Returns a list of tab page widgets.
         This will include hidden widgets that aren't in the
         tab container currently.
+        Visible tabs will be first, in tab order, then followed by
+        any hidden tabs in name order.
 
         * filters
           - Optional strings, names of the classes to be returned.
@@ -546,11 +583,15 @@ class GUI_Main_Window(qt_base_class, generated_class):
           - Subclasses of the filtered classes will be returned.
         '''
         # Start by collecting the widgets.
-        widget_set = set()
-        for widget in self.unique_tabs_dict.values():
-            widget_set.add(widget)
+        widget_list = []
+        # Start with the visible tabs, so that their list indices match
+        # their tab  indices.
         for index in range(self.widget_tab_container.count()):
-            widget_set.add( self.widget_tab_container.widget(index))
+            widget_list.append( self.widget_tab_container.widget(index))
+        # Fill in the hidden tabs, unique ones that were not found above.
+        for name, widget in sorted(self.unique_tabs_dict.items()):
+            if widget not in widget_list:
+                widget_set.append(widget)
 
         # If a filter given, swap it over to actual classes
         # for doing an isinstance check.
@@ -558,7 +599,7 @@ class GUI_Main_Window(qt_base_class, generated_class):
         filters = tuple([globals()[x] for x in filters])
 
         ret_list = []
-        for widget in widget_set:
+        for widget in widget_list:
             # Skip non-matching class types.
             if filters and not isinstance(widget, filters):
                 continue
@@ -647,52 +688,83 @@ class GUI_Main_Window(qt_base_class, generated_class):
     ##########################################################################
     # Reset related functions.
 
-    def Soft_Refresh(self):
+    def Send_Signal(self, *flags):
         '''
-        to be called after a script run, performs a Soft_Refresh on all
-        tabs that display 'current' game file information.
+        Signalling function, to be called by child tabs upon various
+        events, to trigger updates in other tabs (or even the caller
+        tab).  This will call Handle_Signal in all child tabs, with
+        priority for the currently viewed tabs.
+
+        * flags
+          - Strings, series of supported signal flags, indicating what has
+            occurred.
+          - Initial flag options (TODO: trim to those used):
+            - 'file_system_reset'
+            - 'files_modified'
+            - 'files_loaded'
+            - 'script_completed'
         '''
         # Want to prioritize the currently viewed tab.
         current_tab = self.widget_tab_container.currentWidget()
-        current_tab.Soft_Refresh()
+        current_tab.Handle_Signal(*flags)
 
         # Go through all tabs.
         for tab in self.Get_Tab_Widgets():
             # Skip the current_tab since it was already handled.
             if tab is current_tab:
                 continue
-            # Kick off the refresh.
-            tab.Soft_Refresh()
+            tab.Handle_Signal(*flags)
         return
+
+
+    #def Soft_Refresh(self):
+    #    '''
+    #    To be called after a script run, performs a Soft_Refresh on all
+    #    tabs that display 'current' game file information.
+    #    TODO: replace with a generic Send_Signal function completely.
+    #    '''
+    #    # Want to prioritize the currently viewed tab.
+    #    current_tab = self.widget_tab_container.currentWidget()
+    #    current_tab.Soft_Refresh()
+    #
+    #    # Go through all tabs.
+    #    for tab in self.Get_Tab_Widgets():
+    #        # Skip the current_tab since it was already handled.
+    #        if tab is current_tab:
+    #            continue
+    #        # Kick off the refresh.
+    #        tab.Soft_Refresh()
+    #    return
         
 
-    def Refresh_File_System(self):
-        '''
-        Resets/refreshes the File_System and related components.
-        This will kick off data loading on all edit tabs.
-        Meant for use at startup if Settings appear to have proper
-        paths, or for when paths change.
-        TODO: maybe a menu option as well.
-        '''
-        # TODO: check validity of Settings.
-        if not Settings.Paths_Are_Valid():
-            return
-
-        # Want to prioritize the currently viewed tab, if any.
-        # Note: if all tabs are hidden, this will return None.
-        current_tab = self.widget_tab_container.currentWidget()
-        if current_tab != None:
-            current_tab.Reset_From_File_System()
-
-        # Go through all tabs.
-        for tab in self.Get_Tab_Widgets():
-            # Skip the current_tab since it was already handled.
-            if tab is current_tab:
-                continue
-            # Kick off the refresh.
-            # These will queue up, so should be safe.
-            tab.Reset_From_File_System()
-        return
+    #def Refresh_File_System(self):
+    #    '''
+    #    Resets/refreshes the File_System and related components.
+    #    This will kick off data loading on all edit tabs.
+    #    Meant for use at startup if Settings appear to have proper
+    #    paths, or for when paths change.
+    #    TODO: maybe a menu option as well.
+    #    TODO: replace with a generic Send_Signal function completely.
+    #    '''
+    #    # TODO: check validity of Settings.
+    #    if not Settings.Paths_Are_Valid():
+    #        return
+    #
+    #    # Want to prioritize the currently viewed tab, if any.
+    #    # Note: if all tabs are hidden, this will return None.
+    #    current_tab = self.widget_tab_container.currentWidget()
+    #    if current_tab != None:
+    #        current_tab.Reset_From_File_System()
+    #
+    #    # Go through all tabs.
+    #    for tab in self.Get_Tab_Widgets():
+    #        # Skip the current_tab since it was already handled.
+    #        if tab is current_tab:
+    #            continue
+    #        # Kick off the refresh.
+    #        # These will queue up, so should be safe.
+    #        tab.Reset_From_File_System()
+    #    return
 
 
     ##########################################################################
@@ -909,9 +981,13 @@ class GUI_Main_Window(qt_base_class, generated_class):
         
 
         # Save state from tab pages.
+        # Side note: the actual ini order could be jumbled, so these
+        #  tabs will have some care during read back to put them in
+        #  the right order; they can be sorted based on tab name,
+        #  up to 3 digits worth.
         for index, widget in enumerate(self.Get_Tab_Widgets()):
             # Use the tab_properties to handle saving.
-            settings.beginGroup('Tab_{}'.format(index))
+            settings.beginGroup('Tab_{:03}'.format(index))
             widget.tab_properties.Save_Session_Settings(settings)
             settings.endGroup()
             
@@ -929,7 +1005,8 @@ class GUI_Main_Window(qt_base_class, generated_class):
 
         # Loop over the groups; there are an unspecified number due
         # to variable tab amounts being open.
-        for group in settings.childGroups():
+        # Sort these to restore tabs in order.
+        for group in sorted(settings.childGroups()):
             settings.beginGroup(group)
 
             if group == 'Main_Window':

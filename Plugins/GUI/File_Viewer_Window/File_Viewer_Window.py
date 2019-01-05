@@ -145,15 +145,21 @@ class File_Viewer_Window(Tab_Page_Widget, generated_class):
             # Show it if the checkbox is checked.
             textbox.setVisible(checkbox.isChecked())
         return
+    
 
-
-    def Soft_Refresh(self):
+    def Handle_Signal(self, *flags):
         '''
-        Redraw the 'current' text.
+        Respond to signal events.
         '''
-        self.Refresh('current')
+        # TODO: maybe detect if this file was modified.
+        if 'files_modified' in flags:
+            # Only update the current version.
+            self.Refresh('current')
+            #self.Soft_Refresh()
+        elif 'file_system_reset' in flags:
+            self.Reset_From_File_System()
         return
-
+    
     
     def Reset_From_File_System(self):
         '''
@@ -199,6 +205,7 @@ class File_Viewer_Window(Tab_Page_Widget, generated_class):
         self.Queue_Thread(File_System.Load_File, 
                           self.virtual_path,
                           error_if_not_found = False,
+                          short_run = True,
                           callback_function = self.Handle_Game_File)
         return
 
@@ -237,13 +244,17 @@ class File_Viewer_Window(Tab_Page_Widget, generated_class):
             self.version_textbox_dict[version].numbered_text = '\n'.join(numbered_lines)
             
         # Queue up the thread.
+        # TODO: maybe move this to a purely local thread; it can run in
+        # alongside any file system processing going on, though
+        # that might not actually matter with python threading not
+        # being parallel.
+        # TODO: skip threading this if the file is short.
         self.Queue_Thread(self.Get_Text_Highlights, 
                           version_lines_dict = version_lines_dict,
                           callback_function = self.Apply_Highlights)
-
-        # Try to find a different solution for now.
-        #self._Threaded_Refresh()
-        #self.Handle_Thread_Finished()
+        
+        # Send out some signalling flags.
+        self.window.Send_Signal('files_loaded')
 
         return
     
@@ -272,6 +283,8 @@ class File_Viewer_Window(Tab_Page_Widget, generated_class):
         #start = time.time()
 
         # Short text will get processing directly.
+        # The line count is just a guess at what a good switching
+        # point would be.
         num_lines = len(next(iter(version_lines_dict.values())))
         #print(num_lines)
         #print(len(version_lines_dict))
@@ -370,7 +383,16 @@ class File_Viewer_Window(Tab_Page_Widget, generated_class):
         '''
         if not self.virtual_path:
             return
-        File_System.Reset_File(self.virtual_path)
+        self.Queue_Thread(File_System.Reset_File, 
+                          self.virtual_path,
+                          short_run = True,
+                          callback_function = self._Action_Reload_File_pt2)
+        #File_System.Reset_File(self.virtual_path)
+        #self.Refresh()
+        return
+    def _Action_Reload_File_pt2(self, return_value):
+        'Finish file reloading'
+        # Do a full refresh.
         self.Refresh()
         return
 
@@ -543,9 +565,7 @@ class File_Viewer_Window(Tab_Page_Widget, generated_class):
         # Turn on the button.
         self.widget_button_compare.setEnabled(True)
         return
-
-    
-    
+        
 
     def Save_Session_Settings(self, settings):
         '''

@@ -47,12 +47,14 @@ class VFS_Tree_Model(QStandardItemModel):
         return
         
 
-    def Set_File_Listing(self, virtual_paths):
+    def Set_File_Listing(self, virtual_paths, file_info_dict):
         '''
         Fill in the tree with the given file system contents.
 
         * virtual_paths
           - List of strings, virtual paths to be included.
+        * file_info_dict
+          - Dict of dicts, info on loaded files.
         '''        
         ## Record the expansion state of items.
         ## The goal is that all labels currently expanded will get
@@ -69,7 +71,7 @@ class VFS_Tree_Model(QStandardItemModel):
         #self.branch_dict.clear()        
 
         # Convert to vfs items.
-        self.Convert_Paths_To_VFS_Items(virtual_paths)
+        self.Convert_Paths_To_VFS_Items(virtual_paths, file_info_dict)
 
         # Grab the top node.
         top_item = self.path_item_dict['']
@@ -125,7 +127,7 @@ class VFS_Tree_Model(QStandardItemModel):
         return
 
 
-    def Convert_Paths_To_VFS_Items(self, virtual_paths):
+    def Convert_Paths_To_VFS_Items(self, virtual_paths, file_info_dict):
         '''
         Generate VFS_Items for the given virtual_paths.
         Returns a dict, keyed by virtual_path (partials for folders),
@@ -148,11 +150,15 @@ class VFS_Tree_Model(QStandardItemModel):
 
             # If it is not yet seen, record it as a folder.
             if parent_path not in path_item_dict:
+
+                # Create the item.
                 parent = VFS_Item(
                     virtual_path = parent_path,
-                    is_folder = True )
+                    is_folder = True,
+                    shared_file_info_dict = file_info_dict)
+
+                # Record it, and its parents recursively.
                 path_item_dict[parent_path] = parent
-                # Record its parents recursively.
                 Record_Parents(parent)
 
             # Add this item to its parent.
@@ -177,12 +183,18 @@ class VFS_Tree_Model(QStandardItemModel):
                 parent_path = ''
 
             # Set up the first parent.
+            # TODO: this has some code repetition with the Record_Parents
+            # function; a rewrite can clean it up a bit.
             if parent_path not in path_item_dict:
+
+                # Create the item.
                 parent = VFS_Item(
                     virtual_path = parent_path,
-                    is_folder = True )
+                    is_folder = True,
+                    shared_file_info_dict = file_info_dict )
+                
+                # Record it, and its parents recursively.
                 path_item_dict[parent_path] = parent
-                # Record its parents recursively.
                 Record_Parents(parent)
                 
             # Add this virtual_path to its parent.
@@ -277,6 +289,10 @@ class VFS_Tree_Model(QStandardItemModel):
         Does a partial refresh of the table, resetting the 'current'
         values of items and redrawing the table.
         '''
+        # Recolor all items.
+        for item in self.path_q_item_dict.values():
+            item.vfs_item.Color_Q_Item(item)
+
         # Send the selected item off for re-display, if there is
         # a selection.
         if self.last_selected_virtual_path != None:

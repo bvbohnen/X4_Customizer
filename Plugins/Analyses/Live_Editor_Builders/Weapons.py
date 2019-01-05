@@ -10,27 +10,40 @@ E = Edit_Item_Macro
 D = Display_Item_Macro
 
 from .Support import Create_Objects_From_Asset_Files
+from .Support import physics_item_macros
+from .Support import connection_item_macros
 from ...Transforms.Support import Float_to_String
 
 
 ##############################################################################
-
+# Bullets and missiles; these will share some signficiant chunks.
 @Live_Editor_Object_Builder('bullets')
 def _Build_Bullet_Objects():
     '''
     Returns a list of Edit_Objects for all found bullets.
     Meant for calling from the Live_Editor.
-    ''' 
+    '''
+    # Make sure engines are loaded for the missiles.
+    Live_Editor.Get_Category_Objects('engines')
+
     # Look up bullet files.
     # These can be in two locations.
     File_System.Load_Files('assets/props/WeaponSystems/*.xml')
     File_System.Load_Files('assets/fx/weaponFx/*.xml')
-    game_files = File_System.Get_Asset_Files_By_Class('macros',
-                    'bullet','missile','bomb','mine','countermeasure')
-    return Create_Objects_From_Asset_Files(game_files, bullet_item_macros)
+
+    # Split out proper bullets from missiles and similar.
+    bullet_game_files = File_System.Get_Asset_Files_By_Class('macros','bullet')
+    missile_game_files = File_System.Get_Asset_Files_By_Class('macros',
+                    'missile','bomb','mine','countermeasure')
+    objects = []
+    objects += Create_Objects_From_Asset_Files(bullet_game_files, bullet_item_macros)
+    objects += Create_Objects_From_Asset_Files(missile_game_files, missile_item_macros)
+    return objects
 
 
-def Display_Update_Bullet_RoF(
+
+
+def Display_Update_RoF(
         reload_rate, 
         reload_time,
         ammunition_reload_time,
@@ -67,39 +80,14 @@ def Display_Update_Bullet_RoF(
     return ''
 
 
-def Display_Update_Bullet_Range(
-        bullet_lifetime,
-        bullet_speed,
-        bullet_range
-    ):
-    'Update range. TODO: missile range.'
-    # Use bullet range if given, else compute.
-    if bullet_range:
-        return bullet_range
-    if bullet_lifetime and bullet_speed:
-        return Float_to_String(float(bullet_lifetime) * float(bullet_speed))
-    return ''
-
-
-def _Merge(a,b):
-    'Pick either of two values that is not empty, if possible.'
-    return a if a else b if b else ''
-
-def Display_Update_Bullet_Merged_Damage( damage, explosion_damage ):
-    'Merge bullet and explosion damage, for later compute.'
-    return _Merge(damage, explosion_damage)
-
-def Display_Update_Bullet_Merged_Damage_Shield( damage_shield, explosion_damage_shield ):
-    'Merge bullet and explosion damage, for later compute.'
-    return _Merge(damage_shield, explosion_damage_shield)
-
-def Display_Update_Bullet_Merged_Damage_Hull( damage_hull, explosion_damage_hull ):
-    'Merge bullet and explosion damage, for later compute.'
-    return _Merge(damage_hull, explosion_damage_hull)
-
-def Display_Update_Bullet_Merged_Amount( amount, missile_amount ):
-    'Merge bullet and missile amount, for later compute.'
-    return _Merge(amount, missile_amount)
+# Shared item types between bullets and missiles.
+reload_macros = [
+    D('fire_rate'                 , Display_Update_RoF                    , 'Rate of Fire', ''),
+    E('reload_rate'               , './/reload'          , 'rate'         , 'Reload Rate', 'For burst weapons, time between shots in the burst'),
+    E('reload_time'               , './/reload'          , 'time'         , 'Reload Time', 'For non-burst weapons, time between shots'),
+    E('ammunition_rounds'         , './/ammunition'      , 'value'        , 'Burst Rounds', 'For burst weapons, number of shots per burst.'),
+    E('ammunition_reload_time'    , './/ammunition'      , 'reload'       , 'Interburst Time', 'For burst weapons, time from the end of a burst to the start of the next.'),
+    ]
 
 
 def _Calc_Dps(fire_rate, damage, amount):
@@ -112,43 +100,57 @@ def _Calc_Dps(fire_rate, damage, amount):
     return ''
 
 
+def Display_Update_Bullet_Range(
+        bullet_lifetime,
+        bullet_speed,
+        bullet_range
+    ):
+    'Update range.'
+    # Use bullet range if given, else compute.
+    if bullet_range:
+        return bullet_range
+    if bullet_lifetime and bullet_speed:
+        return Float_to_String(float(bullet_lifetime) * float(bullet_speed))
+    return ''
+
+
 def Display_Update_Bullet_Burst_DPS(
         fire_rate,
-        merge_damage,
+        damage,
         damage_repair,
-        merge_amount,
+        bullet_amount,
     ):
     'Calculate burst dps (ignoring heat).'
     # No damage if this is a repair weapon.
-    return '' if damage_repair == '1' else _Calc_Dps(fire_rate, merge_damage, merge_amount)
+    return '' if damage_repair == '1' else _Calc_Dps(fire_rate, damage, bullet_amount)
 
 def Display_Update_Bullet_Burst_DPS_Shield(
         fire_rate,
-        merge_damage_shield,
+        damage_shield,
         damage_repair,
-        merge_amount,
+        bullet_amount,
     ):
     'Calculate burst shield dps (ignoring heat).'
-    return '' if damage_repair == '1' else _Calc_Dps(fire_rate, merge_damage_shield, merge_amount)
+    return '' if damage_repair == '1' else _Calc_Dps(fire_rate, damage_shield, bullet_amount)
 
 def Display_Update_Bullet_Burst_DPS_Hull(
         fire_rate,
-        merge_damage_hull,
+        damage_hull,
         damage_repair,
-        merge_amount,
+        bullet_amount,
     ):
     'Calculate burst hull dps (ignoring heat).'
-    return '' if damage_repair == '1' else _Calc_Dps(fire_rate, merge_damage_hull, merge_amount)
+    return '' if damage_repair == '1' else _Calc_Dps(fire_rate, damage_hull, bullet_amount)
 
 def Display_Update_Bullet_Repair_Rate(
         fire_rate,
-        merge_damage_hull,
+        damage_hull,
         damage_repair,
-        merge_amount,
+        bullet_amount,
     ):
     'Calculate burst repair rate (ignoring heat).'
     # Use the hull damage field for repair amount.
-    return '' if damage_repair != '1' else _Calc_Dps(fire_rate, merge_damage_hull, merge_amount)
+    return '' if damage_repair != '1' else _Calc_Dps(fire_rate, damage_hull, bullet_amount)
 
 
 bullet_item_macros = [
@@ -156,22 +158,18 @@ bullet_item_macros = [
     D('dps_shield'                , Display_Update_Bullet_Burst_DPS_Shield, '+Shield', ''),
     D('dps_hull'                  , Display_Update_Bullet_Burst_DPS_Hull  , '+Hull', ''),
     D('repair_rate'               , Display_Update_Bullet_Repair_Rate     , 'Repair Rate', ''),
-    D('fire_rate'                 , Display_Update_Bullet_RoF             , 'Rate of Fire', ''),
     D('range'                     , Display_Update_Bullet_Range           , 'Range', ''),
+
+    *reload_macros,
 
     E('damage'                    , './/damage'          , 'value'        , 'Damage', ''),
     E('damage_shield'             , './/damage'          , 'shield'       , '+Shield', ''),
     E('damage_hull'               , './/damage'          , 'hull'         , '+Hull', ''),
     E('damage_repair'             , './/damage'          , 'repair'       , 'Repair', 'Set to 1 to flip to repairing.'),
-    E('reload_rate'               , './/reload'          , 'rate'         , 'Reload Rate', 'For burst weapons, time between shots in the burst'),
-    E('reload_time'               , './/reload'          , 'time'         , 'Reload Time', 'For non-burst weapons, time between shots'),
-    E('ammunition_rounds'         , './/ammunition'      , 'value'        , 'Burst Rounds', 'For burst weapons, number of shots per burst.'),
-    E('ammunition_reload_time'    , './/ammunition'      , 'reload'       , 'Interburst Time', 'For burst weapons, time from the end of a burst to the start of the next.'),
+
     E('bullet_speed'              , './/bullet'          , 'speed'        , 'Bullet Speed', ''),
     E('bullet_lifetime'           , './/bullet'          , 'lifetime'     , 'Bullet Lifetime', ''),
     E('bullet_range'              , './/bullet'          , 'range'        , 'Bullet Range', ''),
-
-    E('heat'                      , './/heat'            , 'value'        , '+Heat', 'Heat added per bullet (or burst of bullets)'),
     E('bullet_amount'             , './/bullet'          , 'amount'       , 'Bullet Amount', ''),
     E('barrel_amount'             , './/bullet'          , 'barrelamount' , 'Bullet Barrel Amount', ''),
     E('bullet_timediff'           , './/bullet'          , 'timediff'     , 'Bullet Time Diff', ''),
@@ -181,31 +179,82 @@ bullet_item_macros = [
     E('bullet_scale'              , './/bullet'          , 'scale'        , 'Bullet Scale', ''),
     E('bullet_attach'             , './/bullet'          , 'attach'       , 'Bullet Attach', ''),
 
-    E('explosion_damage'          , './/explosiondamage' , 'value'        , 'Explosion Damage', ''),
-    E('explosion_damage_shield'   , './/explosiondamage' , 'shield'       , 'Explosion +Shield', ''),
-    E('explosion_damage_hull'     , './/explosiondamage' , 'hull'         , 'Explosion +Hull', ''),
-    E('missile_amount'            , './/missile'         , 'amount'       , 'Missile Amount', ''),
-    E('missile_barrel_amount'     , './/missile'         , 'barrelamount' , 'Missile Barrel Amount', ''),
-    E('missile_lifetime'          , './/missile'         , 'lifetime'     , 'Missile Lifetime', ''),
-    E('missile_range'             , './/missile'         , 'range'        , 'Missile Missile Range', ''),
-    E('missile_guided'            , './/missile'         , 'guided'       , 'Missile Guided', ''),
-    E('missile_retarget'          , './/missile'         , 'retarget'     , 'Missile Retarget', ''),
-    E('missile_hull'              , './/hull'            , 'max'          , 'Missile Hull', ''),
-    E('lock_time'                 , './/lock'            , 'time'         , 'Missile Lock Time', ''),
-    E('lock_range'                , './/lock'            , 'range'        , 'Missile Lock Range', ''),
-    E('lock_angle'                , './/lock'            , 'angle'        , 'Missile Lock Angle', ''),
-    E('counter_resilience'        , './/countermeasure'  , 'resilience'   , 'Missile Resiliance', 'Missile resiliance against countermeasures'),
-
-    E('bullet_codename'           , './macro'            , 'name'         , 'Bullet Codename', '' , read_only = True),
-    
-    # Hidden compute terms.
-    D('merge_damage'              , Display_Update_Bullet_Merged_Damage        , hidden = True),
-    D('merge_damage_shield'       , Display_Update_Bullet_Merged_Damage_Shield , hidden = True),
-    D('merge_damage_hull'         , Display_Update_Bullet_Merged_Damage_Hull   , hidden = True),
-    D('merge_amount'              , Display_Update_Bullet_Merged_Amount        , hidden = True),
-    
+    E('heat'                      , './/heat'            , 'value'        , '+Heat', 'Heat added per bullet (or burst of bullets)'),
     ]
 
+
+def Display_Update_Missile_Speed(
+        thrust_forward,
+        physics_drag_forward,
+    ):
+    'Calculate speed.'
+    return Float_to_String(float(thrust_forward) / float(physics_drag_forward))
+
+
+def Display_Update_Missile_Range(
+        speed,
+        missile_lifetime,
+    ):
+    'Calculate range.'
+    return Float_to_String(float(speed) * float(missile_lifetime))
+
+
+def Display_Update_Missile_DPS(
+        fire_rate,
+        explosion_damage,
+        missile_amount,
+    ):
+    'Calculate dps.'
+    return _Calc_Dps(fire_rate, explosion_damage, missile_amount)
+
+def Display_Update_Missile_DPS_Shield(
+        fire_rate,
+        explosion_damage_shield,
+        missile_amount,
+    ):
+    'Calculate shield dps.'
+    return _Calc_Dps(fire_rate, explosion_damage_shield, missile_amount)
+
+def Display_Update_Missile_DPS_Hull(
+        fire_rate,
+        explosion_damage_hull,
+        missile_amount,
+    ):
+    'Calculate hull dps.'
+    return _Calc_Dps(fire_rate, explosion_damage_hull, missile_amount)
+
+
+missile_item_macros = [
+    # No heat on these, so don't bother with burst dps for now.
+    D('dps_base'                  , Display_Update_Missile_DPS             , 'DPS', ''),
+    D('dps_shield'                , Display_Update_Missile_DPS_Shield      , '+Shield', ''),
+    D('dps_hull'                  , Display_Update_Missile_DPS_Hull        , '+Hull', ''),
+    D('speed'                     , Display_Update_Missile_Speed           , 'Speed', ''),
+    D('effective_range'           , Display_Update_Missile_Range           , 'Effective Range', ''),
+
+    *reload_macros,
+    
+    E('weapon_system'             , './/weapon'          , 'system'       , 'Weapon System'        , ''),
+    E('explosion_damage'          , './/explosiondamage' , 'value'        , 'Explosion Damage'     , ''),
+    E('explosion_damage_shield'   , './/explosiondamage' , 'shield'       , 'Explosion +Shield'    , ''),
+    E('explosion_damage_hull'     , './/explosiondamage' , 'hull'         , 'Explosion +Hull'      , ''),
+    E('missile_amount'            , './/missile'         , 'amount'       , 'Amount'               , ''),
+    E('missile_barrel_amount'     , './/missile'         , 'barrelamount' , 'Barrel Amount'        , ''),
+    E('missile_lifetime'          , './/missile'         , 'lifetime'     , 'Lifetime'             , ''),
+    E('missile_range'             , './/missile'         , 'range'        , 'Range'                , ''),
+    E('missile_guided'            , './/missile'         , 'guided'       , 'Guided'               , ''),
+    E('missile_retarget'          , './/missile'         , 'retarget'     , 'Retarget'             , ''),
+    E('missile_hull'              , './/hull'            , 'max'          , 'Hull'                 , ''),
+    E('lock_time'                 , './/lock'            , 'time'         , 'Lock Time'            , ''),
+    E('lock_range'                , './/lock'            , 'range'        , 'Lock Range'           , ''),
+    E('lock_angle'                , './/lock'            , 'angle'        , 'Lock Angle'           , ''),
+    E('counter_resilience'        , './/countermeasure'  , 'resilience'   , 'Counter Resiliance'   , 'Missile resiliance against countermeasures'),
+    
+    E('longrangescan'             , './/longrangescan'   , 'minlevel'     , 'Long Range Scan'      , ''),
+    
+    *physics_item_macros,
+    *connection_item_macros,
+    ]
 
 ##############################################################################
 

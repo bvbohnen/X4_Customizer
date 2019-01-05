@@ -268,14 +268,15 @@ class Script_Window(Tab_Page_Widget, generated_class):
         '''
         Runs the currently loaded script.
         '''
-        # Grey out the run action.
-        self.window.action_Run_Script.setEnabled(False)
-
         # Save the script to a file.
         saved = self.Action_Save_Script()
         # If the save was cancelled, skip the run.
         if not saved:
             return
+
+        # Grey out the run action.
+        # Do this after saving, since it might return early.
+        self.window.action_Run_Script.setEnabled(False)
 
         # Set up its command, to run a script.
         # The easiest way to do this is to just call Main.Run, and let
@@ -302,7 +303,8 @@ class Script_Window(Tab_Page_Widget, generated_class):
 
         # When done, restore Settings back to the gui values, in case
         # the script temporarily modified them.
-        self.window.Store_Settings()
+        #-Removed; signals handle this.
+        #self.window.Store_Settings()
 
         # Close any transform log that might be open, to flush it
         # out and also reset it for a later run.
@@ -310,13 +312,18 @@ class Script_Window(Tab_Page_Widget, generated_class):
 
         # TODO: detect errors in the script and note them; for now, the
         # thread or framework will tend to print them out.
-        self.window.Print('Script run returned')
+        self.window.Print('Script run completed')
 
         # Tell any live edit tables to refresh their current values,
         # since the script may have changed them.
         Live_Editor.Reset_Current_Item_Values()
-        self.window.Soft_Refresh()
+        #-Removed; signals handle this.
+        #self.window.Soft_Refresh()
         
+        # Send out some signalling flags.
+        self.window.Send_Signal('script_completed',
+                                'files_modified',
+                                'files_loaded')
         return
 
     
@@ -358,3 +365,5 @@ class Script_Window(Tab_Page_Widget, generated_class):
         if not self.Check_If_Save_Needed():
             return False
         return True
+
+    

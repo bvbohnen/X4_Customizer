@@ -1,4 +1,4 @@
-X4 Customizer 1.6.1
+X4 Customizer 1.6.2
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -621,3 +621,8 @@ Change Log:
    - Added file viewing tabs to the gui, with xml syntax highlighting and diff comparison output.
  * 1.6.1
    - Bug fixes for hidden tabs and a threading conflicts.
+ * 1.6.2
+   - Added coloring to the VFS tree view.
+   - Added more fields for missile editing.
+   - Bug fix for tabs forgetting order between sessions.
+   - Swapped around inter-tab signalling and added more threading safety.

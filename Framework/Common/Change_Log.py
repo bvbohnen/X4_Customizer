@@ -98,6 +98,11 @@ Change Log:
      and diff comparison output.
  * 1.6.1
    - Bug fixes for hidden tabs and a threading conflicts.
+ * 1.6.2
+   - Added coloring to the VFS tree view.
+   - Added more fields for missile editing.
+   - Bug fix for tabs forgetting order between sessions.
+   - Swapped around inter-tab signalling and added more threading safety.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

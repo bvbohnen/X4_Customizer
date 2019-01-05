@@ -78,6 +78,7 @@ def _Build_Bullet_Object_Tree_View():
     '''
     Constructs an Edit_Tree_View object for use in displaying
     bullet data.
+    TODO: split off from missiles/etc.
     '''
     def Subcat_func(object):
         'Set up sub categories.'
@@ -89,7 +90,7 @@ def _Build_Bullet_Object_Tree_View():
         name              = 'bullets',
         display_name      = 'Bullets',
         object_categories = ['bullets'],
-        label_item        = 'bullet_codename',
+        label_item        = 'name',
         subcategory_func  = Subcat_func,    
     )
 

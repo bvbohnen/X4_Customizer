@@ -40,10 +40,24 @@ class VFS_Window(Tab_Page_Widget, generated_class):
     * list_model
       - QStandardItemModel controlling the widget_listView.
       - Will display files in a directory.
+    * file_info_dict
+      - Dict, keyed by loaded file virtual_path, holding some file
+        info of interest (currently 'loaded','modified','patched','sources).
+      - For use in coloring and detailed summary.
+      - Gathered inside a thread for safety.
+      - This will be a static dict, and references to it can be
+        freely spread around to get natural updates when the dict
+        contents update.
+    * pattern
+      - String, wildcard pattern for file paths to include.
+      - Use this to limit files/folders loaded to speed up the vfs.
+      - Hardcoded initially.
     '''
     def __init__(self, parent, window):
         super().__init__(parent, window)
-
+        self.file_info_dict = {}
+        self.pattern = '*.xml'
+        
         # Set up initial, blank models.
         self.tree_model = VFS_Tree_Model(self, self.widget_treeView)
         self.list_model = VFS_List_Model(self, self.widget_listView)
@@ -58,7 +72,7 @@ class VFS_Window(Tab_Page_Widget, generated_class):
         return
     
     
-    def Action_Refresh(self):
+    def Reset_From_File_System(self):
         '''
         Load the virtual paths from the File_System.
         '''
@@ -74,81 +88,87 @@ class VFS_Window(Tab_Page_Widget, generated_class):
         #    rebuild = True,
         #    )
         
-        # Pattern this for supported file types; don't want everything
-        # because the vfs builder is kinda slow currently.
-        # Only support xml for now, as that is what the file viewer
-        # supports (others not having multiple version support).
-    
-        # Queue up the thread to get the paths.
-        self.Queue_Thread(File_System.Gen_All_Virtual_Paths, 
-                          pattern = '*.xml',
-                          callback_function = self.Handle_Virtual_Paths)
+        # Kick off the threads to update virtual paths and to
+        # update the file info.
+        self.Threaded_Gather_Virtual_Paths()
+        self.Threaded_Gather_File_Info()
+
         return
 
 
-    def Handle_Virtual_Paths(self, virtual_paths):
+    def Threaded_Gather_Virtual_Paths(self):
         '''
-        Capture thread virtual_paths response.
+        Starts thread that accesses the file system and gathers all
+        virtual paths, and some file summary info for loaded files.
         '''
-        assert virtual_paths
-        self.tree_model.Set_File_Listing(virtual_paths)
+        self.Queue_Thread(File_System.Gen_All_Virtual_Paths,
+                          pattern = self.pattern,
+                          callback_function = self._Threaded_Gather_Virtual_Paths_pt2)
         return
+
+    def _Threaded_Gather_Virtual_Paths_pt2(self, virtual_paths):
+        'Threaded_Gather_Virtual_Paths part 2, post-thread'    
+        # Update the tree.
+        self.tree_model.Set_File_Listing(virtual_paths, self.file_info_dict)
+        return
+
+
+    def Threaded_Gather_File_Info(self, pattern = None):
+        '''
+        Starts thread  that gathers info on loaded files, updating
+        file_info_dict.
+        '''
+        self.Queue_Thread(File_System.Get_Loaded_Files,
+                          pattern = pattern,
+                          short_run = True,
+                          callback_function = self._Threaded_Gather_File_Info_pt2)
+        return
+
+    def _Threaded_Gather_File_Info_pt2(self, game_files):
+        'Gather_File_Info part 2, post-thread'
+
+        # Clear old info.
+        self.file_info_dict.clear()
+
+        # Gather generic info of interest.
+        # (An alternative would be to create VFS_Item objects here, but
+        # that can get clumsy to keep them up to date on soft refreshes,
+        # so this will gather info to a generic dict for now that the
+        # items can look into later as needed.)
+        for file in game_files:
+            self.file_info_dict[file.virtual_path] = {
+                'loaded'  : True,
+                'patched' : file.Is_Patched(),
+                'modified': file.Is_Modified(),
+                'sources' : file.Get_Source_Names(),
+                }
+            
+        # Want to do soft refreshes on item displays, so they can
+        # update their info and coloring.
+        # The tree_model updates the list_model currently, so only
+        # refresh the tree.
+        self.tree_model.Soft_Refresh()
+        return
+
 
     def Soft_Refresh(self):
         '''
-        Does a partial refresh of the table, redrawing the current items.
+        Does a partial refresh, redrawing the current items based
+        on fresh game file information.
+        TODO: replace completely with Handle_Signal
         '''
-        # The tree will update the list, so only refresh the tree.
-        self.tree_model.Soft_Refresh()
-        #self.list_model.Soft_Refresh()
+        # Do a threaded update of the file info.
+        # This will update the tree automatically.
+        self.Threaded_Gather_File_Info()
         return
     
-    def Reset_From_File_System(self):
+
+    def Handle_Signal(self, *flags):
         '''
-        Trigger regather of the file system on reset.
+        Respond to signal events.
         '''
-        self.Action_Refresh()
-        return
-
-    #def Action_Make_Table_Group(self):
-    #    '''
-    #    Update button was presssed; clear loaded files and rerun
-    #    the plugin to gather the table group and set up the tree.
-    #    '''
-    #    # Disable the button while working.
-    #    self.widget_Table_Update.setEnabled(False)
-    #
-    #    # Reset the live editor table group that is be re-requested.
-    #    # This will fill in new items that may get created by the
-    #    # user script.
-    #    self.Queue_Thread(
-    #        Live_Editor.Get_Tree_View,
-    #        self.table_name, 
-    #        rebuild = True,
-    #        )
-    #    return
-
-
-    # TODO: maybe use a thread to gather the file system info.
-    #def Handle_Thread_Finished(self, return_value):
-    #    '''
-    #    Catch the returned table_group and updated the widgets.
-    #    '''
-    #    super().Handle_Thread_Finished()
-    #    # Turn the button back on, before handling the response
-    #    # (in case it gets an error, this lets it be rerun).
-    #    self.widget_Table_Update.setEnabled(True)
-    #
-    #    # Pass the Edit_Tree_View down to the model.
-    #    self.tree_model .Set_Edit_Tree_View(return_value)
-    #    #self.table_model.Set_Edit_Tree_View(return_value)
-    #    return
-
-
-    def Close(self):
-        '''
-        Prepare this window for closing, either at shutdown or
-        on tab closure.
-        '''
-        super().Close()
+        if 'file_system_reset' in flags:
+            self.Reset_From_File_System()
+        elif 'files_loaded' or 'files_modified' in flags:
+            self.Threaded_Gather_File_Info()
         return

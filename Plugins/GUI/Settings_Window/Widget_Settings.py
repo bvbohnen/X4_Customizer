@@ -352,3 +352,12 @@ class Widget_Settings(QtWidgets.QGroupBox):
         
         return
 
+    
+    def Handle_Signal(self, *flags):
+        '''
+        Respond to signal events.
+        '''
+        if 'script_completed' in flags:
+            self.Store_Settings()
+        return
+    

@@ -5,7 +5,8 @@ from PyQt5 import QtWidgets
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 
 from ..Shared.Misc import Set_Icon, Set_Foreground_Color
-from Framework import File_System
+#-Removed; all file system access moved elsewhere.
+#from Framework import File_System
 
 class VFS_Item:
     '''
@@ -35,14 +36,24 @@ class VFS_Item:
       - Empty if this is a file.
     * is_folder
       - Bool, True if this is a folder, else it is a file.
+    * shared_file_info_dict
+      - Dict present in the parent window, keyed by virtual_paths,
+        holding some parsed file information.
+      - This should be the same for all vfs items, and will be passed
+        to generated children, to be used in coloring and similar checks.
+      - This dict link is ensured never to change, though the contents
+        may be swapped around (eg. nested dicts could be removed and
+        remade).
     '''
     def __init__(
             self,
             virtual_path,
-            is_folder
+            is_folder,
+            shared_file_info_dict,
         ):
         self.virtual_path = virtual_path
         self.is_folder = is_folder
+        self.shared_file_info_dict = shared_file_info_dict
         self.parent = None
 
         # Split on the last '/', though it may not be present.
@@ -98,21 +109,29 @@ class VFS_Item:
         it at once.
         Does nothing if files are already present.
         '''
+        # TODO: maybe set this up to only fill in missing files, so
+        # that some files can be precreated, or files can be added
+        # after a first pass.
         if self.files:
             return
         for virtual_path in self.file_paths:
-            self.Add_Item(VFS_Item(virtual_path, is_folder = False))
+            # Create the item, passing along the file info.
+            self.Add_Item(VFS_Item(
+                virtual_path, 
+                is_folder = False,
+                shared_file_info_dict = self.shared_file_info_dict
+                ))
         return
 
-
-    def Get_Game_File(self):
-        '''
-        If this is a file, returns the Game_File object for it,
-        or None if there is a loading error.
-        '''
-        if self.is_folder:
-            return
-        return File_System.Load_File(self.virtual_path)
+    #-Removed; this should never be needed, and isn't entirely safe.
+    #def Get_Game_File(self):
+    #    '''
+    #    If this is a file, returns the Game_File object for it,
+    #    or None if there is a loading error.
+    #    '''
+    #    if self.is_folder:
+    #        return
+    #    return File_System.Load_File(self.virtual_path)
     
     
     def Get_Q_Item(
@@ -146,20 +165,7 @@ class VFS_Item:
         else:
             Set_Icon(q_item, 'SP_FileIcon')
 
-        # Color it based on file status.
-        if not self.is_folder:
-            # Special color if both patched and modified.
-            if self.Is_Patched_Modified():
-                color = 'darkviolet'
-            elif self.Is_Modified():
-                color = 'crimson'
-            elif self.Is_Patched():
-                color = 'blue'
-            elif self.Is_Loaded():
-                color = 'black'
-            else:
-                color = 'gray'
-            Set_Foreground_Color(q_item, color)
+        self.Color_Q_Item(q_item)
 
         # Add any children q items.
         for child_q_item in self.Get_Child_Q_Items(
@@ -169,6 +175,28 @@ class VFS_Item:
             q_item.appendRow(child_q_item)
 
         return q_item
+
+
+    def Color_Q_Item(self, q_item):
+        '''
+        Apply coloring to the given QStandardItem. To be used on q_item
+        creation, or to be given a q_item from a higher level when updating
+        colors.
+        '''
+        # Color it based on file status.
+        # Special color if both patched and modified.
+        if self.Is_Patched_Modified():
+            color = 'darkviolet'
+        elif self.Is_Modified():
+            color = 'crimson'
+        elif self.Is_Patched():
+            color = 'blue'
+        elif self.Is_Loaded():
+            color = 'black'
+        else:
+            color = 'gray'
+        Set_Foreground_Color(q_item, color)
+        return
 
 
     def Get_Child_Q_Items(
@@ -234,14 +262,55 @@ class VFS_Item:
         return self.parent.Get_Q_Item()
 
 
+    def Lookup_File_Info(self, field):
+        '''
+        Looks up the given field in the shared_file_info_dict, returning
+        its value or None if a matching entry not found.
+        Folders will check all children and attempt to join their
+        values together: bools get OR'd, lists get joined.
+        '''
+        ret_var = None
+        if not self.is_folder:
+            if self.virtual_path in self.shared_file_info_dict:
+                ret_var = self.shared_file_info_dict[self.virtual_path].get(field, None)
+
+        else:
+            # First pass collects the values; second pass joins them.
+            values = []
+            # Try file names (the files may not be created yet).
+            for path in self.file_paths:
+                if path in self.shared_file_info_dict:
+                    values.append(self.shared_file_info_dict[path].get(field, None))
+
+            # Also get subfolders.
+            for folder in self.folders:
+                values.append(folder.Lookup_File_Info(field))
+
+            # Join all values together.
+            # This is a little clumsy, skipping None and checking for
+            # a bool or list.
+            for value in values:
+                if value == None:
+                    continue
+                if isinstance(value, bool):
+                    if ret_var == None:
+                        ret_var = value
+                    else:
+                        ret_var |= value
+                elif isinstance(value, list):
+                    if ret_var == None:
+                        ret_var = []
+                    ret_var += value
+        return ret_var
+
+
     def Is_Loaded(self):
         '''
         For files, returns True if the File_System has a copy of
         the file loaded, else False.
         '''
-        if self.is_folder:
-            return False
-        if File_System.File_Is_Loaded(self.virtual_path):
+        # This will convert None to False.
+        if self.Lookup_File_Info('loaded'):
             return True
         return False
 
@@ -251,9 +320,8 @@ class VFS_Item:
         For files, returns True if the file is partly or wholly
         by an extension. This ignores customizer modifications.
         '''
-        if self.Is_Loaded():
-            if self.Get_Game_File().Is_Patched():
-                return True
+        if self.Lookup_File_Info('patched'):
+            return True
         return False
 
 
@@ -262,9 +330,8 @@ class VFS_Item:
         For files, returns True if the file has been modified by
         the customizer script.
         '''
-        if self.Is_Loaded():
-            if self.Get_Game_File().Is_Modified():
-                return True
+        if self.Lookup_File_Info('modified'):
+            return True
         return False
         
 
@@ -285,7 +352,7 @@ class VFS_Item:
         if self.is_folder:
             lines += [
                 'dirs      : {}'.format(len(self.folders)),
-                'files     : {}'.format(len(self.files)),
+                'files     : {}'.format(len(self.file_paths)),
                 ]
         else:
             lines += [
@@ -293,11 +360,15 @@ class VFS_Item:
                 'patched   : {}'.format(self.Is_Patched()),
                 'modified  : {}'.format(self.Is_Modified()),
                 ]
-            if self.Is_Patched():
-                lines.append(
-                'extensions:')
-                game_file = self.Get_Game_File()
-                for extension_name in game_file.Get_Source_Names():
-                    lines.append('  '+extension_name)
+
+            # Print out the source locations.
+            # At time of this comment, this only covers extension names,
+            # but may be extended in the game_file to include catalog
+            # names from the base x4 folder as well.
+            sources = self.Lookup_File_Info('sources')
+            if sources:
+                lines.append('sources   :')
+                for name in sources:
+                    lines.append('  '+name)
 
         return '\n'.join(lines)

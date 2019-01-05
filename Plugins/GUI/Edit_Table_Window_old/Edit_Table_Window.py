@@ -86,7 +86,7 @@ class Edit_Table_Window(Tab_Page_Widget, generated_class):
 
     def Action_Make_Table_Group(self):
         '''
-        Update button was presssed; clear loaded files and rerun
+        Update button was pressed; clear loaded files and rerun
         the plugin to gather the table group and set up the tree.
         '''
         # Disable the button while working.

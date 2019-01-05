@@ -37,7 +37,9 @@
     <Compile Include="Analyses\Live_Editor_Builders\Wares.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Analyses\Live_Editor_Builders\Weapons.py" />
+    <Compile Include="Analyses\Live_Editor_Builders\Weapons.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Analyses\Live_Editor_Builders\__init__.py">
       <SubType>Code</SubType>
     </Compile>

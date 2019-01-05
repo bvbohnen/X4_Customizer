@@ -12,12 +12,9 @@ class Tab_Page_Widget(QtWidgets.QWidget):
     * window
       - The parent main window for this tab, generally expected to
         be the main window.
-    * thread_request_active
-      - Bool, True while this widget has a work thread request pending.
-      - New requests will be ignored while this is True.
-    * thread_request
-      - The Work_Request object created by the thread handler when
-        a request was made.
+    * thread_requests_active
+      - List of Work_Request objects created by the thread handler when
+        a request was made, removed as threads are completed.
       - Only filled while a request is active.
     * callback_function
       - The callback function for the current or most recent thread.
@@ -29,8 +26,7 @@ class Tab_Page_Widget(QtWidgets.QWidget):
         super().__init__(parent)
 
         self.window = window
-        self.thread_request_active = False
-        self.thread_request = None
+        self.thread_requests_active = []
         self.print_thread_args = True
         self.callback_function = None
         
@@ -75,30 +71,24 @@ class Tab_Page_Widget(QtWidgets.QWidget):
     def Handle_Thread_Finished(self, return_value = None):
         '''
         Default handler for completed threads.
-        Subclasses should wrap this will their own response handling logic,
-        but still call this with super().
-        Alternatively, subclasses can provide callback_functions to
-        the thread queue, and avoid overwriting this.
+        Subclasses should overwrite this with their own response
+        handling logic, if they don't give callback_functions
+        to their requests.
         '''
-        # Clear this flag right away, in case the callback function
-        # wants to launch another thread.
-        self.thread_request_active = False
-        if self.callback_function:
-            # Buffer up the callback function, so that a new
-            # queued thread can store its own callback.
-            temp = self.callback_function
-            self.callback_function = None
-            temp(return_value)
+        # Could clear out finished requests, but it isn't really
+        # needed, and is done instead when new requests launch
+        # to make things simpler for callback functions.
         return
 
 
     def Unqueue_Thread(self):
         '''
         If a thread is currently queued, remove it from the queue.
-        This doesn't stop a running thread.
+        This doesn't stop a running thread, though will supress
+        its callback function.
         '''
-        if self.thread_request_active:
-            self.window.worker_thread.Unqueue_Thread(self.thread_request)
+        for request in self.thread_requests_active:
+            self.window.worker_thread.Unqueue_Thread(request)
         return
 
 
@@ -108,11 +98,14 @@ class Tab_Page_Widget(QtWidgets.QWidget):
             *args,
             prelaunch_function = None,
             callback_function = None,
+            short_run = False,
             **kwargs,
         ):
         '''
         Queue up a thread to be run. When it finishes, Handle_Thread_Finished
-        will be called automatically.
+        will be called automatically, or the callback_function if provided.
+        TODO: maybe catch/ignore cases where a pending request has the same
+        callback function as a new request.
 
         * work_function
           - The function for the thread to call.
@@ -125,33 +118,46 @@ class Tab_Page_Widget(QtWidgets.QWidget):
             here.
         * callback_function
           - Optional, requester function that will be called after
-            the thread completes, during the local Handle_Thread_Finished.
+            the thread completes, instead of Handle_Thread_Finished.
           - Will be given the return_value.
-          - An alternative to overwriting the Handle_Thread_Finished function.
+        * short_run
+          - Bool, if True then the function is considered to have a short
+            run time, and it will be run in the main thread instead of
+            a subthread to reduce call overhead.
         '''
-        # Skip when a request still pending.
-        # While this could potentially allow queing multiple requests,
-        # that is not an expected case for a single tab page.
-        if self.thread_request_active:
-            self.Print(('Ignoring thread request for "{}"; prior request'
-                        ' still pending.').format(work_function.__name__))
-            return
+        # Call back to a default function, if none given.
+        if callback_function == None:
+            callback_function = self.Handle_Thread_Finished
 
-        self.thread_request_active = True
-        # Capture the callback function and handle it locally.
-        self.callback_function = callback_function
-        self.thread_request = self.window.worker_thread.Queue_Thread(
+        # Do some cleanup on older requests, removing those that
+        # may have finished.
+        for old_request in list(self.thread_requests_active):
+            if old_request.finished:
+                self.thread_requests_active.remove(old_request)
+
+        request = self.window.worker_thread.Queue_Thread(
             # Give the work_function and *args as positional args,
             # to match up with the Queue_Thread signature.
             work_function,
             *args,
-            callback_function  = self.Handle_Thread_Finished,
+            callback_function  = callback_function,
             prelaunch_function = prelaunch_function,
             print_args = self.print_thread_args,
+            short_run = short_run,
             **kwargs
             )
-
+        self.thread_requests_active.append(request)
         return
+
+
+    def Queue_Light_Thread(self, *args, **kwargs):
+        '''
+        As Queue_Thread, except that the function will be called
+        directly instead of through a subthread, but still goes through
+        the machinery to avoid running at the same time as other
+        threads. For use in simple file system accesses.
+        '''
+        return self.Queue_Thread(*args, short_run = True, **kwargs)
 
 
     def Update_Font(self, new_font, small_font):
@@ -224,6 +230,18 @@ class Tab_Page_Widget(QtWidgets.QWidget):
     def Save(self):
         '''
         Save any tab information that needs to go to a file.
+        '''
+        return
+
+
+    def Handle_Signal(self, *flags):
+        '''
+        Handle signals sent from the main window at the request of tabs.
+        Subclasses should overwrite this with their own handling logic,
+        as needed.
+        TODO: think about how to handle cases of back-to-back signals,
+        where a prior one may not have finished updates before the
+        later one arrives, with opportunities to ignore later ones.
         '''
         return
 

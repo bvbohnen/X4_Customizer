@@ -6,11 +6,47 @@ from Framework import Print
 from Framework import Settings
 
 # Use a named tuple to work requests.
-from collections import namedtuple
-Work_Request = namedtuple(
-    'Work_Request', 
-    ['prelaunch_function', 'callback_function', 
-     'work_function', 'print_args', 'args', 'kwargs'])
+#from collections import namedtuple
+#Work_Request = namedtuple(
+#    'Work_Request', 
+#    ['prelaunch_function', 'callback_function', 
+#     'work_function', 'print_args', 'short_run', 'args', 'kwargs'])
+
+# Use a class for this, to dynamically changed the 'finished' flag.
+class Work_Request:
+    '''
+    Object containing work request information.
+
+    Attributes; most are the same as in Queue_Thread.
+    * prelaunch_function
+    * callback_function
+    * work_function
+    * print_args
+    * short_run
+    * args
+    * kwargs
+    * finished
+      - Bool, False when the request is created, True when
+        it has finished.
+    '''
+    def __init__(
+                self, 
+                prelaunch_function, 
+                callback_function, 
+                work_function,
+                print_args, 
+                short_run, 
+                args, 
+                kwargs
+            ):
+        self.prelaunch_function = prelaunch_function
+        self.callback_function  = callback_function
+        self.work_function      = work_function
+        self.print_args         = print_args
+        self.short_run          = short_run
+        self.args               = args
+        self.kwargs             = kwargs
+        self.finished           = False
 
 
 class Worker_Thread_Handler(QtCore.QThread):
@@ -44,6 +80,13 @@ class Worker_Thread_Handler(QtCore.QThread):
       - Bool, True when a thread has been set up to launch, or has
         completed. This is set in the main domain, and used to
         regulate queue service.
+
+    Signals:
+    * send_message
+      - Emitted when send text to print, with the text as the arg,
+        during a thread run.
+      - To be listened to by the main window for Print calls,
+        and used to cross thread domains.
     '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -77,6 +120,7 @@ class Worker_Thread_Handler(QtCore.QThread):
             callback_function,
             prelaunch_function = None,
             print_args = True,
+            short_run = False,
             **kwargs
         ):
         '''
@@ -108,12 +152,16 @@ class Worker_Thread_Handler(QtCore.QThread):
           - Bool, if True (default) then args will be printed in
             an output log message, else they are skipped.
           - Callers should set this False if they use long args.
+        * short_run
+          - Bool, if True the function will be run locally instead
+            of in a subthread.
         '''
         request = Work_Request(
                 callback_function  = callback_function,
                 prelaunch_function = prelaunch_function,
                 work_function      = work_function,
                 print_args         = print_args,
+                short_run          = short_run,
                 args               = args,
                 kwargs             = kwargs,
                 )
@@ -167,16 +215,16 @@ class Worker_Thread_Handler(QtCore.QThread):
         
         # Run the selected function, starting a side thread unless
         # disabled through Settings, in which case the function
-        # is run directly.
-        if not Settings.disable_threading:
-            # Call the pyqt start function.
-            self.start()
-        else:
+        # is run directly. Also use direct runs for short_run requests.
+        if work_request.short_run or Settings.disable_threading:
             # Do a local domain run.
             self.run()
             # Manually send the finished signal, to mimic a thread
             # finishing.
             self.finished.emit()
+        else:
+            # Call the pyqt start function.
+            self.start()
         return
 
 
@@ -193,6 +241,9 @@ class Worker_Thread_Handler(QtCore.QThread):
         # Note: if quitting early, the request may have been cleared
         # to prevent callback.
         if self.current_request != None:
+            # Flag this request as finished.
+            self.current_request.finished = True
+
             # Pass the recorded return value in the callback.
             try:
                 self.current_request.callback_function(self.return_value)
@@ -244,7 +295,10 @@ class Worker_Thread_Handler(QtCore.QThread):
         
         # Nice little printout for what is being called.
         # Note: some args can be quite long, so skip anything complex.
-        if self.current_request.print_args:
+        # Skip this for short runs.
+        if self.current_request.short_run:
+            pass
+        elif self.current_request.print_args:
             self.Print('Starting thread: {}({}{}{})'.format(
                 function.__name__,
                 ', '.join(args),
