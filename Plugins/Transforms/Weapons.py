@@ -204,7 +204,7 @@ def Adjust_Weapon_Fire_Rate(
         *match_rule_multipliers
     ):
     '''
-    Adjusts weapon rate of fire. DPS remains constant.
+    Adjusts weapon rate of fire. DPS and heat/sec remain constant.
 
     * match_rule_multipliers:
       - Series of matching rules paired with the RoF multipliers to use.
@@ -238,6 +238,11 @@ def Adjust_Weapon_Fire_Rate(
 
         # Reduce the damage to compensate.
         Adjust_Bullet_Damage(bullet_root, 1/multiplier)
+
+        # Also reduce the heat/bullet, if there is a heat value.
+        heat_node = bullet_root.find('.//heat')
+        if heat_node != None and heat_node.get('value'):
+            XML_Multiply_Float_Attribute(heat_node, 'value', 1/multiplier)
                                 
         # Put the changes back.
         weapon.bullet_file.Update_Root(bullet_root)
@@ -371,14 +376,14 @@ class Weapon:
         # be identified by a "component" term in the tags.
         root = self.component_file.Get_Root_Readonly()
         xpath = './/connection[@tags]'
-        for connection in root.findall(xpath):
+        for connection in root.xpath(xpath):
             if 'component' in connection.get('tags'):
                 # Add the name of the connection to the xpath to
                 # uniquify it.
                 name = connection.get('name')
                 xpath += '[@name="{}"]'.format(name)
                 # Verify it.
-                assert root.findall(xpath)[0] is connection
+                assert root.xpath(xpath)[0] is connection
                 return xpath
         return None
 

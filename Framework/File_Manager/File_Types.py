@@ -355,7 +355,7 @@ class XML_File(Game_File):
         for doing value lookups.
         '''
         root = self.Get_Root_Readonly(version)
-        nodes = root.findall(xpath)
+        nodes = root.xpath(xpath)
         return nodes
 
 
@@ -588,10 +588,10 @@ class XML_Text_File(XML_File):
                         except KeyError:
                             return
                     else:
-                        node = root.find('./page[@id="{}"]/t[@id="{}"]'.format(page, id))
-                        if node == None:
+                        nodes = root.xpath('./page[@id="{}"]/t[@id="{}"]'.format(page, id))
+                        if not nodes:
                             return
-                        replacement_text = node.text
+                        replacement_text = nodes[0].text
             
                     # In case this replacement has nested terms,
                     # recursively process it, and append to the running
@@ -680,9 +680,9 @@ class XML_Index_File(XML_File):
             return self.name_path_dict.get(name, None)
         else:
             root = self.Get_Root_Readonly()
-            node = root.find('./entry[@name="{}"]'.format(name))
-            if node != None:
-                value = node.get('value', None)
+            nodes = root.xpath('./entry[@name="{}"]'.format(name))
+            if not nodes:
+                value = nodes[0].get('value', None)
                 if value != None:
                     return value + '.xml'
         return None
@@ -815,7 +815,7 @@ class XML_Wares_File(XML_File):
                         #  xpath starting from the ware node.
                         if remainder:
                             new_xpath = '.' + remainder
-                            ware_nodes = ware_node.findall(new_xpath)
+                            ware_nodes = ware_node.xpath(new_xpath)
                         # Otherwise, just return this ware.
                         else:
                             ware_nodes = [ware_node]                               

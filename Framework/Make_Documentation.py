@@ -292,8 +292,11 @@ def Make(*args):
             
 
     # Print out the change log.
+    # Only do this for the full documenation now, after it got too
+    # long for the egosoft forums.
     Make_Horizontal_Line()
-    Add_Lines(Framework.Change_Log.__doc__, merge_lines = True)
+    Add_Lines(Framework.Change_Log.__doc__, merge_lines = True,
+                  include_in_simple = False)
 
     # Print out the license.
     # The simple version will skip this.

@@ -1,4 +1,4 @@
-X4 Customizer 1.7
+X4 Customizer 1.7.1
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -461,7 +461,7 @@ Weapons Transforms:
 
   * Adjust_Weapon_Fire_Rate
 
-    Adjusts weapon rate of fire. DPS remains constant.
+    Adjusts weapon rate of fire. DPS and heat/sec remain constant.
     
     * match_rule_multipliers:
       - Series of matching rules paired with the RoF multipliers to use.
@@ -640,3 +640,5 @@ Change Log:
    - Swapped around inter-tab signalling and added more threading safety.
  * 1.7
    - Added multi-object table views to the gui object editor tabs.
+ * 1.7.1
+   - Fixed an issue with lxml find/findall not properly handling xpaths using indexes after predicates.

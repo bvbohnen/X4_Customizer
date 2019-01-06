@@ -57,18 +57,19 @@ def Apply_Live_Editor_Patches(
 
         for patch in patch_list:
             # Look up the edited node; assume just one xpath match.
-            node = root.find(patch.xpath)
-            if node == None:
+            nodes = root.xpath(patch.xpath)
+            if not nodes:
                 Plugin_Log.Print(('Warning: Apply_Live_Editor_Patches could'
                                 ' not find node "{}" in file "{}"'
                                 ).format(patch.xpath, virtual_path))
                 continue
+            node = nodes[0]
 
             # Either update or remove the attribute.
             # Assume it is safe to delete if the value is an empty string.
             if patch.value == '':
                 if patch.attribute in node.keys():
-                    node.attrib[patch.attribute].pop()
+                    node.attrib.pop(patch.attribute)
             else:
                 node.set(patch.attribute, patch.value)
 

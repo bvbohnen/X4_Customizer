@@ -18,7 +18,7 @@ def Get_Macro_Component_File(macro_file):
     TODO: maybe support an attempt at autoloading one directory up.
     '''
     root = macro_file.Get_Root_Readonly()
-    component_name = root.find('./macro/component').get('ref')
+    component_name = root.xpath('./macro/component')[0].get('ref')
     component_file = File_System.Get_Indexed_File('components', component_name)
     return component_file
 
@@ -34,13 +34,13 @@ def Get_Component_Connection_Xpath(game_file):
     # be identified by a "component" term in the tags.
     root = game_file.Get_Root_Readonly()
     xpath = './/connection[@tags]'
-    for connection in root.findall(xpath):
+    for connection in root.xpath(xpath):
         if 'component' in connection.get('tags'):
             # Add the name of the connection to the xpath to uniquify it.
             name = connection.get('name')
             xpath += '[@name="{}"]'.format(name)
             # Verify it.
-            assert root.find(xpath) is connection
+            assert root.xpath(xpath)[0] is connection
             return xpath
     return None
 

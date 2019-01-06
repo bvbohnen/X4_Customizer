@@ -35,7 +35,7 @@ def Find_All_Matches(base_node, match_node):
         xpath += '[{}]'.format(child.tag)
 
     # Get the initial matches.
-    found_nodes = base_node.findall(xpath)
+    found_nodes = base_node.xpath(xpath)
 
     # Filter out those without the right number of children.
     found_nodes = [x for x in found_nodes 

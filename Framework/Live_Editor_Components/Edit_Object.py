@@ -399,15 +399,16 @@ class Edit_Object:
                     next_macro = macro_list.pop(0)
                     
                 # Look up the xml node being expanded.
-                group_node = xml_node.find(xpath)
+                group_nodes = xml_node.xpath(xpath)
                 # If it wasn't found, skip this macro group entirely.
                 # Note: placeholders aren't added for groups, for now,
                 # unlike raw edit_items.
-                if group_node == None:
+                if not group_nodes:
                     continue
+                group_node = group_nodes[0]
 
                 # Find the xml children with the tag being grouped.
-                child_nodes = group_node.findall(macro.tag)
+                child_nodes = group_node.xpath(macro.tag)
 
                 for index, child_node in enumerate(child_nodes):
                     # Pick an extention for item names, to uniquify
@@ -415,7 +416,7 @@ class Edit_Object:
                     extension = '_{}_'.format(index)
 
                     # Tweak the xpath; this will be to the group node,
-                    # then to this child, with nexted macros being
+                    # then to this child, with next macros being
                     # relative to the child.
                     # Note: xpath indices are 1-based, so offset by 1.
                     child_xpath_prefix = '{}/{}[{}]'.format(abs_xpath, macro.tag, index+1)
@@ -440,8 +441,8 @@ class Edit_Object:
                 #  valid for only one version of the filep; perhaps an
                 #  Edit_Item should always be created, and it will just
                 #  deal with missing nodes internally.
-                node = xml_node.find(xpath)
-                if node == None:
+                nodes = xml_node.xpath(xpath)
+                if not nodes:
                     self.Add_Item( Placeholder_Item(
                         parent       = self,
                         name         = name,

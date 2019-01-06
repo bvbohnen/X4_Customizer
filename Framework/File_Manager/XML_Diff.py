@@ -87,13 +87,37 @@ Note on patch generation approach:
         ids across all calls to id filling function.
 
 '''
+'''
+Note on lxml and xpath bugginess:
+    When using indexed lookups (/a/b[5]), lxml tends to bog down
+    horribly in larger files.  For the wares file, it was 1/1000 speed.
+
+    Further, lxml evaluates expressions with a parameter and an index
+    incorrectly when using find or findall.
+    Example:
+        /a/b[@c="d"][5]
+
+        By the xpath docs, this should be the 5th child of 'a' that
+        is of tag 'b' and has attribute 'c=d'.
+
+        lxml gets this wrong, and looks for a child of 'a' that is
+        the 5th child and also has attribue 'c=d'.
+
+    In the python docs, buried toward the end of the xpath section,
+    is this: "position predicates must be preceded by a tag name".
+    lxml copies this behavior.
+
+    However, lxml also has an 'xpath' method that will act like findall
+    except with correct evaluation. Use that always.
+'''
 from lxml import etree as ET
 from copy import deepcopy
 from itertools import zip_longest
 import random
 import time # Used for some profiling.
 
-from ..Common import Plugin_Log, Print
+from ..Common import Plugin_Log
+from ..Common import Print as Print_Log
 from ..Common.Exceptions import XML_Patch_Exception
 
 
@@ -294,7 +318,13 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
                 type = 'attrib'
 
             # The remaining xpath should hopefully work.
-            matched_nodes = temp_tree.findall(xpath)
+            #matched_nodes = temp_tree.xpath(xpath)
+            # Note: when switching from findall to xpath(), a
+            # prefixed '.' was needed to get this to work.
+            # TODO: why does this matter? In small tests it wasn't
+            # needed.
+            matched_nodes = temp_tree.xpath('.' + xpath)
+            #matched_nodes3 = temp_tree.xpath('./' + xpath)
 
             # On match failure, skip the operation similar to how
             # X4 would skip it.
@@ -757,7 +787,7 @@ def _Get_Xpath_Recursive(node):
     #  not needed and clutter up the output diff patch.)
     xpath = node.tag
     # Get elements with the same tag.
-    similar_tag_elements = parent.findall(xpath)
+    similar_tag_elements = parent.xpath(xpath)
     # Store this into a temp var; want to use the same-tag version later.
     similar_elements = similar_tag_elements
     # Loop while there is more than 1 similar element (want just self).
@@ -771,7 +801,7 @@ def _Get_Xpath_Recursive(node):
             # inner term.
             xpath += '''[@{}='{}']'''.format(key, value)
             # Check element matches again.
-            similar_elements = parent.findall(xpath)
+            similar_elements = parent.xpath(xpath)
             # If just one match, done.
             if len(similar_elements):
                 break
@@ -784,12 +814,12 @@ def _Get_Xpath_Recursive(node):
     xpath = _Get_Xpath_Recursive(parent) + '/' + xpath
 
     # If there were multiple element matches, add a suffix.
-    # Note: the xpath index is relative to other nodes with the same tag,
-    #  ignoring attributes.
+    # Note: the xpath index is relative to other nodes matched with
+    # the same attributes (which differs from find/findall if there
+    # were preceeding attributes).
     if len(similar_elements) > 1:
-        # Get the index of this node relative to other same-tag nodes.
         # Note: xpath is 1-based indexing.
-        index = similar_tag_elements.index(node) + 1
+        index = similar_elements.index(node) + 1
         xpath += '[{}]'.format(index)
 
     return xpath
@@ -817,11 +847,11 @@ def Verify_Patch(original_node, modified_node, patch_node):
         if patched_line != mod_line:
             # If it was succesful up to this point, print a message.
             if success:
-                Print('Patch test failed on line {}.'.format(line_number))
+                Print_Log('Patch test failed on line {}.'.format(line_number))
                 # For checking, dump all of the xml to files.
                 # This is mainly intended for use by the unit test.
                 # TODO: attach to an input arg.
-                if 1:
+                if 0:
                     with open('test_original_node.xml', 'w') as file:
                         file.write(Print(original_node, encoding = 'unicode'))
                     with open('test_modified_node.xml', 'w') as file:
@@ -831,7 +861,7 @@ def Verify_Patch(original_node, modified_node, patch_node):
                     with open('test_original_node_patched.xml', 'w') as file:
                         file.write(Print(original_node_patched, encoding = 'unicode'))
                     # Pause; allow time to peek at files or ctrl-C.
-                    input('Press enter to continue testing.')
+                    #input('Press enter to continue testing.')
                     
             # Flag as a failure.
             success = False
@@ -869,7 +899,7 @@ def Unit_Test(test_node, num_tests = 100, edits_per_test = 5, rand_seed = None):
         modified_node = deepcopy(test_node)
 
         # Get a flattened list of all non-comment nodes.
-        node_list = modified_node.findall('.//')
+        node_list = modified_node.xpath('.//')
 
         # Make a few edits.
         edits_remaining = edits_per_test
@@ -951,7 +981,7 @@ def Unit_Test(test_node, num_tests = 100, edits_per_test = 5, rand_seed = None):
                 modified_node, 
                 maximal = False,
                 verify = True)
-            Print('Test {} passed'.format(test_number))
+            Print_Log('Test {} passed'.format(test_number))
         except XML_Patch_Exception as ex:
-            Print('Test {} failed; message: {}'.format(test_number, ex))
+            Print_Log('Test {} failed; message: {}'.format(test_number, ex))
     return

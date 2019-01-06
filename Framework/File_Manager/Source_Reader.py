@@ -427,7 +427,7 @@ class Source_Reader_class:
         if content_xml_path.exists():
             # (lxml parser needs a string path.)
             content_root = ET.parse(str(content_xml_path)).getroot()
-            for extension_node in content_root.findall('extension'):
+            for extension_node in content_root.xpath('extension'):
                 name = extension_node.get('id')
                 if extension_node.get('enabled') == 'true':
                     user_extensions_enabled[name] = True
@@ -486,10 +486,10 @@ class Source_Reader_class:
 
                 # Collect all the names of dependencies.
                 dependencies = [x.get('id') 
-                                for x in content_root.findall('dependency')]
+                                for x in content_root.xpath('dependency')]
                 # Collect optional dependencies.
                 soft_dependencies = [x.get('id') 
-                                for x in content_root.findall('dependency[@optional="true"]')]
+                                for x in content_root.xpath('dependency[@optional="true"]')]
                 # Pick out hard dependencies (those not optional).
                 hard_dependencies = [x for x in dependencies
                                      if x not in soft_dependencies ]

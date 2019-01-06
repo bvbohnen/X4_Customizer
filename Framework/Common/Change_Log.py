@@ -105,6 +105,9 @@ Change Log:
    - Swapped around inter-tab signalling and added more threading safety.
  * 1.7
    - Added multi-object table views to the gui object editor tabs.
+ * 1.7.1
+   - Fixed an issue with lxml find/findall not properly handling xpaths
+     using indexes after predicates.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.
