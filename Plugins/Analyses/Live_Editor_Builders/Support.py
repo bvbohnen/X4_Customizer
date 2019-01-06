@@ -158,9 +158,9 @@ physics_item_macros = [
 
 connection_item_macros = [    
     # Loop over connections.
-    _G('connections'               , './macro/connections'                    , 'connection' , 'Connection'          ),
+    _G('connections'               , './macro/connections'                    , 'connection' , 'Conn.'           ),
     _E('name'                      , '.'                                      , 'ref'        , 'Name'            , ''),
     _E('connector'                 , './macro'                                , 'connection' , 'Connector'       , ''),
-    _E('macro_name'                , './macro'                                , 'ref'        , 'Macro Name'      , '',  is_reference = True),
+    _E('macro_name'                , './macro'                                , 'ref'        , 'Macro'           , '',  is_reference = True),
     _G('/connections'),
     ]

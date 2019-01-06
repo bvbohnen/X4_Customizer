@@ -263,11 +263,12 @@ class File_Viewer_Window(Tab_Page_Widget, generated_class):
         '''
         Returns the text modified with preceeding line numbers.
         Input is raw text, output is a list of lines.
+        Numbering starts at 1.
         '''
         new_lines = []
         for index, line in enumerate(text.splitlines()):
-            # Add line numbers on the left.
-            new_lines.append('{: >3d} {}'.format(index, line))
+            # Add line numbers on the left, starting at 1.
+            new_lines.append('{: >3d} {}'.format(index+1, line))
         return new_lines
 
 

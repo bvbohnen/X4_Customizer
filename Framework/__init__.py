@@ -56,6 +56,36 @@ Running the Python source code:
     - When no script is given, this launches the GUI.
 
 
+GUI sections:
+
+  * "Script" displays the current control script, alongside documentation
+    on available plugins.  Drag plugins to the script window for a fast
+    templated copy.  Scripts can be opened or saved, and default to
+    the Scripts folder.  Syntax is highlighted as Python code.
+    Press "Run Script" to run the current script; other tabs displaying
+    game information will be updated automatically with the script changes.
+
+  * "Config" allows customization of settings. These are saved to a
+    json file in the main tool directory when the window closes.
+
+  * The "Edit" menu opens up tabs with editable tables of game object
+    information. Objects may be displayed individually or in a table.
+    See further below for details. All edits made are saved in
+    a json file in the main tool directory when a script is run
+    or the window closes.
+
+  * The "Utilities" menu currently has one option, the Virtual File
+    System. This shows which game files the Customizer has loaded,
+    patched from other extensions (blue), or modified itself (red).
+    Right click a file for the option to view its contents.
+
+  * The File Viewer tabs display individual file contents, in their
+    pre-diff patch, post-diff patch, and post-customizer versions.
+    Select two versions and press "Compare" to get a summary on
+    lines changed. Press "Reload" to force the file to be reloaded
+    from disk, including any diff patches; this may be used to 
+    test customize diff patch files in another extension.
+
 The control script:
 
   * This tool is primarily controlled by a user supplied python script which

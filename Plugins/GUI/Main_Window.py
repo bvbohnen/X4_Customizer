@@ -703,6 +703,8 @@ class GUI_Main_Window(qt_base_class, generated_class):
             - 'files_modified'
             - 'files_loaded'
             - 'script_completed'
+            - 'save'
+            - 'save_as'
         '''
         # Want to prioritize the currently viewed tab.
         current_tab = self.widget_tab_container.currentWidget()
@@ -714,6 +716,13 @@ class GUI_Main_Window(qt_base_class, generated_class):
             if tab is current_tab:
                 continue
             tab.Handle_Signal(*flags)
+
+        # Handle some signals here.
+        if 'save' in flags or 'save_as' in flags:
+            # The live editor doesn't belong to a tab, so save
+            # it here.
+            Live_Editor.Save_Patches()
+            self.Print('Saved Live Editor patches')
         return
 
 

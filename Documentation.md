@@ -1,4 +1,4 @@
-X4 Customizer 1.6.2
+X4 Customizer 1.7
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -44,6 +44,18 @@ Running the Python source code:
     - This is the primary entry function for the python source code, and equivalent to X4_Customizer.exe.
     - When no script is given, this launches the GUI.
 
+
+GUI sections:
+
+  * "Script" displays the current control script, alongside documentation on available plugins.  Drag plugins to the script window for a fast templated copy.  Scripts can be opened or saved, and default to the Scripts folder.  Syntax is highlighted as Python code. Press "Run Script" to run the current script; other tabs displaying game information will be updated automatically with the script changes.
+
+  * "Config" allows customization of settings. These are saved to a json file in the main tool directory when the window closes.
+
+  * The "Edit" menu opens up tabs with editable tables of game object information. Objects may be displayed individually or in a table. See further below for details. All edits made are saved in a json file in the main tool directory when a script is run or the window closes.
+
+  * The "Utilities" menu currently has one option, the Virtual File System. This shows which game files the Customizer has loaded, patched from other extensions (blue), or modified itself (red). Right click a file for the option to view its contents.
+
+  * The File Viewer tabs display individual file contents, in their pre-diff patch, post-diff patch, and post-customizer versions. Select two versions and press "Compare" to get a summary on lines changed. Press "Reload" to force the file to be reloaded from disk, including any diff patches; this may be used to test customize diff patch files in another extension.
 
 The control script:
 
@@ -626,3 +638,5 @@ Change Log:
    - Added more fields for missile editing.
    - Bug fix for tabs forgetting order between sessions.
    - Swapped around inter-tab signalling and added more threading safety.
+ * 1.7
+   - Added multi-object table views to the gui object editor tabs.

@@ -25,20 +25,22 @@ class Object_View:
         return
     
 
-    def Get_Display_Version_Items_Dict(self, version = None):
+    def Get_Display_Version_Items_Dict(self, *args, **kwargs):
         '''
         Returns a dict keyed by version name and holding lists of
         items, taken from here or first level references.
         Labels may be read from any non-None item in each list row.
-
-        * version
-          - Optional, the version to limit responses to.
+        Args are the same as Edit_Object.Get_Display_Version_Items_Dict.
+        Any skipped_item_names fed to here will be joined with the
+        view skipped_item_names and passed along.
         '''
-        # TODO: maybe cache this, and reset on reference changes
-        # in the object.
-        return self.edit_object.Get_Display_Version_Items_Dict(
-            skipped_item_names = self.skipped_item_names,
-            version = version)
+        # Fill or extend the skipped_item_names, as needed.
+        if 'skipped_item_names' in kwargs:
+            kwargs['skipped_item_names'].extend(self.skipped_item_names)
+        else:
+            kwargs['skipped_item_names'] = self.skipped_item_names
+        # Pass along the args/kwargs.
+        return self.edit_object.Get_Display_Version_Items_Dict(*args, **kwargs)
 
 
 
@@ -57,20 +59,22 @@ class Edit_Tree_View:
       - String, name to use for this tree in name displays, such as
         gui tabs or when nested under another tree later.
     * tree
-      - OrderedDict holding nested OrderedDicts and Object_Views, laying out
-        how the tree should be displayed.
+      - List holding nested tuples of (key, node), where nodes are 
+        Lists and Object_Views, laying out how the tree should be displayed.
       - Keys are the display labels for the gui tree, generally taken
         from object category names or the object names themselves.
-      - Flat views will simply have the top OrderedDict filled with
+      - Flat views will simply have the top List filled with
         Object_Views.
-      - A single tree node should never mix OrderedDicts and Object_Views
+      - A single tree node should never mix Lists and Object_Views
         in its children (for now).
+    * table_group
+      - Cached Edit_Table_Group generated from this tree view.
     '''
     def __init__(self, name, display_name = None):
         self.name = name
         self.display_name = display_name if display_name else name
-        # Start with an empty ordered dict for the tree top level.
-        self.tree = OrderedDict()
+        self.tree = []
+        self.table_group = None
         return
 
 
@@ -89,13 +93,24 @@ class Edit_Tree_View:
         # This will loop through keys and trace a path.
         branch_node = self.tree
         for key in keys:
+
+            # Look for the branch.
+            next_node = None
+            for subnode in branch_node:
+                if subnode[0] == key:
+                    next_node = subnode
+                    break
+
             # If the branch doesn't exist, start it.
-            if key not in branch_node:
-                branch_node[key] = OrderedDict()
-            branch_node = branch_node[key]
+            if next_node == None:
+                next_node = (key, [])
+                branch_node.append(next_node)
+
+            # Advance to the next_node's list.
+            branch_node = next_node[1]
 
         # Can now record the object.
-        branch_node[label] = Object_View(label, edit_object)
+        branch_node.append((label, Object_View(label, edit_object)))
         return
 
 
@@ -110,12 +125,12 @@ class Edit_Tree_View:
 
     def Get_Branch_Nodes(self, start_node = None):
         '''
-        Returns all tree OrderedDict nodes at any level at or below
+        Returns all tree List nodes at any level at or below
         the given node.
 
         * start_node
           - The node to begin at. Defaults to the top tree node.
-          - Should be an OrderedDict.
+          - Should be a List.
           - This will be included in the return list.
         '''
         if start_node == None:
@@ -134,11 +149,19 @@ class Edit_Tree_View:
 
             # If it is not flat, its children are further nodes.
             if not self.Is_Flat(node):
-                unvisited_nodes += list(node.values())
+                unvisited_nodes += self.Expand_Node(node)
 
         return found_nodes
 
+
+    def Expand_Node(self, node):
+        '''
+        Expands the children of the given node into a list.
+        This may be sublists or object views.
+        '''
+        return [x[1] for x in node]
     
+
     def Get_Leaf_Nodes(self, start_node = None):
         '''
         Returns all tree Object_View nodes at any level at or below
@@ -146,7 +169,7 @@ class Edit_Tree_View:
 
         * start_node
           - The node to begin at. Defaults to the top tree node.
-          - Should be an OrderedDict.
+          - Should be a List.
           - This will be included in the return list.       
         '''
         ret_list = []
@@ -154,7 +177,7 @@ class Edit_Tree_View:
         for node in self.Get_Branch_Nodes(start_node):
             # If it is flat (just has leaves), record them.
             if self.Is_Flat(node):
-                ret_list += list(node.values())
+                ret_list += self.Expand_Node(node)
         return ret_list
 
 
@@ -166,10 +189,11 @@ class Edit_Tree_View:
         '''
         # Work through the branches.
         for node in self.Get_Branch_Nodes(start_node):
-            # Sorting an ordered dict can be done nicely using its
-            # move_to_end method.
-            for key in sorted(node.keys()):
-                node.move_to_end(key)
+            node.sort(key = lambda k: k[0])
+            ## Sorting an ordered dict can be done nicely using its
+            ## move_to_end method.
+            #for key in sorted(node.keys()):
+            #    node.move_to_end(key)
         return
 
 
@@ -180,7 +204,7 @@ class Edit_Tree_View:
         
         * start_node
           - The node to begin at. Defaults to the top tree node.
-          - Should be an OrderedDict.
+          - Should be a List.
           - This will be included in the return list.
         '''
         '''
@@ -204,7 +228,7 @@ class Edit_Tree_View:
             #  as safe if refs are changed during live editing.
             item_names_used = set()
             item_names_seen = set()
-            for object_view in node.values():
+            for object_view in self.Expand_Node(node):
 
                 # Get all items, including placeholders, and consider them seen.
                 for item in object_view.edit_object.Get_Items(
@@ -219,7 +243,7 @@ class Edit_Tree_View:
             item_names_not_used = item_names_seen - item_names_used
             
             # Apply to all object views.
-            for object_view in node.values():
+            for object_view in self.Expand_Node(node):
                 object_view.skipped_item_names = item_names_not_used
 
         return
@@ -237,41 +261,69 @@ class Edit_Tree_View:
             raise AssertionError('Empty branch found in tree')
         # Sample the first element, and check its type.
         # If it is an object, this should be flat.
-        return isinstance( next(iter(node.values())), Object_View)
+        return isinstance(node[0][1], Object_View)
 
 
-    def Convert_To_Table_Group(self):
+    def Convert_To_Table_Group(self, rebuild = False):
         '''
         Returns an Edit_Table_Group holding the tree contents.
-        A table will be formed for each first level tree subnode, or
+        A table will be formed for each first or second tree subnode, or
         for the entire tree if it is a flat list.
         Table columns are not pruned, even if no object uses them.
+        Caches the result, and returns it on prior calls.
+        The returned table should not be edited.
+
+        * rebuild
+          - Bool, if True then the table group is always regenerated.
         '''
-        table_group = Edit_Table_Group(self.name)
+        # Return a cached version.
+        if self.table_group != None and not rebuild:
+            return self.table_group
+
+        # Start a new table group.
+        self.table_group = Edit_Table_Group(self.name)
         
-        # Form a dict of lists, holding the objects to assign to
-        # each subtable. Inner elements are tuples of (label, object view).
-        # Outer key is the original node label (possibly tree name).
-        label_object_groups_dict = OrderedDict()
+        # Form a list of tuples, holding the objects to assign to
+        # each subtable.
+        # Elements are tuples of (label, object_dict), where the object
+        # dict is keyed by object name and holds all objects for
+        # a single table.
+        label_object_groups = []
 
-        # Check if this tree has a flat list or not.
-        if self.Is_Flat():
-            label_object_groups_dict[self.name] = self.Get_Leaf_Nodes(self.tree)
+        def Find_Object_Groups(label, branch, depth):
+            '''
+            Recursive function that returns a list of (label,object_list)
+            pairs, collecting from branches when depth hits 0, else
+            recursing into branches when there is depth remaining.
+            If an end branch is seen before depth=0 reached, it is
+            packed into a group.
+            '''
+            ret_list = []
+            if depth == 0 or self.Is_Flat(branch):
+                ret_list.append((label, self.Get_Leaf_Nodes(branch)))
+            else:
+                for sublabel, subnode in branch:
+                    # Reduce depth and expand the branch.
+                    # Append the sublabel to the current label,
+                    # so that the results are reasonably named.
+                    ret_list += Find_Object_Groups(label + '/' + sublabel, 
+                                                   subnode, depth -1)
+            return ret_list
 
-        else:
-            # Loop over first level subnodes.
-            for label, subnode in self.tree.items():
-                label_object_groups_dict[label] = self.Get_Leaf_Nodes(subnode)
+        # Try out a depth of 2.
+        label_object_groups = Find_Object_Groups(self.name, self.tree, 2)
 
-
+        # Error check: all objects should be accounted for.
+        assert len(self.Get_Leaf_Nodes()) == sum(len(x[1]) for x in label_object_groups)
+        
         # Make tables for each of these object groups.
-        for label, object_group in label_object_groups_dict.items():
+        for label, object_group in label_object_groups:
             edit_table = Edit_Table(name = label)
-            table_group.Add_Table(edit_table)
+            self.table_group.Add_Table(edit_table)
             for object in object_group:
                 edit_table.Add_Object(object)
 
-        return table_group
+        return self.table_group
 
 
     def Add_Tree(self, other_tree):
@@ -280,5 +332,5 @@ class Edit_Tree_View:
         The label will be the other's display name.
         '''
         assert other_tree.display_name
-        self.tree[other_tree.display_name] = other_tree.tree
+        self.tree.append((other_tree.display_name, other_tree.tree))
         return

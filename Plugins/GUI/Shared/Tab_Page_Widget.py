@@ -184,7 +184,8 @@ class Tab_Page_Widget(QtWidgets.QWidget):
                 settings.setValue('state', widget.saveState())
 
             # Save checkbox status.
-            if isinstance(widget, QtWidgets.QCheckBox):
+            if isinstance(widget, (QtWidgets.QCheckBox,
+                                   QtWidgets.QRadioButton)):
                 settings.setValue('checked', widget.isChecked())
 
             # All widgets have geometry, though it doesn't seem
@@ -213,7 +214,8 @@ class Tab_Page_Widget(QtWidgets.QWidget):
                     pass
 
             # Get checkbox status.
-            if isinstance(widget, QtWidgets.QCheckBox):
+            if isinstance(widget, (QtWidgets.QCheckBox,
+                                   QtWidgets.QRadioButton)):
                 try:
                     value = settings.value('checked')
                     if value == 'true':

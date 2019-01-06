@@ -38,10 +38,23 @@ class Settings_Window(Tab_Page_Widget, generated_class):
         self.widget_settings_doc.setPlainText(Settings.__doc__)
         
         # Attach the main window to the settings widget.
+        # TODO: do this a better way.
         self.widget_settings.window = window
                 
         # Init the splitter to 1:1.
         self.hsplitter.setSizes([1000,1000])
+        return
+    
+    
+    
+    def Handle_Signal(self, *flags):
+        '''
+        Respond to signal events.
+        '''
+        if 'script_completed' in flags:
+            self.widget_settings.Store_Settings()
+        if 'save' in flags or 'save_as' in flags:
+            self.Save()
         return
     
 

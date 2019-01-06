@@ -88,7 +88,7 @@ class Script_Window(Tab_Page_Widget, generated_class):
 
             # Need to check the return code against button codes.
             if selection_code == QMessageBox.Save:
-                self.Action_Save_Script_As()
+                self.Save_Script_As()
             elif selection_code == QMessageBox.Cancel:
                 # On cancellation, let the caller know so they can
                 # stop whatever action prompted this check.
@@ -164,9 +164,37 @@ class Script_Window(Tab_Page_Widget, generated_class):
         return
 
 
-    # TODO: detect script edits (typing into the text box).
-    
     def Action_Save_Script(self):
+        '''
+        Save was selected from the menu
+        '''
+        # Currently the Save button is shared across all tabs.
+        # Use an emitted signal, so other tabs will save too.
+        # This will be bounced back here to trigger the actual save.
+        self.window.Send_Signal('save')
+        return
+
+
+    def Action_Save_Script_As(self):
+        '''
+        Save-as was selected from the menu
+        '''
+        self.window.Send_Signal('save_as')
+        return
+
+
+    def Handle_Signal(self, *flags):
+        '''
+        Respond to signal events.
+        '''
+        if 'save_as' in flags:
+            self.Save_Script_As()
+        elif 'save' in flags:
+            self.Save_Script()
+        return
+
+
+    def Save_Script(self):
         '''
         Save was selected from the menu, or some other action triggered
         a save request.
@@ -181,14 +209,14 @@ class Script_Window(Tab_Page_Widget, generated_class):
             if not self.widget_script.Is_Modified():
                 return True
             # Save to it.
-            save_success = self.Save_Script(self.current_script_path)
+            save_success = self.Save_Script_To_File(self.current_script_path)
         else:
             # Fall back on the save_as dialogue.
-            save_success = self.Action_Save_Script_As()
+            save_success = self.Save_Script_As()
         return save_success
 
 
-    def Action_Save_Script_As(self):
+    def Save_Script_As(self):
         '''
         Save-as was selected from the menu.
         Opens a dialog for selecting the file name and path, and
@@ -221,11 +249,11 @@ class Script_Window(Tab_Page_Widget, generated_class):
         last_dialog_path = file_selected.parent
 
         # Pass the file name on to the general save function.
-        save_success = self.Save_Script(file_selected)
+        save_success = self.Save_Script_To_File(file_selected)
         return save_success
 
     
-    def Save_Script(self, file_path):
+    def Save_Script_To_File(self, file_path):
         '''
         Saves the current script.
         Returns True if the script saved succesfully, False if not.
@@ -261,6 +289,7 @@ class Script_Window(Tab_Page_Widget, generated_class):
         # Save the Live_Editor patches, since they may get loaded
         #  by a plugin for xml application.
         Live_Editor.Save_Patches()
+        self.window.Print('Saved Live Editor patches')
         return
 
     
@@ -269,7 +298,7 @@ class Script_Window(Tab_Page_Widget, generated_class):
         Runs the currently loaded script.
         '''
         # Save the script to a file.
-        saved = self.Action_Save_Script()
+        saved = self.Save_Script()
         # If the save was cancelled, skip the run.
         if not saved:
             return

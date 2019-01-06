@@ -120,6 +120,16 @@ class Edit_Object:
         return
 
 
+    def Get_Reference(self, item_name, version):
+        '''
+        Returns the reference object for the given item_name
+        and version, or None if there is no reference.
+        '''
+        if item_name in self.item_version_object_refs:
+            return self.item_version_object_refs[item_name].get(version, None)
+        return None
+
+
     def Gen_All_References(self, version):
         '''
         Generates all referenced Edit_Objects, recursively.
@@ -205,18 +215,23 @@ class Edit_Object:
         return ret_list
 
 
-    def Get_Item(self, item_name, version = 'current', allow_placeholders = False):
+    def Get_Item(self, item_name, 
+                 version = 'current', 
+                 allow_refs = True, 
+                 allow_placeholders = False):
         '''
         Look up and return the item matching the given name.
         Item may be pulled from this object or one of its references.
         If the item_name isn't found, returns None.
-        If an item is found but has a blank value
         
         * item_name
           - String, the item's name.
         * version
           - When the item is not found locally, this is the version of
             references to use in ref lookups.
+        * allow_refs
+          - Bool, if True (default) then referenced object lookups
+            will be done if the item is not found locally.
         * allow_placeholders
           - Bool, if True then a Placeholder_Item object may be returned.
         '''
@@ -232,15 +247,16 @@ class Edit_Object:
                 return self.items_dict[item_name]
 
         # Check references.
-        for subdict in self.item_version_object_refs.values():
-            ref_object = subdict[version]
-            # Skip empty refs.
-            if ref_object == None:
-                continue
-            # If it found an item, return it.
-            item = ref_object.Get_Item(item_name, version)
-            if item != None:
-                return item
+        if allow_refs:
+            for subdict in self.item_version_object_refs.values():
+                ref_object = subdict[version]
+                # Skip empty refs.
+                if ref_object == None:
+                    continue
+                # If it found an item, return it.
+                item = ref_object.Get_Item(item_name, version)
+                if item != None:
+                    return item
 
         # Couldn't find a match.
         return None
@@ -480,8 +496,8 @@ class Edit_Object:
             include_ref_separators = True,
         ):
         '''
-        Returns a dict keyed by version name and holding lists of
-        items, taken from here or first level references.
+        Returns a dict keyed by version name and holding lists of items,
+        taken from here or first level references.
         Lists may include Placeholder_Items or None entries, though
         the same spot in each list will always have at least one item.
         
@@ -547,7 +563,8 @@ class Edit_Object:
                     continue
 
                 # Add the padding item.
-                version_items[version].append(padding)
+                if include_ref_separators:
+                    version_items[version].append(padding)
                 
                 # Check each of its items.
                 for item in ref_object.Get_Items(allow_placeholders = True):

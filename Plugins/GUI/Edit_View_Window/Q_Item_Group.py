@@ -46,6 +46,7 @@ class Q_Item_Group:
         q_item = QStandardItem()
         q_item.q_item_group = self
         q_item.version    = version
+        #q_item.setToolTip(self.edit_item.description)
         self.q_items[version].append(q_item)
         # Just update all items for now, instead of splitting code
         # to have a single item updater.
@@ -197,7 +198,7 @@ class Q_Item_Group:
             # TODO: maybe suppress this on the initial drawing of the
             # table, since it will get called on every item of every row.
             if value_changed and q_item.model() != None:
-                q_item.model().Resize_Rows()
+                q_item.model().Resize_Cells()
                 
 
         # For any items that are references, they can just request

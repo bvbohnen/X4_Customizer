@@ -17,7 +17,7 @@
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
-      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0,0,0,0">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0,0,0,0,0,0,0">
        <item>
         <widget class="QPushButton" name="widget_Table_Update">
          <property name="text">
@@ -36,6 +36,30 @@
         </widget>
        </item>
        <item>
+        <widget class="QRadioButton" name="button_view_table">
+         <property name="text">
+          <string>Table</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="button_view_table_flip">
+         <property name="text">
+          <string>Table(flip)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="button_view_object">
+         <property name="text">
+          <string>Object</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QCheckBox" name="widget_table_checkBox_0">
          <property name="text">
           <string>CheckBox</string>
@@ -46,6 +70,9 @@
         <widget class="QCheckBox" name="widget_table_checkBox_1">
          <property name="text">
           <string>CheckBox</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -88,6 +115,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="autoScroll">
+         <bool>false</bool>
+        </property>
         <property name="editTriggers">
          <set>QAbstractItemView::AllEditTriggers</set>
         </property>
@@ -105,6 +135,12 @@
         </property>
         <property name="verticalScrollMode">
          <enum>QAbstractItemView::ScrollPerPixel</enum>
+        </property>
+        <property name="horizontalScrollMode">
+         <enum>QAbstractItemView::ScrollPerPixel</enum>
+        </property>
+        <property name="sortingEnabled">
+         <bool>true</bool>
         </property>
         <property name="cornerButtonEnabled">
          <bool>false</bool>

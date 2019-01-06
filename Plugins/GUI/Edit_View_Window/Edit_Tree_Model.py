@@ -24,6 +24,8 @@ class Edit_Tree_Model(QStandardItemModel):
     * item_dict
       - Dict, keyed by label, of QTreeWidgetItem leaf nodes.
       - Note: this could be unsafe if a label is used more than once.
+      - TODO: label reuse was encountered with mines; need to
+        change out to an item list or similar, or use more unique names.
     * branch_dict
       - Dict, keyed by label, holding QTreeWidgetItem branch nodes.
     '''
@@ -98,13 +100,13 @@ class Edit_Tree_Model(QStandardItemModel):
     def _Fill_Tree_Node(self, parent_item, edit_tree_node):
         '''
         Recursive function to fill in the model item children for the given
-        tree view node (an OrderedDict).
+        tree view node (a list of tuples of (label, sublist or object)).
         '''
         
         #self.appendRow(QStandardItem(edit_tree.name))
 
         # Loop over the edit_tree_node children.
-        for label, next_edit_node in edit_tree_node.items():
+        for label, next_edit_node in edit_tree_node:
             
             # Make a new gui item.
             item = QStandardItem(label)
@@ -115,7 +117,7 @@ class Edit_Tree_Model(QStandardItemModel):
             parent_item.appendRow(item)
 
             # If this is a category (a dict), recursively fill in its children.
-            if isinstance(next_edit_node, OrderedDict):
+            if isinstance(next_edit_node, list):
                 # Note that it is a label, for easy skipping when clicked.
                 #item.is_label = True
                 

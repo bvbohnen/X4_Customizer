@@ -30,6 +30,9 @@ class Edit_View_Window(Tab_Page_Widget, generated_class):
     * widget_table_checkBox_1
     * widget_table_checkBox_2
     * widget_table_checkBox_3
+    * button_view_object
+    * button_view_table
+    * button_view_table_flip
 
     Attributes:
     * window
@@ -86,6 +89,8 @@ class Edit_View_Window(Tab_Page_Widget, generated_class):
         # box min sizes (apparently), so just set the sizes to something
         # huge to ensure the ratios go through.
         self.hsplitter.setSizes([1000,2000])
+        # Set the left side to not stretch as the window changes.
+        self.hsplitter.setStretchFactor(0,0)
         
         self.Init_Checkboxes()
         return
