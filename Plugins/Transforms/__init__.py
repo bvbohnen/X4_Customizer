@@ -12,6 +12,8 @@ from .Jobs import Adjust_Job_Count
 
 from .Misc import Apply_Live_Editor_Patches
 
+from .Text import Color_Text
+
 from .Wares import Adjust_Ware_Price_Spread
 from .Wares import Adjust_Ware_Prices
 
