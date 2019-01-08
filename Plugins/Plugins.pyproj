@@ -119,6 +119,9 @@
     <Compile Include="Transforms\Support.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Transforms\Text.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Transforms\Wares.py">
       <SubType>Code</SubType>
     </Compile>

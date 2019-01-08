@@ -542,6 +542,39 @@ def _Patch_Node_Constructor(
     # Start with the base xpath.
     xpath = _Get_Xpath_Recursive(target)
 
+    # Test: trim the xpath down with // syntax as much as can be
+    # done. This code will be a little messy, since throwaway
+    # added to test loading times.
+    # Note on test results: 35s load time with maximal diffs,
+    # 36s with full xpaths, 39s with these shortened xpaths,
+    # so never use this in practice. (With test xpaths mostly
+    # coming from adjusting ware price spread.)
+    if 0:
+        top_node = target
+        while top_node.getparent() != None:
+            top_node = top_node.getparent()
+        # Start picking off xpath terms, left to right.
+        new_xpath = xpath
+        while 1:
+            # Stop if there are no extra tags.
+            if '/' not in new_xpath:
+                break
+            # Pick off the first term
+            throwaway, test_xpath = new_xpath.split('/',1)
+            # Test it, with a preceeding //.
+            test_nodes = top_node.xpath('//' + test_xpath)
+            # If
+            if len(test_nodes) == 1 and test_nodes[0] is target:
+                #print('shortened to {}'.format(test_xpath))
+                new_xpath = test_xpath
+            else:
+                break
+        # If it was truncated, put the '//' prefix on and overwrite
+        # the original xpath.
+        if new_xpath != xpath:
+            xpath = '//' + new_xpath
+            #print('final path: {}'.format(xpath))
+
     # Suffix for attrib or text.
     if type == 'text':
         # Expect this to always target the normal text, which is

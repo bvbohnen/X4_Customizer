@@ -2,42 +2,6 @@
 
 from Framework import Transform_Wrapper, Settings, Load_File, File_System
 
-'''
-Copied from x3 customizer; maybe do something with this.
-    Race_color_letters = {
-            # argon
-            '1': 'B',
-            # boron
-            '2': 'G',
-            # split
-            '3': 'M',
-            # paranid
-            '4': 'C',
-            # teladi
-            '5': 'Y',
-            # xenon
-            '6': 'R',
-            # kha'ak
-            '7': 'R',
-            # pirates
-            '8': 'R',
-            # goner
-            '9': 'B',
-            # unknown; leave uncolored or just use grey. Code is more consistent
-            #  for now to just use grey.
-            '14': 'A',
-            # Terran (ATF)
-            '17': 'W',
-            # Terran (USC)
-            '18': 'W',
-            # Yaki
-            '19': 'R',
-        }
-'''
-
-# TODO: develop this further to support text searching, coloring only
-# selected words, maybe; that wouldn't be as robust across languages
-# though.
 @Transform_Wrapper(category = 'Text')
 def Color_Text(
         *page_t_colors
@@ -90,3 +54,8 @@ def Color_Text(
             game_file.Update_Root(xml_root)
 
     return
+
+
+# TODO: develop this further to support text searching, coloring only
+# selected words, maybe; that wouldn't be as robust across languages
+# though.

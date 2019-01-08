@@ -65,8 +65,13 @@ Note on multiple exes:
     Basically, compile in window mode, then for the command line
     launch with the "|more" suffix to cause the console to capture
     printouts.
+    Update: cannot capture responses in |more without console=True,
+    but that causes the console to appear behind the gui...
+    so this might be a dead end.
 
-    TODO: look into this, and swap over bat files if it looks good.
+
+    Overall decision: just compile two versions, one windowed and one not.
+
 
 Note: pyinstaller had trouble finding pyqt5 source files ("plugins"),
 but this was solved with a pip update.
@@ -126,11 +131,11 @@ def Make(*args):
         help = 'Delete the pyinstaller work folder when done, though this'
                ' will slow down rebuilds.')
 
-    argparser.add_argument(
-        '-o', '-O', 
-        action='store_true',
-        help = 'Compile with basic python optimization, removing assertions'
-               ' and perhaps some debug checks.')
+    #argparser.add_argument(
+    #    '-o', '-O', 
+    #    action='store_true',
+    #    help = 'Compile with basic python optimization, removing assertions'
+    #           ' and perhaps some debug checks.')
     
     #argparser.add_argument(
     #    '-window', 
@@ -153,19 +158,19 @@ def Make(*args):
     #  possible, but not through the spec file (at least not easily),
     #  so do it through the command line call.
     build_folder = os.path.join('..','pyinstaller_build_files')
-    
+
     # Pick the final location to place the exe and support files.
     # This should have the same relative path to reach any common
     #  files in the source and patches folders, which can be
     #  moved up under the main level (so the x4_customizer exe
     #  can be down one folder, and the python down another folder).
     dist_folder = os.path.normpath(os.path.join(This_dir, '..', 'bin'))
+
     # Subfolder to shove misc exe support files into.
     # Update: the new pyinstaller with python 3.7 doesn't like moving
     # these files away from the exe.
     exe_support_folder = os.path.join(dist_folder)#, 'support')
     
-    program_name = 'X4_Customizer'
     # Note: it would be nice to put the spec file in a subfolder, but
     #  pyinstaller messes up (seems to change its directory to wherever
     #  the spec file is) and can't find the source python, so the spec
@@ -174,140 +179,16 @@ def Make(*args):
     # Hook file probably works like the spec file.
     hook_file_path = 'pyinstaller_x4c_hook.py'
 
-
     # Change the working directory to here.
     # May not be necessary, but pyinstaller not tested for running
     #  from other directories, and this just makes things easier
     #  in general.
     original_cwd = os.getcwd()
     os.chdir(This_dir)
-
     
-    # Generate lines for a hook file.
-    # With the packaging of X4_Customizer, this doesn't appears to
-    #  be needed anymore.
-    # TODO: maybe remove entirely.
-    hook_lines = []
-
-    # Prepare the specification file expected by pyinstaller.
-    spec_lines = []
-
-    # Note: most places where paths may be used should be set as
-    #  raw strings, so the os.path forward slashes will get treated
-    #  as escapes when python parses them again otherwise.
-
-    # Analysis block specifies details of the source files to process.
-    spec_lines += [
-        'a = Analysis(',
-        '    [',
-        # Files to include.
-        # It seems like only the main x4_customizer is needed, everything
-        #  else getting recognized correctly.
-        '        "Main.py",',
-        '    ],',
-
-        # Relative path to work in; just use here.
-        '    pathex = [r"{}"],'.format(This_dir),
-        # Misc external binaries; unnecessary.
-        '    binaries = [],',
-        # Misc data files. While the source/patches folders could be
-        #  included, it makes more sense to somehow launch the generated
-        #  exe from the expected location so those folders are
-        #  seen as normal.
-        '    datas = [],',
-
-        # Misc imports pyinstaller didn't see.
-        '    hiddenimports = [',
-        # Add in regex, since it can be handy for runtime imported packages.
-        #-Removed, heavyweight.
-        #'        r"re",',
-        # Add fnmatch instead (wildcard style string matching).
-        # -This might be removable if it is in the framework.
-        '        r"fnmatch",',
-        # Inspect is used in the Live_Editor to ease some code writing.
-        '        r"inspect",',
-        # Multiprocessing can be used by plugins for speedups.
-        '        r"multiprocessing",',
-        # Add pyqt for the gui plugin.
-        # Pyinstaller needs a lot of help on this one when not being
-        # given the original source files (which are in plugins).
-        '        r"PyQt5",',
-        '        r"PyQt5.QtWidgets",',
-        '        r"PyQt5.QtCore",',
-        '        r"PyQt5.QtGui",',
-        '        r"PyQt5.uic",',
-        '    ],',
-
-        '    hookspath = [],',
-        # Extra python files to run when the exe starts up.
-        '    runtime_hooks = [',
-        '        "{}",'.format(hook_file_path),
-        '    ],',
-
-        # Exclude scipy, since it adds 500 MB to the 12 MB compile.
-        # Code which uses scipy should have an appropriate backup.
-        # Also skip numpy and matplotlib, which are only present for
-        #  some optional scaling equation verification.
-        '    excludes = [',
-        '        r"scipy",',
-        '        r"numpy",',
-        '        r"matplotlib",',
-        '        r"Plugins",', # Make sure the plugins aren't compiled.
-        '    ],',
-
-        '    win_no_prefer_redirects = False,',
-        '    win_private_assemblies = False,',
-        '    cipher = None,',
-        ')',
-        '',
-        ]
-    
-    spec_lines += [
-        'pyz = PYZ(a.pure, a.zipped_data,',
-        '     cipher = None,',
-        ')',
-        '',
-    ]
-    
-    spec_lines += [
-        'exe = EXE(pyz,',
-        '    a.scripts,',
-        '    exclude_binaries = True,',
-        '    name = "{}",'.format(program_name),
-        '    debug = False,',
-        '    strip = False,',
-        '    upx = True,',
-        # May want to disable console for a gui version.
-        #'    console = True,',
-        '    console = False,',
-        '    windowed = True,',
-        ')',
-        '',
-    ]
-    
-    spec_lines += [
-        'coll = COLLECT(exe,',
-        '    a.binaries,',
-        '    a.zipfiles,',
-        '    a.datas,',
-        '    strip = False,',
-        '    upx = True,',
-        '    name = "{}",'.format(program_name),
-        ')',
-        '',
-    ]
-    
-    
-    # Write the spec and hook files to the build folder, creating it
-    #  if needed.
-    if not os.path.exists(build_folder):
-        os.mkdir(build_folder)
-        
-    with open(spec_file_path, 'w') as file:
-        file.write('\n'.join(spec_lines))
-    with open(hook_file_path, 'w') as file:
-        file.write('\n'.join(hook_lines))
-
+    # Set two program names, based on mode.
+    program_name_gui     = 'X4_Customizer'
+    program_name_console = 'X4_Customizer_console'
 
     # Delete the existing dist directory; pyinstaller has trouble with
     #  this for some reason (maybe using os.remove, which also seemed
@@ -319,82 +200,233 @@ def Make(*args):
         shutil.rmtree(dist_folder)
 
 
-    # Run pyinstaller.
-    # This can call "pyinstaller" directly, assuming it is registered
-    #  on the command line, but it may be more robust to run python
-    #  and target the PyInstaller package.
-    # By going through python, it is also possible to set optimization
-    #  mode that will be applied to the compiled code.
-    # TODO: add optimization flag.
-    pyinstaller_call_args = [
-        'python', 
-        '-m', 'PyInstaller', 
-        spec_file_path,
-        '--distpath', dist_folder,
-        '--workpath', build_folder,
-        ]
-
-    # Set a clean flag if requested, making pyinstaller do a fresh
-    #  run. Alternatively, could just delete the work folder.
-    if parsed_args.preclean:
-        pyinstaller_call_args.append('--clean')
-
-    # Add the optimization flag, OO taking precedence.
-    # Put this flag before the -m and script name, else it gets fed
-    #  to the script.
-    # (In practice, these seem to make little to no difference, but are
-    #  kinda neat to have anyway.)
-    # -Removed; some places now reference docstrings, so need to keep them.
-    #if parsed_args.oo:
-    #    pyinstaller_call_args.insert(1, '-OO')
-    elif parsed_args.o:
-        pyinstaller_call_args.insert(1, '-O')
-
-    subprocess.run(pyinstaller_call_args)
-
-
-    # Check if the exe was created.
-    exe_path = os.path.join(dist_folder, program_name, program_name + '.exe')
-    if not os.path.exists(exe_path):
-        # It wasn't found; quit early.
-        print('Executable not created.')
-        return
-
-
-    # Move most files to a folder under the exe.
-    # Create the folder to move to first.
-    if not os.path.exists(exe_support_folder):
-        os.mkdir(exe_support_folder)
-    # Traverse the folder with the files; this was collected under
-    #  another folder with the name of the program.
-    path_to_exe_files = os.path.join(dist_folder, program_name)
-    for file_name in os.listdir(path_to_exe_files):
-
-        # These select names will be kept together and moved to the
-        #  bin folder.
-        if file_name in [
-            program_name + '.exe',
-            'base_library.zip',
-            'pyexpat.pyd',
-            'python36.dll',
-            ]:
-            # Move the file up one level to the dist folder.
-            shutil.move(
-                os.path.join(path_to_exe_files, file_name),
-                os.path.join(dist_folder, file_name),
-                )
+    # To be able to support direct command line calls (with responses)
+    # as well as gui launching, the only workable solution appears
+    # to be to compile twice.
+    for mode in ['console','gui']:
+    
+        # Set unique names based on mode.
+        if mode == 'console':
+            program_name = program_name_console
         else:
-            # Move the file up one level, and down to the support folder.
-            shutil.move(
-                os.path.join(path_to_exe_files, file_name),
-                os.path.join(exe_support_folder, file_name),
-                )
+            program_name = program_name_gui
             
-    # Clean out the now empty folder in the dist directory.
-    os.rmdir(path_to_exe_files)
-    # Clean up the spec and hook files.
-    os.remove(spec_file_path)
-    os.remove(hook_file_path)
+    
+        # Generate lines for a hook file.
+        # With the packaging of X4_Customizer, this doesn't appears to
+        #  be needed anymore.
+        # TODO: maybe remove entirely.
+        # TODO: maybe set a gui/console mode here, eg. so that the
+        # console version of the compile will not launch a gui
+        # by default without args.
+        hook_lines = []
+
+        # Prepare the specification file expected by pyinstaller.
+        spec_lines = []
+
+        # Note: most places where paths may be used should be set as
+        #  raw strings, so the os.path forward slashes will get treated
+        #  as escapes when python parses them again otherwise.
+
+        # Analysis block specifies details of the source files to process.
+        spec_lines += [
+            'a = Analysis(',
+            '    [',
+            # Files to include.
+            # It seems like only the main x4_customizer is needed, everything
+            #  else getting recognized correctly.
+            '        "Main.py",',
+            '    ],',
+
+            # Relative path to work in; just use here.
+            '    pathex = [r"{}"],'.format(This_dir),
+            # Misc external binaries; unnecessary.
+            '    binaries = [],',
+            # Misc data files. While the source/patches folders could be
+            #  included, it makes more sense to somehow launch the generated
+            #  exe from the expected location so those folders are
+            #  seen as normal.
+            '    datas = [],',
+
+            # Misc imports pyinstaller didn't see.
+            '    hiddenimports = [',
+            # Add in regex, since it can be handy for runtime imported packages.
+            #-Removed, heavyweight.
+            #'        r"re",',
+            # Add fnmatch instead (wildcard style string matching).
+            # -This might be removable if it is in the framework.
+            '        r"fnmatch",',
+            # Inspect is used in the Live_Editor to ease some code writing.
+            '        r"inspect",',
+            # Multiprocessing can be used by plugins for speedups.
+            '        r"multiprocessing",',
+            # Add pyqt for the gui plugin.
+            # Pyinstaller needs a lot of help on this one when not being
+            # given the original source files (which are in plugins).
+            '        r"PyQt5",',
+            '        r"PyQt5.QtWidgets",',
+            '        r"PyQt5.QtCore",',
+            '        r"PyQt5.QtGui",',
+            '        r"PyQt5.uic",',
+            '    ],',
+
+            '    hookspath = [],',
+            # Extra python files to run when the exe starts up.
+            '    runtime_hooks = [',
+            '        "{}",'.format(hook_file_path),
+            '    ],',
+
+            # Exclude scipy, since it adds 500 MB to the 12 MB compile.
+            # Code which uses scipy should have an appropriate backup.
+            # Also skip numpy and matplotlib, which are only present for
+            #  some optional scaling equation verification.
+            '    excludes = [',
+            '        r"scipy",',
+            '        r"numpy",',
+            '        r"matplotlib",',
+            '        r"Plugins",', # Make sure the plugins aren't compiled.
+            '    ],',
+
+            '    win_no_prefer_redirects = False,',
+            '    win_private_assemblies = False,',
+            '    cipher = None,',
+            ')',
+            '',
+            ]
+    
+        spec_lines += [
+            'pyz = PYZ(a.pure, a.zipped_data,',
+            '     cipher = None,',
+            ')',
+            '',
+        ]
+    
+        spec_lines += [
+            'exe = EXE(pyz,',
+            '    a.scripts,',
+            '    exclude_binaries = True,',
+            '    name = "{}",'.format(program_name),
+            '    debug = False,',
+            '    strip = False,',
+            '    upx = True,',
+            # Need console=True to capture responses with |more, but this
+            # causes a console to stay open behind the window, so...
+            # make this mode based.
+            '    console = {},'.format('True' if mode == 'console' else 'False'),
+            # To avoid having to use "|more" for the console version,
+            # disable windowed mode for it.
+            '    windowed = {},'.format('True' if mode == 'gui' else 'False'),
+            ')',
+            '',
+        ]
+    
+        spec_lines += [
+            'coll = COLLECT(exe,',
+            '    a.binaries,',
+            '    a.zipfiles,',
+            '    a.datas,',
+            '    strip = False,',
+            '    upx = True,',
+            '    name = "{}",'.format(program_name),
+            ')',
+            '',
+        ]
+    
+    
+        # Write the spec and hook files to the build folder, creating it
+        #  if needed.
+        if not os.path.exists(build_folder):
+            os.mkdir(build_folder)
+        
+        with open(spec_file_path, 'w') as file:
+            file.write('\n'.join(spec_lines))
+        with open(hook_file_path, 'w') as file:
+            file.write('\n'.join(hook_lines))
+
+
+        # Run pyinstaller.
+        # This can call "pyinstaller" directly, assuming it is registered
+        #  on the command line, but it may be more robust to run python
+        #  and target the PyInstaller package.
+        # By going through python, it is also possible to set optimization
+        #  mode that will be applied to the compiled code.
+        # TODO: add optimization flag.
+        pyinstaller_call_args = [
+            'python', 
+            '-m', 'PyInstaller', 
+            spec_file_path,
+            '--distpath', dist_folder,
+            '--workpath', build_folder,
+            ]
+
+        # Set a clean flag if requested, making pyinstaller do a fresh
+        #  run. Alternatively, could just delete the work folder.
+        if parsed_args.preclean:
+            pyinstaller_call_args.append('--clean')
+
+        #-Removed entirely; this isn't useful, and the assetions are
+        # used in some places to signal errors.
+        # Add the optimization flag, OO taking precedence.
+        # Put this flag before the -m and script name, else it gets fed
+        #  to the script.
+        # (In practice, these seem to make little to no difference, but are
+        #  kinda neat to have anyway.)
+        # -Removed; some places now reference docstrings, so need to keep them.
+        #if parsed_args.oo:
+        #    pyinstaller_call_args.insert(1, '-OO')
+        #elif parsed_args.o:
+        #    pyinstaller_call_args.insert(1, '-O')
+
+        # Run pyinstaller.
+        subprocess.run(pyinstaller_call_args)
+
+
+        # Check if the exe was created.
+        exe_path = os.path.join(dist_folder, program_name, program_name + '.exe')
+        if not os.path.exists(exe_path):
+            # It wasn't found; quit early.
+            print('Executable not created.')
+            return
+
+
+        # Move most files to a folder under the exe.
+        # Create the folder to move to first.
+        if not os.path.exists(exe_support_folder):
+            os.mkdir(exe_support_folder)
+        # Traverse the folder with the files; this was collected under
+        #  another folder with the name of the program.
+        path_to_exe_files = os.path.join(dist_folder, program_name)
+        for file_name in os.listdir(path_to_exe_files):
+
+            # These select names will be kept together and moved to the
+            #  bin folder.
+            if file_name in [
+                program_name + '.exe',
+                'base_library.zip',
+                'pyexpat.pyd',
+                'python36.dll',
+                ]:
+                # Move the file up one level to the dist folder.
+                shutil.move(
+                    os.path.join(path_to_exe_files, file_name),
+                    os.path.join(dist_folder, file_name),
+                    )
+            else:
+                # Move the file up one level, and down to the support folder.
+                shutil.move(
+                    os.path.join(path_to_exe_files, file_name),
+                    os.path.join(exe_support_folder, file_name),
+                    )
+            
+        # Clean out the now empty folder in the dist directory.
+        os.rmdir(path_to_exe_files)
+        # Clean up the spec and hook files.
+        os.remove(spec_file_path)
+        os.remove(hook_file_path)
+
+
+    # When here, the console and gui versions should be ready
+    # and collected into the same bin folder.
 
     # Delete the pyinstaller work folder, if requested.
     if parsed_args.postclean:
@@ -409,42 +441,42 @@ def Make(*args):
             # Use '%*' to pass all command line args.
             # The " | MORE" tag supposedly will capture stdout of
             # the tool even though it was compiled for a window.
-            'cmd'  : os.path.join('bin', program_name + '.exe') + ' -nogui %* | MORE',
+            'cmd'  : os.path.join('bin', program_name_console + '.exe') + ' -nogui %*',
             # Pause the window when done, so messages can be read.
             'pause': True,
             },
         {
             'name' : 'Clean_Script',
-            'cmd'  : os.path.join('bin', program_name + '.exe') + ' -nogui %* -clean | MORE',
+            'cmd'  : os.path.join('bin', program_name_console + '.exe') + ' -nogui %* -clean',
             'pause': True,
             },
         {
             'name' : 'Cat_Unpack',
-            'cmd'  : os.path.join('bin', program_name + '.exe') + ' -nogui Cat_Unpack -argpass %* | MORE',
+            'cmd'  : os.path.join('bin', program_name_console + '.exe') + ' -nogui Cat_Unpack -argpass %*',
             'pause': True,
             },
         {
             'name' : 'Cat_Pack',
-            'cmd'  : os.path.join('bin', program_name + '.exe') + ' -nogui Cat_Pack -argpass %* | MORE',
+            'cmd'  : os.path.join('bin', program_name_console + '.exe') + ' -nogui Cat_Pack -argpass %*',
             'pause': True,
             },
         {
             'name' : 'Check_Extensions',
-            'cmd'  : os.path.join('bin', program_name + '.exe') + ' -nogui Check_Extensions -argpass %* | MORE',
+            'cmd'  : os.path.join('bin', program_name_console + '.exe') + ' -nogui Check_Extensions -argpass %*',
             'pause': True,
             },
         {
             'name' : 'Start_Gui',
             # Use 'start' to launch the gui and close the bat window
             # right away.
-            'cmd'  : 'start ' + os.path.join('bin', program_name + '.exe') + ' %*',
+            'cmd'  : 'start ' + os.path.join('bin', program_name_gui + '.exe') + ' %*',
             # No pausing for now; probably just annoying if the gui
             # doesn't crash.
             'pause': False,
             },
         ]
 
-    # Create a bat file for launching the exe from the top level directory.
+    # Create the bat files.
     for bat_file_details in bat_file_details_list:
         file_name = os.path.join(This_dir, '..', bat_file_details['name'] + '.bat')
         lines = [
