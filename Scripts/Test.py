@@ -18,74 +18,45 @@ Settings(
 # code changes.
 test_all = 0
 
+if 0:
+    GUI.Start_GUI()
+    
+# Test the extension checker.
+if 1 or test_all:
+    Check_Extension('AAI-Deployables')
+if 0 or test_all:
+    # Alternatively, check everything (may take longer).
+    Check_All_Extensions()
+
+
+if 0:
+    Color_Text((20005,3012,'C'))
+
+if 0:
+    # Live editor tree builders.
+    edit_tree = Framework.Live_Editor.Get_Tree_View('weapons')
+
 
 # Test the gui live editor, doing a transform before and after
 # the patch application. Transform before should show up in the
 # gui edit tables; transform after should show up in the final
 # game files (along with the hand edits from the gui).
-if 1:
+if 0:
     # Pre-editor should have halved damage, post-editor 2x damage,
     # compared to vanilla or the input extensions.
-    Adjust_Weapon_Damage(0.5)
+    #Adjust_Weapon_Damage(0.5)
     Apply_Live_Editor_Patches()
-    Adjust_Weapon_Damage(4)
-
-
-# lxml seems to have slow findall performance with wares.xml;
-# toy around with it. TODO: remove this; problem was found and fixed.
-if 0:
-    wares_file = Framework.Load_File('libraries/wares.xml')
-    xml_node = wares_file.Get_Root()
-    import timeit
-    results = []
-
-    # Get time for one findall lookup, of a similar form to what is
-    # slow in the diff patch application.
-    results = xml_node.findall('./ware[100]/price[1]')
-    print(timeit.timeit(
-        "results = xml_node.findall('./ware[100]/price[1]')", 
-        number=10,
-        globals=globals()))
-    print(len(results))
-    # -As long as the path is correct for finding results, this has
-    # the slowdown seen by findall in the diff patcher.
-
-    # Try this with a non-indexed path, using parameters instead.
-    results = xml_node.findall('./ware[@id="advancedcomposites"]/price[1]')
-    print(timeit.timeit(
-        '''results = xml_node.findall('./ware[@id="advancedcomposites"]/price[1]')''', 
-        number=10,
-        globals=globals()))
-    print(len(results))
-    # -This is drastically faster.
-    # So, lxml has some sort of horrible implementation of [index] xpaths,
-    # such as not killing off bad path searches sufficiently early.
-    # Lesson: tweak the diff patch generator to use node attributes as
-    # much as possible, with indexing only as a clarification for
-    # ambiguous cases.
-    
-    # Make some test edits and get a diff patch.
-    Adjust_Ware_Price_Spread(
-        ('id        energycells'       , 2  ),
-        ('group     shiptech'          , 0.8),
-        ('container ship'              , 1.5),
-        ('tags      crafting'          , 0.2),
-        ('*'                           , 0.1) )
-    print(timeit.timeit(
-        '''wares_file.Get_Binary()''', 
-        number=10,
-        globals=globals()))
-    # This takes just 2 seconds per call (20 total); completely fine.
-
-    print('timing test done')
+    #Adjust_Weapon_Damage(4)
 
 
 if 0 or test_all:
     Adjust_Mission_Rewards(0.5)
-    #Write_To_Extension()
+    Write_To_Extension()
 
+
+# Ware transforms and printout.
 if 0 or test_all:
-    #Print_Ware_Stats('ware_stats_premod')
+    Print_Ware_Stats('ware_stats_premod')
     Adjust_Ware_Price_Spread(
         ('id        energycells'       , 2  ),
         ('group     shiptech'          , 0.8),
@@ -96,7 +67,8 @@ if 0 or test_all:
         ('container inventory'         , 0.5) )    
     Print_Ware_Stats('ware_stats_postmod')
 
-# Weapon transforms.
+
+# Weapon transforms and printout.
 if 0 or test_all:
     Print_Weapon_Stats('weapon_stats_premod')
     #Adjust_Weapon_Damage(1.2)
@@ -166,13 +138,6 @@ if 0 or test_all:
     #    ('faction   argon'             , 1.2),
     #                                     1.1 )
 
-
-# Test the extension checker.
-if 0 or test_all:
-    Check_Extension('test_mod')
-if 0 or test_all:
-    # Alternatively, check everything (may take longer).
-    Check_All_Extensions()
 
 # Simple cat unpack, allowing errors.
 if 0 or test_all:

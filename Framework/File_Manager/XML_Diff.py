@@ -213,21 +213,29 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
     error_prefix = '' if not error_prefix else '({}) '.format(error_prefix)
     
     if patch_node.tag != 'diff':
+
         # Error check for tag mismatch.
         if patch_node.tag != original_node.tag:
-            raise AssertionError(
+            # Side note: this was observed with a bad t/0001.xml diff
+            # patch attempt on a file that doesn't exist from some
+            # satellite mod. (Normally x4 won't load non-existent files
+            # since it has no reference to them, but the extension
+            # checker here will try it.)
+            Plugin_Log.Print(
                 '{}Error: Root tags differ: {} vs {}; skipping patch'.format(
                     error_prefix,
                     original_node.tag,
                     patch_node.tag ))
+            return original_node
 
         # Move over the children.
         original_node.extend(patch_node.getchildren())
 
         # TODO: maybe do error detection on adding a node with
-        # an "id" attribute that matches an existing node, since
+        # an "id" or "name" attribute that matches an existing node, since
         # x4 prints such errors in some cases (maybe all?).
-        # Would need to see if it can be done blindly for all files.
+        # Would need to see if it can be done blindly for all files,
+        # or if it should be specialized to macros/components/wares/etc.
 
     else:
         # Small convenience function for printing errors in various
@@ -325,6 +333,9 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
             # needed.
             matched_nodes = temp_tree.xpath('.' + xpath)
             #matched_nodes3 = temp_tree.xpath('./' + xpath)
+
+            if xpath == '''//aiscript/attention/actions/do_if[@value='$deploydistraction and not $alreadydeployed? and not this.assignedcontrolled.zone.isclass.highway']''':
+                bla = 0
 
             # On match failure, skip the operation similar to how
             # X4 would skip it.
@@ -437,20 +448,22 @@ def _Apply_Patch_Op(op_node, target_node, type):
 
         if op_node.tag == 'remove':
             # Remove from the parent.
-            # Note: the parent may be the top of the tree.
-            # TODO: check when happens when removing root.
             parent.remove(target_node)
                     
         if op_node.tag == 'replace':
-            # Error check the op_node for the right children count.
-            if len(op_node.getchildren()) != 1:
-                return '0 or multiple children'
+            # Essentially a mix of remove and add, replacing with the
+            # op_node children (can be multiple).
 
-            # Similar to remove, but replace with the op_node
-            # child (should be just one).
-            # Copy for safety.
-            op_node_child = deepcopy(op_node.getchildren()[0])
-            parent.replace(target_node, op_node_child)
+            # Copy children for safety.
+            op_node_children = deepcopy(op_node.getchildren())
+
+            # Need to insert one child at a time, at the right location.
+            # Do this before removing the target node, so these can
+            # be inserted before it.
+            for child in op_node_children:
+                target_node.addprevious(child)
+            # Can now remove the target.
+            parent.remove(target_node)
 
     return
 

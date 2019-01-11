@@ -1,5 +1,4 @@
 
-
 import inspect
 from collections import OrderedDict, defaultdict
 from collections import namedtuple
@@ -289,6 +288,7 @@ class Edit_Object:
             self,
             game_file,
             macro_list,
+            xpath_prefix = '',
             xpath_replacements = None
         ):
         '''
@@ -303,6 +303,10 @@ class Edit_Object:
           - List of Edit_Item_Macro and Display_Item_Macro objects,
             or pairs of Item_Group_Macro objects that will repeat over
             the intermediate other macros.
+        * xpath_prefix
+          - String, prefix to apply to all macro xpaths which will
+            select the appropriate object node (added to support
+            files containing multiple objects).
         * xpath_replacements
           - Dict holding replacements for macro xpath placeholders.
           - May be full or partial replacements; care should be
@@ -313,11 +317,28 @@ class Edit_Object:
           - Also useful for files which hold multiple objects, to
             be able to insert a per-object xpath prefix.
         '''
+        # If there is an initial xpath prefix given, use it to pick
+        #  out the starting node, else use root.
+        xml_node = game_file.Get_Root_Readonly()
+        if xpath_prefix:
+            test_nodes = xml_node.xpath(xpath_prefix)
+            if len(test_nodes) == 1:
+                xml_node = test_nodes[0]
+            else:
+                # Something went wrong. Perhaps this xpath doesn't
+                # work for the given game_file. Though this case
+                # is not expected in practice, since the caller should
+                # have picked the prefix based on what nodes are present.
+                # Just consider this an error for now.
+                raise AssertionError('Make_Items was given a bad xpath_prefix.')
+
         # Bounce to the recursive function, unpacking the initial
         # root node.
         self._Make_Items_Recursive(
             game_file = game_file,
-            xml_node = game_file.Get_Root_Readonly(),
+            xml_node = xml_node,
+            # Pass along the starting prefix.
+            xpath_prefix = xpath_prefix,
             # Copy the list, so the function can pop items off it privately.
             macro_list = list(macro_list),
             xpath_replacements = xpath_replacements )
@@ -378,6 +399,7 @@ class Edit_Object:
                     abs_xpath = xpath.replace('.',xpath_prefix,1)
                 else:
                     abs_xpath = xpath
+
 
             # Extend the name and display name.
             name         = name_prefix + macro.name

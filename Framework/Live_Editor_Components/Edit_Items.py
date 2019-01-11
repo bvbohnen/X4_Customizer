@@ -1,6 +1,7 @@
 
 from collections import defaultdict
 from ..File_Manager import Load_File
+from ..Common import Print
 
 # Static list of version names used.
 version_names = ['vanilla','patched','current','edited']
@@ -338,21 +339,30 @@ class Edit_Item(_Base_Item):
         if game_file == None:
             game_file = Load_File(self.virtual_path)
 
-        # Look up the xpath node; should be just one.
+        # Look up the xpath node; there should be 0 or 1 of these.
+        # Note: the xpath may be missing for some file versions,
+        #  such as a patched version adding a node missing from
+        #  the vanilla version (eg. a ware with an added production
+        #  formula).
         nodes = game_file.Get_Xpath_Nodes(self.xpath, version = version)
-        if len(nodes) != 1:
-            raise AssertionError(
-                'Error: Found {} nodes for file "{}", xpath "{}".'
+        if len(nodes) > 1:
+            Print('Error: Found {} nodes for file "{}", xpath "{}".'
                 .format(len(nodes), self.virtual_path, self.xpath))
 
-        # Pull out the field info.
-        # Note: may be empty, in which case use an empty string.
-        value = nodes[0].get(self.attribute, default = '')
+        # Set a default value of ''.
+        if not nodes:
+            value = ''
+        else:
+            # Pull out the field info.
+            # Note: may be empty, in which case use an empty string.
+            value = nodes[0].get(self.attribute, default = '')
+
         # Record it.
         self.version_value_dict[version] = value
 
-        # Record the patched node for reference.
-        if version == 'patched':
+        # Record the patched node for reference, to match up to
+        # live_editor saved patches which may have had a different xpath.
+        if version == 'patched' and nodes:
             # There should be an id in the node tail.
             if not nodes[0].tail:
                 from lxml import etree as ET

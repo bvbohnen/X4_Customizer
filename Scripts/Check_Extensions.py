@@ -39,8 +39,15 @@ argparser.add_argument(
     help =  'Path to the user x4 documents folder.'
             ' If not given, uses the default in Settings.')
 
-args = argparser.parse_args(sys.argv[1:])
+argparser.add_argument(
+    '-more_orders',
+    action = 'store_true',
+    help =  'Performs additional loading order tests, loading extensions'
+            ' at the earliest or latest opportunity; otherwise only'
+            ' alphabetical ordering by folder name is used.'
+            )
 
+args = argparser.parse_args(sys.argv[1:])
 
 # Copy over a couple paths to Settings; let it deal with validation
 # and defaults.
@@ -56,11 +63,11 @@ Settings.ignore_output_extension = False
 # This will also initialize the file system.
 if not args.extensions:
     args.extensions = File_System.Get_Extension_Names()
-
+    
 passed = []
 failed = []
 for extension in args.extensions:
-    if Check_Extension(extension):
+    if Check_Extension(extension, check_other_orderings = args.more_orders):
         passed.append(extension)
     else:
         failed.append(extension)

@@ -275,7 +275,7 @@ def _Build_Weapon_Objects():
 # Fields from the weapon macro file to look for and convert to Edit_Items.
 # Switch to full xpaths to hopefully speed up lxml processing time.
 weapon_item_macros = [
-    E('rotation_speed'       , './macro/properties/rotationspeed'        , 'max'          , 'Rot. Speed', ''),
+    E('rotation_speed'       , './/rotationspeed'        , 'max'          , 'Rot. Speed', ''),
     E('rotation_acceleration', './/rotationacceleration' , 'max'          , 'Rot. Accel.', ''),
 
     E('heat_overheat'        , './/heat'                 , 'overheat'     , 'Overheat', 'Max heat before firing stops'),

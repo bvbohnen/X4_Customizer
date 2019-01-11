@@ -83,7 +83,7 @@ class Cat_Reader:
         self.cat_path = cat_path
         self.dat_path = cat_path.with_suffix('.dat')
         self.cat_entries = {}
-                
+
         # Read the cat. Error if not found.
         if not self.cat_path.exists():
             raise AssertionError('Error: failed to find cat file at {}'.format(path))

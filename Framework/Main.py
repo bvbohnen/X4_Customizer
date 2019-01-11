@@ -272,6 +272,7 @@ def Run(*args):
     return
 
 if __name__ == '__main__':
+    # assert False
     # Multiprocessing requires these functions be run right after entry.
     # Note: this breaks the normal VS debugging, so only do it when frozen.
     if getattr(sys, 'frozen', False):

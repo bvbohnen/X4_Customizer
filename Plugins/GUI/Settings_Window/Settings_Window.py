@@ -44,8 +44,7 @@ class Settings_Window(Tab_Page_Widget, generated_class):
         # Init the splitter to 1:1.
         self.hsplitter.setSizes([1000,1000])
         return
-    
-    
+        
     
     def Handle_Signal(self, *flags):
         '''

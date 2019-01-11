@@ -93,14 +93,14 @@ def _Build_Storage_Objects():
 # TODO: maybe lockboxes and/or collectablewares as well
 
 storage_item_macros = [
-    E('makerrace'            , './macro/properties/identification'        , 'makerrace'    , 'Maker', ''),
-    #E('mk'                   , './macro/properties/identification'        , 'mk'           , 'Mark', ''),    
+    E('makerrace'            , './properties/identification'        , 'makerrace'    , 'Maker', ''),
+    #E('mk'                   , './properties/identification'        , 'mk'           , 'Mark', ''),    
 
-    E('cargo_max'            , './macro/properties/cargo'                 , 'max'          , 'Cargo Max', ''),
-    E('cargo_tags'           , './macro/properties/cargo'                 , 'tags'         , 'Cargo Tags'  , ''),
+    E('cargo_max'            , './properties/cargo'                 , 'max'          , 'Cargo Max', ''),
+    E('cargo_tags'           , './properties/cargo'                 , 'tags'         , 'Cargo Tags'  , ''),
     
-    #E('hull'                 , './macro/properties/hull'                  , 'max'          , 'Hull', ''),
-    E('hull_integrated'      , './macro/properties/hull'                  , 'integrated'   , 'Hull Integrated', ''),
+    #E('hull'                 , './properties/hull'                  , 'max'          , 'Hull', ''),
+    E('hull_integrated'      , './properties/hull'                  , 'integrated'   , 'Hull Integrated', ''),
     ]
 
 
@@ -122,32 +122,32 @@ def _Build_Engine_Objects():
 # 'engine' vs 'thruster', and by size.
 
 engine_item_macros = [
-    E('makerrace'            , './macro/properties/identification'        , 'makerrace'    , 'Maker', ''),
-    E('mk'                   , './macro/properties/identification'        , 'mk'           , 'Mark', ''),    
+    E('makerrace'            , './properties/identification'        , 'makerrace'    , 'Maker', ''),
+    E('mk'                   , './properties/identification'        , 'mk'           , 'Mark', ''),    
 
-    E('thrust_forward'       , './macro/properties/thrust'                , 'forward'      , 'Thrust Forward', ''),
-    E('thrust_reverse'       , './macro/properties/thrust'                , 'reverse'      , 'Thrust Reverse'  , ''),
+    E('thrust_forward'       , './properties/thrust'                , 'forward'      , 'Thrust Forward', ''),
+    E('thrust_reverse'       , './properties/thrust'                , 'reverse'      , 'Thrust Reverse'  , ''),
     
-    E('thrust_strafe'        , './macro/properties/thrust'                , 'strafe'       , 'Thrust Strafe'  , ''),
-    E('thrust_pitch'         , './macro/properties/thrust'                , 'pitch'        , 'Thrust Pitch'  , ''),
-    E('thrust_yaw'           , './macro/properties/thrust'                , 'yaw'          , 'Thrust Yaw'  , ''),
-    E('thrust_roll'          , './macro/properties/thrust'                , 'roll'         , 'Thrust Roll'  , ''),
+    E('thrust_strafe'        , './properties/thrust'                , 'strafe'       , 'Thrust Strafe'  , ''),
+    E('thrust_pitch'         , './properties/thrust'                , 'pitch'        , 'Thrust Pitch'  , ''),
+    E('thrust_yaw'           , './properties/thrust'                , 'yaw'          , 'Thrust Yaw'  , ''),
+    E('thrust_roll'          , './properties/thrust'                , 'roll'         , 'Thrust Roll'  , ''),
 
-    E('boost_duration'       , './macro/properties/boost'                 , 'duration'     , 'Boost Duration', ''),
-    E('boost_thrust'         , './macro/properties/boost'                 , 'thrust'       , 'Boost Thrust'  , ''),
-    E('boost_attack'         , './macro/properties/boost'                 , 'attack'       , 'Boost Attack'  , ''),
-    E('boost_release'        , './macro/properties/boost'                 , 'release'      , 'Boost Release' , ''),
+    E('boost_duration'       , './properties/boost'                 , 'duration'     , 'Boost Duration', ''),
+    E('boost_thrust'         , './properties/boost'                 , 'thrust'       , 'Boost Thrust'  , ''),
+    E('boost_attack'         , './properties/boost'                 , 'attack'       , 'Boost Attack'  , ''),
+    E('boost_release'        , './properties/boost'                 , 'release'      , 'Boost Release' , ''),
     
-    E('travel_charge'        , './macro/properties/travel'                , 'charge'       , 'Travel Charge', ''),
-    E('travel_thrust'        , './macro/properties/travel'                , 'thrust'       , 'Travel Thrust'  , ''),
-    E('travel_attack'        , './macro/properties/travel'                , 'attack'       , 'Travel Attack'  , ''),
-    E('travel_release'       , './macro/properties/travel'                , 'release'      , 'Travel Release' , ''),
+    E('travel_charge'        , './properties/travel'                , 'charge'       , 'Travel Charge', ''),
+    E('travel_thrust'        , './properties/travel'                , 'thrust'       , 'Travel Thrust'  , ''),
+    E('travel_attack'        , './properties/travel'                , 'attack'       , 'Travel Attack'  , ''),
+    E('travel_release'       , './properties/travel'                , 'release'      , 'Travel Release' , ''),
 
-    E('hull'                 , './macro/properties/hull'                  , 'max'          , 'Hull', ''),
-    E('hull_threshold'       , './macro/properties/hull'                  , 'threshold'    , 'Hull Thr.', 'Hull Threshold'),
+    E('hull'                 , './properties/hull'                  , 'max'          , 'Hull', ''),
+    E('hull_threshold'       , './properties/hull'                  , 'threshold'    , 'Hull Thr.', 'Hull Threshold'),
     
-    E('effects_boosting'     , './macro/properties/effects/boosting'      , 'ref'          , 'Boost Effect', ''),
-    E('sounds_engine'        , './macro/properties/sounds/enginedetail'   , 'ref'          , 'Sound Effect', ''),
+    E('effects_boosting'     , './properties/effects/boosting'      , 'ref'          , 'Boost Effect', ''),
+    E('sounds_engine'        , './properties/sounds/enginedetail'   , 'ref'          , 'Sound Effect', ''),
 
     ]
 

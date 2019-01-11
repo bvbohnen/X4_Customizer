@@ -98,7 +98,16 @@ class Widget_Settings(QtWidgets.QGroupBox):
                     button_f.py_value = False
                     button_d.py_value = None
 
+                    # Set these not to save across sessions, to avoid
+                    # restored session data overwriting any loaded
+                    # values from config.
+                    button_t.do_not_save = True
+                    button_f.do_not_save = True
+                    button_d.do_not_save = True
+                    
+
                     # Listen to the clicked signals.
+                    # TODO: use the button group signal.
                     Setup_Modification_Listener(button_t, field)
                     Setup_Modification_Listener(button_f, field)
                     Setup_Modification_Listener(button_d, field)
@@ -107,8 +116,8 @@ class Widget_Settings(QtWidgets.QGroupBox):
 
                     # Give these integer indexes, positive.
                     # Make somewhat sensible.
-                    button_group.addButton(button_t, 1)
                     button_group.addButton(button_f, 0)
+                    button_group.addButton(button_t, 1)
                     button_group.addButton(button_d, 2)
                     # Annotate with a reverse lookup dict.
                     button_group.button_dict = {
@@ -132,6 +141,10 @@ class Widget_Settings(QtWidgets.QGroupBox):
                 # paths or strings).
                 else:
                     widget = QtWidgets.QLineEdit()
+
+                    # Don't save contents across sessions.
+                    widget.do_not_save = True
+
                     # Treat default text as a placeholder.
                     widget.setPlaceholderText(str(default))
                     
@@ -250,7 +263,7 @@ class Widget_Settings(QtWidgets.QGroupBox):
             self.window.Print('Error when setting field {}'.format(field))
             return
         widget = self.field_widget_dict[field]
-
+        
         # Handle based on widget type.
         if isinstance(widget, QtWidgets.QLineEdit):
             # TODO: How to know when to Path convert, and if it is

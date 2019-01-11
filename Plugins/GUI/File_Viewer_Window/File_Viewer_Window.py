@@ -88,6 +88,15 @@ class File_Viewer_Window(Tab_Page_Widget, generated_class):
         self.widget_button_compare.clicked.connect(self.Action_Compare)
         self.widget_button_reload.clicked.connect(self.Action_Reload_File)
         
+        # Set up the diff text boxes to scroll together; they will
+        # always have the same line count.
+        # The valueChanged signal should output an int of the position,
+        #  which will feed to setValue of the other box.
+        vertical_0 = self.textEdit_compare_right.verticalScrollBar()
+        vertical_1 = self.textEdit_compare_left .verticalScrollBar()
+        vertical_0.valueChanged.connect(vertical_1.setValue)
+        vertical_1.valueChanged.connect(vertical_0.setValue)
+
 
         # Start the dock hidden.
         self.dockWidget.setVisible(False)
@@ -491,31 +500,37 @@ class File_Viewer_Window(Tab_Page_Widget, generated_class):
             # TODO: left align the table title somehow, else it tends
             # to be scrolled off out of view if any lines are long.
             if '<thead' in line:
-                # This looks like (manually newlined):
-                # <thead><tr>
-                # <th class="diff_next"><br /></th>
-                # <th colspan="2" class="diff_header">Vanilla</th>
-                # -split here
-                # <th class="diff_next"><br /></th>
-                # <th colspan="2" class="diff_header">Current</th>
-                # </tr></thead>
-                start = '<thead><tr>'
-                end   = '</tr></thead>'
-                splitter = '<th class'
+                # -Remove this line; it just doesn't work well, scrolling
+                # out of visible area right away and being centered to
+                # the often wide text (so not visible without adjusting
+                # the scroll bar).
+                pass
 
-                # Pull off the start/end sections, and scrap the spacing.
-                stripline = line.strip().replace(start,'').replace(end,'')
-
-                # Split into an empty string and the two sides.
-                header, left, right = stripline.split(splitter)
-
-                # Put the start/end and splitter back on both sides.
-                left = start + splitter + left + end
-                right = start + splitter + right + end
-
-                # Save.
-                split_html[0].append(left)
-                split_html[1].append(right)
+                ## This looks like (manually newlined):
+                ## <thead><tr>
+                ## <th class="diff_next"><br /></th>
+                ## <th colspan="2" class="diff_header">Vanilla</th>
+                ## -split here
+                ## <th class="diff_next"><br /></th>
+                ## <th colspan="2" class="diff_header">Current</th>
+                ## </tr></thead>
+                #start = '<thead><tr>'
+                #end   = '</tr></thead>'
+                #splitter = '<th class'
+                #
+                ## Pull off the start/end sections, and scrap the spacing.
+                #stripline = line.strip().replace(start,'').replace(end,'')
+                #
+                ## Split into an empty string and the two sides.
+                #header, left, right = stripline.split(splitter)
+                #
+                ## Put the start/end and splitter back on both sides.
+                #left = start + splitter + left + end
+                #right = start + splitter + right + end
+                #
+                ## Save.
+                #split_html[0].append(left)
+                #split_html[1].append(right)
 
             elif line.endswith('</tr>'):
                 # Normal row splits.

@@ -6,15 +6,13 @@
     <ProjectHome>
     </ProjectHome>
     <StartupFile>Main.py</StartupFile>
-    <SearchPath>
-    </SearchPath>
+    <SearchPath>..\Framework;..\..\X4_Customizer</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>Framework</Name>
-    <RootNamespace>Framework</RootNamespace>
+    <RootNamespace>X4_Customizer</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <CommandLineArguments>Test</CommandLineArguments>
-    <EnableNativeCodeDebugging>True</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -46,30 +44,49 @@
     <Compile Include="Common\Change_Log.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Common\__init__.py" />
+    <Compile Include="Common\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="File_Manager\File_System.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="File_Manager\File_Types.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Common\Logs.py" />
+    <Compile Include="Common\Logs.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Common\Plugin_Manager.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="File_Manager\Source_Reader_Local.py" />
     <Compile Include="File_Manager\XML_Diff.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="File_Manager\__init__.py" />
+    <Compile Include="File_Manager\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="File_Manager\Source_Reader.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Live_Editor_Components\Edit_Items.py" />
-    <Compile Include="Live_Editor_Components\Edit_Object.py" />
-    <Compile Include="Live_Editor_Components\Edit_Tables.py" />
-    <Compile Include="Live_Editor_Components\Edit_Tree_View.py" />
-    <Compile Include="Live_Editor_Components\Live_Editor_class.py" />
-    <Compile Include="Live_Editor_Components\__init__.py" />
+    <Compile Include="Live_Editor_Components\Edit_Items.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Live_Editor_Components\Edit_Object.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Live_Editor_Components\Edit_Tables.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Live_Editor_Components\Edit_Tree_View.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Live_Editor_Components\Live_Editor_class.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Live_Editor_Components\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Make_Documentation.py">
       <SubType>Code</SubType>
     </Compile>
@@ -82,11 +99,15 @@
     <Compile Include="Make_Release.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Common\Scaling_Equations.py" />
+    <Compile Include="Common\Scaling_Equations.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Common\Settings.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Main.py" />
+    <Compile Include="Main.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="__init__.py">
       <SubType>Code</SubType>
     </Compile>

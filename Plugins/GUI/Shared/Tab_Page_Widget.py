@@ -173,9 +173,14 @@ class Tab_Page_Widget(QtWidgets.QWidget):
         '''
         Save geometry of the current sessions state.
         Subclasses should wrap this with their own saved state.
+        Widgets with a 'do_not_save' attribute will be skipped.
         '''        
         # Iterate over all widgets.
         for widget in self.findChildren(QtWidgets.QWidget):
+            # Skip do_not_save widgets.
+            if getattr(widget, 'do_not_save', None):
+                continue
+
             name = widget.objectName()
             settings.beginGroup(name)
 
@@ -199,9 +204,16 @@ class Tab_Page_Widget(QtWidgets.QWidget):
         '''
         Loads geometry to the current sessions state.
         Subclasses should wrap this with their own saved state.
+        Widgets with a 'do_not_save' attribute will be skipped.
         '''
         # Iterate over all widgets.
         for widget in self.findChildren(QtWidgets.QWidget):
+            # Skip do_not_save widgets.
+            # Normally these weren't saved to begin with, but this
+            # check helps avoid hiccups across version changes that
+            # add new do_not_save flags.
+            if getattr(widget, 'do_not_save', None):
+                continue
             
             name = widget.objectName()
             settings.beginGroup(name)

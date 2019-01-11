@@ -7,12 +7,11 @@
     </ProjectHome>
     <StartupFile>
     </StartupFile>
-    <SearchPath>
-    </SearchPath>
+    <SearchPath>..\Framework;..\Plugins;..\..\X4_Customizer</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>Scripts</Name>
-    <RootNamespace>Scripts</RootNamespace>
+    <RootNamespace>X4_Customizer</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -23,7 +22,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Authors_Transforms.py" />
+    <Compile Include="Authors_Transforms.py" >
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Cat_Pack.py">
       <SubType>Code</SubType>
     </Compile>
@@ -33,12 +34,18 @@
     <Compile Include="Check_Extensions.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Example_Transforms.py" />
+    <Compile Include="Example_Transforms.py" >
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Make_Documentation.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Test.py" />
-    <Compile Include="Default_Script_template.py" />
+    <Compile Include="Test.py" >
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Default_Script_template.py" >
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

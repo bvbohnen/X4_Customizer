@@ -151,13 +151,15 @@ class File_System_class:
         
         # Check if the game_file is an xml file with a supported
         # asset tag, and updates the asset_class_dict if so.
-        if isinstance(game_file, XML_File) and game_file.asset_class_name != None:
+        if isinstance(game_file, XML_File) and game_file.asset_class_name_dict != None:
             tag        = game_file.root_tag
-            class_name = game_file.asset_class_name
-            name       = game_file.asset_name
-            # Record the file two ways.
-            self.asset_class_dict[tag][class_name].append(game_file)
-            self.asset_name_dict[name] = game_file
+            # There could be multiple assets of different classes, so
+            # loop over them.
+            for class_name, name_list in game_file.asset_class_name_dict.items():
+                for name in name_list:
+                    # Record the file two ways.
+                    self.asset_class_dict[tag][class_name].append(game_file)
+                    self.asset_name_dict[name] = game_file
         return
 
 
@@ -196,6 +198,7 @@ class File_System_class:
         '''
         Returns a loaded asset XML_File object with the corresponding
         "name" (as found in the xml).  Error if not found.
+        The returned file may contain other assets.
         
         Example: Get_Asset_File('weapon_tel_l_beam_01_mk1')
         '''
@@ -336,8 +339,8 @@ class File_System_class:
             # Problem if the file isn't found.
             if game_file == None:
                 if error_if_not_found:
-                    raise File_Missing_Exception(
-                        'Could not find file "{}", or file was empty'.format(virtual_path))
+                    raise File_Missing_Exception(('Error: Could not find file'
+                            ' "{}", or file was empty').format(virtual_path))
                 return None
         
             # Store the contents in the game_file_dict if not in testing.

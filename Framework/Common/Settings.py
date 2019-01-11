@@ -337,7 +337,7 @@ class Settings_class:
         and load defaults from it.
         Returns a list of field names updated.
         '''
-        fields_update = []
+        fields_updated = []
 
         # Try the home_path and the call directory to find this.
         for json_path in [Path('settings.json'), home_path / 'settings.json']:
@@ -354,7 +354,7 @@ class Settings_class:
                         ).format(type(ex).__name__))
                 # Don't continue; just return. Avoids repeating errors
                 # if the cwd is the home_path.
-                return fields_update
+                return fields_updated
 
             # Do some replacements of strings for normal types;
             # unfortunately json.load doesn't do this automatically.
@@ -374,14 +374,14 @@ class Settings_class:
                 if hasattr(self, key):
                     # This should always be a bool or a string.
                     setattr(self, key, value)
-                    fields_update.append(key)
+                    fields_updated.append(key)
                 else:
                     Print(('Entry "{}" in settings.json not recognized; skipping.'
                            ).format(key))
 
             # Don't want to check other json files.
             break
-        return fields_update
+        return fields_updated
 
 
     def Save_Json(self, fields_to_save):

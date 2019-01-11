@@ -26,26 +26,26 @@ def _Build_Storage_Objects():
 
 
 ship_item_macros = [
-    E('ship_type'                 , './macro/properties/ship'                , 'type'       , 'Ship Type'       , ''),
-    E('purpose_primary'           , './macro/properties/purpose'             , 'primary'    , 'Primary Purpose' , ''),
+    E('ship_type'                 , './properties/ship'                , 'type'       , 'Ship Type'       , ''),
+    E('purpose_primary'           , './properties/purpose'             , 'primary'    , 'Primary Purpose' , ''),
 
-    E('hull'                      , './macro/properties/hull'                , 'max'        , 'Hull'            , ''),
-    E('explosion_damage'          , './macro/properties/explosiondamage'     , 'value'      , 'Expl. Damage'    , ''),
-    E('people_capacity'           , './macro/properties/people'              , 'capacity'   , 'People'          , ''),
-    E('storage_missile'           , './macro/properties/storage'             , 'missile'    , 'Missile Storage' , ''),
-    E('thruster_tags'             , './macro/properties/thruster'            , 'tags'       , 'Thruster Tags'   , ''),
-    E('secrecy_level'             , './macro/properties/secrecy'             , 'level'      , 'Secrecy Level'   , ''),
+    E('hull'                      , './properties/hull'                , 'max'        , 'Hull'            , ''),
+    E('explosion_damage'          , './properties/explosiondamage'     , 'value'      , 'Expl. Damage'    , ''),
+    E('people_capacity'           , './properties/people'              , 'capacity'   , 'People'          , ''),
+    E('storage_missile'           , './properties/storage'             , 'missile'    , 'Missile Storage' , ''),
+    E('thruster_tags'             , './properties/thruster'            , 'tags'       , 'Thruster Tags'   , ''),
+    E('secrecy_level'             , './properties/secrecy'             , 'level'      , 'Secrecy Level'   , ''),
     
     *physics_item_macros,
 
-    E('sounds_ship'               , './macro/properties/sounds/shipdetail'   , 'ref'        , 'Sound Effect'    , ''),
-    E('sound_occlusion'           , './macro/properties/sound_occlusion'     , 'inside'     , 'Sound Occlusion' , ''),
+    E('sounds_ship'               , './properties/sounds/shipdetail'   , 'ref'        , 'Sound Effect'    , ''),
+    E('sound_occlusion'           , './properties/sound_occlusion'     , 'inside'     , 'Sound Occlusion' , ''),
 
     # Loop over software.
-    G('software'                  , './macro/properties/software'            , 'software'   , 'Software'            ),
-    E('ware'                      , '.'                                      , 'ware'       , 'Ware'            , ''),
-    E('default'                   , '.'                                      , 'default'    , 'Default'         , ''),
-    E('compatible'                , '.'                                      , 'compatible' , 'Compatible'      , ''),
+    G('software'                  , './properties/software'            , 'software'   , 'Software'            ),
+    E('ware'                      , '.'                                , 'ware'       , 'Ware'            , ''),
+    E('default'                   , '.'                                , 'default'    , 'Default'         , ''),
+    E('compatible'                , '.'                                , 'compatible' , 'Compatible'      , ''),
     G('/software'),
 
     *connection_item_macros

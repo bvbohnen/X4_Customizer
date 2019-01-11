@@ -351,6 +351,9 @@ class Weapon:
       - Component file for the weapon.
       - Note: the bullet also has a component, but it isn't of interest
         for now.
+
+    TODO: this needs an overhaul for when files define multiple weapons
+    at once.
     '''
     def __init__(self, weapon_file):
         self.weapon_file = weapon_file
