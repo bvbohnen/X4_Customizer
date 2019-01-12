@@ -17,6 +17,7 @@ def Set_Icon(widget, icon_name):
     * icon_name
         - String, name of the icon.
         - Example useful names: 'SP_DirIcon','SP_FileIcon'
+        - If None given, an empty icon is applied.
     '''
     # Returns if not a supported widget.
     method = getattr(widget, 'setIcon', None)
@@ -25,21 +26,24 @@ def Set_Icon(widget, icon_name):
     if method == None:
         return
 
-    # Start with a code lookup from the enum.
-    icon_code = getattr(QtWidgets.QStyle, icon_name)
-    # Return if not found.
-    if icon_code == None:
-        return
+    if icon_name != None:
+        # Start with a code lookup from the enum.
+        icon_code = getattr(QtWidgets.QStyle, icon_name)
+        # Return if not found.
+        if icon_code == None:
+            return
     
-    # Reference the main application for the current style.
-    # Do a delayed import, added when multiprocessing started
-    # complaining about a possible import loop.
-    from .. import Main_Window
-    # Convert from code to an icon for the current style.
-    icon = Main_Window.qt_application.style().standardIcon(icon_code)
-    # Return if None (assuming that can happen.
-    if icon == None:
-        return
+        # Reference the main application for the current style.
+        # Do a delayed import, added when multiprocessing started
+        # complaining about a possible import loop.
+        from .. import Main_Window
+        # Convert from code to an icon for the current style.
+        icon = Main_Window.qt_application.style().standardIcon(icon_code)
+        # Return if None (assuming that can happen.
+        if icon == None:
+            return
+    else:
+        icon = QtGui.QIcon()
 
     # Finally, apply the icon.
     method(icon)

@@ -8,6 +8,12 @@ class Tab_Page_Widget(QtWidgets.QWidget):
     since a limit in the designer prevents proper promotion of tab
     pages to this class.
 
+    Class attributes:
+    * unique_tab
+      - Bool, if True then only one instance of this tab should exist.
+        Attempts to create more should be redirected to focusing on
+        the existing tab.
+
     Attributes:
     * window
       - The parent main window for this tab, generally expected to
@@ -22,6 +28,8 @@ class Tab_Page_Widget(QtWidgets.QWidget):
       - Bool, if True then threads will print their args when launched.
       - Set False for tabs that have complex thread args.
     '''
+    unique_tab = False
+
     def __init__(self, parent, window):
         super().__init__(parent)
 
@@ -99,6 +107,7 @@ class Tab_Page_Widget(QtWidgets.QWidget):
             prelaunch_function = None,
             callback_function = None,
             short_run = False,
+            print_args = True,
             **kwargs,
         ):
         '''

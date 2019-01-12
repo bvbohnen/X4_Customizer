@@ -12,6 +12,7 @@ from Framework import File_Missing_Exception
 def Check_Extension(
         extension_name,
         check_other_orderings = False,
+        return_log_messages = False
     ):
     '''
     Checks an extension for xml diff patch errors and dependency errors.
@@ -35,10 +36,16 @@ def Check_Extension(
         changing their folder name and thereby their loading order.
       - Defaults to False, to avoid printing errors that won't be
         present with the current extension order.
+    * return_log_messages
+      - Bool, if True then instead of the normal True/False return,
+        this will instead return a list of logged lines that
+        contain any error messages.
+      - Does not stop the normal message Prints.
     '''
     # TODO: think about also checking later extensions to see if they
     #  might overwrite this extension.
     
+    Print('')
     Print('Checking extension: {}'.format(extension_name))
 
     # Lowercase the name to standardize it for lookups.
@@ -62,6 +69,10 @@ def Check_Extension(
     # Keep a history of messages seen, to avoid reprinting them when 
     # the loading order is switched.
     messages_seen = set()
+
+    # Possibly keep a list of lines seen for returning.
+    logged_messages = []
+
     # For name checks, use re to protect against one extension name
     # being inside another longer name by using '\b' as word edges;
     # also add a (?<!/) check to avoid matching when the extension
@@ -86,7 +97,12 @@ def Check_Extension(
             messages_seen.add(message)
             nonlocal success
             success = False
-            # Add an indent for visual niceness.
+            
+            # Record the message, if requested.
+            if return_log_messages:
+                logged_messages.append(message)
+
+            # Print with an indent for visual niceness.
             Print('  ' + message)
         return
 
@@ -125,8 +141,14 @@ def Check_Extension(
             Load_File(virtual_path, test_load = True, 
                       error_if_not_found = False)
             
+    Print('  Overall result: ' + ('Success' if success else 'Error detected'))
+
     # Detach the logging function override.
     Plugin_Log.logging_function = None
+
+    # Return the messages if requested, else the success flag.
+    if return_log_messages:
+        return logged_messages
     return success
 
 

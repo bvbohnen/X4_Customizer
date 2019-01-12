@@ -33,6 +33,7 @@ from Framework.Common import home_path
 # Include base classes, so they can be used in isinstance checks.
 #from .Edit_Table_Window import Edit_Table_Window
 from .Edit_View_Window   import Edit_View_Window
+from .Extensions_Window  import Extensions_Window
 from .Settings_Window    import Settings_Window
 from .Script_Window      import Script_Window
 from .Shared             import Tab_Page_Widget
@@ -395,6 +396,7 @@ class GUI_Main_Window(qt_base_class, generated_class):
         # Actions that go straight to tab openers.
         for action_name, class_name, label in [
             ('action_VFS', 'VFS_Window', 'VFS'),
+            ('action_Extensions', 'Extensions_Window', 'Extensions'),            
             ]:
             action = getattr(self, action_name)
             action.triggered.connect(
@@ -528,8 +530,23 @@ class GUI_Main_Window(qt_base_class, generated_class):
         '''
         Create a new tab holding a widget_class object, with  the
         given tab label. Any extra kwargs are passed.
-        Returns the created widget.
+        If the tab class is meant to be unique and an existing copy
+        is open, that one will be focused on.
+        Returns the created or freshly shown widget.
         '''
+        # Look up the window class.
+        window_class = globals()[class_name]
+        # Check if it is meant to be unique.
+        if window_class.unique_tab:
+            # Check if there is a matching window already open.
+            open_tabs = self.Get_Tab_Widgets(class_name)
+            if open_tabs:
+                widget = open_tabs[0]
+                # There should just be one. Focus on it.
+                index = self.widget_tab_container.indexOf(widget)
+                self.widget_tab_container.setCurrentIndex(index)
+                return widget
+
         # Store the tab information for rebuilding on reload.
         tab_properties = Tab_Properties(
             self,

@@ -45,28 +45,30 @@
     <Compile Include="GUI\Edit_View_Window\Edit_Table_Model.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\Edit_View_Window\Edit_View_Window.py" >
+    <Compile Include="GUI\Edit_View_Window\Edit_View_Window.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\Edit_View_Window\Edit_Tree_Model.py" >
+    <Compile Include="GUI\Edit_View_Window\Edit_Tree_Model.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GUI\Edit_View_Window\Q_Item_Group.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\Edit_View_Window\__init__.py" >
+    <Compile Include="GUI\Edit_View_Window\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\File_Viewer_Window\File_Viewer_Window.py" >
+    <Compile Include="GUI\Extensions_Window\Extensions_Window.py" />
+    <Compile Include="GUI\Extensions_Window\__init__.py" />
+    <Compile Include="GUI\File_Viewer_Window\File_Viewer_Window.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\File_Viewer_Window\XML_Syntax_Highlighter.py" >
+    <Compile Include="GUI\File_Viewer_Window\XML_Syntax_Highlighter.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GUI\File_Viewer_Window\File_Text_Brower.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\File_Viewer_Window\__init__.py" >
+    <Compile Include="GUI\File_Viewer_Window\__init__.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GUI\Shared\Misc.py">
@@ -87,13 +89,13 @@
     <Compile Include="GUI\Edit_Table_Window_old\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\Script_Window\Script_Window.py" >
+    <Compile Include="GUI\Script_Window\Script_Window.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GUI\Script_Window\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\Settings_Window\Settings_Window.py" >
+    <Compile Include="GUI\Settings_Window\Settings_Window.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GUI\Settings_Window\__init__.py">
@@ -105,19 +107,19 @@
     <Compile Include="GUI\Shared\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\VFS_Window\VFS_List_Model.py" >
+    <Compile Include="GUI\VFS_Window\VFS_List_Model.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GUI\VFS_Window\VFS_Item.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\VFS_Window\VFS_Window.py" >
+    <Compile Include="GUI\VFS_Window\VFS_Window.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\VFS_Window\VFS_Tree_Model.py" >
+    <Compile Include="GUI\VFS_Window\VFS_Tree_Model.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\VFS_Window\__init__.py" >
+    <Compile Include="GUI\VFS_Window\__init__.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Transforms\Misc.py">
@@ -126,34 +128,34 @@
     <Compile Include="Analyses\Print_Object_Stats.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Analyses\__init__.py" >
+    <Compile Include="Analyses\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\Main_Window.py" >
+    <Compile Include="GUI\Main_Window.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\Worker_Thread_Handler.py" >
+    <Compile Include="GUI\Worker_Thread_Handler.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\Script_Window\Syntax_Highlighter.py" >
+    <Compile Include="GUI\Script_Window\Syntax_Highlighter.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\Shared\Widget_Documentation.py" >
+    <Compile Include="GUI\Shared\Widget_Documentation.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\Script_Window\Widget_Plugins.py" >
+    <Compile Include="GUI\Script_Window\Widget_Plugins.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\Script_Window\Widget_Script.py" >
+    <Compile Include="GUI\Script_Window\Widget_Script.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\Settings_Window\Widget_Settings.py" >
+    <Compile Include="GUI\Settings_Window\Widget_Settings.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\Edit_Table_Window_old\Tree_Viewer.py" >
+    <Compile Include="GUI\Edit_Table_Window_old\Tree_Viewer.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GUI\__init__.py" >
+    <Compile Include="GUI\__init__.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Transforms\Director.py">
@@ -183,13 +185,13 @@
     <Compile Include="Utilities\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="__init__.py" >
+    <Compile Include="__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Transforms\Jobs.py" >
+    <Compile Include="Transforms\Jobs.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Transforms\__init__.py" >
+    <Compile Include="Transforms\__init__.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -199,6 +201,7 @@
     <Folder Include="GUI\Edit_Table_Window_old\" />
     <Folder Include="GUI\Edit_View_Window\" />
     <Folder Include="GUI\File_Viewer_Window\" />
+    <Folder Include="GUI\Extensions_Window\" />
     <Folder Include="GUI\VFS_Window\" />
     <Folder Include="GUI\Shared\" />
     <Folder Include="GUI\Script_Window\" />

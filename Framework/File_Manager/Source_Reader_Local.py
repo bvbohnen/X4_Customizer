@@ -1,6 +1,6 @@
 
 from pathlib import Path
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from itertools import chain
 
 from . import File_Types
@@ -39,23 +39,28 @@ class Location_Source_Reader:
     * location
       - Path to the location being sourced from.
       - If not given, auto detection of cat files will be skipped.
+    * folder_name_lower
+      - Name of the final folder of the location, lower cased.
+      - To be used in ordering extensions.
     * extension_name
       - String, name of the extension, if an extension, else None.
       - Taken from the original content.xml format.
     * extension_path_name
-      - As above, but lower casing.
+      - As above, but lower cased.
       - This should be used for matching virtual_paths or dependencies.
     * soft_dependencies
-      - List of strings, names of other extensions this one should
+      - List of strings, path_names of other extensions this one should
         load after; other extension might not exist.
     * hard_dependencies
-      - List of strings, names of other extensions this one should
+      - List of strings, path_names of other extensions this one should
         load after; other extension should exist.
     * catalog_file_dict
-      - OrderedDict of Cat_Reader objects, keyed by file path, organized
-        by priority, where the first entry is the highest priority cat.
-      - Dict entries are initially None, and get replaced with Catalog_Files
-        as the cats are searched.
+      - OrderedDict of Cat_Reader objects, keyed by virtual_path relative
+        to the location, ordered by priority, where the first entry is 
+        the highest priority cat.
+      - Inner dict entries are initially None, and get replaced with
+        Catalog_Files as the cats are searched.
+      - This collects all catalogs together, of any prefix.
     * source_file_path_dict
       - Dict, keyed by virtual_path, holding the system path
         for where the file is located, for loose files at the location
@@ -70,13 +75,22 @@ class Location_Source_Reader:
             hard_dependencies = None,
         ):
         self.location = location
+        self.folder_name_lower = None
+        if location:
+            # Use the .stem property for the containing folder.
+            self.folder_name_lower = location.stem.lower()
         self.catalog_file_dict = OrderedDict()
+
         self.extension_name = extension_name
-        self.extension_path_name = (extension_name.lower() 
-                                    if extension_name else None)
+        # Grab a lower cased extension name, if a name was given.
+        self.extension_path_name = None
+        if extension_name:
+            self.extension_path_name = extension_name.lower()
+
         self.soft_dependencies = soft_dependencies
         self.hard_dependencies = hard_dependencies
         self.source_file_path_dict = None
+
         # Search for cats and loose files if location given.
         if location != None:
             self.Find_Catalogs(location)
@@ -89,32 +103,35 @@ class Location_Source_Reader:
         Find and record all catalog files at the given location,
         according to the X4 naming convention.
         '''
-
         # Search for cat files the game will recognize.
         '''
         These start at 01.cat, and count up as 2-digit values until
-         the count is broken.
+        the count is broken.
+
         Extensions observed to use prefixes 'ext_' and 'subst_' on
-         their cat/dat files. Some details:
-         'subst_' get loaded first, and overwrite lower game files
-         instead of patching them (eg. 'substitute').
-         'ext_' get loaded next, and are treated as patches.
-        (This was verified in an accidental test, where a subst file
-         that changed nodes caused an ext file in the same extension
-         to fail its diff patching.)
+        their cat/dat files.
+        
+        Some details:
+        -  'subst_' get loaded first, and overwrite lower game files
+            instead of patching them (eg. 'substitute').
+        -  'ext_' get loaded next, and are treated as patches.
+            (This was verified in an accidental test, where a subst file
+            that changed nodes caused an ext file in the same extension
+            to fail its diff patching.)
 
         Since the base folder names (01.cat etc) are never expected
-         to be mixed with extension names (ext_01.cat etc), and to
-         simplify Location_Source_Reader setup so that it doesn't
-         need to be told if it is pointed at an extension, all
-         prefixes could be searched here.
+        to be mixed with extension names (ext_01.cat etc), and to
+        simplify Location_Source_Reader setup so that it doesn't
+        need to be told if it is pointed at an extension, all
+        prefixes could be searched here.
         '''
         
         # For convenience, the first pass will fill in a list with low
         #  to high priority, then the list can be reversed at the end.
         cat_dir_list_low_to_high = []
 
-        # Put the prefixes in reverse priority.
+        # Put the prefixes in reverse priority, so subst will get
+        # found first in general searches.
         if self.extension_name:
             prefixes = ['ext_','subst_']
         else:
@@ -220,14 +237,14 @@ class Location_Source_Reader:
         return self.catalog_file_dict[cat_path]
 
 
-    def Get_All_Catalog_Readers(self):
-        '''
-        Returns a list of all Cat_Reader objects, opening them
-        as necessary.
-        '''
-        # Loop over the cat_path names and return readers.
-        return [self.Get_Catalog_Reader(cat_path) 
-                for cat_path in self.catalog_file_dict]
+    #def Get_All_Catalog_Readers(self):
+    #    '''
+    #    Returns a list of all Cat_Reader objects, opening them
+    #    as necessary.
+    #    '''
+    #    # Loop over the cat_path names and return readers.
+    #    return [self.Get_Catalog_Reader(cat_path) 
+    #            for cat_path in self.catalog_file_dict]
 
 
     def Get_Cat_Entries(self):
@@ -272,7 +289,7 @@ class Location_Source_Reader:
         return virtual_paths
 
 
-    def Read_Loose_File(self, virtual_path, allow_md5_error = False):
+    def Read_Loose_File(self, virtual_path, **kwargs):
         '''
         Returns a tuple of (file_path, file_binary) for a loose file
         matching the given virtual_path.
@@ -289,29 +306,47 @@ class Location_Source_Reader:
         return (file_path, file_binary)
 
 
-    def Read_Catalog_File(self, virtual_path, allow_md5_error = False):
+    def Read_Catalog_File(self, virtual_path, 
+                          cat_prefix = None, allow_md5_error = False):
         '''
         Returns a tuple of (cat_path, file_binary) for a cat/dat entry
         matching the given virtual_path.
         If no file found, returns (attempted_cat_path, None).
+
+        * cat_prefix
+          - Optional string, prefix of catalog files to search.
+        * allow_md5_error
+          - Bool, if True then the md5 check will be suppressed.
         '''
         cat_path = None
         file_binary = None
+
         # Loop over the cats in priority order.
         for cat_path in self.catalog_file_dict:
+
+            # If a prefix was given, skip if this cat doesn't have
+            # a matched prefix.
+            if cat_prefix and not cat_path.name.startswith(cat_prefix):
+                continue
+
             # Get the reader.
             cat_reader = self.Get_Catalog_Reader(cat_path)
+
             # Check the cat for the file.
             file_binary = cat_reader.Read(virtual_path, 
                                           allow_md5_error = allow_md5_error)
+
             # Stop looping over cats once a match found.
             if file_binary != None:
                 break
-        return (cat_path, file_binary)
 
+        return (cat_path, file_binary)
+    
 
     def Read(self, 
              virtual_path,
+             include_loose_files = True,
+             cat_prefix = None,
              error_if_not_found = False,
              allow_md5_error = False,
              ):
@@ -324,6 +359,11 @@ class Location_Source_Reader:
           - String, virtual path of the file to look up.
           - For files which may be gzipped into a pck file, give the
             expected non-zipped extension (.xml, .txt, etc.).
+        * include_loose_files
+          - Bool, if True then loose files are searched.
+        * cat_prefix
+          - Optional string, prefix of catalog files to search.
+          - Eg. 'subst' to look only at 'subst_#.cat' files.
         * error_if_not_found
           - Bool, if True an exception will be thrown if the file cannot
             be found, otherwise None is returned.
@@ -338,6 +378,11 @@ class Location_Source_Reader:
         else:
             method_order = [self.Read_Catalog_File, self.Read_Loose_File]
 
+        # Maybe skip loose file checks.
+        if not include_loose_files:
+            method_order.remove(self.Read_Loose_File)
+
+
         # Call the search methods in order, looking for the first to
         #  fill in file_binary. This will also record where the data
         #  was read from, for debug printout and identifying patches
@@ -345,7 +390,12 @@ class Location_Source_Reader:
         source_path = None
         file_binary = None
         for method in method_order:
-            source_path, file_binary = method(virtual_path, allow_md5_error)
+            # Call the function. Pass some args.
+            source_path, file_binary = method(
+                virtual_path, 
+                cat_prefix = cat_prefix,
+                allow_md5_error = allow_md5_error,
+                )
             if file_binary != None:
                 break
             

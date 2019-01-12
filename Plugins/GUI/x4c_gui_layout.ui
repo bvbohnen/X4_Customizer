@@ -107,6 +107,7 @@
     <property name="title">
      <string>Utility</string>
     </property>
+    <addaction name="action_Extensions"/>
     <addaction name="action_VFS"/>
    </widget>
    <addaction name="menuFile"/>
@@ -254,6 +255,11 @@
   <action name="action_VFS">
    <property name="text">
     <string>Virtual File System</string>
+   </property>
+  </action>
+  <action name="action_Extensions">
+   <property name="text">
+    <string>Extensions</string>
    </property>
   </action>
  </widget>

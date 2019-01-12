@@ -3,61 +3,80 @@ Support for reading source files, including unpacking from cat/dat files.
 Includes File_Missing_Exception for when a file is not found.
 '''
 '''
-Notes on the X4 file structure (filled out as it is learned):
+X4 virtual path determination:
 
-    It appears that x4 is inconsistent with how it deals with file paths.
+    - Any file in the base x4 catalogs will have a virtual path
+      relative to the root x4 folder.
+      Eg. '/libraries/parameters.xml'
 
-    Any file in the base x4 catalogs will have a virtual path
-    relative to the root x4 folder.
-        Eg. /libraries/parameters.xml
+    - Extension files that have a path relative to the extension folder
+      which matches the path of a base file relative to the x4 folder
+      will use the x4 folder based path.
+      Eg. '/extensions/extA/libraries/wares.xml' will use the path
+          'libraries/wares.xml'
 
-    However, files from extensions can have multiple treatments:
-        a) A virtual path relative to the extension folder,
-           if such a virtual path matches that of a base game file.
-        b) A virtual path relative to the root x4 folder, including
-           extensions/ext_name, for when adding a new file not
-           part of the x4 base.
-        c) A virtual path relative to the extension folder, but
-           in turn targetting an extended path to a file added
-           by another extension.
+    - Extensions files that do not match to a base file will instead
+      use a path relative to the x4 base folder.
+      Note: this is based on extension folder name, not extension id.
+      Eg. '/extensions/extA/libraries/newfile.xml' will use the path
+          '/extensions/extA/libraries/newfile.xml'
 
-    This causes hiccups in the source file reading here.
-    Situation (c) comes up when extensions edit files from other extensions.
-    Awkwardly, it also comes up when there is no dependency in place,
-    so extA can patch extB files without a dependency on extB.
+    - Extensions which target other extensions' new files will have
+      a path relative to the extension folder that matches a path
+      relative to the base x4 folder, extended out to the other extension.
+      Eg. 'extensions/extA/extensions/extB/somefile' will use the path
+          'extensions/extB/somefile'.
+      This comes up when extensions edit files from other extensions.
+      It also comes up when there is no dependency in place, so extA
+      can patch extB files without a dependency on extB.
 
-    It is unclear on if a diff patch can be applied to another extension's
-    diff patch.  Currently, it seems that patching only works on a base
-    version of a file, patches being applied in dependency order.
 
-    
-    The loading approach will be to:
+Loading order:
+
+    After various testing, the x4 file loading order appears to be:
+        
         a) Search for the base file version (not a patch).
             - This will establish the actual virtual_path of the file.
             - Paths not starting with 'extensions/' will look in the
-              base x4 directory and the override source folder.
+              base x4 directory and the 'subst_#.cat' files of the
+              extensions.
             - Paths starting with 'extensions/' will look only at the
               particular named extension, and will search inside it
               using a truncated path.
 
-        b) Search for patches and substitutions.
+        b) Search for patches.
             - All extensions are searched, not the base game folders.
             - If the path starts with 'extensions', the particular
               named extension can be skipped (cannot patch its own file).
             - Path is left unmodified.
+            - These can be found in 'ext_#.cat' or as loose files.
+            - Does not include 'subst_#.cat' files; those were handled
+              during base file loading.
 
-        c) Apply the patches to the base in dependency order.
+    Priorities for loading will be determined separately per step.
 
-    For the current understanding, this seems sufficient to match x4 behavior.
+    Eg. is extA has a dependency on extB and introduces file newfile.xml,
+    and extB has a patch for newfile.xml, then the newfile.xml will load
+    from exta (as part of step (a)), and then get patched by extB, even
+    though that seems to be opposite the dependency order.
+
+    For extensions that have no dependencies to order them, they will
+    be handled in lowercase alphabetical folder order.
 
 
-Notes on case:
+Note on case:
     To simplify path handling, all paths will be lower cased.
-    This appears to sync up with the game internals, particularly in
-    regard to linux support (which requires extensions use lower case
-    in general for paths).
     A side effect is that extension names need to be stored in lower
     case, since they can show up in virtual paths.
+
+    This appears to sync up with the game internals, particularly in
+    regard to linux support (which requires extensions use lower case
+    in general for paths). This can also be observed in the log,
+    where listed extension names are sometimes printed in lower case
+    (eg. signature checks are lower case, and though extension diff messages
+    are original case, extensions are ordered alphabetically based
+    on lower case).
+
 '''
 from lxml import etree as ET
 from collections import OrderedDict
@@ -69,6 +88,7 @@ from ..Common import Settings
 from ..Common import File_Missing_Exception
 from ..Common import Plugin_Log, Print
 from .Source_Reader_Local import Location_Source_Reader
+from .Extension_Finder import Find_Extensions
 
 class Source_Reader_class:
     '''
@@ -120,97 +140,36 @@ class Source_Reader_class:
                 location = source_folder)
 
 
-        # Extension lookup will be somewhat more complicated.
-        # Need to figure out which extensions the user has enabled.
-        # The user content.xml, if it exists (which it may not), will
-        #  hold details on custom extension enable/disable settings.
-        # Note: by observation, the content.xml appears to not be a complete
-        #  list, and may only record cases where the enable/disable selection
-        #  differs from the extension default.
-        user_extensions_enabled  = {}
-        content_xml_path = Settings.Get_User_Content_XML_Path()
-        if content_xml_path.exists():
-            # (lxml parser needs a string path.)
-            content_root = ET.parse(str(content_xml_path)).getroot()
-            for extension_node in content_root.xpath('extension'):
-                name = extension_node.get('id')
-                if extension_node.get('enabled') == 'true':
-                    user_extensions_enabled[name] = True
-                else:
-                    user_extensions_enabled[name] = False
-                
+        # Skip if ignoring extensions.
+        # (Can also take care of this elsewhere, but this spot is easy.)
+        if not Settings.ignore_extensions:
+            # Loop over Extension_Summary objects.
+            for ext_summary in Find_Extensions():            
 
-        # Find where these extensions are located, and record details.
-        # Use a list of _Extension_Details objects for detail tracking.
-        ext_summary_dict = OrderedDict()
-
-        # Could be in documents or x4 directory.
-        for base_path in [Settings.Get_X4_Folder(), Settings.Get_User_Folder()]:
-            extensions_path = base_path / 'extensions'
-
-            # Skip if there is no extensions folder.
-            if not extensions_path.exists():
-                continue
-
-            # Skip if ignoring extensions.
-            # (Can also take care of this elsewhere, but this spot is easy.)
-            if Settings.ignore_extensions:
-                continue
-
-            # Note the path to the target output extension content.xml,
-            #  so it can be skipped.
-            output_content_path = Settings.Get_Output_Folder() / 'content.xml'
-
-            # Use glob to pick out all of the extension content.xml files.
-            for content_xml_path in extensions_path.glob('*/content.xml'):
+                # Skip those disabled.
+                if not ext_summary.enabled:
+                    continue
 
                 # Skip the current output extension target, since its contents
                 #  are the ones being updated this run.
                 # Sometimes this will be included based on settings, eg. when
                 #  only creating documentation.
-                if (content_xml_path == output_content_path 
+                if (ext_summary.is_current_output 
                 and Settings.ignore_output_extension):
                     continue
 
-                # Load it and pick out the id.
-                content_root = ET.parse(str(content_xml_path)).getroot()
-                name = content_root.get('id')
-                
-                # Determine if this is enabled or disabled.
-                # If it is in user content.xml, use that flag, else use the
-                #  flag in the extension.
-                # Skip if this extension is in content.xml and disabled.
-                if name in user_extensions_enabled:
-                    enabled = user_extensions_enabled[name]
-                else:
-                    # Apparently a mod can use '1' for this instead of
-                    # 'true', so try both.
-                    enabled = content_root.get('enabled', 'true').lower() in ['true','1']
-                if not enabled:
-                    continue
-                
-                # Collect all the names of dependencies.
-                # Lowercase these to standardize name checks.
-                dependencies = [x.get('id').lower()
-                                for x in content_root.xpath('dependency')]
-                # Collect optional dependencies.
-                soft_dependencies = [x.get('id') 
-                                for x in content_root.xpath('dependency[@optional="true"]')]
-                # Pick out hard dependencies (those not optional).
-                hard_dependencies = [x for x in dependencies
-                                     if x not in soft_dependencies ]
-                
                 # Create the reader object.
                 # Don't worry about ordering just yet.
                 reader = Location_Source_Reader(
-                    location = content_xml_path.parent,
-                    extension_name = name,
-                    soft_dependencies = soft_dependencies,
-                    hard_dependencies = hard_dependencies,
+                    location          = ext_summary.content_xml_path.parent,
+                    # TODO: maybe track the display name of the extension.
+                    extension_name    = ext_summary.ext_id,
+                    soft_dependencies = ext_summary.soft_dependencies,
+                    hard_dependencies = ext_summary.hard_dependencies,
                     )
                 # Record using the path name (lowercase).
                 self.extension_source_readers[reader.extension_path_name] = reader
-
+                
         # Now sort the extension order to satisfy dependencies.
         self.Sort_Extensions()
         
@@ -221,16 +180,14 @@ class Source_Reader_class:
         '''
         Sort the found extensions so that all dependencies are satisfied.
         Optionally, allow setting of sorting priority.
+        When dependencies are otherwise satisfied, extensions are
+        sorted by alphabetical lowercase folder name.
 
         * priorities
           - Dict, keyed by extension name, holding an integer priority.
           - Default priority is 0.
           - Negative priority loads an extension earlier, positive later.
         '''
-        # TODO: maybe sort the ext_summary_dict so that extensions are
-        # always loaded in the same order, which might be a better match
-        # to X4 loading.
-
         # Get a starting dict, keyed by extension path name.
         unsorted_dict = {ext.extension_path_name : ext 
                         for ext in self.extension_source_readers.values()}
@@ -288,12 +245,13 @@ class Source_Reader_class:
                     ext for ext in unsorted_dict.values()
                     if all(dep in sorted_dict for dep in ext.soft_dependencies)]
 
-            # Now sort them in priority order, with secondary on name order.
+            # Now sort them in priority order, with secondary on lowercase
+            # folder name order.
             valid_next_exts = sorted(
                 valid_next_exts,
                 # Priority goes first (low to high), then name (A to Z).
                 key = lambda ext: (priorities[ext.extension_path_name], 
-                                   ext.extension_path_name))
+                                   ext.folder_name_lower))
 
             # Pick the first one and schedule it.
             pick = valid_next_exts[0]
@@ -415,7 +373,7 @@ class Source_Reader_class:
         # Step 1: get the base version of the file.
         # If the virtual_path begins with "extentions", read from the
         # selected extension if present, else from the base x4 folder
-        # and source folder.
+        # or source folder.
         game_file = None
         if virtual_path.startswith('extensions/'):
             # Can split on all '/' and take the second term for the
@@ -464,31 +422,55 @@ class Source_Reader_class:
 
         # Step 2: collect any patches/substitutions.
         # These can come from any extension, except the one the file
-        # was sourced from (if it came from an ext).
-        for ext_reader in self.extension_source_readers.values():
+        #  was sourced from (if it came from an ext).
+        # Note: substitions should be evaluated separately from
+        #  patches; an extension can apply both, and substitutions
+        #  from all extensions should preceed patches from all.
+        for mode in ['substitution','patch']:
 
-            # Skip if this ext is the original source.
-            # This should be harmless to allow, but saves a little time.
-            if ext_reader.extension_name == game_file.extension_name:
-                continue
+            for ext_reader in self.extension_source_readers.values():
 
-            # Get the file, if any.
-            ext_game_file = ext_reader.Read(virtual_path)
-            if ext_game_file == None:
-                continue
+                # Skip if this ext is the original source.
+                # This should be harmless to allow, but saves a little time.
+                # (A path of 'extensions/name/...' is never expected to
+                # show up again as 'extensions/name/extensions/name/...',
+                # hence an extension will not patch its own source file.)
+                if ext_reader.extension_name == game_file.extension_name:
+                    continue
+
+                # Get the file, if any.
+                if mode == 'substitution':
+                    # For substitutions, want to just search the 'subst_'
+                    # catalogs and not any loose files.
+                    ext_game_file = ext_reader.Read(
+                        virtual_path,
+                        include_loose_files = False,
+                        cat_prefix = 'subst_')
+                else:
+                    # For patches, want to search the 'ext_' catalogs and
+                    # any loose files.
+                    ext_game_file = ext_reader.Read(
+                        virtual_path,
+                        include_loose_files = True,
+                        cat_prefix = 'ext_')
+
+                # Skip if no matching file was found.
+                # This is the normal case.
+                if ext_game_file == None:
+                    continue
             
-            # Merge the extension version with the original.
-            # Start by recording the extension name for reference
-            #  by the extension_checker utility.
-            self.ext_currently_patching = ext_game_file.extension_name
+                # Merge the extension version with the original.
+                # Start by recording the extension name for reference
+                #  by the extension_checker utility.
+                self.ext_currently_patching = ext_game_file.extension_name
 
-            # Call the merger.
-            # This may return the ext_game_file if a substitution
-            # occurred, so update the game_file link.
-            game_file = game_file.Merge(ext_game_file)
+                # Call the merger.
+                # This may return the ext_game_file if a substitution
+                # occurred, so update the game_file link.
+                game_file = game_file.Merge(ext_game_file)
 
-            # Clear out the patching note.
-            self.ext_currently_patching = None
+                # Clear out the patching note.
+                self.ext_currently_patching = None
             
 
         # Finish initializing the xml file once patching

@@ -47,6 +47,9 @@
     <Compile Include="Common\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="File_Manager\Extension_Finder.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="File_Manager\File_System.py">
       <SubType>Code</SubType>
     </Compile>
