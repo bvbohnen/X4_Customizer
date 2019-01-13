@@ -79,13 +79,14 @@ Note on case:
 
 '''
 from lxml import etree as ET
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from fnmatch import fnmatch
 
 from . import File_Types
 from .. import Common
 from ..Common import Settings
 from ..Common import File_Missing_Exception
+from ..Common import File_Loading_Error_Exception
 from ..Common import Plugin_Log, Print
 from .Source_Reader_Local import Location_Source_Reader
 from .Extension_Finder import Find_Extensions
@@ -104,12 +105,12 @@ class Source_Reader_class:
       - Takes priority over the base X4 folder.
     * extension_source_readers
       - OrderedDict of Location_Source_Reader objects pointing at enabled
-        extensions, keyed by lowercase extension name.
+        extensions, keyed by lowercase extension folder name.
       - Earlier extensions in the list satisfy dependencies from later
         extensions in the list, so xml patching should be done from
         first entry to last entry.
     * ext_currently_patching
-      - String, during xml patch application this is the name of the
+      - String, during xml patch application this is the name (folder) of the
         extension sourcing the patch.
       - For use by monitoring code.
     '''
@@ -162,17 +163,13 @@ class Source_Reader_class:
                 # Don't worry about ordering just yet.
                 reader = Location_Source_Reader(
                     location          = ext_summary.content_xml_path.parent,
-                    # TODO: maybe track the display name of the extension.
-                    extension_name    = ext_summary.ext_id,
-                    soft_dependencies = ext_summary.soft_dependencies,
-                    hard_dependencies = ext_summary.hard_dependencies,
-                    )
-                # Record using the path name (lowercase).
-                self.extension_source_readers[reader.extension_path_name] = reader
+                    extension_summary = ext_summary )
+
+                # Record using the extension name (its folder).
+                self.extension_source_readers[reader.extension_name] = reader
                 
         # Now sort the extension order to satisfy dependencies.
-        self.Sort_Extensions()
-        
+        self.Sort_Extensions()        
         return
 
 
@@ -182,6 +179,12 @@ class Source_Reader_class:
         Optionally, allow setting of sorting priority.
         When dependencies are otherwise satisfied, extensions are
         sorted by alphabetical lowercase folder name.
+        This will print warnings and errors to the Plugin_Log for
+        missing dependencies or duplicated IDs.
+
+        TODO: split out the error checks/messages to another function.
+        TODO: move some of this id/dependency setup code into the
+        extension_finder.
 
         * priorities
           - Dict, keyed by extension name, holding an integer priority.
@@ -189,7 +192,7 @@ class Source_Reader_class:
           - Negative priority loads an extension earlier, positive later.
         '''
         # Get a starting dict, keyed by extension path name.
-        unsorted_dict = {ext.extension_path_name : ext 
+        unsorted_dict = {ext.extension_name : ext 
                         for ext in self.extension_source_readers.values()}
 
         # Fill out the priorities with defaults.
@@ -199,29 +202,87 @@ class Source_Reader_class:
             if name not in priorities:
                 priorities[name] = 0
 
-        # Need to sort the extensions according to dependencies.
+
+        # Note: dependencies are given based on extension ID (which
+        #  should be matched case insensitive), but IDs are not unique,
+        #  so a single original dependency ID may actually point to
+        #  multiple extension folders.
+        # In X4, this bugs up and only the first folder found with a matching
+        #  id will be considered a dependency target.
+        # While this code could unwrap dependencies to all ID matches,
+        #  and did so at one point, that has been removed to get a better
+        #  match to x4.
+
+        # Do a general duplicate id check to print to the log.
+        id_readers_list_dict = defaultdict(list)
+        for source_reader in self.extension_source_readers.values():
+            id_readers_list_dict[source_reader.extension_summary.ext_id.lower()
+                                 ].append(source_reader.extension_name)
+        for ext_id, readers in id_readers_list_dict.items():
+            if len(readers) > 1:
+                Plugin_Log.Print(('Error: duplicated extension id "{}",'
+                ' used by {}').format( ext_id, readers ))
+
+
+        # Translate dependency ids into extension_names, when possible.
+        # These inner dicts are keyed by extension reader, holding lists of
+        # known extension names; any missing id will be skipped.
+        reader_deps_dict_dict = {
+            'soft' : defaultdict(list),
+            'hard' : defaultdict(list) }
+
+        for source_reader in self.extension_source_readers.values():
+            # Loop over soft and hard.
+            for dep_type in ['soft','hard']:
+                
+                # Loop over the dependency ids.
+                for dep_id in getattr(source_reader.extension_summary, 
+                                        dep_type+'_dependencies'):
+                    # Lowercase to standardize.
+                    dep_id = dep_id.lower()
+
+                    # Check for a match.
+                    # Use folder order.
+                    matching_reader = None
+                    for reader in sorted(self.extension_source_readers.values(),
+                                         key = lambda k: k.extension_name):
+
+                        # Skip if not a match.
+                        if dep_id != reader.extension_summary.ext_id.lower():
+                            continue
+                        # Record if no match yet found.
+                        if not matching_reader:
+                            matching_reader = reader
+                        # Otherwise print an error.
+                        else:
+                            Plugin_Log.Print(('Error: extension "{}" has'
+                                ' multiple dependency matches for id "{}";'
+                                ' only the first match will be used, as in x4.'
+                                ).format(
+                                    source_reader.extension_name, 
+                                    dep_id))
+
+                    # Record the reader, if found.
+                    if matching_reader:
+                        reader_deps_dict_dict[dep_type][source_reader].append(
+                            matching_reader.extension_name)
+                    else:
+                        # If this is a hard dep, print an error but
+                        # allow processing to continue.
+                        if dep_type == 'hard':
+                            Plugin_Log.Print(('Error: extension "{}" has a'
+                                ' missing hard dependency on id "{}"').format(
+                                    source_reader.extension_name, 
+                                    dep_id))
+
+
+        # Now need to sort the extensions according to dependencies.
         # A brute force appoach will be used, scheduling extensions
         #  that have dependencies filled first, iterating until done.
         # Each loop will move some number of summaries from unsorted_dict
         #  to sorted_dict.
+        # This dict is keyed by extension_name.
         sorted_dict = OrderedDict()
-
-        # Do a hard dependency error check.
-        for name, source_reader in unsorted_dict.items():
-            for hard_dep_name in source_reader.hard_dependencies:
-                if hard_dep_name not in unsorted_dict:
-                    # Print as an Error but continue processing.
-                    Plugin_Log.Print(('Error: extension "{}" has a missing'
-                        ' hard dependency on "{}"').format(name, hard_dep_name))
-                    
-        # To satisfy optional dependencies, start by filling in dummy
-        #  entries for all missing extensions.
-        for name, source_reader in unsorted_dict.items():
-            for dep_name in ( source_reader.hard_dependencies 
-                            + source_reader.soft_dependencies):
-                if dep_name not in unsorted_dict:
-                    sorted_dict[dep_name] = None
-                
 
         # Start the sorting process, with a safety limit.
         limit = 10000
@@ -232,37 +293,31 @@ class Source_Reader_class:
 
             # Gather which extensions can be sorted into the next slot.
             # Start with all that have hard and soft dependencies filled.
-            valid_next_exts = [
-                ext for ext in unsorted_dict.values()
-                if all(dep in sorted_dict for dep in (
-                    ext.hard_dependencies + ext.soft_dependencies))]
+            valid_next_readers = [
+                reader for reader in unsorted_dict.values()
+                if all(dep_name in sorted_dict for dep_name in (
+                    reader_deps_dict_dict['hard'][reader] 
+                    + reader_deps_dict_dict['soft'][reader] ))]
 
             # If none were found, try just those with hard dependencies filled.
-            # TODO: This may be more lax than X4 about soft dependencies;
-            #  maybe look into it.
-            if not valid_next_exts:
-                valid_next_exts = [
-                    ext for ext in unsorted_dict.values()
-                    if all(dep in sorted_dict for dep in ext.soft_dependencies)]
+            if not valid_next_readers:
+                valid_next_readers = [
+                    reader for reader in unsorted_dict.values()
+                    if all(dep_name in sorted_dict 
+                           for dep_name in reader_deps_dict_dict['hard'][reader])]
 
             # Now sort them in priority order, with secondary on lowercase
             # folder name order.
-            valid_next_exts = sorted(
-                valid_next_exts,
-                # Priority goes first (low to high), then name (A to Z).
-                key = lambda ext: (priorities[ext.extension_path_name], 
-                                   ext.folder_name_lower))
+            valid_next_readers = sorted(
+                valid_next_readers,
+                # Priority goes first (low to high), then name.
+                key = lambda reader: (priorities[reader.extension_name], 
+                                   reader.extension_name))
 
             # Pick the first one and schedule it.
-            pick = valid_next_exts[0]
-            sorted_dict[pick.extension_path_name] = pick
-            unsorted_dict.pop(pick.extension_path_name)
-
-
-        # Prune out dummy entries.
-        for name in list(sorted_dict.keys()):
-            if sorted_dict[name] == None:
-                sorted_dict.pop(name)
+            pick = valid_next_readers[0]
+            sorted_dict[pick.extension_name] = pick
+            unsorted_dict.pop(pick.extension_name)
 
         # Store the sorted list.
         self.extension_source_readers = sorted_dict
@@ -331,7 +386,7 @@ class Source_Reader_class:
             # Work through extensions.
             for ext_reader in self.extension_source_readers.values():
                 # Work through the paths with prefixing as needed.
-                for path in self.Gen_Extension_Virtual_Paths(ext_reader.extension_path_name):
+                for path in self.Gen_Extension_Virtual_Paths(ext_reader.extension_name):
                     self._virtual_paths_set.add(virtual_path)
 
         # With the set filled in, can do a pass to yield each path.
@@ -354,14 +409,16 @@ class Source_Reader_class:
         Extension xml files will be automatically merged with any
         base files.
         If the file contents are empty, this returns None.
+        May trigger a File_Loading_Error_Exception if a found file
+        has trouble during loading.
          
         * virtual_path
           - String, virtual path of the file to look up.
           - For files which may be gzipped into a pck file, give the
             expected non-zipped extension (.xml, .txt, etc.).
         * error_if_not_found
-          - Bool, if True an exception will be thrown if the file cannot
-            be found, otherwise None is returned.
+          - Bool, if True a File_Missing_Exception will be thrown if the file
+            cannot be found, otherwise None is returned.
         '''
         # Always work with lowercase virtual paths.
         # (Note: this may have been done already in the File_System, but
@@ -437,7 +494,7 @@ class Source_Reader_class:
                 # hence an extension will not patch its own source file.)
                 if ext_reader.extension_name == game_file.extension_name:
                     continue
-
+                
                 # Get the file, if any.
                 if mode == 'substitution':
                     # For substitutions, want to just search the 'subst_'
@@ -454,23 +511,39 @@ class Source_Reader_class:
                         include_loose_files = True,
                         cat_prefix = 'ext_')
 
+                #-Removed; while problem files could be skipped, go
+                # ahead and keep them complaining for now.
+                ## Catch File_Loading_Error_Exception errors here,
+                ## to more reliably skip over problem patch files.
+                #except File_Loading_Error_Exception as ex:
+                #    Plugin_Log.Print(
+                #        ('Error: Skipping patch from "{}" due to exception: {}.'
+                #         ).format(ext_reader.extension_name, ex))
+                #    continue
+                
                 # Skip if no matching file was found.
                 # This is the normal case.
                 if ext_game_file == None:
                     continue
             
-                # Merge the extension version with the original.
-                # Start by recording the extension name for reference
-                #  by the extension_checker utility.
-                self.ext_currently_patching = ext_game_file.extension_name
 
                 # Call the merger.
                 # This may return the ext_game_file if a substitution
-                # occurred, so update the game_file link.
-                game_file = game_file.Merge(ext_game_file)
+                #  occurred, so update the game_file link.
+                # To avoid ext_currently_patching getting out of date on
+                #  exceptions (that might be caught at a higher level),
+                #  pack this into a try/except block.
 
-                # Clear out the patching note.
-                self.ext_currently_patching = None
+                # Start by recording the extension name for reference
+                #  by the extension_checker utility.
+                self.ext_currently_patching = ext_game_file.extension_name
+                try:
+                    game_file = game_file.Merge(ext_game_file)
+                except Exception as ex:
+                    raise ex
+                finally:
+                    # Clear out the patching note.
+                    self.ext_currently_patching = None
             
 
         # Finish initializing the xml file once patching

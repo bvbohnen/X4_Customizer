@@ -115,7 +115,7 @@ class VFS_Window(Tab_Page_Widget, generated_class):
 
     def Threaded_Gather_File_Info(self, pattern = None):
         '''
-        Starts thread  that gathers info on loaded files, updating
+        Starts thread that gathers info on loaded files, updating
         file_info_dict.
         '''
         self.Queue_Thread(File_System.Get_Loaded_Files,
@@ -169,6 +169,6 @@ class VFS_Window(Tab_Page_Widget, generated_class):
         '''
         if 'file_system_reset' in flags:
             self.Reset_From_File_System()
-        elif 'files_loaded' or 'files_modified' in flags:
+        elif 'files_loaded' in flags or 'files_modified' in flags:
             self.Threaded_Gather_File_Info()
         return

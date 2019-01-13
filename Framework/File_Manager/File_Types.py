@@ -268,7 +268,8 @@ class XML_File(Game_File):
     # Tag is generally or always the singular of a plural asset group.
     valid_asset_tags = {'macros'     : 'macro',
                         'components' : 'component'}
-
+    temp_44_binary = None
+    temp_49_binary = None
     def __init__(
             self, 
             binary = None, 
@@ -283,9 +284,11 @@ class XML_File(Game_File):
         if binary != None:
             # Process into an xml tree.
             # Strip out blank text here, so that prettyprint works later.
+            # Note: this could throw xml parsing errors if there are problems
+            # with the file. Let the higher level catch such problems.
             self.original_root = ET.XML(
-                binary,
-                parser = ET.XMLParser(remove_blank_text=True))
+            binary,
+            parser = ET.XMLParser(remove_blank_text=True))
 
         elif xml_root != None:
             assert isinstance(xml_root, ET._Element)
@@ -323,8 +326,13 @@ class XML_File(Game_File):
         # Look through the root children for class attributes.
         # Normally there is just one for vanilla files, but there could
         # be multiple for mods.
+        # If something is amiss, this might return none.
         asset_nodes = self.patched_root.findall('./'+node_tag)
-        assert len(asset_nodes) > 0
+        if not asset_nodes:
+            Plugin_Log.Print(('Error: asset file contains no assets;'
+                'in file {}; sources: {}.').format(
+                    self.virtual_path, self.source_extension_names))
+            return
 
         # Start a fresh dict to record these.
         self.asset_class_name_dict = defaultdict(list)

@@ -3,12 +3,7 @@ Holds modules that will be commonly imported by transforms
 and other parts of the framework.
 '''
 # Import exceptions early, due to some dependency issues.
-from .Exceptions import File_Missing_Exception
-from .Exceptions import Obj_Patch_Exception
-from .Exceptions import Text_Patch_Exception
-from .Exceptions import Gzip_Exception
-from .Exceptions import XML_Patch_Exception
-from .Exceptions import Cat_Hash_Exception
+from .Exceptions import *
 
 from . import Change_Log
 from .Change_Log import Get_Version

@@ -326,16 +326,14 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
                 type = 'attrib'
 
             # The remaining xpath should hopefully work.
-            #matched_nodes = temp_tree.xpath(xpath)
             # Note: when switching from findall to xpath(), a
             # prefixed '.' was needed to get this to work.
-            # TODO: why does this matter? In small tests it wasn't
-            # needed.
-            matched_nodes = temp_tree.xpath('.' + xpath)
-            #matched_nodes3 = temp_tree.xpath('./' + xpath)
-
-            if xpath == '''//aiscript/attention/actions/do_if[@value='$deploydistraction and not $alreadydeployed? and not this.assignedcontrolled.zone.isclass.highway']''':
-                bla = 0
+            # Note: if the xpath is malformed, this will throw an exception.
+            try:
+                matched_nodes = temp_tree.xpath('.' + xpath)
+            except Exception as ex:
+                Print_Error('xpath exception: {}'.format(ex))
+                continue
 
             # On match failure, skip the operation similar to how
             # X4 would skip it.

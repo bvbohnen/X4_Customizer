@@ -67,6 +67,8 @@ class Worker_Thread_Handler(QtCore.QThread):
     a thread completes and there are queued items.
 
     Attributes:
+    * window
+      - The main window.
     * request_queue
       - List of Work_Request objects.
       - These will be serviced serially, in arrival order.
@@ -88,8 +90,9 @@ class Worker_Thread_Handler(QtCore.QThread):
       - To be listened to by the main window for Print calls,
         and used to cross thread domains.
     '''
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, window):
+        super().__init__(window)
+        self.window = window
         self.request_queue = []
         self.current_request = None
         self.thread_active = False
@@ -208,6 +211,7 @@ class Worker_Thread_Handler(QtCore.QThread):
 
         # Immediately flag the thread as active.
         self.thread_active = True
+        self.window.Send_Signal('thread_started')
 
         # Store the work request into an attribute, for the thread
         # to check when it launches on its own domain.
@@ -256,6 +260,7 @@ class Worker_Thread_Handler(QtCore.QThread):
         # Update the activity flag.
         self.thread_active = False
         self.current_request = None
+        self.window.Send_Signal('thread_finished')
 
         # Check if another request was queued while the thread was running.
         if self.request_queue:

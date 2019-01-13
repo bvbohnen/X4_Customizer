@@ -8,6 +8,7 @@ from .Cat_Reader import Cat_Reader
 from .. import Common
 from ..Common import Settings
 from ..Common import File_Missing_Exception
+from ..Common import File_Loading_Error_Exception
 from ..Common import Plugin_Log, Print
 
 
@@ -42,18 +43,10 @@ class Location_Source_Reader:
     * folder_name_lower
       - Name of the final folder of the location, lower cased.
       - To be used in ordering extensions.
+    * extension_summary
+      - Extension_Summary object, if this is for an extension.
     * extension_name
-      - String, name of the extension, if an extension, else None.
-      - Taken from the original content.xml format.
-    * extension_path_name
-      - As above, but lower cased.
-      - This should be used for matching virtual_paths or dependencies.
-    * soft_dependencies
-      - List of strings, path_names of other extensions this one should
-        load after; other extension might not exist.
-    * hard_dependencies
-      - List of strings, path_names of other extensions this one should
-        load after; other extension should exist.
+      - String, name of the folder holding the extension, if an extension.
     * catalog_file_dict
       - OrderedDict of Cat_Reader objects, keyed by virtual_path relative
         to the location, ordered by priority, where the first entry is 
@@ -70,25 +63,13 @@ class Location_Source_Reader:
     def __init__(
             self, 
             location = None, 
-            extension_name = None,
-            soft_dependencies = None,
-            hard_dependencies = None,
+            extension_summary = None,
         ):
         self.location = location
-        self.folder_name_lower = None
-        if location:
-            # Use the .stem property for the containing folder.
-            self.folder_name_lower = location.stem.lower()
+        self.extension_summary = extension_summary
+        self.extension_name = (extension_summary.extension_name 
+                               if extension_summary else None)
         self.catalog_file_dict = OrderedDict()
-
-        self.extension_name = extension_name
-        # Grab a lower cased extension name, if a name was given.
-        self.extension_path_name = None
-        if extension_name:
-            self.extension_path_name = extension_name.lower()
-
-        self.soft_dependencies = soft_dependencies
-        self.hard_dependencies = hard_dependencies
         self.source_file_path_dict = None
 
         # Search for cats and loose files if location given.
@@ -132,7 +113,7 @@ class Location_Source_Reader:
 
         # Put the prefixes in reverse priority, so subst will get
         # found first in general searches.
-        if self.extension_name:
+        if self.extension_summary:
             prefixes = ['ext_','subst_']
         else:
             prefixes = ['']
@@ -402,18 +383,27 @@ class Location_Source_Reader:
         # If no binary was found, error.
         if file_binary == None:
             if error_if_not_found:
-                raise File_Missing_Exception(
-                    'Could not find a match for file {}'.format(virtual_path))
+                message = 'Could not find a match for file {}'.format(virtual_path)
+                raise File_Missing_Exception(message)
             return None
         
         # Construct the game file.
-        game_file = File_Types.New_Game_File(
-            binary = file_binary,
-            virtual_path = virtual_path,
-            file_source_path = source_path,
-            from_source = True,
-            extension_name = self.extension_name,
-            )
+        # This may throw an exception on a problem (eg. bad xml might
+        # toss an lxml.etree.XMLSyntaxError).
+        try:
+            game_file = File_Types.New_Game_File(
+                binary = file_binary,
+                virtual_path = virtual_path,
+                file_source_path = source_path,
+                from_source = True,
+                extension_name = self.extension_name,
+                )
+        except Exception as ex:
+            # Want to keep the original stack trace; can use 'from'
+            # syntax to do so.
+            message = ('Error when parsing file {} from {}; original'
+                       ' exception: {}.').format(virtual_path, source_path, ex)
+            raise File_Loading_Error_Exception(message) from ex
         
         # Debug print the read location.
         if Settings.log_source_paths:

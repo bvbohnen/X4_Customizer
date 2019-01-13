@@ -118,6 +118,8 @@ class Tab_Page_Widget(QtWidgets.QWidget):
 
         * work_function
           - The function for the thread to call.
+          - Note: only one thread for a given function will be allowed
+            to be active at once per tab.
         * args, kwargs
           - Args and kwargs for the function to run.
         * prelaunch_function
@@ -134,15 +136,25 @@ class Tab_Page_Widget(QtWidgets.QWidget):
             run time, and it will be run in the main thread instead of
             a subthread to reduce call overhead.
         '''
-        # Call back to a default function, if none given.
-        if callback_function == None:
-            callback_function = self.Handle_Thread_Finished
-
         # Do some cleanup on older requests, removing those that
         # may have finished.
         for old_request in list(self.thread_requests_active):
             if old_request.finished:
                 self.thread_requests_active.remove(old_request)
+
+        # Check for an existing thread already using this function, which
+        #  suggests an error occurred (eg. a tab was refreshed while
+        #  already refreshing).
+        if any(x.work_function is work_function
+               for x in self.thread_requests_active):
+            self.Print(('Thread error: function "{}" called while a prior'
+                        ' thread for it is still pending.').format(
+                            work_function.__name__))
+            return
+
+        # Call back to a default function, if none given.
+        if callback_function == None:
+            callback_function = self.Handle_Thread_Finished
 
         request = self.window.worker_thread.Queue_Thread(
             # Give the work_function and *args as positional args,

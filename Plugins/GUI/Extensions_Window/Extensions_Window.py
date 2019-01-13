@@ -1,5 +1,6 @@
 
 from pathlib import Path
+from lxml import etree as ET
 
 from PyQt5.uic import loadUiType
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -42,8 +43,11 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
     * selected_item
       - QStandardModelItem that is currently selected.
     * extension_item_dict
-      - Dict, keyed by extension id, holding the QStandardModelItem
+      - Dict, keyed by lowercase extension id, holding the QStandardModelItem
         representing it.
+    * modified
+      - Bool, True if an extention enable/disable state was changed
+        since the last save.
     '''
     # Set this tab as unique; disallow multiple to avoid them fighting
     # over what gets enabled/disabled.
@@ -53,13 +57,14 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
     # The thread will be in a qt thread domain, the handler in this
     # domain, so use a signal for this.
     # Messages are just those recorded by the Check_Extension log
-    # lines, joined together, following the ext_id of the test.
+    # lines, joined together, following the extension_name of the test.
     test_result = QtCore.pyqtSignal(str, str)
 
     def __init__(self, parent, window):
         super().__init__(parent, window)
         self.selected_item = None
         self.extension_item_dict = {}
+        self.modified = False
 
         # Don't print args for threads; some lists are passed around.
         self.print_thread_args = False
@@ -97,8 +102,8 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         self.w_button_disable_all.clicked.connect(
             lambda checked, state = False: self.Set_All_Enable_States(state))
 
-        # Reload is a simple reloader to find any new extensions.
-        self.w_button_reload .clicked.connect(self.Refresh)
+        # Reload to find any new extensions.
+        self.w_button_reload .clicked.connect(self.Handle_Reload)
 
         # Test buttons will share a function.
         self.w_button_test_all .clicked.connect(
@@ -125,8 +130,79 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
     
 
     def Save(self):
-        # Update the user content.xml with enabled/disables as needed.
-        # TODO
+        '''
+        Save current settings to the user content.xml.
+        Note: extensions with ID overlap will only support the first
+        one's state being saved (per x4 limitations).
+        '''
+        # Skip saving if there were no modifications.
+        # This will also catch cases where extensions failed to load.
+        if not self.modified:
+            return
+        self.modified = False
+        '''
+        Example format:
+        <content>
+          <extension id="test_mod" enabled="true"></extension>
+          <extension id="hide_press_button_popups" enabled="false"></extension>
+          <extension id="RebalancedShieldsAndMore" enabled="false"></extension>
+        </content>
+        '''
+        # Create the content root element.
+        content_root = ET.Element('content')
+        # Record ids found, so that only the first extension gets added.
+        ids_found = set()
+
+        # Search through current extensions.
+        # Do this in folder order, to match x4 behavior with id conflicts.
+        for extension_name, item in sorted(self.extension_item_dict.items(),
+                                           key = lambda kv: kv[0]):
+
+            # Do this error check before checking if the enabled state
+            # has changed, since any non-first extension of an ID will
+            # have its content.xml element apply to the first extension
+            # of that ID.
+            # Note: this may not be a perfect behavior match to the game,
+            # as it didn't seem worth thinking through thoroughly.
+            ext_id = item.ext_summary.ext_id.lower()
+            if ext_id in ids_found:
+                self.window.Print('Cannot save non-default enabled state for'
+                                  ' "{}" due to ID "{}" conflict.'.format(
+                                      extension_name, ext_id))
+            ids_found.add(ext_id)
+
+            # Want to compare the current enable/disable status against the
+            # extension's default. Can skip when they match.
+            enabled = self.Item_Is_Enabled(item)
+            if enabled == item.ext_summary.default_enabled:
+                continue
+
+            # Add the element for this extension.
+            ext_node = ET.Element('extension', attrib = {
+                'id' : ext_id,
+                'enabled' : 'true' if enabled else 'false',
+                })
+            content_root.append(ext_node)
+
+        # Write it out; this overwrites the user content.xml if it exists.
+        content_xml_path = Settings.Get_User_Content_XML_Path()
+        with open(content_xml_path, 'wb') as file:
+            ET.ElementTree(content_root).write(
+                file, 
+                encoding = 'utf-8',
+                xml_declaration = True,
+                pretty_print = True)
+        return
+
+
+    def Handle_Reload(self):
+        '''
+        The Reload button was clicked.
+        Saves current enable statuses, then does a fresh search
+        for extensions.
+        '''
+        self.Save()
+        self.Refresh()
         return
 
     
@@ -134,10 +210,7 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         '''
         Get the current set of found extensions by the file system,
         and fill in their list.
-        '''
-        # Save any current enables/disabled.
-        self.Save()
-        
+        '''        
         # Disable the buttons while working.
         self.w_button_test_all     .setEnabled(False)
         self.w_button_test_selected.setEnabled(False)
@@ -170,6 +243,7 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
 
         # Fill in the extensions list.
         # Sort by display name.
+        # TODO: maybe optionally categorize by author.
         for ext_summary in sorted(extension_summary_list, 
                                   key = lambda x: x.display_name):
 
@@ -199,8 +273,8 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
             self.list_model.appendRow(item)
 
             # Record to the dict.
-            self.extension_item_dict[ext_summary.ext_id] = item
-
+            self.extension_item_dict[ext_summary.extension_name] = item
+            
         return
 
     
@@ -214,6 +288,17 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         new_item = self.list_model.itemFromIndex(qitemselection.indexes()[0])
         self.Change_Item(new_item)
         return
+    
+
+    def Handle_doubleClicked(self, index):
+        '''
+        An item was double-clicked; toggle its checkbox.
+        '''
+        item = self.list_model.itemFromIndex(index)
+        self.Set_Item_Checked(item, not self.Item_Is_Enabled(item))
+        # Flag as modified to save changes.
+        self.modified = True
+        return
 
 
     def Handle_itemChanged(self, item):
@@ -225,6 +310,8 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         # Update the display if this is the current item.
         if self.selected_item and item is self.selected_item:
             self.Update_Details()
+        # Flag as modified to save changes.
+        self.modified = True
         return
 
 
@@ -254,26 +341,91 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
 
         # Fill in the detail text.
         detail_lines = [
-            'ID         : {}'.format(item.ext_summary.ext_id),
-            'Name       : {}'.format(item.ext_summary.display_name),
-            'Author     : {}'.format(item.ext_summary.Get_Attribute('author')),
-            'Enabled    : {}'.format(self.Item_Is_Enabled(item)),
-            'Description:',
-            '',
-            '{}'.format(item.ext_summary.Get_Attribute('description')),
-            '',
-            'Test result: {}'.format(
+            # Grab the original folder, not the .folder attribute, to
+            # get original case.
+            'Folder           : {}'.format(item.ext_summary.content_xml_path.parent.name),
+            'Name             : {}'.format(item.ext_summary.display_name),
+            'Author           : {}'.format(item.ext_summary.Get_Attribute('author')),
+            'ID               : {}'.format(item.ext_summary.ext_id),
+            'Version          : {}'.format(item.ext_summary.Get_Attribute('version')),
+            'Date             : {}'.format(item.ext_summary.Get_Attribute('date')),
+            'Removable        : {}'.format(not item.ext_summary.Get_Bool_Attribute('save', True)),
+            'Enabled          : {}'.format(self.Item_Is_Enabled(item)),
+            'Default Enabled  : {}'.format(item.ext_summary.default_enabled),
+            ]
+        
+        detail_lines += [
+            'Test result      : {}'.format(
                 'Success' if item.test_success == True
                 else 'Failed' if item.test_success == False
                 else '?'),
+            ]
+
+        description = item.ext_summary.Get_Attribute('description')
+        if description:
+            detail_lines += [
+            '',
+            description,
+            ]
+
+
+        def Get_Extension_For_ID(ext_id):
+            '''
+            Returns the first extension item found matching a given ext ID.
+            Uses alphabetical extension_name ordering.
+            '''
+            for name, item in sorted(self.extension_item_dict.items(),
+                                           key = lambda kv: kv[0]):
+                if item.ext_summary.ext_id.lower() == ext_id.lower():
+                    return item
+            return None
+
+        def Format_Dependency_List(dep_list):
+            '''
+            Apply formatting to dependencies, looking up their mod
+            display names from ids.
+            '''
+            ret_list = []
+            for ext_id in dep_list:
+                # Dependencies might be missing, so only fill in names
+                # when found.
+                item = Get_Extension_For_ID(ext_id)
+                if not item:
+                    dep_name = '?'
+                else:
+                    dep_name = item.ext_summary.display_name
+                    # Swap to the original case id.
+                    ext_id = item.ext_summary.ext_id
+                ret_list.append('{} (id: {})'.format(dep_name, ext_id))
+            return ret_list
+
+        if item.ext_summary.soft_dependencies:
+            detail_lines += [
+            '',
+            # TODO: list dependencies using extension display name, not id.
+            'Soft dependencies :',
+            # Indent with a couple spaces.
+            '  ' + '\n  '.join(Format_Dependency_List(
+                                item.ext_summary.soft_dependencies)),
+            ]
+            
+        if item.ext_summary.hard_dependencies:
+            detail_lines += [
+            '',
+            'Hard dependencies :',
+            # Indent with a couple spaces.
+            '  ' + '\n  '.join(Format_Dependency_List(
+                                item.ext_summary.hard_dependencies)),
             ]
 
         # Add in any error log messages, if there are some.
         if item.check_result_log_text:
             detail_lines += [
             '',
-            'Errors:' if item.check_result_log_text else '',
+            'Test Log:' if item.check_result_log_text else '',
             '',
+            # TODO: format this a bit: extra newlines between messages,
+            # number the messages, maybe indent, etc.
             item.check_result_log_text,
             ]
 
@@ -303,16 +455,7 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         # Color the item.
         self.Color_Item(item)
         return
-
-
-    def Handle_doubleClicked(self, index):
-        '''
-        An item was double-clicked; toggle its checkbox.
-        '''
-        item = self.list_model.itemFromIndex(index)
-        self.Set_Item_Checked(item, not self.Item_Is_Enabled(item))
-        return
-
+    
 
     def Item_Is_Enabled(self, item):
         '''
@@ -393,25 +536,25 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         self.w_button_retest_errors.setEnabled(False)
 
         # Clear prior test results for all disabled extensions.
-        for ext_id, item in self.extension_item_dict.items():
+        for extension_name, item in self.extension_item_dict.items():
             if not self.Item_Is_Enabled(item):
                 item.check_result_log_text = None
                 item.test_success = None
 
-        # Pick out the extension ids being tested.
+        # Pick out the extension names being tested.
         if mode == 'selected':
             item = self.selected_item
             # Ignore if not enabled.
             if not self.Item_Is_Enabled(item):
                 return
-            extension_id_list = [item.ext_summary.ext_id]
+            extension_name_list = [item.ext_summary.extension_name]
 
         # Handle 'all' and 'errors' in a loop.
         else:
-            extension_id_list = []
+            extension_name_list = []
 
             # Find the checked items (enabled).
-            for ext_id, item in self.extension_item_dict.items():
+            for extension_name, item in self.extension_item_dict.items():
                 if not self.Item_Is_Enabled(item):
                     continue
 
@@ -421,12 +564,12 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
                     continue
 
                 # Record it.
-                extension_id_list.append(ext_id)
+                extension_name_list.append(extension_name)
                 
 
         # Queue up the test as a thread, since it resets the file system.
         self.Queue_Thread(  self.Test_Thread,
-                            extension_id_list,
+                            extension_name_list,
                             # Need to save out the current extension enable state
                             # just before the thread kicks off.
                             prelaunch_function = self.Save,
@@ -434,7 +577,7 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         return
     
 
-    def Test_Thread(self, extension_id_list):
+    def Test_Thread(self, extension_name_list):
         '''
         Threaded tester. This will block access by other tabs to
         the file system while running.
@@ -459,14 +602,14 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
     
         # Run the tests, collecting the logged messages.
         #ext_log_lines_dict = {}
-        for ext_id in extension_id_list:
-            log_lines = Check_Extension(ext_id, return_log_messages = True)
-            #ext_log_lines_dict[ext_id] = log_lines
+        for extension_name in extension_name_list:
+            log_lines = Check_Extension(extension_name, 
+                                        return_log_messages = True)
 
             # Make the gui more responsive during testing by
             # using a signal emitted to a function that catches results
             # and updates state as each extension finishes.
-            self.test_result.emit(ext_id, '\n'.join(log_lines))
+            self.test_result.emit(extension_name, '\n'.join(log_lines))
 
 
         # Restore the Settings.
@@ -480,11 +623,11 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         return #ext_log_lines_dict
 
 
-    def Handle_Test_Result(self, ext_id, log_text):
+    def Handle_Test_Result(self, extension_name, log_text):
         '''
         Function to catch emitted test_result signals.
         '''
-        item = self.extension_item_dict[ext_id]
+        item = self.extension_item_dict[extension_name]
 
         # Record the lines to the extension for display.
         item.check_result_log_text = log_text

@@ -56,6 +56,9 @@ class VFS_Tree_Model(QStandardItemModel):
         * file_info_dict
           - Dict of dicts, info on loaded files.
         '''        
+        # TODO: time this and improve if a problem; this has some
+        # issue locking up the gui for a few seconds.
+
         ## Record the expansion state of items.
         ## The goal is that all labels currently expanded will get
         ## automatically reexpanded after a refresh.

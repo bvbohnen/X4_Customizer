@@ -8,6 +8,12 @@ class File_Missing_Exception(Exception):
     or the file is empty.
     '''
 
+class File_Loading_Error_Exception(Exception):
+    '''
+    Exception raised when File_Manager.Load_File runs into an exception
+    when loading a found file, eg. bad xml syntax or similar.
+    '''
+
 class Obj_Patch_Exception(Exception):
     '''
     Exception raised when an obj binary patch fails to find a

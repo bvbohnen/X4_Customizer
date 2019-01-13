@@ -24,6 +24,7 @@ from Framework import Settings
 from Framework import Print
 from Framework import Change_Log
 from Framework import Live_Editor
+from Framework import File_System
 
 from .Worker_Thread_Handler import Worker_Thread_Handler
 from .Shared import Styles, Set_Icon
@@ -261,6 +262,25 @@ class GUI_Main_Window(qt_base_class, generated_class):
     Widget names:
     * widget_tab_container
     * widget_output_dock
+    
+    Action names:
+    * action_New
+    * action_Open
+    * action_Save
+    * action_Save_As
+    * action_Run_Script
+    * action_Reset
+    * action_Quit
+    * action_Change_Font
+    * action_View_Output
+    * action_View_Script
+    * action_View_Settings
+    * action_VFS
+    * action_Extensions
+     - TODO: make this a View? (though not always present).
+    Unused:
+    * action_Clean
+
 
     Attributes:
     * application
@@ -292,6 +312,8 @@ class GUI_Main_Window(qt_base_class, generated_class):
       - Dict, keyed by tab name, holding unique widgets to display as tabs.
       - These may not actually be present in the tab widget, such as
         when hidden.
+
+           
     '''
     '''
     Scrapped: signals like this get messy: if 'loaded' and 'modified'
@@ -380,6 +402,8 @@ class GUI_Main_Window(qt_base_class, generated_class):
         self.action_Quit          .triggered.connect(self.Action_Quit)
         self.action_Change_Font   .triggered.connect(self.Action_Change_Font)
         self.action_View_Output   .triggered.connect(self.Action_View_Output)
+        self.action_Reset         .triggered.connect(self.Action_Reset)
+        
         # TODO: Quit without saving
 
         # Actions that show/hide unique tabs.
@@ -722,6 +746,8 @@ class GUI_Main_Window(qt_base_class, generated_class):
             - 'script_completed'
             - 'save'
             - 'save_as'
+            - 'thread_started'
+            - 'thread_finished'
         '''
         # Want to prioritize the currently viewed tab.
         current_tab = self.widget_tab_container.currentWidget()
@@ -740,58 +766,47 @@ class GUI_Main_Window(qt_base_class, generated_class):
             # it here.
             Live_Editor.Save_Patches()
             self.Print('Saved Live Editor patches')
+
+        # Disable the Reset action during threads.
+        if 'thread_started' in flags:
+            self.action_Reset.setEnabled(False)
+        if 'thread_finished' in flags:
+            self.action_Reset.setEnabled(True)
+
         return
+    
 
+    def Action_Reset(self):
+        '''
+        The Reset button was pressed.
+        This will reset the file system, live editor, and refresh all tabs.
+        '''
+        # Verify no threads are active; if they are, ignore the button press.
+        # This should normally be impossible if the action was disabled
+        # properly.
+        if self.worker_thread.thread_active:
+            return
 
-    #def Soft_Refresh(self):
-    #    '''
-    #    To be called after a script run, performs a Soft_Refresh on all
-    #    tabs that display 'current' game file information.
-    #    TODO: replace with a generic Send_Signal function completely.
-    #    '''
-    #    # Want to prioritize the currently viewed tab.
-    #    current_tab = self.widget_tab_container.currentWidget()
-    #    current_tab.Soft_Refresh()
-    #
-    #    # Go through all tabs.
-    #    for tab in self.Get_Tab_Widgets():
-    #        # Skip the current_tab since it was already handled.
-    #        if tab is current_tab:
-    #            continue
-    #        # Kick off the refresh.
-    #        tab.Soft_Refresh()
-    #    return
+        # Kick off a general save for all tabs.
+        # This saves settings, enabled extensions, maybe some others.
+        # After reset some tabs will reload from disk, so this ensures
+        # those changes are preserved.
+        self.Send_Signal('save')
+
+        # Reset the file system to flush out old contents.
+        File_System.Reset()
+
+        # Reset the live editor, to make it do a fresh pull of data
+        # from the file system.
+        # Note: this is designed to remember its patches across a reset,
+        # so they don't need to be saved.
+        Live_Editor.Reset()
         
-
-    #def Refresh_File_System(self):
-    #    '''
-    #    Resets/refreshes the File_System and related components.
-    #    This will kick off data loading on all edit tabs.
-    #    Meant for use at startup if Settings appear to have proper
-    #    paths, or for when paths change.
-    #    TODO: maybe a menu option as well.
-    #    TODO: replace with a generic Send_Signal function completely.
-    #    '''
-    #    # TODO: check validity of Settings.
-    #    if not Settings.Paths_Are_Valid():
-    #        return
-    #
-    #    # Want to prioritize the currently viewed tab, if any.
-    #    # Note: if all tabs are hidden, this will return None.
-    #    current_tab = self.widget_tab_container.currentWidget()
-    #    if current_tab != None:
-    #        current_tab.Reset_From_File_System()
-    #
-    #    # Go through all tabs.
-    #    for tab in self.Get_Tab_Widgets():
-    #        # Skip the current_tab since it was already handled.
-    #        if tab is current_tab:
-    #            continue
-    #        # Kick off the refresh.
-    #        # These will queue up, so should be safe.
-    #        tab.Reset_From_File_System()
-    #    return
-
+        # Signal all tabs to reset, but only if the settings paths
+        # are set up properly.
+        if Settings.Paths_Are_Valid():
+            self.Send_Signal('file_system_reset')
+        return
 
     ##########################################################################
     # Font related actions.

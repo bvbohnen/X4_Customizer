@@ -72,11 +72,13 @@
     <addaction name="separator"/>
     <addaction name="action_Quit"/>
    </widget>
-   <widget class="QMenu" name="menuRun">
+   <widget class="QMenu" name="menuActions">
     <property name="title">
-     <string>Run</string>
+     <string>Actions</string>
     </property>
     <addaction name="action_Run_Script"/>
+    <addaction name="separator"/>
+    <addaction name="action_Reset"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="title">
@@ -111,7 +113,7 @@
     <addaction name="action_VFS"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuRun"/>
+   <addaction name="menuActions"/>
    <addaction name="menuEdit"/>
    <addaction name="menuUtilities"/>
    <addaction name="menuView"/>
@@ -201,17 +203,12 @@
     <string>Save As</string>
    </property>
   </action>
-  <action name="actionClose">
-   <property name="text">
-    <string>Close</string>
-   </property>
-  </action>
   <action name="action_Quit">
    <property name="text">
     <string>Quit</string>
    </property>
   </action>
-  <action name="actionClean">
+  <action name="action_Clean">
    <property name="text">
     <string>Clean</string>
    </property>
@@ -237,11 +234,6 @@
     <string>Output</string>
    </property>
   </action>
-  <action name="actionasdf">
-   <property name="text">
-    <string>asdf</string>
-   </property>
-  </action>
   <action name="action_View_Script">
    <property name="text">
     <string>Script</string>
@@ -260,6 +252,11 @@
   <action name="action_Extensions">
    <property name="text">
     <string>Extensions</string>
+   </property>
+  </action>
+  <action name="action_Reset">
+   <property name="text">
+    <string>Reset VFS</string>
    </property>
   </action>
  </widget>

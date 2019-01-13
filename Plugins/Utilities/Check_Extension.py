@@ -6,7 +6,8 @@ from Framework import File_Manager
 from Framework import Load_File
 from Framework import Plugin_Log
 from Framework import Print
-from Framework import File_Missing_Exception
+from Framework import File_Missing_Exception, File_Loading_Error_Exception
+from Framework import Settings
 
 @Utility_Wrapper()
 def Check_Extension(
@@ -25,7 +26,8 @@ def Check_Extension(
     that can go before it).
 
     * extension_name
-      - Name of the extension being checked.
+      - Name (folder) of the extension being checked.
+      - May be given in original or lower case.
       - This should match an enabled extension name findable on
         the normal search paths set in Settings.
     * check_other_orderings
@@ -49,7 +51,7 @@ def Check_Extension(
     Print('Checking extension: {}'.format(extension_name))
 
     # Lowercase the name to standardize it for lookups.
-    extension_path_name = extension_name.lower()
+    extension_name = extension_name.lower()
 
     # Success flag will be set false on any unexpected message.
     success = True
@@ -58,11 +60,15 @@ def Check_Extension(
     source_reader = File_Manager.File_System.Get_Source_Reader()
 
     # Verify the extension name is valid.
-    if extension_path_name not in source_reader.extension_source_readers:
+    if extension_name not in source_reader.extension_source_readers:
         raise AssertionError(
             'Extension "{}" not found in enabled extensions: {}'.format(
             extension_name, sorted(source_reader.Get_Extension_Names())))
     
+    # Look up the display name of the extension, which might be used
+    # in some messages being listened to.
+    extension_display_name = source_reader.extension_source_readers[
+        extension_name].extension_summary.display_name
 
     # Handle logging messages during the loading tests.
     # Do this by overriding the normal log function.
@@ -70,15 +76,23 @@ def Check_Extension(
     # the loading order is switched.
     messages_seen = set()
 
-    # Possibly keep a list of lines seen for returning.
+    # Keep a list of lines seen, to possibly return.
     logged_messages = []
 
     # For name checks, use re to protect against one extension name
     # being inside another longer name by using '\b' as word edges;
     # also add a (?<!/) check to avoid matching when the extension
     # name is in a virtual_path (always preceeding by a '\').
-    re_name = r'(?<!/)\b{}\b'.format(extension_name)
+    # Note: the extension_name could have special re characters in it;
+    #  can use re.escape to pre-format it.
+    # Use (a|b) style to match both forms of the extension name.
+    re_name = r'(?<!/)\b({}|{})\b'.format(re.escape(extension_name),
+                                          re.escape(extension_display_name))
+
     def Logging_Function(message):
+
+        # Detect if this extension has its name in the message.
+        this_ext_name_in_message = re.search(re_name, message)
 
         # Want to skip messages based on diff patches by other
         # extensions. Can check the ext_currently_patching attribute
@@ -88,12 +102,24 @@ def Check_Extension(
         # As a backup, don't skip if this extension's name is in 
         # the message for some reason (though that case isn't really
         # expected currently).
-        and not re.search(re_name, message)):
+        and not this_ext_name_in_message):
             return
+
+        # Skip dependency errors from other extensions.
+        # TODO: think of a smarter way to do this that can safely ignore
+        # messages like this without ignoring those caused by this extension.
+        # (Perhaps don't rely on the extension resort to catch these,
+        #  but a specific extension checker.)
+        if not this_ext_name_in_message:
+            for skip_string in ['duplicated extension id', 
+                                'missing hard dependency',
+                                'multiple dependency matches']:
+                if skip_string in message:
+                    return
 
         if message in messages_seen:
             return
-        if 'Error' in message:
+        if 'Error' in message or 'error' in message:
             messages_seen.add(message)
             nonlocal success
             success = False
@@ -109,7 +135,6 @@ def Check_Extension(
     # Connect the custom logging function.
     Plugin_Log.logging_function = Logging_Function
     
-
     # Set up the loading orders by adjusting priority.
     # -1 will put this first, +1 will put it last, after satisfying
     # other dependencies. 0 will be used for standard alphabetical,
@@ -128,19 +153,30 @@ def Check_Extension(
             Print('  Loading at latest...')
 
         # Resort the extensions.
+        # This will also check dependencies and for unique extension ids.
         source_reader.Sort_Extensions(priorities = {
-            extension_path_name : priority })
+            extension_name : priority })
         
         # Loop over all files in the extension.
-        for virtual_path in source_reader.Gen_Extension_Virtual_Paths(extension_path_name):
+        for virtual_path in source_reader.Gen_Extension_Virtual_Paths(extension_name):
+
             # Do a test load; this preserves any prior loads that
             # may have occurred before this plugin was called.
-            # Ignore not-found errors for this; they should only come
-            # up if there was a file format problem that got it rejected,
-            # which shows up in a different error message.
-            Load_File(virtual_path, test_load = True, 
-                      error_if_not_found = False)
+            try:
+                Load_File(virtual_path, test_load = True)
+
+            # Some loading problems will be printed to the log and then
+            # ignored, but others can be passed through as an exception;
+            # catch the exceptions.
+            # TODO: maybe in developer mode reraise the exception to
+            # get the stack trace.
+            except Exception as ex:
+                # Pass it to the logging function.
+                Logging_Function(
+                    ('Error when loading file {}; returned exception: {}'
+                     ).format(virtual_path, ex))
             
+
     Print('  Overall result: ' + ('Success' if success else 'Error detected'))
 
     # Detach the logging function override.
