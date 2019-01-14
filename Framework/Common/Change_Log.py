@@ -114,6 +114,8 @@ Change Log:
    - Added the Extensions tab to the gui, allowing viewing, enabling,
      disabling, and testing of extensions.
    - Added the Color_Text transform.
+ * 1.8.1
+   - Fixed a couple crash bugs when script or configuration tabs are hidden.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

@@ -632,7 +632,7 @@ class GUI_Main_Window(qt_base_class, generated_class):
         # Fill in the hidden tabs, unique ones that were not found above.
         for name, widget in sorted(self.unique_tabs_dict.items()):
             if widget not in widget_list:
-                widget_set.append(widget)
+                widget_list.append(widget)
 
         # If a filter given, swap it over to actual classes
         # for doing an isinstance check.
@@ -749,14 +749,16 @@ class GUI_Main_Window(qt_base_class, generated_class):
             - 'thread_started'
             - 'thread_finished'
         '''
-        # Want to prioritize the currently viewed tab.
+        # Want to prioritize the currently viewed tab, if any.
+        # (This may be None if all tabs are closed.)
         current_tab = self.widget_tab_container.currentWidget()
-        current_tab.Handle_Signal(*flags)
+        if current_tab != None:
+            current_tab.Handle_Signal(*flags)
 
-        # Go through all tabs.
+        # Go through all tabs (including hidden ones not in the container).
         for tab in self.Get_Tab_Widgets():
             # Skip the current_tab since it was already handled.
-            if tab is current_tab:
+            if current_tab != None and tab is current_tab:
                 continue
             tab.Handle_Signal(*flags)
 

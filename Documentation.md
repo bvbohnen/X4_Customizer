@@ -1,4 +1,4 @@
-X4 Customizer 1.8
+X4 Customizer 1.8.1
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -679,3 +679,5 @@ Change Log:
    - Tested with the top 100 Nexus mods to guide various debug and refinement.
    - Added the Extensions tab to the gui, allowing viewing, enabling, disabling, and testing of extensions.
    - Added the Color_Text transform.
+ * 1.8.1
+   - Fixed a couple crash bugs when script or configuration tabs are hidden.
