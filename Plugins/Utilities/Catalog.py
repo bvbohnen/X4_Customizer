@@ -209,7 +209,7 @@ def Cat_Pack(
         location = source_dir_path)
 
     # Pick out the subfolders to be included.
-    subfolder_names = File_Manager.Source_Reader.valid_virtual_path_prefixes
+    subfolder_names = File_Manager.Source_Reader_Local.valid_virtual_path_prefixes
     
     num_writes        = 0
     num_pattern_skips = 0

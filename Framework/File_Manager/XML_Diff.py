@@ -943,7 +943,7 @@ def Unit_Test(test_node, num_tests = 100, edits_per_test = 5, rand_seed = None):
         modified_node = deepcopy(test_node)
 
         # Get a flattened list of all non-comment nodes.
-        node_list = modified_node.xpath('.//')
+        node_list = modified_node.xpath('.//*')
 
         # Make a few edits.
         edits_remaining = edits_per_test

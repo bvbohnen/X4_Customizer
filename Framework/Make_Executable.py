@@ -81,6 +81,7 @@ import argparse
 import sys
 import os
 import shutil
+from pathlib import Path # TODO: complete switchover to pathlib.
 
 # Conditional import of pyinstaller, checking if it is available.
 try:
@@ -91,7 +92,23 @@ except Exception:
 
 import subprocess
 
-This_dir = os.path.normpath(os.path.join(os.path.dirname(__file__)))
+This_dir = Path(__file__).parent
+
+def Clear_Dir(dir_path):
+    '''
+    Clears contents of the given directory.
+    '''
+    # Note: rmtree is pretty flaky, so put it in a loop to keep
+    # trying the removal.
+    if os.path.exists(dir_path):
+        for _ in range(10):
+            try:
+                shutil.rmtree(dir_path)
+            except Exception:
+                continue
+            break
+    return
+
 
 def Make(*args):
 
@@ -130,6 +147,11 @@ def Make(*args):
         action='store_true',
         help = 'Delete the pyinstaller work folder when done, though this'
                ' will slow down rebuilds.')
+    
+    argparser.add_argument(
+        '-bats_only', 
+        action='store_true',
+        help = 'Only update the .bat files, otherwise skipping the compile.')
 
     #argparser.add_argument(
     #    '-o', '-O', 
@@ -150,34 +172,31 @@ def Make(*args):
     #           ' but also trimming docstrings to reduce code size.')
     
     # Run the parser on the input args.
-    parsed_args = argparser.parse_args(args)
+    # Split off the remainder, mostly to make it easy to run this
+    # in VS when its default args are still set for Main.
+    parsed_args, remainder = argparser.parse_known_args(args)
 
 
     # Set the output folder names.
     # Note: changing the pyinstaller build and dist folder names is
     #  possible, but not through the spec file (at least not easily),
     #  so do it through the command line call.
-    build_folder = os.path.join('..','pyinstaller_build_files')
+    build_folder = (This_dir / '..' / 'pyinstaller_build_files').resolve()
 
     # Pick the final location to place the exe and support files.
     # This should have the same relative path to reach any common
     #  files in the source and patches folders, which can be
     #  moved up under the main level (so the x4_customizer exe
     #  can be down one folder, and the python down another folder).
-    dist_folder = os.path.normpath(os.path.join(This_dir, '..', 'bin'))
-
-    # Subfolder to shove misc exe support files into.
-    # Update: the new pyinstaller with python 3.7 doesn't like moving
-    # these files away from the exe.
-    exe_support_folder = os.path.join(dist_folder)#, 'support')
-    
+    dist_folder = (This_dir / '..' / 'bin').resolve()
+        
     # Note: it would be nice to put the spec file in a subfolder, but
     #  pyinstaller messes up (seems to change its directory to wherever
     #  the spec file is) and can't find the source python, so the spec
     #  file needs to be kept in the main dir and cleaned up at the end.
-    spec_file_path = 'X4_Customizer.spec'
+    spec_file_path = This_dir / 'X4_Customizer.spec'
     # Hook file probably works like the spec file.
-    hook_file_path = 'pyinstaller_x4c_hook.py'
+    hook_file_path = This_dir / 'pyinstaller_x4c_hook.py'
 
     # Change the working directory to here.
     # May not be necessary, but pyinstaller not tested for running
@@ -193,17 +212,21 @@ def Make(*args):
     # Delete the existing dist directory; pyinstaller has trouble with
     #  this for some reason (maybe using os.remove, which also seemed
     #  to have the same permission error pyinstaller gets).
-    if os.path.exists(dist_folder):
-        # Use shutil for this; os.remove is for a file, os.rmdir is
-        #  for an empty directory, but shutil rmtree will handle
-        #  the whole thing.
-        shutil.rmtree(dist_folder)
+    if not parsed_args.bats_only and dist_folder.exists():
+        Clear_Dir(dist_folder)
 
 
     # To be able to support direct command line calls (with responses)
-    # as well as gui launching, the only workable solution appears
-    # to be to compile twice.
+    #  as well as gui launching, the only workable solution appears
+    #  to be to compile twice.
+    # Warning: gui version puts another copy of Qt an extra folder deeper,
+    #  so aim to have the console version not include qt. This will also
+    #  duplicate lxml (which is also packed into its own folder). Deal with
+    #  that after compilation.
     for mode in ['console','gui']:
+        # Skip when only making bat files.
+        if parsed_args.bats_only:
+            continue
     
         # Set unique names based on mode.
         if mode == 'console':
@@ -239,7 +262,7 @@ def Make(*args):
             '    ],',
 
             # Relative path to work in; just use here.
-            '    pathex = [r"{}"],'.format(This_dir),
+            '    pathex = [r"{}"],'.format(str(This_dir)),
             # Misc external binaries; unnecessary.
             '    binaries = [],',
             # Misc data files. While the source/patches folders could be
@@ -263,17 +286,17 @@ def Make(*args):
             # Add pyqt for the gui plugin.
             # Pyinstaller needs a lot of help on this one when not being
             # given the original source files (which are in plugins).
-            '        r"PyQt5",',
-            '        r"PyQt5.QtWidgets",',
-            '        r"PyQt5.QtCore",',
-            '        r"PyQt5.QtGui",',
-            '        r"PyQt5.uic",',
+            '        r"PyQt5",'          ,#if mode == 'gui' else '',
+            '        r"PyQt5.QtWidgets",',#if mode == 'gui' else '',
+            '        r"PyQt5.QtCore",'   ,#if mode == 'gui' else '',
+            '        r"PyQt5.QtGui",'    ,#if mode == 'gui' else '',
+            '        r"PyQt5.uic",'      ,#if mode == 'gui' else '',
             '    ],',
 
             '    hookspath = [],',
             # Extra python files to run when the exe starts up.
             '    runtime_hooks = [',
-            '        "{}",'.format(hook_file_path),
+            '        r"{}",'.format(str(hook_file_path)),
             '    ],',
 
             # Exclude scipy, since it adds 500 MB to the 12 MB compile.
@@ -335,8 +358,8 @@ def Make(*args):
     
         # Write the spec and hook files to the build folder, creating it
         #  if needed.
-        if not os.path.exists(build_folder):
-            os.mkdir(build_folder)
+        if not build_folder.exists():
+            build_folder.mkdir()
         
         with open(spec_file_path, 'w') as file:
             file.write('\n'.join(spec_lines))
@@ -354,15 +377,20 @@ def Make(*args):
         pyinstaller_call_args = [
             'python', 
             '-m', 'PyInstaller', 
-            spec_file_path,
-            '--distpath', dist_folder,
-            '--workpath', build_folder,
+            str(spec_file_path),
+            '--distpath', str(dist_folder),
+            '--workpath', str(build_folder),
             ]
 
         # Set a clean flag if requested, making pyinstaller do a fresh
         #  run. Alternatively, could just delete the work folder.
+        # Update: pyinstaller cannot deal with nested folders (needs to be
+        #  called once for each folder, so deletion should probably be done
+        #  manually here.
         if parsed_args.preclean:
-            pyinstaller_call_args.append('--clean')
+            #pyinstaller_call_args.append('--clean')
+            if build_folder.exists():
+                Clear_Dir(build_folder)
 
         #-Removed entirely; this isn't useful, and the assetions are
         # used in some places to signal errors.
@@ -382,47 +410,35 @@ def Make(*args):
 
 
         # Check if the exe was created.
-        exe_path = os.path.join(dist_folder, program_name, program_name + '.exe')
-        if not os.path.exists(exe_path):
+        exe_path = dist_folder / program_name / (program_name + '.exe')
+        if not exe_path.exists():
             # It wasn't found; quit early.
             print('Executable not created.')
             return
 
 
-        # Move most files to a folder under the exe.
-        # Create the folder to move to first.
-        if not os.path.exists(exe_support_folder):
-            os.mkdir(exe_support_folder)
         # Traverse the folder with the files; this was collected under
         #  another folder with the name of the program.
-        path_to_exe_files = os.path.join(dist_folder, program_name)
-        for file_name in os.listdir(path_to_exe_files):
+        path_to_exe_files = dist_folder / program_name
+        for path in path_to_exe_files.iterdir():
 
-            # These select names will be kept together and moved to the
-            #  bin folder.
-            if file_name in [
-                program_name + '.exe',
-                'base_library.zip',
-                'pyexpat.pyd',
-                'python36.dll',
-                ]:
-                # Move the file up one level to the dist folder.
-                shutil.move(
-                    os.path.join(path_to_exe_files, file_name),
-                    os.path.join(dist_folder, file_name),
-                    )
-            else:
-                # Move the file up one level, and down to the support folder.
-                shutil.move(
-                    os.path.join(path_to_exe_files, file_name),
-                    os.path.join(exe_support_folder, file_name),
-                    )
+            # Move the file up one level, and down to the support folder.
+            # Note: after some digging, it appears shutil deals with folders
+            #  by passing to 'copytree', which doesn't work well if the
+            #  dest already has a folder of the same name (apparently
+            #  copying over to underneath that folder, eg. copying /PyQt
+            #  to someplace with /PyQt will end up copying to /PyQt/PyQt).
+            # Only do this move if the destination doesn't already have
+            #  a copy of the file/dir.
+            dest_path = dist_folder / path.name
+            if not dest_path.exists():
+                shutil.move(path, dest_path)
             
         # Clean out the now empty folder in the dist directory.
-        os.rmdir(path_to_exe_files)
+        Clear_Dir(path_to_exe_files)
         # Clean up the spec and hook files.
-        os.remove(spec_file_path)
-        os.remove(hook_file_path)
+        spec_file_path.unlink()
+        hook_file_path.unlink()
 
 
     # When here, the console and gui versions should be ready
@@ -430,46 +446,56 @@ def Make(*args):
 
     # Delete the pyinstaller work folder, if requested.
     if parsed_args.postclean:
-        if os.path.exists(build_folder):
-            shutil.rmtree(build_folder)
+        # Note: rmtree is pretty flaky, so put it in a loop to keep
+        # trying the removal.
+        if build_folder.exists():
+            Clear_Dir(build_folder)
 
 
     # Set up bat files for easier launching.
+    # To support calling the bat from elsewhere, need to prefix
+    #  the exe with %~dp0\ (which fills the bat file folder path).
+    # The path needs to be quoted to support spaces.
+    exe_command = os.path.join(r'"%~dp0\bin', program_name_console + '.exe"')
     bat_file_details_list = [
         {
             'name' : 'Run_Script',
             # Use '%*' to pass all command line args.
             # The " | MORE" tag supposedly will capture stdout of
-            # the tool even though it was compiled for a window.
-            'cmd'  : os.path.join('bin', program_name_console + '.exe') + ' -nogui %*',
+            #  the tool even though it was compiled for a window,
+            #  but that isn't useful anymore with separate compiles.
+            'cmd'  : exe_command + ' -nogui %*',
             # Pause the window when done, so messages can be read.
             'pause': True,
             },
         {
             'name' : 'Clean_Script',
-            'cmd'  : os.path.join('bin', program_name_console + '.exe') + ' -nogui %* -clean',
+            'cmd'  : exe_command + ' -nogui %* -clean',
             'pause': True,
             },
         {
             'name' : 'Cat_Unpack',
-            'cmd'  : os.path.join('bin', program_name_console + '.exe') + ' -nogui Cat_Unpack -argpass %*',
+            'cmd'  : exe_command + ' -nogui Cat_Unpack -argpass %*',
             'pause': True,
             },
         {
             'name' : 'Cat_Pack',
-            'cmd'  : os.path.join('bin', program_name_console + '.exe') + ' -nogui Cat_Pack -argpass %*',
+            'cmd'  : exe_command + ' -nogui Cat_Pack -argpass %*',
             'pause': True,
             },
         {
             'name' : 'Check_Extensions',
-            'cmd'  : os.path.join('bin', program_name_console + '.exe') + ' -nogui Check_Extensions -argpass %*',
+            'cmd'  : exe_command + ' -nogui Check_Extensions -argpass %*',
             'pause': True,
             },
         {
             'name' : 'Start_Gui',
             # Use 'start' to launch the gui and close the bat window
             # right away.
-            'cmd'  : 'start ' + os.path.join('bin', program_name_gui + '.exe') + ' %*',
+            # Because of oddities with 'start', which treats the first arg
+            #  as a label if quoted, give it a dummy set of quotes first.
+            # "" "%~dp0\
+            'cmd'  : 'start "" ' + exe_command.replace(program_name_console, program_name_gui) + ' %*',
             # No pausing for now; probably just annoying if the gui
             # doesn't crash.
             'pause': False,
@@ -478,7 +504,7 @@ def Make(*args):
 
     # Create the bat files.
     for bat_file_details in bat_file_details_list:
-        file_name = os.path.join(This_dir, '..', bat_file_details['name'] + '.bat')
+        file_name = This_dir / '..' / (bat_file_details['name'] + '.bat')
         lines = [
             # Disable the echo of the command.
             '@echo off',

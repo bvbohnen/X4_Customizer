@@ -58,7 +58,10 @@ def Adjust_Ware_Price_Spread(
         # Look up the existing spread.
         price_node = ware.find('./price')
         price_min  = int(price_node.get('min'))
-        price_avg  = int(price_node.get('average'))
+        try:
+            price_avg  = int(price_node.get('average'))
+        except:
+            bla = 0
         price_max  = int(price_node.get('max'))
 
         # If price is 0 or 1, just skip.

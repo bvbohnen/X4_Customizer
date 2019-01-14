@@ -25,6 +25,8 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
     Widget names:
     * w_button_enable_all
     * w_button_disable_all
+    * w_button_use_defaults
+    * w_button_undo_changes
     * w_button_reload
     * w_button_test_all
     * w_button_test_selected
@@ -33,7 +35,8 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
     * w_hide_2
     * w_hide_3
     * w_text_details
-    * w_listView
+    * w_model_view
+    * w_checkbox_word_wrap
     
     Attributes:
     * window
@@ -43,11 +46,18 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
     * selected_item
       - QStandardModelItem that is currently selected.
     * extension_item_dict
-      - Dict, keyed by lowercase extension id, holding the QStandardModelItem
-        representing it.
+      - Dict, keyed by extension name (lowercase folder), holding the
+        QStandardModelItem representing it.
     * modified
       - Bool, True if an extention enable/disable state was changed
         since the last save.
+    * original_enabled_states
+      - Dict, keyed by extension name, holding the enabled state when
+        first loading this tab.
+      - This will only get set once, and then is left static on
+        an subsequent reloads to avoid it getting overwritten with
+        local changes to the content.xml file.
+      - This is None until the first extension loading.
     '''
     # Set this tab as unique; disallow multiple to avoid them fighting
     # over what gets enabled/disabled.
@@ -65,19 +75,21 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         self.selected_item = None
         self.extension_item_dict = {}
         self.modified = False
+        # Start this at None to indicate it hasn't been filled yet.
+        self.original_enabled_states = None
 
         # Don't print args for threads; some lists are passed around.
         self.print_thread_args = False
                         
         # Set up initial, blank models.
         self.list_model  = QStandardItemModel(self)
-        self.w_listView.setModel(self.list_model)
-        
+        self.w_model_view.setModel(self.list_model)
+
         # Catch selection changes in the view.
-        self.w_listView.selectionModel().selectionChanged.connect(
+        self.w_model_view.selectionModel().selectionChanged.connect(
             self.Handle_selectionChanged)
         # Catch double clicks, to toggle checkboxes more easily.
-        self.w_listView.doubleClicked.connect(
+        self.w_model_view.doubleClicked.connect(
             self.Handle_doubleClicked)
 
         # Catch changes to item check boxes.
@@ -98,9 +110,14 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
 
         # Enable/disable buttons will share a function.
         self.w_button_enable_all .clicked.connect(
-            lambda checked, state = True: self.Set_All_Enable_States(state))
+            lambda checked, mode = 'enable_all': self.Action_Change_Enable_States(mode))
         self.w_button_disable_all.clicked.connect(
-            lambda checked, state = False: self.Set_All_Enable_States(state))
+            lambda checked, mode = 'disable_all': self.Action_Change_Enable_States(mode))
+        self.w_button_use_defaults.clicked.connect(
+            lambda checked, mode = 'use_defaults': self.Action_Change_Enable_States(mode))
+        self.w_button_undo_changes.clicked.connect(
+            lambda checked, mode = 'undo_changes': self.Action_Change_Enable_States(mode))
+        
 
         # Reload to find any new extensions.
         self.w_button_reload .clicked.connect(self.Handle_Reload)
@@ -113,7 +130,12 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         self.w_button_retest_errors .clicked.connect(
             lambda checked, mode = 'errors'  : self.Run_Tests(mode))
 
-        # Connect the local signal.
+        # Catch changes to the word wrap checkbox.
+        # Note: this starts checked while the text starts wrapped.
+        self.w_checkbox_word_wrap.stateChanged.connect(
+            self.Handle_Word_Wrap_Change)
+
+        # Connect the local thread signal.
         self.test_result.connect(self.Handle_Test_Result)
         return
         
@@ -164,11 +186,11 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
             # of that ID.
             # Note: this may not be a perfect behavior match to the game,
             # as it didn't seem worth thinking through thoroughly.
-            ext_id = item.ext_summary.ext_id.lower()
+            ext_id = item.ext_summary.ext_id
             if ext_id in ids_found:
-                self.window.Print('Cannot save non-default enabled state for'
-                                  ' "{}" due to ID "{}" conflict.'.format(
-                                      extension_name, ext_id))
+                self.window.Print(('Warning: Cannot save non-default enabled'
+                                  ' state for "{}" due to ID "{}" conflict.'
+                                  ).format(extension_name, ext_id))
             ids_found.add(ext_id)
 
             # Want to compare the current enable/disable status against the
@@ -192,6 +214,22 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
                 encoding = 'utf-8',
                 xml_declaration = True,
                 pretty_print = True)
+
+        self.window.Print('Saved user content.xml enabled extensions.')
+        return
+
+
+    def Handle_Word_Wrap_Change(self, state):
+        '''
+        Handle changes to the checkbox state.
+        '''
+        # State is 2 for a checked box, 0 for unchecked.
+        if state:
+            # Standard is to wrap by widget width.
+            self.w_text_details.setLineWrapMode(QtWidgets.QTextEdit.WidgetWidth)
+        else:
+            # Disable wrapping.
+            self.w_text_details.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
         return
 
 
@@ -241,6 +279,11 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         # Clear the display.
         self.w_text_details.setText('')
 
+        # If this is the first run, fill in the original_enabled_states.
+        first_run = self.original_enabled_states == None
+        if first_run:
+            self.original_enabled_states = {}
+
         # Fill in the extensions list.
         # Sort by display name.
         # TODO: maybe optionally categorize by author.
@@ -257,6 +300,12 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
             # Flag with no test result.
             item.test_success = None
 
+            # Record the enabled state at startup, if this is the
+            # first loading.
+            if first_run:
+                self.original_enabled_states[
+                    ext_summary.extension_name] = ext_summary.enabled
+
             # Set up a checkbox for enable/disable.
             item.setCheckable(True)
             # Init it based on enabled state.
@@ -265,15 +314,34 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
             # Color the item.
             self.Color_Item(item)
 
+            # Add an item for the author name, to aid in sorting.            
+            author_item = QStandardItem(ext_summary.Get_Attribute('author'))
+            # Give this a reference to the main item, to be used
+            # when it is selected (eg. double clicking the author name
+            # to enable an extension).
+            author_item.main_item = item
+            
             # Set as readonly, to avoid double clicks bringing up an
             # edit prompt.
             item.setEditable(False)
+            author_item.setEditable(False)
 
             # Add to the list.
-            self.list_model.appendRow(item)
+            self.list_model.appendRow([item, author_item])
 
             # Record to the dict.
             self.extension_item_dict[ext_summary.extension_name] = item
+            
+        # Header names.
+        # Pack into items so they can be centered.
+        label_items = [QStandardItem(label) for label in ['Name','Author']]
+        for index, label_item in enumerate(label_items):
+            label_item.setTextAlignment(QtCore.Qt.AlignHCenter)
+            self.list_model.setHorizontalHeaderItem(index, label_item)
+        
+        # Make sure the columns are wide enough.
+        self.w_model_view.resizeColumnToContents(0)
+        self.w_model_view.resizeColumnToContents(1)
             
         return
 
@@ -283,9 +351,17 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         A different item was clicked on.
         '''
         # This takes a bothersome object that needs indexes
-        # extracted, that then need to be converted to items,
-        # instead of just giving the item like qtreewidget.
-        new_item = self.list_model.itemFromIndex(qitemselection.indexes()[0])
+        #  extracted, that then need to be converted to items,
+        #  instead of just giving the item like qtreewidget.
+        # Note: use index [0] for the main item even if author was clicked.
+        # Note: from experimentation, selectionChanged bugs up if control
+        #  is held when a currently selected item is clicked on, which
+        #  will result in empty coordinates.
+        #  To work around this, wrap the lookup in try/except.
+        try:
+            new_item = self.list_model.itemFromIndex(qitemselection.indexes()[0])
+        except Exception:
+            return
         self.Change_Item(new_item)
         return
     
@@ -295,6 +371,9 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         An item was double-clicked; toggle its checkbox.
         '''
         item = self.list_model.itemFromIndex(index)
+        # Convert author items over to their main item.
+        if hasattr(item, 'main_item'):
+            item = item.main_item
         self.Set_Item_Checked(item, not self.Item_Is_Enabled(item))
         # Flag as modified to save changes.
         self.modified = True
@@ -306,6 +385,10 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         An item's checkbox was clicked, or it has an icon changed.
         Just want to catch the former case.
         '''
+        # Convert author to main item.
+        if hasattr(item, 'main_item'):
+            item = item.main_item
+        # Color it.
         self.Color_Item(item)
         # Update the display if this is the current item.
         if self.selected_item and item is self.selected_item:
@@ -323,6 +406,9 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         # triggers with None as the selection, so catch that case.
         if new_item == None:
             return
+        # Skip if somehow the author item makes it to here.
+        if hasattr(new_item, 'main_item'):
+            return
 
         # Record the item and update the details display.
         self.selected_item = new_item
@@ -339,6 +425,22 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
             return
         item = self.selected_item
 
+        # Give the version in x4 terms (int, adding decimal before last
+        # two digits) and original (which ~40% of mods give in a wrong
+        # format).
+        version = item.ext_summary.Get_Attribute('version')
+        try:
+            # Note: in game, it seems to ignore letters, but don't
+            #  spend the effort doing that here. TODO: maybe touch this up.
+            # Go string->float->int, to deal with mistaken decimals.
+            game_version = '{:.2f}'.format(int(float(version)) / 100)
+        except Exception:
+            game_version = '?'
+        # If there is something odd about the version, add the original
+        # string in parentheses.
+        if game_version == '?' or '.' in version:
+            game_version += ' ({})'.format(version)
+
         # Fill in the detail text.
         detail_lines = [
             # Grab the original folder, not the .folder attribute, to
@@ -347,7 +449,7 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
             'Name             : {}'.format(item.ext_summary.display_name),
             'Author           : {}'.format(item.ext_summary.Get_Attribute('author')),
             'ID               : {}'.format(item.ext_summary.ext_id),
-            'Version          : {}'.format(item.ext_summary.Get_Attribute('version')),
+            'Version          : {}'.format( game_version ),
             'Date             : {}'.format(item.ext_summary.Get_Attribute('date')),
             'Removable        : {}'.format(not item.ext_summary.Get_Bool_Attribute('save', True)),
             'Enabled          : {}'.format(self.Item_Is_Enabled(item)),
@@ -363,11 +465,7 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
 
         description = item.ext_summary.Get_Attribute('description')
         if description:
-            detail_lines += [
-            '',
-            description,
-            ]
-
+            detail_lines += ['', description]
 
         def Get_Extension_For_ID(ext_id):
             '''
@@ -376,7 +474,7 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
             '''
             for name, item in sorted(self.extension_item_dict.items(),
                                            key = lambda kv: kv[0]):
-                if item.ext_summary.ext_id.lower() == ext_id.lower():
+                if item.ext_summary.ext_id == ext_id:
                     return item
             return None
 
@@ -403,7 +501,7 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
             detail_lines += [
             '',
             # TODO: list dependencies using extension display name, not id.
-            'Soft dependencies :',
+            'Optional dependencies :',
             # Indent with a couple spaces.
             '  ' + '\n  '.join(Format_Dependency_List(
                                 item.ext_summary.soft_dependencies)),
@@ -412,7 +510,7 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         if item.ext_summary.hard_dependencies:
             detail_lines += [
             '',
-            'Hard dependencies :',
+            'Required dependencies :',
             # Indent with a couple spaces.
             '  ' + '\n  '.join(Format_Dependency_List(
                                 item.ext_summary.hard_dependencies)),
@@ -424,9 +522,11 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
             '',
             'Test Log:' if item.check_result_log_text else '',
             '',
-            # TODO: format this a bit: extra newlines between messages,
-            # number the messages, maybe indent, etc.
-            item.check_result_log_text,
+            # TODO: think about formatting this.
+            # Can just use empty lines between messages so that they
+            # are separated between word wrapped blocks.
+            # (This may not be as useful if word wrap is turned off.)
+            '\n\n'.join(item.check_result_log_text.splitlines()),
             ]
 
         # TODO: set up source readers and get file virtual paths.
@@ -464,13 +564,53 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         '''
         return bool(item.checkState())
 
+    
+        self.w_button_enable_all .clicked.connect(
+            lambda checked, mode = 'enable_all': self.Action_Change_Enable_States(mode))
+        self.w_button_disable_all.clicked.connect(
+            lambda checked, mode = 'disable_all': self.Action_Change_Enable_States(mode))
+        self.w_button_use_defaults.clicked.connect(
+            lambda checked, mode = 'use_defaults': self.Action_Change_Enable_States(mode))
+        self.w_button_undo_changes.clicked.connect(
+            lambda checked, mode = 'undo_changes': self.Action_Change_Enable_States(mode))
+        
 
-    def Set_All_Enable_States(self, state = True):
+    def Action_Change_Enable_States(self, mode):
         '''
-        Set all extensions enabled or disabled, based on state.
+        Set the enable/disable states on all extensions, based on mode.
+        
+        * mode
+          - String, one of ['enable_all', 'disable_all', 
+            'use_defaults', 'undo_changes']
         '''
-        for item in self.extension_item_dict.values():
-            self.Set_Item_Checked(item, state)
+        # These all are considered to modify the extensions.
+        self.modified = True
+
+        if mode == 'enable_all':
+            # Turn all extensions on.
+            for item in self.extension_item_dict.values():
+                self.Set_Item_Checked(item, True)
+
+        elif mode == 'disable_all':
+            # Turn all extensions off.
+            for item in self.extension_item_dict.values():
+                self.Set_Item_Checked(item, False)
+
+        elif mode == 'use_defaults':
+            # Set all extensions to their content.xml default state.
+            for item in self.extension_item_dict.values():
+                self.Set_Item_Checked(item, item.ext_summary.default_enabled)
+
+        elif mode == 'undo_changes':
+            # Try to remove changes made during this gui session.
+            for name, item in self.extension_item_dict.items():
+                # Use the recorded flag at startup, or skip if there
+                # is no record (eg. the extension was added after startup
+                # and recognized through a refresh).
+                enabled = self.original_enabled_states.get(name, None)
+                if enabled == None:
+                    continue
+                self.Set_Item_Checked(item, enabled)
         return
 
 
@@ -542,17 +682,17 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
                 item.test_success = None
 
         # Pick out the extension names being tested.
+        extension_name_list = []
         if mode == 'selected':
             item = self.selected_item
             # Ignore if not enabled.
-            if not self.Item_Is_Enabled(item):
-                return
-            extension_name_list = [item.ext_summary.extension_name]
+            # (This will end up passing through an empty test list,
+            #  which is fine since it cleans up the button states and such.)
+            if self.Item_Is_Enabled(item):
+                extension_name_list.append(item.ext_summary.extension_name)
 
         # Handle 'all' and 'errors' in a loop.
         else:
-            extension_name_list = []
-
             # Find the checked items (enabled).
             for extension_name, item in self.extension_item_dict.items():
                 if not self.Item_Is_Enabled(item):

@@ -156,6 +156,11 @@ def Check_Extension(
         # This will also check dependencies and for unique extension ids.
         source_reader.Sort_Extensions(priorities = {
             extension_name : priority })
+
+        # TODO: maybe think about doing a dependency version check as well,
+        # but that isn't very important since x4 will catch those problems,
+        # so this tool can somewhat safely assume they will get dealt with
+        # by the user.
         
         # Loop over all files in the extension.
         for virtual_path in source_reader.Gen_Extension_Virtual_Paths(extension_name):

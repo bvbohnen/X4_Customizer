@@ -238,8 +238,6 @@ class Source_Reader_class:
                 # Loop over the dependency ids.
                 for dep_id in getattr(source_reader.extension_summary, 
                                         dep_type+'_dependencies'):
-                    # Lowercase to standardize.
-                    dep_id = dep_id.lower()
 
                     # Check for a match.
                     # Use folder order.
@@ -248,7 +246,7 @@ class Source_Reader_class:
                                          key = lambda k: k.extension_name):
 
                         # Skip if not a match.
-                        if dep_id != reader.extension_summary.ext_id.lower():
+                        if dep_id != reader.extension_summary.ext_id:
                             continue
                         # Record if no match yet found.
                         if not matching_reader:
@@ -447,6 +445,9 @@ class Source_Reader_class:
                 # deal with picking the path apart locally.
                 game_file = self.extension_source_readers[ext_name].Read(ext_path)
 
+                # Fix the virtual_path that was attached to the file.
+                # The reader only give its local path.
+                game_file.virtual_path = virtual_path
         else:
             # Read from the source and base x4 locations.
             if self.loose_source_reader != None:
@@ -494,60 +495,56 @@ class Source_Reader_class:
                 # hence an extension will not patch its own source file.)
                 if ext_reader.extension_name == game_file.extension_name:
                     continue
-                
-                # Get the file, if any.
-                if mode == 'substitution':
-                    # For substitutions, want to just search the 'subst_'
-                    # catalogs and not any loose files.
-                    ext_game_file = ext_reader.Read(
-                        virtual_path,
-                        include_loose_files = False,
-                        cat_prefix = 'subst_')
-                else:
-                    # For patches, want to search the 'ext_' catalogs and
-                    # any loose files.
-                    ext_game_file = ext_reader.Read(
-                        virtual_path,
-                        include_loose_files = True,
-                        cat_prefix = 'ext_')
 
-                #-Removed; while problem files could be skipped, go
-                # ahead and keep them complaining for now.
-                ## Catch File_Loading_Error_Exception errors here,
-                ## to more reliably skip over problem patch files.
-                #except File_Loading_Error_Exception as ex:
-                #    Plugin_Log.Print(
-                #        ('Error: Skipping patch from "{}" due to exception: {}.'
-                #         ).format(ext_reader.extension_name, ex))
-                #    continue
+                # Note: if there is a problem loading the file, typically
+                # bad xml syntax, x4 will print an error and skip it;
+                # do the same here.
+
+                # Start by recording the extension name for reference
+                #  by the extension_checker utility.
+                self.ext_currently_patching = ext_reader.extension_name
+                
+                try:
+                    # Get the file, if any.
+                    if mode == 'substitution':
+                        # For substitutions, want to just search the 'subst_'
+                        # catalogs and not any loose files.
+                        ext_game_file = ext_reader.Read(
+                            virtual_path,
+                            include_loose_files = False,
+                            cat_prefix = 'subst_')
+                    else:
+                        # For patches, want to search the 'ext_' catalogs and
+                        # any loose files.
+                        ext_game_file = ext_reader.Read(
+                            virtual_path,
+                            include_loose_files = True,
+                            cat_prefix = 'ext_')
+                        
+                # Catch File_Loading_Error_Exception errors here,
+                # to more reliably skip over problem patch files.
+                # TODO: maybe general error catching.
+                except File_Loading_Error_Exception as ex:
+                    Plugin_Log.Print(
+                        ('Error: Skipping patch from "{}" due to exception: {}.'
+                         ).format(ext_reader.extension_name, ex))
+                    continue
                 
                 # Skip if no matching file was found.
                 # This is the normal case.
                 if ext_game_file == None:
-                    continue
-            
+                    continue            
 
                 # Call the merger.
                 # This may return the ext_game_file if a substitution
                 #  occurred, so update the game_file link.
-                # To avoid ext_currently_patching getting out of date on
-                #  exceptions (that might be caught at a higher level),
-                #  pack this into a try/except block.
-
-                # Start by recording the extension name for reference
-                #  by the extension_checker utility.
-                self.ext_currently_patching = ext_game_file.extension_name
-                try:
-                    game_file = game_file.Merge(ext_game_file)
-                except Exception as ex:
-                    raise ex
-                finally:
-                    # Clear out the patching note.
-                    self.ext_currently_patching = None
+                game_file = game_file.Merge(ext_game_file)
             
 
-        # Finish initializing the xml file once patching
-        # is complete.
+        # Clear out the patching note.
+        self.ext_currently_patching = None
+
+        # Finish initializing the xml file once patching is complete.
         game_file.Delayed_Init()
 
         return game_file

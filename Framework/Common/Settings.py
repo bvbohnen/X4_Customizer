@@ -19,7 +19,7 @@ class Settings_class:
     using direct writes to attributes.
 
     Settings may be updated individually, or as arguments of
-    a call to Settings, OR through a "settings.json" file in the
+    a call to Settings, or through a "settings.json" file in the
     top X4 Customizer folder (eg. where documentation resides).
     Any json settings will overwrite defaults, and be overwritten by
     settings in the control script. Changes made using the GUI
@@ -91,6 +91,8 @@ class Settings_class:
     * extension_name
       - String, name of the extension being generated.
       - Spaces will be replaced with underscores for the extension id.
+      - A lowercase version of this will be used for the output folder
+        name.
       - Defaults to 'X4_Customizer'
     * output_to_user_extensions
       - Bool, if True then the generated extension holding output files
@@ -533,7 +535,9 @@ class Settings_class:
         else:
             path = self.path_to_x4_folder
         # Offset to the extension.
-        path = path / 'extensions' / self.extension_name
+        # Use a lowercase name to improve portability, as it may
+        # be required for reliable operation on linux.
+        path = path / 'extensions' / (self.extension_name.lower())
         # Create the output folder if it does not exist.
         if not path.exists():
             # Add any needed parents as well.

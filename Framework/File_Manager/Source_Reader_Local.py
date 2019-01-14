@@ -401,13 +401,13 @@ class Location_Source_Reader:
         except Exception as ex:
             # Want to keep the original stack trace; can use 'from'
             # syntax to do so.
-            message = ('Error when parsing file {} from {}; original'
+            message = ('Error when parsing file "{}" from "{}"; original'
                        ' exception: {}.').format(virtual_path, source_path, ex)
             raise File_Loading_Error_Exception(message) from ex
         
         # Debug print the read location.
         if Settings.log_source_paths:
-            Plugin_Log.Print('Loaded file {} from {}'.format(
+            Plugin_Log.Print('Loaded file "{}" from "{}"'.format(
                 virtual_path, source_path))
         
         return game_file

@@ -1,4 +1,4 @@
-X4 Customizer 1.7.1
+X4 Customizer 1.8
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -184,6 +184,15 @@ Live_Editor Transforms:
 
 ***
 
+Text Transforms:
+
+  * Color_Text
+
+    Applies coloring to selected text nodes, for all versions of the text found in the current X4 files. Note: these colors will override any prior color in effect, and will return to standard text color at the end of the colored text node.
+
+
+***
+
 Wares Transforms:
 
 
@@ -236,7 +245,7 @@ Utilities:
 
   * Check_Extension
 
-    Checks an extension for xml diff patch errors and dependency errors. Performs two passes: scheduling this extension as early as possible (after its dependencies), and as late as possible (after all other extensions that can go before it). Problems are printed to the console. Returns True if no errors found, else False.
+    Checks an extension for xml diff patch errors and dependency errors. Problems are printed to the console. Returns True if no errors found, else False.
 
   * Write_To_Extension
 

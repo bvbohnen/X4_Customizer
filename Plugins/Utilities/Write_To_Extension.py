@@ -61,12 +61,15 @@ def Make_Extension_Content_XML():
     # Combine together.
     version = version_major + version_minor
 
+    # Set the ID based on replacing spaces.
+    this_id = Settings.extension_name.replace(' ','_')
+
     # Set up the root content node.
     content_node = ET.Element(
         'content',
         attrib = {
             # Swap spaces to _; unclear on if x4 accepts spaces.
-            'id'        : Settings.extension_name.replace(' ','_'),
+            'id'        : this_id,
             'name'      : Settings.extension_name,
             'author'    : 'X4_Customizer',
             'version'   : version,
@@ -105,20 +108,30 @@ def Make_Extension_Content_XML():
     # TODO: future work can track specific node edits, and set dependencies
     #  only where transform modified nodes might overlap with extension
     #  modified nodes.
-    source_extension_names = set()
+    # Dependencies use extension ids, so this will do name to id
+    #  translation.
+    # Note: multiple dependencies may share the same ID if those extensions
+    #  have conflicting ids; don't worry about that here.
+    source_extension_ids = set()
     for file_name, game_file in File_System.game_file_dict.items():
-        if game_file.modified:
-            source_extension_names |= set(game_file.source_extension_names)
+        if not game_file.modified:
+            continue
+        
+        for ext_name in game_file.source_extension_names:
+            # Translate extension names to ids.
+            ext_id = File_System.source_reader.extension_source_readers[
+                                ext_name].extension_summary.ext_id
+            source_extension_ids.add(ext_id)
 
     # Add the elements; keep alphabetical for easy reading.
-    for source_extension_name in sorted(source_extension_names):
+    for ext_id in sorted(source_extension_ids):
         # Omit self, just in case... shouldn't come up, but might.
-        if source_extension_name == Settings.extension_name.replace(' ','_'):
+        if ext_id == this_id:
             Print('Error: output extension appears in its own dependencies,'
                   ' indicating it transformed its own prior output.')
         else:
             content_node.append( ET.Element('dependency', attrib={
-                'id' : source_extension_name }))
+                'id' : ext_id }))
 
     # Record it.
     File_System.Add_File( Framework.File_Manager.XML_File(

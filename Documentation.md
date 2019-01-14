@@ -1,4 +1,4 @@
-X4 Customizer 1.7.1
+X4 Customizer 1.8
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -142,7 +142,7 @@ Example input file:
 
     This holds general settings and paths to control the customizer. Adjust these settings as needed prior to running the first plugin, using direct writes to attributes.
     
-    Settings may be updated individually, or as arguments of a call to Settings, OR through a "settings.json" file in the top X4 Customizer folder (eg. where documentation resides). Any json settings will overwrite defaults, and be overwritten by settings in the control script. Changes made using the GUI will be applied to the json settings.
+    Settings may be updated individually, or as arguments of a call to Settings, or through a "settings.json" file in the top X4 Customizer folder (eg. where documentation resides). Any json settings will overwrite defaults, and be overwritten by settings in the control script. Changes made using the GUI will be applied to the json settings.
     
     Examples:
     * In the control script (prefix paths with 'r' to support backslashes):
@@ -198,6 +198,7 @@ Example input file:
     * extension_name
       - String, name of the extension being generated.
       - Spaces will be replaced with underscores for the extension id.
+      - A lowercase version of this will be used for the output folder name.
       - Defaults to 'X4_Customizer'
     * output_to_user_extensions
       - Bool, if True then the generated extension holding output files will be under <path_to_user_folder/extensions>.
@@ -363,6 +364,28 @@ Live_Editor Transforms:
     * file_name
       - Optional, alternate name of a json file holding the Live_Editor generated patches file.
       - Default uses the name in Settings.
+        
+
+
+***
+
+Text Transforms:
+
+  * Color_Text
+
+    Applies coloring to selected text nodes, for all versions of the text found in the current X4 files. Note: these colors will override any prior color in effect, and will return to standard text color at the end of the colored text node.
+    
+    * page_t_colors
+      - One or more groups of (page id, text id, color code) to apply.
+    
+    Example:
+    
+        Color_Text(
+            (20005,1001,'B'),
+            (20005,3012,'C'),
+            (20005,6046,'Y'),
+            )
+    
         
 
 
@@ -535,11 +558,21 @@ Utilities:
 
   * Check_Extension
 
-    Checks an extension for xml diff patch errors and dependency errors. Performs two passes: scheduling this extension as early as possible (after its dependencies), and as late as possible (after all other extensions that can go before it). Problems are printed to the console. Returns True if no errors found, else False.
+    Checks an extension for xml diff patch errors and dependency errors. Problems are printed to the console. Returns True if no errors found, else False.
+    
+    Performs up to three passes that adjust extension loading order: in alphabetical folder order, as early as possible (after its dependencies), and as late as possible (after all other extensions that can go before it).
     
     * extension_name
-      - Name of the extension being checked.
+      - Name (folder) of the extension being checked.
+      - May be given in original or lower case.
       - This should match an enabled extension name findable on the normal search paths set in Settings.
+    * check_other_orderings
+      - Bool, if True then the 'earliest' and 'latest' loading orders will be checked, else only 'alphabetical' is checked.
+      - These are recommended to identify where dependencies should be added to extensions, to protect against other extensions changing their folder name and thereby their loading order.
+      - Defaults to False, to avoid printing errors that won't be present with the current extension order.
+    * return_log_messages
+      - Bool, if True then instead of the normal True/False return, this will instead return a list of logged lines that contain any error messages.
+      - Does not stop the normal message Prints.
         
 
   * Write_To_Extension
@@ -642,3 +675,7 @@ Change Log:
    - Added multi-object table views to the gui object editor tabs.
  * 1.7.1
    - Fixed an issue with lxml find/findall not properly handling xpaths using indexes after predicates.
+ * 1.8
+   - Tested with the top 100 Nexus mods to guide various debug and refinement.
+   - Added the Extensions tab to the gui, allowing viewing, enabling, disabling, and testing of extensions.
+   - Added the Color_Text transform.

@@ -36,6 +36,7 @@ class Extension_Summary:
         be considered dependent) and with enabling/disabling mods
         (only the last ID match can be flipped out of its default
         state).
+      - Is case sensitive in X4.
     * display_name
       - String, the name to display for the extension.
     * enabled
@@ -45,7 +46,7 @@ class Extension_Summary:
     * is_current_output
       - Bool, True if this extension is the customizer output.
     * soft_dependencies
-      - List of lowercase ids of other extensions this extension
+      - List of ids of other extensions this extension
         has a soft (non-error if missing) dependency on.
     * hard_dependencies
       - As above, but dependencies that will throw an error if missing.
@@ -97,8 +98,14 @@ class Extension_Summary:
         if not attr_str:
             return default
         # Handle simple integers and bool expressions.
-        # Do True detection; it is a bit easier than False.
-        return attr_str.lower() in ['true','1']
+        if attr_str.lower() in ['true','1']:
+            return True
+        elif attr_str.lower() in ['false','0']:
+            return False
+        else:
+            # As a backup, just return the default.
+            # TODO: maybe warn on this case.
+            return default
 
 
 def Find_Extensions():
@@ -120,9 +127,8 @@ def Find_Extensions():
         # (lxml parser needs a string path.)
         content_root = ET.parse(str(content_xml_path)).getroot()
         for extension_node in content_root.xpath('extension'):
-            # Lowercase to standardize.
-            name = extension_node.get('id').lower()
-            if extension_node.get('enabled') == 'true':
+            name = extension_node.get('id')
+            if extension_node.get('enabled') in ['true','1']:
                 user_extensions_enabled[name] = True
             else:
                 user_extensions_enabled[name] = False
@@ -175,7 +181,7 @@ def Find_Extensions():
                 
             # Collect all the names of dependencies.
             # Lowercase these to standardize name checks.
-            dependencies = [x.get('id').lower()
+            dependencies = [x.get('id')
                             for x in content_root.xpath('dependency')]
             # Collect optional dependencies.
             soft_dependencies = [x.get('id') 

@@ -263,7 +263,7 @@ class File_System_class:
         for path in virtual_paths:
             # If there is no file of this name, or it is empty,
             # skip it; there seem to be broken links in the
-            # index files.
+            # index files. TODO: maybe warn on broken links.
             game_file = self.Load_File(path, error_if_not_found = False)
             if game_file != None:
                 ret_list.append(game_file)
@@ -345,6 +345,7 @@ class File_System_class:
         
             # Store the contents in the game_file_dict if not in testing.
             if not test_load:
+                assert game_file.virtual_path == virtual_path
                 self.Add_File(game_file)
             else:
                 return None

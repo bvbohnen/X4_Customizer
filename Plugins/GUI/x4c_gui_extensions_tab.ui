@@ -13,9 +13,9 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_6">
+  <layout class="QGridLayout" name="gridLayout_4">
    <item row="0" column="0">
-    <layout class="QGridLayout" name="gridLayout_5">
+    <layout class="QGridLayout" name="gridLayout_2">
      <item row="1" column="0">
       <widget class="QSplitter" name="hsplitter">
        <property name="orientation">
@@ -23,6 +23,16 @@
        </property>
        <widget class="QWidget" name="layoutWidget">
         <layout class="QGridLayout" name="gridLayout_3">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <item row="1" column="0">
+          <widget class="QTreeView" name="w_model_view">
+           <property name="sortingEnabled">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="0">
           <widget class="QLabel" name="label_4">
            <property name="text">
@@ -33,23 +43,47 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QListView" name="w_listView"/>
-         </item>
         </layout>
        </widget>
        <widget class="QWidget" name="layoutWidget">
-        <layout class="QGridLayout" name="gridLayout_4">
-         <item row="1" column="0">
-          <widget class="QTextBrowser" name="w_text_details"/>
-         </item>
-         <item row="0" column="0">
+        <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0" columnminimumwidth="0,0,0">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <item row="0" column="1">
           <widget class="QLabel" name="label_3">
            <property name="text">
             <string>Details</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0" colspan="3">
+          <widget class="QTextBrowser" name="w_text_details">
+           <property name="openLinks">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QCheckBox" name="w_checkbox_word_wrap">
+           <property name="layoutDirection">
+            <enum>Qt::RightToLeft</enum>
+           </property>
+           <property name="text">
+            <string>Word Wrap</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -61,66 +95,111 @@
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QPushButton" name="w_button_enable_all">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Enable all extensions</string>
+         </property>
          <property name="text">
-          <string>Enable All</string>
+          <string>All On</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="w_button_disable_all">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Disable all extensions</string>
+         </property>
          <property name="text">
-          <string>Disable All</string>
+          <string>All Off</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="w_button_reset_defaults">
+        <widget class="QPushButton" name="w_button_use_defaults">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Set all extensions to their default enabled state</string>
+         </property>
          <property name="text">
-          <string>Reset Defaults</string>
+          <string>Defaults</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="w_hide_3">
+        <widget class="QPushButton" name="w_button_undo_changes">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Reset extensions to their GUI session starting state</string>
+         </property>
+         <property name="text">
+          <string>Reset</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="w_hide_3">
          <property name="enabled">
           <bool>false</bool>
          </property>
          <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Hide</string>
+          <string/>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="w_button_reload">
-         <property name="text">
-          <string>Reload</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="w_hide_1">
+        <widget class="QToolButton" name="w_hide_1">
          <property name="enabled">
           <bool>false</bool>
          </property>
          <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Hide</string>
+          <string/>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="w_button_test_selected">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Run tests on the selected extension if enabled</string>
+         </property>
          <property name="text">
           <string>Test Selected</string>
          </property>
@@ -128,6 +207,15 @@
        </item>
        <item>
         <widget class="QPushButton" name="w_button_test_all">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Run tests on all enabled extensions</string>
+         </property>
          <property name="text">
           <string>Test All</string>
          </property>
@@ -135,24 +223,49 @@
        </item>
        <item>
         <widget class="QPushButton" name="w_button_retest_errors">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Run tests on enabled extensions with errors or untested</string>
+         </property>
          <property name="text">
           <string>Retest Errors</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="w_hide_2">
+        <widget class="QToolButton" name="w_hide_2">
          <property name="enabled">
           <bool>false</bool>
          </property>
          <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Hide</string>
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="w_button_reload">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Reload the extension list from disk</string>
+         </property>
+         <property name="text">
+          <string>Reload</string>
          </property>
         </widget>
        </item>

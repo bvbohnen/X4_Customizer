@@ -12,28 +12,30 @@ from Plugins import *
 
 Settings(
     path_to_x4_folder = r'C:\Steam\SteamApps\common\X4 Foundations',
+    developer = 1,
     )
 
 # For all tests to run, mostly to tease out exceptions after
 # code changes.
 test_all = 0
 
-if 0:
+if 1:
     GUI.Start_GUI()
     
 # Test the extension checker.
-if 1 or test_all:
-    Check_Extension('AAI-Deployables')
 if 0 or test_all:
+    Check_Extension('test_mod')
+if 0:
     # Alternatively, check everything (may take longer).
     Check_All_Extensions()
 
 
-if 0:
+if 0 or test_all:
     Color_Text((20005,3012,'C'))
 
-if 0:
+if 0 or test_all:
     # Live editor tree builders.
+    edit_tree = Framework.Live_Editor.Get_Tree_View('components')
     edit_tree = Framework.Live_Editor.Get_Tree_View('weapons')
 
 
@@ -51,12 +53,12 @@ if 0:
 
 if 0 or test_all:
     Adjust_Mission_Rewards(0.5)
-    Write_To_Extension()
+    #Write_To_Extension()
 
 
 # Ware transforms and printout.
 if 0 or test_all:
-    Print_Ware_Stats('ware_stats_premod')
+    #Print_Ware_Stats('ware_stats_premod')
     Adjust_Ware_Price_Spread(
         ('id        energycells'       , 2  ),
         ('group     shiptech'          , 0.8),
@@ -64,27 +66,13 @@ if 0 or test_all:
         ('tags      crafting'          , 0.2),
         ('*'                           , 0.1) )
     Adjust_Ware_Prices(
-        ('container inventory'         , 0.5) )    
-    Print_Ware_Stats('ware_stats_postmod')
+        ('container inventory'         , 0.5) )
+    #Print_Ware_Stats('ware_stats_postmod')
 
 
 # Weapon transforms and printout.
 if 0 or test_all:
-    Print_Weapon_Stats('weapon_stats_premod')
-    #Adjust_Weapon_Damage(1.2)
-    #Adjust_Weapon_Damage(
-    #    ('name weapon_tel_l_beam_01_mk1', 10),
-    #    ('tags large standard turret'   , 5),
-    #    ('tags medium missile weapon'   , 3),
-    #    ('class bomblauncher'           , 20),
-    #    ('*'                            , 1.2) )
-    #Adjust_Weapon_Range(
-    #    ('name weapon_tel_l_beam_01_mk1', 10),
-    #    ('tags large standard turret'   , 5),
-    #    ('tags medium missile weapon'   , 3),
-    #    ('class bomblauncher'           , 20),
-    #    ('*'                            , 1.2) )
-    
+    #Print_Weapon_Stats('weapon_stats_premod')    
     Adjust_Weapon_Damage(
         ('tags small standard weapon'   , 2),
         ('*'                            , 1.2),
@@ -101,27 +89,11 @@ if 0 or test_all:
         ('tags small standard weapon'   , 2),
         ('tags missile'                 , 2),
         )
-    Print_Weapon_Stats('weapon_stats_postmod')
+    #Print_Weapon_Stats('weapon_stats_postmod')
     
 
 # Testing ways to call Jobs.
-if 0 or test_all:
-    #Adjust_Job_Count(
-    #    ('id'     ,'masstraffic*'      , 0.5),
-    #    ('tags'   ,'military destroyer', 2  ),
-    #    ('tags'   ,'miner'             , 1.5),
-    #    ('size'   ,'s'                 , 1.5),
-    #    ('faction','argon'             , 1.2),
-    #    ('id'     ,'*'                 , 1.1) )
-    #
-    #Adjust_Job_Count(
-    #    ('id      : masstraffic*'      , 0.5),
-    #    ('tags    : military destroyer', 2  ),
-    #    ('tags    : miner'             , 1.5),
-    #    ('size    : s'                 , 1.5),
-    #    ('faction : argon'             , 1.2),
-    #    ('*'                           , 1.1) )
-    
+if 0 or test_all:    
     Adjust_Job_Count(
         ('id        masstraffic*'      , 0.5),
         ('tags      military destroyer', 2  ),
@@ -129,14 +101,6 @@ if 0 or test_all:
         ('size      s'                 , 1.5),
         ('faction   argon'             , 1.2),
         ('*'                           , 1.1) )
-    
-    #Adjust_Job_Count(
-    #    ('id        masstraffic*'      , 0.5),
-    #    ('tags      military destroyer', 2  ),
-    #    ('tags      miner'             , 1.5),
-    #    ('size      s'                 , 1.5),
-    #    ('faction   argon'             , 1.2),
-    #                                     1.1 )
 
 
 # Simple cat unpack, allowing errors.

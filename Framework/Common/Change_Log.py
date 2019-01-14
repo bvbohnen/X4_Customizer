@@ -108,6 +108,12 @@ Change Log:
  * 1.7.1
    - Fixed an issue with lxml find/findall not properly handling xpaths
      using indexes after predicates.
+ * 1.8
+   - Tested with the top 100 Nexus mods to guide various debug and
+     refinement.
+   - Added the Extensions tab to the gui, allowing viewing, enabling,
+     disabling, and testing of extensions.
+   - Added the Color_Text transform.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.
