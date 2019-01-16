@@ -1,4 +1,4 @@
-X4 Customizer 1.8.1
+X4 Customizer 1.9
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -305,6 +305,15 @@ Analyses:
 
 Director Transforms:
 
+  * Adjust_Mission_Reward_Mod_Chance
+
+    Adjusts generic mission chance to reward a mod instead of credits. The vanilla chance is 2% for a mod, 98% for credits.
+    
+    * mod_chance
+      - Int, the new percent chance of rewarding a mod.
+      - Should be between 0 and 100.
+        
+
   * Adjust_Mission_Rewards
 
     Adjusts generic mission credit and notoriety rewards by a flat multiplier.
@@ -336,7 +345,7 @@ Jobs Transforms:
         - 'id'      : Name of the job entry; supports wildcards.
         - 'faction' : The name of the faction.
         - 'tags'    : One or more tags, space separated.
-        - 'size'    : The ship size suffix, 's','m','l', or 'xl'.
+        - 'size'    : The ship size suffix, 'xs','s','m','l', or 'xl'.
         - '*'       : Matches all jobs; takes no value term.
     
     Examples:
@@ -364,6 +373,61 @@ Live_Editor Transforms:
     * file_name
       - Optional, alternate name of a json file holding the Live_Editor generated patches file.
       - Default uses the name in Settings.
+        
+
+
+***
+
+Ships Transforms:
+
+  * Common documentation
+
+    Ship transforms will commonly use a group of matching rules to determine which ships get modified, and by how much.   
+    
+    * Matching rules:
+      - These are tuples pairing a matching rule (string) with transform defined args, eg. ("key  value", arg0, arg1, ...).
+      - The "key" specifies the xml field to look up, which will be checked for a match with "value".
+      - If a target object matches multiple rules, the first match is used.
+      - Supported keys for ships:
+        - 'name'    : Internal name of the ship macro; supports wildcards.
+        - 'purpose' : The general role of the ship. List of purposes:
+          - mine
+          - trade
+          - build
+          - fight
+        - 'type'    : The ship type. List of types:
+          - courier, resupplier, transporter, freighter, miner, largeminer, builder
+          - scout, interceptor, fighter, heavyfighter
+          - bomber, corvette, frigate, scavenger
+          - destroyer, carrier, battleship
+          - xsdrone, smalldrone, police, personalvehicle, escapepod, lasertower
+        - 'class'   : The class of ship. List of classes:
+          - 'ship_xs'
+          - 'ship_s'
+          - 'ship_m'
+          - 'ship_l'
+          - 'ship_xl'
+          - 'spacesuit'
+        - '*'       : Matches all ships; takes no value term.
+    
+    Examples:
+    
+        Adjust_Ship_Speed(1.5)
+        Adjust_Ship_Speed(
+            ('name ship_xen_xl_carrier_01_a*', 1.2),
+            ('class ship_s'                  , 2.0),
+            ('type corvette'                 , 1.5),
+            ('purpose fight'                 , 1.2),
+            ('*'                             , 1.1) )
+    
+        
+
+  * Adjust_Ship_Speed
+
+    Adjusts the speed and acceleration of ships, in each direction.
+    
+    * match_rule_multipliers:
+      - Series of matching rules paired with the multipliers to use.
         
 
 
@@ -681,3 +745,7 @@ Change Log:
    - Added the Color_Text transform.
  * 1.8.1
    - Fixed a couple crash bugs when script or configuration tabs are hidden.
+ * 1.9
+   - Added Adjust_Ship_Speed.
+   - Added Adjust_Mission_Reward_Mod_Chance.
+   - Fixed crash bug when testing an extension with none selected.

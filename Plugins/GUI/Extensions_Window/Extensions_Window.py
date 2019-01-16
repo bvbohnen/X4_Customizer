@@ -563,21 +563,13 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
 
     def Item_Is_Enabled(self, item):
         '''
-        Returns True if the item is enabled (checkbox checked)
-        else False.
+        Returns True if the item is enabled (checkbox checked) else False.
+        If the item is None, returns False.
         '''
+        if item == None:
+            return False
         return bool(item.checkState())
 
-    
-        self.w_button_enable_all .clicked.connect(
-            lambda checked, mode = 'enable_all': self.Action_Change_Enable_States(mode))
-        self.w_button_disable_all.clicked.connect(
-            lambda checked, mode = 'disable_all': self.Action_Change_Enable_States(mode))
-        self.w_button_use_defaults.clicked.connect(
-            lambda checked, mode = 'use_defaults': self.Action_Change_Enable_States(mode))
-        self.w_button_undo_changes.clicked.connect(
-            lambda checked, mode = 'undo_changes': self.Action_Change_Enable_States(mode))
-        
 
     def Action_Change_Enable_States(self, mode):
         '''
@@ -689,10 +681,10 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         extension_name_list = []
         if mode == 'selected':
             item = self.selected_item
-            # Ignore if not enabled.
+            # Ignore if no item selected, or item is not enabled.
             # (This will end up passing through an empty test list,
             #  which is fine since it cleans up the button states and such.)
-            if self.Item_Is_Enabled(item):
+            if item != None and self.Item_Is_Enabled(item):
                 extension_name_list.append(item.ext_summary.extension_name)
 
         # Handle 'all' and 'errors' in a loop.

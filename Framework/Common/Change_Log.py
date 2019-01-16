@@ -116,6 +116,10 @@ Change Log:
    - Added the Color_Text transform.
  * 1.8.1
    - Fixed a couple crash bugs when script or configuration tabs are hidden.
+ * 1.9
+   - Added Adjust_Ship_Speed.
+   - Added Adjust_Mission_Reward_Mod_Chance.
+   - Fixed crash bug when testing an extension with none selected.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

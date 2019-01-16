@@ -1,4 +1,4 @@
-X4 Customizer 1.8.1
+X4 Customizer 1.9
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -159,6 +159,10 @@ Analyses:
 
 Director Transforms:
 
+  * Adjust_Mission_Reward_Mod_Chance
+
+    Adjusts generic mission chance to reward a mod instead of credits. The vanilla chance is 2% for a mod, 98% for credits.
+
   * Adjust_Mission_Rewards
 
     Adjusts generic mission credit and notoriety rewards by a flat multiplier.
@@ -180,6 +184,16 @@ Live_Editor Transforms:
   * Apply_Live_Editor_Patches
 
     This will apply all patches created by hand through the live editor in the GUI. This should be called no more than once per script, and currently should be called before any other transforms which might read the edited values. Pending support for running some transforms prior to hand edits.
+
+
+***
+
+Ships Transforms:
+
+
+  * Adjust_Ship_Speed
+
+    Adjusts the speed and acceleration of ships, in each direction.
 
 
 ***
