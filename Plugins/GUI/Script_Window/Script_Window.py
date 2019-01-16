@@ -290,6 +290,8 @@ class Script_Window(Tab_Page_Widget, generated_class):
         #  by a plugin for xml application.
         Live_Editor.Save_Patches()
         self.window.Print('Saved Live Editor patches')
+        # Send a signal so Config is updated properly.
+        self.window.Send_Signal('script_starting')
         return
 
     

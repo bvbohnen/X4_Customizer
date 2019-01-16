@@ -68,6 +68,7 @@ class Widget_Script(QtWidgets.QPlainTextEdit):
         '''
         Detect text changes, and maybe do some edits to clean them up.
         '''
+        self.modified = True
 
         # After doing some annoying digging into the syntax highlighter
         # source code, it looks like it wants to hook this signal

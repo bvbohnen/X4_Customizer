@@ -50,7 +50,11 @@ class Settings_Window(Tab_Page_Widget, generated_class):
         '''
         Respond to signal events.
         '''
-        if 'script_completed' in flags:
+        # Note: at script start, settings can be out of sync
+        # if Run_Script is pressed while a text box is
+        # being edited. Re-store settings when a script starts
+        # to be safe.
+        if 'script_completed' in flags or 'script_starting' in flags:
             self.widget_settings.Store_Settings()
         if 'save' in flags or 'save_as' in flags:
             self.Save()
