@@ -291,6 +291,13 @@ class Widget_Settings(QtWidgets.QGroupBox):
         Save the current settings to a json file, and update the
         Settings object.
         '''
+        # Make sure settings are up to date.
+        # There was a corner case where a text box was being edited
+        # when the gui window is closed, that would miss the settings
+        # update while having the next text show up here; this call
+        # clears up that problem.
+        self.Store_Settings()
+
         # Gather which fields need saving.
         fields_to_save = []
         for field, widget in self.field_widget_dict.items():
@@ -323,6 +330,12 @@ class Widget_Settings(QtWidgets.QGroupBox):
     def Handle_Widget_Modification_Signals(self, field):
         '''
         Handle events when widgets are modified.
+        TODO: stop this from triggering every time the window is tabbed
+        away from.
+        TODO: get this to trigger if a text field is being edited
+        when the gui is closed (causes an oddity in this case
+        with the text() of the widget being changed, but the settings
+        not having been updated).
         '''
         self.modified = True
 

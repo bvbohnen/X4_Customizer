@@ -359,7 +359,7 @@ class Settings_class:
                 return fields_updated
 
             # Do some replacements of strings for normal types;
-            # unfortunately json.load doesn't do this automatically.
+            #  unfortunately json.load doesn't do this automatically.
             replacements_dict = {
                 'true' : True,
                 'True' : True,
@@ -367,12 +367,25 @@ class Settings_class:
                 'false': False,
                 'False': False,
                 '0'    : False,
-                'none' : None,
                 }
+            
+            # Note: this is unsafe if a path is given that matches one
+            #  of these strings, so only apply these replacements for
+            #  select fields. This will be based on the defaults, and
+            #  which are bools.
+            defaults = self.Get_Defaults()
 
             for key, value in json_dict.items():
-                # Convert to python bools.
-                value = replacements_dict.get(value, value)
+
+                if isinstance(defaults[key], bool):
+                    # Convert to python bools.
+                    value = replacements_dict.get(value, value)
+                elif defaults[key] == None:
+                    # Convert none to None for paths.
+                    if value == 'none':
+                        value = None
+                # Paths and string names will be left alone.
+
                 if hasattr(self, key):
                     # This should always be a bool or a string.
                     setattr(self, key, value)
@@ -444,7 +457,8 @@ class Settings_class:
         '''
         Checks the current paths for errors (not existing, etc.), converts
         them to Path objects, creates the output extension folder, etc.
-        Raises AssertionError on any critical problem.
+        Raises AssertionError on any critical problem, and may raise
+        other exceptions on misc problems.
         Sets _init_complete if no errors are found.
         '''
         # Limit to running just once, though this might get called
@@ -452,6 +466,10 @@ class Settings_class:
         # all error checks are passed.
         if self._init_complete:
             return
+
+        # Note: some problems can occur if the user input paths are
+        # weird (one guy tried a newline). This code may trigger
+        # other exceptions than those listed.
 
         # Start with conversions to full Paths, since the user
         # may have written these with strings.
@@ -489,6 +507,9 @@ class Settings_class:
             else:
                 # Hard error.
                 raise AssertionError(message)
+
+        # Check that file names are given, and not blank.
+        # TODO
             
         # If here, can continue with source file processing.
         self._init_complete = True
@@ -505,7 +526,7 @@ class Settings_class:
         # be good to go.
         try:
             self.Delayed_Init()
-        except AssertionError:
+        except Exception:
             # A problem was encountered.
             return False
         return True

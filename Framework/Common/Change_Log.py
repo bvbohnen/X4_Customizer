@@ -119,7 +119,7 @@ Change Log:
  * 1.9
    - Added Adjust_Ship_Speed.
    - Added Adjust_Mission_Reward_Mod_Chance.
-   - Fixed crash bug when testing an extension with none selected.
+   - Fixed a couple crash bugs.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.
