@@ -3,7 +3,9 @@ Transforms to jobs.
 '''
 from fnmatch import fnmatch
 from Framework import Transform_Wrapper, Load_File
-from .Support import *
+from .Support import Standardize_Match_Rules
+from .Support import XML_Multiply_Int_Attribute
+from .Support import XML_Multiply_Float_Attribute
 
 @Transform_Wrapper()
 def Adjust_Job_Count(
@@ -27,7 +29,7 @@ def Adjust_Job_Count(
         - 'id'      : Name of the job entry; supports wildcards.
         - 'faction' : The name of the faction.
         - 'tags'    : One or more tags, space separated.
-        - 'size'    : The ship size suffix, 's','m','l', or 'xl'.
+        - 'size'    : The ship size suffix, 'xs','s','m','l', or 'xl'.
         - '*'       : Matches all jobs; takes no value term.
 
     Examples:

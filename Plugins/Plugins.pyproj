@@ -161,6 +161,9 @@
     <Compile Include="Transforms\Director.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Transforms\Ships.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Transforms\Support.py">
       <SubType>Code</SubType>
     </Compile>

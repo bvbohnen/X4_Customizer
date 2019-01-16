@@ -2,7 +2,7 @@
 Transforms to director scripts.
 '''
 from fnmatch import fnmatch
-from Framework import Transform_Wrapper, Load_File
+from Framework import Transform_Wrapper, Load_File, File_System
 from .Support import *
 
 
@@ -80,4 +80,66 @@ def Adjust_Mission_Rewards(
             x = notoriety_node.attrib
 
     lib_reward_file.Update_Root(xml_root)
+    return
+
+
+
+@Transform_Wrapper()
+def Adjust_Mission_Reward_Mod_Chance(
+        new_chance = 2,
+    ):
+    '''
+    Adjusts generic mission chance to reward a mod instead of credits.
+    The vanilla chance is 2% for a mod, 98% for credits.
+
+    * mod_chance
+      - Int, the new percent chance of rewarding a mod.
+      - Should be between 0 and 100.
+    '''
+    '''
+    Many generic missions repeat this bit of code:
+
+    <do_any>
+        <do_if value="not $RewardCr" weight="98">
+            ...
+        </do_if>
+        <do_if value="not $RewardObj" weight="2">
+            ...
+        </do_if>
+    </do_any>
+
+    Can hunt down the appropriate nodes to make the edit.
+    '''
+    # Validate the mod_chance range.
+    mod_chance = int(new_chance)
+    if mod_chance < 0:
+        mod_chance = 0
+    elif mod_chance > 100:
+        mod_chance = 100
+        
+    # Want the various generic mission scripts.
+    # These all are prefixed with GM_
+    game_files = File_System.Load_Files('md/GM_*')
+       
+    for game_file in game_files:
+        xml_root = game_file.Get_Root()
+
+        # Find the parent reward  node.
+        reward_nodes = xml_root.xpath('//do_if[@value="$GenerateReward"]')
+        if len(reward_nodes) != 1:
+            continue
+
+        # Pick out the two nodes of interest.
+        high_nodes = reward_nodes[0].xpath('do_any/do_if[@value="not $RewardCr"][@weight="98"]')
+        low_nodes  = reward_nodes[0].xpath('do_any/do_if[@value="not $RewardObj"][@weight="2"]')
+
+        # 1 of each should have been found.
+        if len(high_nodes) != 1 or len(low_nodes) != 1:
+            continue
+
+        # Make the edits.
+        high_nodes[0].set('weight', str(100-mod_chance))
+        low_nodes[0] .set('weight', str(mod_chance))
+
+        game_file.Update_Root(xml_root)
     return

@@ -34,7 +34,9 @@ Notes on reload times:
 '''
 from fnmatch import fnmatch
 from Framework import Transform_Wrapper, Load_File, File_System
-from .Support import *
+from .Support import Standardize_Match_Rules
+from .Support import XML_Multiply_Int_Attribute
+from .Support import XML_Multiply_Float_Attribute
 
 doc_matching_rules = '''
     Weapon transforms will commonly use a group of matching rules
@@ -412,22 +414,7 @@ class Weapon:
         assert ',' not in tags_str
         # Remove any blanks due to excess spaces.
         return [x for x in tags_str.split(' ') if x]
-
-        ## Note: this connection doesn't have a standard name, but can
-        ## be identified by a "component" term in the tags.
-        #root = self.component_file.Get_Root_Readonly()
-        #for connection in root.findall('.//connection[@tags]'):
-        #    if 'component' in connection.get('tags'):
-        #        tags_str = connection.get('tags')
-        #        # These appear to always be space separated.
-        #        # Some tag lists have brackets and commas; verify that
-        #        #  isn't the case here.
-        #        assert '[' not in tags_str
-        #        assert ',' not in tags_str
-        #        # Remove any blanks due to excess spaces.
-        #        return [x for x in tags_str.split(' ') if x]
-        #return []
-
+    
 
 def Get_All_Weapons():
     '''

@@ -42,7 +42,7 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
     * window
       - The parent main window holding this tab.
     * list_model
-      - QStandardModel to run the w_list_extensions.
+      - QStandardModel to run the w_model_view.
     * selected_item
       - QStandardModelItem that is currently selected.
     * extension_item_dict
@@ -99,6 +99,7 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         # Hide the invisible buttons, but set them to still take space.
         # These are used to center and shrink the active buttons.
         # See comments in File_Viewer_Window on this.
+        # TODO: consider switching to spacers to handle this.
         for widget in [self.w_hide_1, self.w_hide_2, self.w_hide_3]:
             widget.setVisible(False)
             sizepolicy = widget.sizePolicy()
@@ -255,9 +256,6 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         self.w_button_retest_errors.setEnabled(False)
         
         # Queue up the thread to access the file system.
-        # TODO: set this to return disabled extensions as well.
-        # TODO: queue a local function which will gather these
-        # names as well as details.
         self.Queue_Thread(File_Manager.Extension_Finder.Find_Extensions,
                           short_run = True,
                           callback_function = self._Refresh_pt2)
@@ -532,7 +530,13 @@ class Extensions_Window(Tab_Page_Widget, generated_class):
         # TODO: set up source readers and get file virtual paths.
         # TODO: append any check results with error messages.
 
+        # Preserve approximate scrollbar position around the
+        # text change. If the position goes out of range, setValue
+        # should lock it in range.
+        scroll_pos = self.w_text_details.verticalScrollBar().value()
         self.w_text_details.setText('\n'.join(detail_lines))
+        self.w_text_details.verticalScrollBar().setValue(scroll_pos)
+
         return
 
 

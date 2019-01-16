@@ -19,7 +19,7 @@ Settings(
 # code changes.
 test_all = 0
 
-if 1:
+if 0:
     GUI.Start_GUI()
     
 # Test the extension checker.
@@ -38,6 +38,17 @@ if 0 or test_all:
     edit_tree = Framework.Live_Editor.Get_Tree_View('components')
     edit_tree = Framework.Live_Editor.Get_Tree_View('weapons')
 
+
+if 1 or test_all:
+    Adjust_Mission_Reward_Mod_Chance(10)
+
+if 0 or test_all:
+    Adjust_Ship_Speed(
+        ('name ship_xen_xl_carrier_01_a*', 1.2),
+        ('class ship_s'                  , 2.0),
+        ('type corvette'                 , 1.5),
+        ('purpose fight'                 , 1.2),
+        ('*'                             , 1.1) )
 
 # Test the gui live editor, doing a transform before and after
 # the patch application. Transform before should show up in the

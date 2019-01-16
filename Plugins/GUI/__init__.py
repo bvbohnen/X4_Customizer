@@ -16,7 +16,7 @@ except Exception:
 
 def Start_GUI():
     '''
-    Start up the GUI using PyQt and loading the gui.ui file.
+    Start up the GUI using PyQt and loading the .ui files.
     If the pyqt import failed, this will return early.
     '''
     if not _pyqt_found:

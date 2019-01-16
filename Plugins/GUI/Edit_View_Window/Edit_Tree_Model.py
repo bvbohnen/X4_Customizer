@@ -36,7 +36,7 @@ class Edit_Tree_Model(QStandardItemModel):
         self.qt_view = qt_view
         self.window = window
         self.item_dict   = {}
-        self.branch_dict = {}        
+        self.branch_dict = {}
         return
     
 
