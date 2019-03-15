@@ -234,6 +234,9 @@ class File_Viewer_Window(Tab_Page_Widget, generated_class):
         version_lines_dict = {}
         for version in versions:
             xml_root = game_file.Get_Root_Readonly(version = version)
+            # TODO: this has a bit of an oddity in that newlines buried
+            # in attributes do not get preserved as unicode newlines;
+            # Perhaps print as utf-8, then convert that to unicode.
             text = XML_Diff.Print(xml_root, encoding = 'unicode')
 
             # Fill in the line numbers; they are needed before

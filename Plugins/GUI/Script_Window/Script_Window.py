@@ -1,6 +1,6 @@
 
 from pathlib import Path
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.uic import loadUiType
  
@@ -42,12 +42,29 @@ class Script_Window(Tab_Page_Widget, generated_class):
       - Path for the currently open script.
     * last_dialog_path
       - Path last used in the Load or Save dialog boxes, to be reused.
+    * last_file_modified_time
+      - The script file modified time, as reported by the OS, at the
+        most recent file load or save event.
+      - Used to detect external changes.
     '''
     def __init__(self, parent, window):
         super().__init__(parent, window)
         
         self.current_script_path = None
         self.last_dialog_path = home_path / 'Scripts'
+        self.last_file_modified_time = None
+        
+        # Set up the external modification check timer.
+        self.external_mod_check_timer = QtCore.QTimer(self)
+        # Will attach directly to the reload check function.
+        self.external_mod_check_timer.timeout.connect(
+            self.Reload_If_Extenally_Modified)
+        
+        # Can start the timer now; the function will return early if
+        #  the initial file load hasn't been performed.
+        # Check rate doesn't have to be very high.
+        # Try every 10 seconds for now.
+        self.external_mod_check_timer.start(10000)
 
         # Hook up to some main window actions.        
         window.action_New        .triggered.connect( self.Action_New_Script    )
@@ -67,6 +84,31 @@ class Script_Window(Tab_Page_Widget, generated_class):
         self.Action_New_Script()
         return
        
+
+    def Reload_If_Extenally_Modified(self):
+        '''
+        Checks if the script file has been modified externally, and
+        reloads it if so. Does nothing if current_script_path or
+        last_file_modified_time are not set yet.
+        Any local modifications will be ignored and lost.
+        '''
+        if self.current_script_path == None:
+            return
+        if self.last_file_modified_time == None:
+            return
+
+        # Get the latest modified time.
+        current_mod_time = self.current_script_path.stat().st_mtime_ns
+
+        # Do nothing if times match.
+        if current_mod_time == self.last_file_modified_time:
+            return
+
+        # Time mismatch, so reload.
+        self.window.Print('External script modification detected.')
+        self.Load_Script_File(self.current_script_path)
+        return
+
 
     def Check_If_Save_Needed(self):
         '''
@@ -136,7 +178,7 @@ class Script_Window(Tab_Page_Widget, generated_class):
         # Convert to a Path.
         file_selected = Path(file_selected)
         # Update the last_dialog_path.
-        last_dialog_path = file_selected.parent
+        self.last_dialog_path = file_selected.parent
                 
         # Continue using Load_Project_From_File.
         # TODO: maybe combine this with Load_Project_From_File if it is not
@@ -147,7 +189,7 @@ class Script_Window(Tab_Page_Widget, generated_class):
 
     def Load_Script_File(self, file_path):
         '''
-        Load in the text from a script file, and sent to the
+        Load in the text from a script file, and send it to the
         script widget.
         '''
         try:
@@ -155,9 +197,31 @@ class Script_Window(Tab_Page_Widget, generated_class):
         except Exception:
             self.window.Print('Failed to load script from "{}"'.format(file_path))
             return
-
+        
+        # Record the modified time on the file.
+        self.last_file_modified_time = file_path.stat().st_mtime_ns
+        
+        # Print the text to the window.        
+        # This will aim to preserve the scroll position if the file_path
+        # matches the current_script_path (eg. just reloading the
+        # current file).
+        scroll_pos = self.widget_script.verticalScrollBar().value()
         self.widget_script.setPlainText(text)
-        self.current_script_path = file_path
+
+        if self.current_script_path == file_path:
+            # TODO: for some reason this scrolls down by a couple lines
+            #  each time.  Why?  In testing, appears to be a Qt bug,
+            #  since setValue(29) followed by value() returns 32, so
+            #  some internal funkiness is going on.
+            #  This bug may only happen when word wrapped; as a workaround,
+            #  disable wrapping for now.
+            self.widget_script.verticalScrollBar().setValue(scroll_pos)
+            scroll_pos3 = self.widget_script.verticalScrollBar().value()
+        else:
+            # Record the new file path.
+            self.current_script_path = file_path
+
+        # Clear any modified flag.
         self.widget_script.Clear_Modified()
         self.window.Print('Loaded script from "{}"'.format(file_path))
         # TODO: maybe update window name.
@@ -246,7 +310,7 @@ class Script_Window(Tab_Page_Widget, generated_class):
         # Convert to a Path.
         file_selected = Path(file_selected)
         # Update the last_dialog_path.
-        last_dialog_path = file_selected.parent
+        self.last_dialog_path = file_selected.parent
 
         # Pass the file name on to the general save function.
         save_success = self.Save_Script_To_File(file_selected)
@@ -265,6 +329,9 @@ class Script_Window(Tab_Page_Widget, generated_class):
         text = self.widget_script.toPlainText()
         # Write it.
         file_path.write_text(text)
+        
+        # Record the modified time on the file.
+        self.last_file_modified_time = file_path.stat().st_mtime_ns
 
         # Clear the modified flag.
         self.widget_script.Clear_Modified()

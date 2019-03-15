@@ -77,7 +77,6 @@ def Adjust_Mission_Rewards(
             op = notoriety_node.get(attrib)
             op = op.replace('$Value', '($Value * {})'.format(mult_str))
             notoriety_node.set(attrib, op)
-            x = notoriety_node.attrib
 
     lib_reward_file.Update_Root(xml_root)
     return
@@ -139,7 +138,7 @@ def Adjust_Mission_Reward_Mod_Chance(
 
         # Make the edits.
         high_nodes[0].set('weight', str(100-mod_chance))
-        low_nodes[0] .set('weight', str(mod_chance))
+        low_nodes [0].set('weight', str(mod_chance))
 
         game_file.Update_Root(xml_root)
     return

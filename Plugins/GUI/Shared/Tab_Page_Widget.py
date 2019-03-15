@@ -56,6 +56,40 @@ class Tab_Page_Widget(QtWidgets.QWidget):
             
         return
 
+    
+    def _Exception_Catch_Wrapper(func):
+        '''
+        Small wrapper that will catch any exceptions thrown by
+        the wrapped function, print them to the main window, and
+        otherwise let the gui keep running.
+        Note: if an exception occurs, the wrapped function will return
+        None, which may trigger further exceptions upstream.
+        Note: for functions called from qt, this requires the function
+        capture all qt fed arguments (instead of using truncated
+        arg lists and relying on qt to skip unused args).
+        '''
+        '''
+        Note: this cannot be set as a staticmethod since that
+        delays its creation until after it is needed;
+        also, it does not take 'self' on its own, just the
+        wrapped func.
+        '''
+        # Use functools wraps to preserve the docstring and such.
+        @functools.wraps(func)
+        # All wrapped functions will have self.
+        def func_wrapper(self, *args, **kwargs):
+            try:
+                # Run the func as normal.
+                return func(self, *args, **kwargs)
+            except Exception as ex:
+                self.window.Print(('Exception encountered when calling {};\n'
+                                  ' exception:\n{}'
+                                  ).format(func_wrapper.__name__,
+                                           traceback.format_exc()))
+            # Return None; don't worry about this triggering more errors.
+            return
+        return func_wrapper
+
 
     def Soft_Refresh(self):
         '''
@@ -135,6 +169,9 @@ class Tab_Page_Widget(QtWidgets.QWidget):
           - Bool, if True then the function is considered to have a short
             run time, and it will be run in the main thread instead of
             a subthread to reduce call overhead.
+        * print_args
+          - Bool, if function args should be printed to the output window.
+          - Defaults True.
         '''
         # Do some cleanup on older requests, removing those that
         # may have finished.

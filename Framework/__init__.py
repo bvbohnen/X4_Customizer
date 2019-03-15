@@ -141,6 +141,39 @@ Writing custom edit code:
     inclusion in later Customizer releases to share with other users.
 
 '''
+'''
+todo:
+- Support user files in the output extension.
+  This needs a lot of thought into how to join files together, eg. user
+  diffs need to be included with generated diffs, but this can get
+  complicated if another extension run after the user diffs.
+  Perhaps make a rule that such custom files cannot have external
+  dependencies? Though that isn't preferably.
+  Well, think about it.
+- Fix bug: changing output extension requires gui restart to work.
+- Fix xml formatting of quotation marks in attributes, which show
+  up as &quot;
+- Suppress some gui exceptions when paths are not set up correctly,
+  tabs shouldn't try to update with bad Settings.
+- Set the output extension to be included for general gui displays,
+  and only disabled during a script run (along with its VFS reset).
+  Would this be in parallel with the Settings option, or just
+  reuse the Settings flag?
+- Change tray icon to something more visible on black backgrounds.
+- Save out versions of xml in vanilla/diff patched/edited state for
+  external viewing (maybe export from the VFS).
+- Dark theme, maybe https://stackoverflow.com/questions/15035767/is-the-qt-5-dark-fusion-theme-available-for-windows
+  For cutstom colors, maybe do a custom light/dark flip operation,
+  that takes the average rgb, and scales by (1 - avg/255).
+- Set MD/AI script loading to not support patching/merging; apparently
+  these just look for the first file found (or last subst).
+- Button on edit tabs to export csv/html directly.
+- csv generated files get messed up by comments in original fields, common
+  for text page/ids. Need to filter out original commas first.
+  (Donish, need to test)
+- When packing cats, add select top level files that are also present in
+  the main game cats, so that unpack-repack of main files captures everything.
+'''
 # TODO: maybe add in examples of usage (perhaps tagged to put them
 #  in the full documenation and not the readme).
 

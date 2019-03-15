@@ -17,7 +17,7 @@ from ..Common import Plugin_Log, Print
 # TODO: maybe expand on this and look at everything.
 valid_virtual_path_prefixes =  (
         'aiscripts/','assets/',
-        'cutscenes/','extensions/'
+        'cutscenes/','extensions/',
         'index/',
         'libraries/','maps/',
         'md/','music/',
@@ -166,8 +166,8 @@ class Location_Source_Reader:
 
         # Dynamically find all files in the source folder.
         # The glob pattern means: 
-        #  '**' (recursive search)
-        #  '/*' (anything in that folder, including subfolders)
+        #  '**' (recursive search of directories, starting from current)
+        #  '/*' (all files or subdirs in that dir)
         # Note: to limit overhead from looking at invalid paths, the
         # outer loop would ideally be limited to the valid path prefixes,
         # though glob is case sensitive so this might not work great.

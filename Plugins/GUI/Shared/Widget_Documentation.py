@@ -17,7 +17,7 @@ class Widget_Documentation(QTextBrowser):
         # -Removed; this requires line wrap, and ends up looking
         #  really bad when markdown indents are lost.
         #text = Merge_Lines(text)
-        # If not mergine lines, still want to remove excess indentation.
+        # If not merging lines, still want to remove excess indentation.
         # This takes a line list, for now.
         line_list = [x for x in text.splitlines()]
         Remove_Line_Indents(line_list)
@@ -26,9 +26,6 @@ class Widget_Documentation(QTextBrowser):
         super().setPlainText(text)
 
 
-    # See comments in Widget_Plugins for this.
-    # TODO: doesn't work in brief testing, for whatever reason;
-    # this is all super shady.
     def mimeData(self, selections):
         '''
         Customize the dragged item to be somewhat formatted, for

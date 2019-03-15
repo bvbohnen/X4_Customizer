@@ -46,7 +46,7 @@ argparser.add_argument(
     '-include',
     # Common use will likely just want xml and a couple other file types;
     # make that the default, and require explicit * to get everything.
-    default = ['*.xml','*.xsd','*.lua','*.html','*.css','*.js'],
+    default = ['*.xml','*.xsd','*.lua','*.html','*.css','*.js','*.xsl'],
     # Consume all following plain args.
     nargs = '*',
     help =  'Wildcard patterns for files to be included, space separated.'

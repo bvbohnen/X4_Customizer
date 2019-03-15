@@ -9,6 +9,7 @@ from Framework import Live_Editor
 from Framework import Print
 
 
+# TODO: make file_name automated based on category.
 @Analysis_Wrapper()
 def Print_Object_Stats(
         category, 
@@ -174,7 +175,9 @@ def Write_Tables(file_name, *tables):
     with open(Settings.Get_Output_Folder() / (file_name+'.csv'), 'w') as file:
         for table in tables:
             for line in table:
-                file.write(', '.join(line) + '\n')
+                # Quick fix: replace commas in the line to avoid them
+                # getting confused with the csv commas.
+                file.write(', '.join(line.replace(',',';')) + '\n')
             # Put extra space between tables.
             file.write('\n')
 

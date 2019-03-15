@@ -71,6 +71,8 @@ class Widget_Plugins(QTreeWidget):
                     package_item.addChild(subitem)
                     # Annotate the item with the plugin, for easy
                     # referencing.
+                    # TODO: record better customized doc text which
+                    # includes the function call signature.
                     subitem.plugin = plugin
 
         self.expandAll()

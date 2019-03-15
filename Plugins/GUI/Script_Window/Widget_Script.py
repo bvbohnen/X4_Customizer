@@ -70,13 +70,6 @@ class Widget_Script(QtWidgets.QPlainTextEdit):
         '''
         self.modified = True
 
-        # After doing some annoying digging into the syntax highlighter
-        # source code, it looks like it wants to hook this signal
-        # into its _q_reformatBlocks function.
-        #-Removed; this was needed from some example code used in
-        # testing, but personal code doesn't need this.
-        #self.highlighter._q_reformatBlocks(position, chars_removed, chars_added)
-
         # Note: position is the start of the edited section, after
         # which chars are added (or from after which chars were removed,
         # or both).
@@ -86,51 +79,61 @@ class Widget_Script(QtWidgets.QPlainTextEdit):
         # for the eof.
         total_chars = self.document().characterCount() -1
         
-        # If a space is deleted, can try to detect if it is a multiple
-        #  of 4 from the start of the line, and if so, delete another 3.
-        # Only do this on a single character removal, with at least
-        #  3 characters prior to it, for backspaces; deletes will need
-        #  to check for 3 following spaces instead.
-        # It is unclear on how to detect what was removed, so this will
-        #  be blind to if it was a space or something else.
-        if chars_removed == 1 and chars_added == 0:
-        
-            # Look back to check alignment with the start of the line.
-            # TODO
-        
-            # Loop over this, trying to look back, then forward.
-            for start, end in [(position -3, position),
-                               (position, position + 3)]:
-                # Don't search past doc boundaries.
-                # (Note: cursor can move to before or after a character,
-                #  so the position range is char count +1.)
-                if start < 0:
-                    continue
-                if end > total_chars:
-                    continue
-                # TODO: how to know when near the end of the doc.
-        
-                # Set the anchor and position for implicit selection.
-                self.cursor.setPosition(start, QTextCursor.MoveAnchor)
-                self.cursor.setPosition(end, QTextCursor.KeepAnchor)
-        
-                # Pull the chars.
-                text = self.cursor.selectedText()
-        
-                # If 3 spaces, remove the selection.
-                if text == '   ':
-                    self.cursor.removeSelectedText()
-                    # Limit to one direction deletion
-                    break
+        #-Removed; de-indent is handled by keyPressEvent with shift-tab,
+        # instead of with space deletion (which is clumsy in practice).
+        ## If a space is deleted, can try to detect if it is a multiple
+        ##  of 4 from the start of the line, and if so, delete another 3.
+        ## Only do this on a single character removal, with at least
+        ##  3 characters prior to it, for backspaces; deletes will need
+        ##  to check for 3 following spaces instead.
+        ## It is unclear on how to detect what was removed, so this will
+        ##  be blind to if it was a space or something else.
+        #if chars_removed == 1 and chars_added == 0:
+        #
+        #    # Look back to check alignment with the start of the line.
+        #    # TODO
+        #
+        #    # Loop over this, trying to look back, then forward.
+        #    for start, end in [(position -3, position),
+        #                       (position, position + 3)]:
+        #        # Don't search past doc boundaries.
+        #        # (Note: cursor can move to before or after a character,
+        #        #  so the position range is char count +1.)
+        #        if start < 0:
+        #            continue
+        #        if end > total_chars:
+        #            continue
+        #        # TODO: how to know when near the end of the doc.
+        #
+        #        # Set the anchor and position for implicit selection.
+        #        self.cursor.setPosition(start, QTextCursor.MoveAnchor)
+        #        self.cursor.setPosition(end, QTextCursor.KeepAnchor)
+        #
+        #        # Pull the chars.
+        #        text = self.cursor.selectedText()
+        #
+        #        # If 3 spaces, remove the selection.
+        #        if text == '   ':
+        #            self.cursor.removeSelectedText()
+        #            # Limit to one direction deletion
+        #            break
         
         
         # For char additions, look for tabs and replace them.
+        # Note: this can happen when text is copy/pasted in, with
+        # tabs included, so this logic should try to catch any tab
+        # within the new text body.
         if chars_added:
             # Limit the end point to the last non-eof character.
             start = position
             end = position + chars_added
             if end > total_chars:
                 end = total_chars
+                
+            # Save the cursor position.
+            old_position = self.textCursor().position()
+            old_anchor   = self.textCursor().anchor()
+
             # Use the cursor to select what was added.
             # This involves setting the anchor to the selection start,
             # and cursor position to selection end.
@@ -138,7 +141,17 @@ class Widget_Script(QtWidgets.QPlainTextEdit):
             self.cursor.setPosition(end, QTextCursor.KeepAnchor)
             text = self.cursor.selectedText()
             if '\t' in text:
+                # Replace the selected text with a copy that has
+                # tabs swapped to spaces.
+                # TODO: for some reason this clears the undo history,
+                # though docs don't mention this behavior; look into why.
                 self.cursor.insertText(text.replace('\t','    '))
+                
+            # TODO: fix this bit of code; it is giving a '-1' index
+            # error for some reason; also, it may not be necessary.
+            # Reset the cursor selection back to the original.
+            #self.cursor.setPosition(old_anchor, QTextCursor.MoveAnchor)
+            #self.cursor.setPosition(old_position, QTextCursor.KeepAnchor)
             
         return
 
@@ -152,8 +165,10 @@ class Widget_Script(QtWidgets.QPlainTextEdit):
         This function is called automatically when a key is pressed.
         The original version handles up/down/left/right/pageup/pagedown
         and ignores other keys.
+        This wrapper will also catch shift-tab.
+        This is triggered prior to contentsChange.
         '''
-        if event.key() in [QtCore.Qt.Key_Backtab, QtCore.Qt.Key_Tab]:
+        if event.key() == QtCore.Qt.Key_Backtab:
             # The text cursor will need to be updated appropriately.
             # self.textCursor()
             # Get the place the edit is occurring.
@@ -161,12 +176,48 @@ class Widget_Script(QtWidgets.QPlainTextEdit):
             # Proper handling of highlights in VS/notepad style would
             # be a little complicated...
             # TODO: think about this.
+
+            # Get the current text cursor position/anchor.
+            # Note: anchor can be before or after the position.
             position = self.textCursor().position()
             anchor   = self.textCursor().anchor()
 
-            # TODO: fill this in more.
-        # Just pass the call upward for now.
-        return super().keyPressEvent(event)
+            # Standardize the locations so 'start' is first, 'end' is second.
+            if position > anchor:
+                start = anchor
+                end = position
+            else:
+                start = position
+                end = anchor
+
+            # If these differ, then a chunk of text is highlighted,
+            # in which case all involved lines can have their
+            # indentation changed. TODO.
+
+            # Move the cursor to select 4 characters prior to
+            # the original selection, to find out if they are
+            # a group of spaces.
+            self.cursor.setPosition(start, QTextCursor.MoveAnchor)
+            self.cursor.setPosition(start -4, QTextCursor.KeepAnchor)
+            text = self.cursor.selectedText()
+            if text == '    ':
+                # If there, shift-tab was pressed with 4 spaces prior
+                # to the selected text. In this case, remove the
+                # 4 spaces but do not modify the text selection.
+                self.cursor.removeSelectedText()
+                # Offset the original position/anchor back by 4.
+                position -= 4
+                anchor   -= 4
+
+            # Reset the cursor selection back to the original, accounting
+            # for the deleted text.
+            self.cursor.setPosition(anchor, QTextCursor.MoveAnchor)
+            self.cursor.setPosition(position, QTextCursor.KeepAnchor)
+
+        else:
+            # Just pass the call upward for now.
+            super().keyPressEvent(event)
+        return
 
 
     def New_Script(self):
@@ -187,3 +238,4 @@ class Widget_Script(QtWidgets.QPlainTextEdit):
             ]
         self.setPlainText('\n'.join(lines))
         self.Clear_Modified()
+        return

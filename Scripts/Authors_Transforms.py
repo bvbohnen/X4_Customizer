@@ -15,6 +15,12 @@ Adjust_Job_Count(('id masstraffic*', 0.5))
 # This is Pious Mists.
 Color_Text((20005,3021,'C'))
 
+# Speed up all smaller ships by a bit.
+Adjust_Ship_Speed(
+    ('class ship_s' , 1.3),
+    ('class ship_m' , 1.1),
+    )
+
 
 # Toy around with small weapons.
 '''
@@ -49,6 +55,8 @@ Adjust_Ware_Prices(
 
 # Reduce generic mission rewards somewhat heavily.
 Adjust_Mission_Rewards(0.3)
+# Make mods more likely from missions.
+Adjust_Mission_Reward_Mod_Chance(10)
 
 # Write modified files.
 Write_To_Extension()

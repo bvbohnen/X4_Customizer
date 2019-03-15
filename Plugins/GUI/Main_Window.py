@@ -354,8 +354,10 @@ class GUI_Main_Window(qt_base_class, generated_class):
         self.setupUi(self)
 
         # This icon is kinda like and X.
+        # TODO: something else, with less black, for users who use
+        #  a black taskbar.
         # TODO: maybe extract the x4 exe icon, though that will only
-        # work on windows.
+        #  work on windows if done at runtime.
         # https://stackoverflow.com/questions/1616342/best-way-to-extract-ico-from-exe-and-paint-with-pyqt
         Set_Icon(self, 'SP_DialogCloseButton')
 
