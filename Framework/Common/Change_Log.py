@@ -120,6 +120,12 @@ Change Log:
    - Added Adjust_Ship_Speed.
    - Added Adjust_Mission_Reward_Mod_Chance.
    - Fixed a couple crash bugs.
+ * 1.9.1
+   - Replaced excess commas in csv files with semicolons.
+   - Added a missing comma that cause index and extension folders to
+     be ignored when looking for loose files.
+   - Gui script window will now check for external changes to the script.
+   - Script editor swapped to using tab and shift-tab for indentation.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

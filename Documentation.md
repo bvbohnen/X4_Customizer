@@ -1,4 +1,4 @@
-X4 Customizer 1.9
+X4 Customizer 1.9.1
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -749,3 +749,8 @@ Change Log:
    - Added Adjust_Ship_Speed.
    - Added Adjust_Mission_Reward_Mod_Chance.
    - Fixed a couple crash bugs.
+ * 1.9.1
+   - Replaced excess commas in csv files with semicolons.
+   - Added a missing comma that cause index and extension folders to be ignored when looking for loose files.
+   - Gui script window will now check for external changes to the script.
+   - Script editor swapped to using tab and shift-tab for indentation.

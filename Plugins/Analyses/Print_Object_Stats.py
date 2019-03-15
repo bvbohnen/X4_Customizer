@@ -177,7 +177,7 @@ def Write_Tables(file_name, *tables):
             for line in table:
                 # Quick fix: replace commas in the line to avoid them
                 # getting confused with the csv commas.
-                file.write(', '.join(line.replace(',',';')) + '\n')
+                file.write(', '.join([x.replace(',',';') for x in line]) + '\n')
             # Put extra space between tables.
             file.write('\n')
 
