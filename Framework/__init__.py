@@ -168,11 +168,10 @@ todo:
 - Set MD/AI script loading to not support patching/merging; apparently
   these just look for the first file found (or last subst).
 - Button on edit tabs to export csv/html directly.
-- csv generated files get messed up by comments in original fields, common
-  for text page/ids. Need to filter out original commas first.
-  (Donish, need to test)
 - When packing cats, add select top level files that are also present in
   the main game cats, so that unpack-repack of main files captures everything.
+- When packing cats, support sig files (otherwise ignored by the source
+  reader).
 '''
 # TODO: maybe add in examples of usage (perhaps tagged to put them
 #  in the full documenation and not the readme).

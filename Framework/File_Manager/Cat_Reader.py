@@ -2,11 +2,11 @@
 Support for unpacking files from cat/dat pairself.
 
 In Rebirth and X4, these files are no longer obfuscated like they
-were in X4, and can be read directly without any magic XORs or similar.
+were in X2/X3, and can be read directly without any magic XORs or similar.
 
 
 The format of cat files, each line:
-<cat_path  byte_count  date_stamp  hash?>
+<cat_path  byte_count  date_stamp  hash>
 
 Date stamps are 10-byte, time since epoch (1,54x,xxx,xxx).
 The Hashes are 128-bit MD5 codes, mostly.
@@ -16,7 +16,7 @@ The Hashes are 128-bit MD5 codes, mostly.
 
 The corresponding dat file contains the contents indicated by the catalog
 file, in order. The start position of the data is based on the sum of
-prior file sizeself.
+prior file sizes.
 Question: are any internal files in gzip format?
 
 Note on case:
@@ -24,11 +24,11 @@ Note on case:
     catalogs do sometimes have uppercase characters in paths.
     Mods may use lowercase paths.
     Ideally, original case can be kept for cat unpacking or similar,
-    since it is just cleaner, but other tools may force into
-    lowercase when extracting files that modders worked on.
-    However, working in pure lowercase is just simpler to maintain,
-    so any case preservation will be sidelined to a special
-    support dict.    
+    but other tools may force paths into lowercase when
+    extracting files that modders worked on.
+    However, working in pure lowercase is simpler to maintain.
+    Here, paths will be handled in lower case generally, but the original
+    case will be preserved for lookup when needed.
 '''
 from pathlib import Path
 import hashlib
@@ -141,8 +141,6 @@ class Cat_Reader:
 
         * virtual_path
           - String, path of the file to look up in cat format.
-          - If packed files are wanted, this should end in a suitable
-            suffix (eg. .gz).
         * error_if_not_found
           - Bool, if True and the name is not recorded in this cat, then
             an exception will be thrown, otherwise returns None.
