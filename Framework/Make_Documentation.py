@@ -491,6 +491,8 @@ def Get_BB_Text(line_list):
     list_indent = None
     # Tag for if a code section is in use.
     code_active = False
+    # Amount a code block is indented by.
+    code_indent = None
     # Tag for if the change log section is active.
     changelog_active = False
     # Tag for if a transform section is active.
@@ -536,9 +538,23 @@ def Get_BB_Text(line_list):
     def Open_Code():
         'Open a new code section.'
         nonlocal code_active
+        nonlocal code_indent
         if not code_active:
             Add_Tag('[code]')
             code_active = True
+            # Look for the starting indent of the code, on the next
+            # line with content.
+            next_index = index+1
+            while next_index < len(line_list):
+                next_line = line_list[next_index]
+                # Does this line have something on it?
+                if next_line:
+                    # Record the leading spaces.
+                    code_indent = len(next_line) - len(next_line.lstrip(' '))
+                    # Stop looking.
+                    break
+                # Advance another line looking for content.
+                next_index += 1
 
     def Close_Code():
         'Close a current code section.'
@@ -564,8 +580,16 @@ def Get_BB_Text(line_list):
         # Use BB default small/large sizes.
         # Update: the latest BB software treats this as a %.
         return '[size=75]{}[/size]'.format(string)
-
+    
     def Large(string):
+        'Apply large font tags to a string. Should go inside other tags.'
+        return '[size=130]{}[/size]'.format(string)
+
+    def XLarge(string):
+        'Apply large font tags to a string. Should go inside other tags.'
+        return '[size=160]{}[/size]'.format(string)
+
+    def XXLarge(string):
         'Apply large font tags to a string. Should go inside other tags.'
         return '[size=200]{}[/size]'.format(string)
 
@@ -604,22 +628,47 @@ def Get_BB_Text(line_list):
             # Drop the *s for now.
             Record('')
 
-        # Otherwise if code is active, leave the line unchanged.
+        # Otherwise if code is active, check for de-indent, else
+        #  leave the line unchanged.
         elif code_active:
-            Record(line)
+            indent = len(line) - len(line.lstrip(' '))
+            # Only check lines with content.
+            if line and indent < code_indent:
+                # Indent reduced; close code block.
+                Close_Code()
+                # Reprocess the line by restarting this loop iteration
+                # without an index advancement.
+                continue
+            else:
+                # Still indented, to continue recording code lines.
+                Record(line)
             
-        # Special cases:
-        # Hype up the main heading.
-        elif line.startswith('X4 Customizer'):
+        # Handle markdown style section headers, including main title.
+        elif line.startswith('#'):
+
+            # Pick the sizing function to use.
+            # More '#' is a smaller header.
+            if line.startswith('###'):
+                size_function = Large
+            elif line.startswith('##'):
+                size_function = XLarge
+            elif line.startswith('#'):
+                size_function = XXLarge
+                
+            # Remove the hashes and following space.
+            line = line.replace('#','').strip()
+
             # Note: tag order is somewhat strict (though in examples it
             #  shouldn't be).
             # Innermost is text size, then color, then bold.
-            line = Large(line)
+            line = size_function(line)
+
             # The color feels a little tacky; large/bold is enough.
             #line = Color(line, 'yellow')
             line = Bold(line)
             Record(line)
 
+            
         # The underline under the heading can be swapped to a blank line.
         # In markdown this boldens the line above it; in BB the bolding
         #  is manual.
@@ -636,13 +685,14 @@ def Get_BB_Text(line_list):
         #  for a list (or maybe code), including closing a prior list.
         elif strip_line[0] not in ['-','*'] and strip_line[-1] == ':':
             Close_List()
-            # Bold the list header.
-            Record( Bold( line) )
 
             # The example input opens a code section, else open a list.
-            if strip_line.startswith('Example input file'):
+            if strip_line.startswith('Example input file') or strip_line.endswith('code:'):
+                Record( line )
                 Open_Code()
             else:
+                # Bold the list header.
+                Record( Bold( line) )
                 Open_List()
 
             # Note when in the change log, to suppress extra formatting.
@@ -694,6 +744,8 @@ def Get_BB_Text(line_list):
             Record(line)
 
         # Advance the index for next iteration.
+        # If an above case left the line unprocessed, it will have
+        # used 'continue' to skip this increment.
         index += 1
 
     # If a list is active at the end, close it.
