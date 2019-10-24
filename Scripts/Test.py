@@ -19,7 +19,7 @@ Settings(
 # code changes.
 test_all = 0
 
-if 0:
+if 1:
     GUI.Start_GUI()
     
 # Test the extension checker.
@@ -39,7 +39,7 @@ if 0 or test_all:
     edit_tree = Framework.Live_Editor.Get_Tree_View('weapons')
 
 
-if 1 or test_all:
+if 0 or test_all:
     Adjust_Mission_Reward_Mod_Chance(10)
 
 if 0 or test_all:

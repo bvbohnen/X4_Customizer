@@ -5,13 +5,15 @@
     <ProjectGuid>58b46218-4d3c-4dd2-9710-e5f2a717ea2d</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>
-    </StartupFile>
+    <StartupFile>Cat_Pack.py</StartupFile>
     <SearchPath>..\Framework;..\Plugins;..\..\X4_Customizer</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>Scripts</Name>
     <RootNamespace>X4_Customizer</RootNamespace>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <CommandLineArguments>"C:\Steam\steamapps\common\X4 Foundations\extensions\MapMarker\unpacked" "C:\Steam\steamapps\common\X4 Foundations\extensions\MapMarker\repack.cat"</CommandLineArguments>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,7 +24,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Authors_Transforms.py" >
+    <Compile Include="Authors_Transforms.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Cat_Pack.py">
@@ -34,16 +36,16 @@
     <Compile Include="Check_Extensions.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Example_Transforms.py" >
+    <Compile Include="Example_Transforms.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Make_Documentation.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Test.py" >
+    <Compile Include="Test.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Default_Script_template.py" >
+    <Compile Include="Default_Script_template.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

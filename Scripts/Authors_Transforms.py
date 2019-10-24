@@ -9,18 +9,20 @@ from Plugins import *
 Apply_Live_Editor_Patches()
 
 # Prune some mass traffic.
+# (There may also be a way to adjust this in-game now.)
 Adjust_Job_Count(('id masstraffic*', 0.5))
 
 # Toy around with coloring.
 # This is Pious Mists.
-Color_Text((20005,3021,'C'))
+# Color_Text((20005,3021,'C'))
 
 # Speed up all smaller ships by a bit.
+'''
 Adjust_Ship_Speed(
     ('class ship_s' , 1.3),
     ('class ship_m' , 1.1),
     )
-
+'''
 
 # Toy around with small weapons.
 '''
@@ -36,16 +38,17 @@ Adjust_Weapon_Shot_Speed(
     ('tags small standard weapon'   , 2),
     ('tags missile'                 , 2),
     )
-'''
 Adjust_Weapon_Fire_Rate(
     ('tags small standard weapon'   , 4),
     #('tags missile'                 , 2),
     )
-#Print_Weapon_Stats()
+Print_Weapon_Stats()
+'''
 
 
 # Reduce general price spread on wares, to reduce trade profit.
-Adjust_Ware_Price_Spread(0.5)
+# (Remove for now, until getting a better feel for the game.)
+#Adjust_Ware_Price_Spread(0.5)
 
 # Reduce the prices on inventory items, since they are often
 # obtained for free.

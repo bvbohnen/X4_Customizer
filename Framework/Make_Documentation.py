@@ -411,12 +411,23 @@ def Merge_Lines(text_block):
             merge = False
             line_list[line_number] = ''
             strip_line = ''
-            
+
         elif strip_line == '</code>':
             code_block_active = False
             merge = False
             line_list[line_number] = ''
             strip_line = ''
+            
+        # Similar for ``` md style explicit code block, which can be suffixed
+        #  with the language. Keep the line in this case.
+        elif strip_line.startswith('```') and not code_block_active:
+            code_block_active = True
+            merge = False
+            
+        # Closing ``` looks the same, so need to test if code was already open.
+        elif strip_line.startswith('```') and code_block_active:
+            code_block_active = False
+            merge = False
 
         # When a code block is active, don't merge.
         elif code_block_active:
@@ -628,17 +639,20 @@ def Get_BB_Text(line_list):
             # Drop the *s for now.
             Record('')
 
-        # Otherwise if code is active, check for de-indent, else
+        # Otherwise if code is active, check for de-indent or ```, else
         #  leave the line unchanged.
         elif code_active:
             indent = len(line) - len(line.lstrip(' '))
-            # Only check lines with content.
+            # Only check lines with content for indent.
             if line and indent < code_indent:
                 # Indent reduced; close code block.
                 Close_Code()
                 # Reprocess the line by restarting this loop iteration
                 # without an index advancement.
                 continue
+            elif strip_line.startswith('```'):
+                Close_Code()
+                # Do not reprocess the line in this case; it can be tossed.
             else:
                 # Still indented, to continue recording code lines.
                 Record(line)
@@ -679,6 +693,11 @@ def Get_BB_Text(line_list):
         elif strip_line.startswith('Full documentation'):
             Close_List()
             Record(line)
+
+        # Look for explicit code block starts.
+        elif strip_line.startswith('```'):
+            # Don't record the line; just replace with a code tag.
+            Open_Code()
 
         # Look for any line that is a term ending in ':', but not
         #  starting with '*' or similar. This will be a header

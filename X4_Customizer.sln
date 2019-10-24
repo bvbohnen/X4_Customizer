@@ -9,6 +9,12 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Plugins", "Plugins\Plugins.
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Scripts", "Scripts\Scripts.pyproj", "{58B46218-4D3C-4DD2-9710-E5F2A717EA2D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{74B55FE2-2F3B-4352-99B9-1B549902956D}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation.md = Documentation.md
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
