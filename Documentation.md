@@ -1,4 +1,4 @@
-X4 Customizer 1.9.1
+X4 Customizer 1.10
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -308,6 +308,8 @@ Director Transforms:
   * Adjust_Mission_Reward_Mod_Chance
 
     Adjusts generic mission chance to reward a mod instead of credits. The vanilla chance is 2% for a mod, 98% for credits.
+    
+    Pending update for x4 3.0+.
     
     * mod_chance
       - Int, the new percent chance of rewarding a mod.
@@ -754,3 +756,5 @@ Change Log:
    - Added a missing comma that cause index and extension folders to be ignored when looking for loose files.
    - Gui script window will now check for external changes to the script.
    - Script editor swapped to using tab and shift-tab for indentation.
+ * 1.10
+   - Added Gui option to save xml files from the VFS tab.
