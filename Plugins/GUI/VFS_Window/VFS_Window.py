@@ -52,11 +52,14 @@ class VFS_Window(Tab_Page_Widget, generated_class):
       - String, wildcard pattern for file paths to include.
       - Use this to limit files/folders loaded to speed up the vfs.
       - Hardcoded initially.
+    * last_dialog_path
+      - Path last used in the Save dialog box, to be reused.
     '''
     def __init__(self, parent, window):
         super().__init__(parent, window)
         self.file_info_dict = {}
         self.pattern = '*.xml'
+        self.last_dialog_path = None
         
         # Set up initial, blank models.
         self.tree_model = VFS_Tree_Model(self, self.widget_treeView)
@@ -171,4 +174,27 @@ class VFS_Window(Tab_Page_Widget, generated_class):
             self.Reset_From_File_System()
         elif 'files_loaded' in flags or 'files_modified' in flags:
             self.Threaded_Gather_File_Info()
+        return
+
+    
+    def Save_Session_Settings(self, settings):
+        '''
+        Save aspects of the current sessions state.
+        '''
+        super().Save_Session_Settings(settings)
+        settings.setValue('last_dialog_path', str(self.last_dialog_path))
+        return
+
+
+    def Load_Session_Settings(self, settings):
+        '''
+        Save aspects of the prior sessions state.
+        '''
+        super().Load_Session_Settings(settings)
+        # Note: need to capture 'None' strings and convert them.
+        # Paths need to be cast to a Path if not None.
+        stored_value = settings.value('last_dialog_path', None)
+        if stored_value not in [None, 'None']:
+            self.last_dialog_path = Path(stored_value)
+        
         return

@@ -5,23 +5,23 @@ Includes File_Missing_Exception for when a file is not found.
 '''
 X4 virtual path determination:
 
-    - Any file in the base x4 catalogs will have a virtual path
+    1 Any file in the base x4 catalogs will have a virtual path
       relative to the root x4 folder.
       Eg. '/libraries/parameters.xml'
 
-    - Extension files that have a path relative to the extension folder
+    2 Extension files that have a path relative to the extension folder
       which matches the path of a base file relative to the x4 folder
-      will use the x4 folder based path.
+      will use the x4 folder based path, and act as a patch (diff or append).
       Eg. '/extensions/extA/libraries/wares.xml' will use the path
           'libraries/wares.xml'
 
-    - Extensions files that do not match to a base file will instead
+    3 Extensions files that do not match to a base file will instead
       use a path relative to the x4 base folder.
       Note: this is based on extension folder name, not extension id.
       Eg. '/extensions/extA/libraries/newfile.xml' will use the path
           '/extensions/extA/libraries/newfile.xml'
 
-    - Extensions which target other extensions' new files will have
+    4 Extensions which target other extensions' new files will have
       a path relative to the extension folder that matches a path
       relative to the base x4 folder, extended out to the other extension.
       Eg. 'extensions/extA/extensions/extB/somefile' will use the path
@@ -29,6 +29,17 @@ X4 virtual path determination:
       This comes up when extensions edit files from other extensions.
       It also comes up when there is no dependency in place, so extA
       can patch extB files without a dependency on extB.
+      This is essentially the same as (1).
+      
+
+TODO: it has been suggested and md/aiscript folders in extensions will
+always have a path relative to the base x4 folder, not the extension.
+Run a test on this.
+
+TODO: the readme for X:Rebirth tools says that anything in ext is
+relative to the extension, anything in subst relative to x4 base.
+Can maybe verify that here, though currently it is not expected to
+change pathing logic.
 
 
 Loading order:
@@ -62,7 +73,6 @@ Loading order:
 
     For extensions that have no dependencies to order them, they will
     be handled in lowercase alphabetical folder order.
-
 
 Note on case:
     To simplify path handling, all paths will be lower cased.

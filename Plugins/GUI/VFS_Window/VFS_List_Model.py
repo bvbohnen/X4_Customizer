@@ -1,8 +1,12 @@
 
+from pathlib import Path
+
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QBrush
+
 from .VFS_Item import VFS_Item
 from ..Shared.Misc import Set_Icon
+from Framework import File_System, XML_Diff, Print, Settings
 
 class VFS_List_Model(QStandardItemModel):
     '''
@@ -28,9 +32,16 @@ class VFS_List_Model(QStandardItemModel):
         self.qt_view .setModel(self)
         
         self.menu = QtWidgets.QMenu(self.qt_view)
-        open_action = self.menu.addAction('Open in viewer')
-        # TODO: pass the name of the event, once there are multiple.
-        open_action.triggered.connect(self.Handle_contextMenuEvent)
+        context_events = {
+            'view': 'Open in viewer',
+            'save_vanilla': 'Save to file (vanilla)',
+            'save_patched': 'Save to file (patched)',
+            }
+        for event_name, text in context_events.items():
+            open_action = self.menu.addAction(text)
+            # TODO: pass the name of the event, once there are multiple.
+            open_action.triggered.connect(
+                lambda x, y = event_name: self.Handle_contextMenuEvent(x, y))
 
         # Items double clicked.
         self.qt_view.doubleClicked.connect(self.Handle_doubleClicked)
@@ -135,17 +146,88 @@ class VFS_List_Model(QStandardItemModel):
         return
 
 
-    def Handle_contextMenuEvent(self, event):
+    def Handle_contextMenuEvent(self, event, event_name):
         '''
         Handle the file view context menu action.
         '''
+        # Note: "event" input is "False" in a quick check.
         item = self.selected_item
-        # Create a new tab for the viewer.
-        # TODO: clean up this window.window thing.
-        self.window.window.Create_Tab(
-            class_name = 'File_Viewer_Window', 
-            label = item.vfs_item.name,
-            virtual_path = item.vfs_item.virtual_path)
+
+        if event_name == 'view':
+            # Create a new tab for the viewer.
+            # TODO: clean up this window.window thing.
+            self.window.window.Create_Tab(
+                class_name = 'File_Viewer_Window', 
+                label = item.vfs_item.name,
+                virtual_path = item.vfs_item.virtual_path)
+
+        elif event_name in ['save_vanilla', 'save_patched']:
+
+            # Load the file text.
+            # TODO: wait on this until after save prompt.
+            game_file = File_System.Load_File(
+                          item.vfs_item.virtual_path,
+                          error_if_not_found = False)
+
+            # Error check.
+            if game_file == None:
+                self.window.Print(('Error loading file for path "{}"'
+                                  ).format(self.virtual_path))
+                return
+
+            # Get the right text version.
+            version = event_name.replace('save_','')            
+            xml_root = game_file.Get_Root_Readonly(version = version)
+            # TODO: this has a bit of an oddity in that newlines buried
+            # in attributes do not get preserved as unicode newlines;
+            # Perhaps print as utf-8, then convert that to unicode.
+            text = XML_Diff.Print(xml_root, encoding = 'unicode')
+            
+
+            # Pick the output directory default.
+            if not self.window.last_dialog_path:
+                directory = Settings.path_to_x4_folder
+            else:
+                directory = self.window.last_dialog_path
+
+            # Create a file selection dialogue, using a QFileDialog object.
+            file_dialogue = QtWidgets.QFileDialog(self.window)
+
+            # Allow selection of any file (as oppposed to existing file).
+            file_dialogue.setFileMode(QtWidgets.QFileDialog.AnyFile)
+
+            # Get the filename/path from the dialogue.
+            #  Note: in qt5 this now returns a tuple of
+            #   (path string, type name with extension as a string).
+            #  Only keep the full path here.
+            virtual_path = Path(item.vfs_item.virtual_path)
+            extension = virtual_path.suffix
+            file_name = virtual_path.name
+            file_selected, _ = file_dialogue.getSaveFileName(
+                # TODO: maybe extact with full path as an option.
+                directory = str(directory / file_name) )
+
+            # If the file path is empty, the user cancelled the dialog.
+            if not file_selected:
+                return False
+        
+            # Convert to a Path.
+            file_selected = Path(file_selected)
+            # Update the last_dialog_path.
+            self.window.last_dialog_path = file_selected.parent
+
+            # Make the directory if needed.
+            file_selected.parent.mkdir(parents = True, exist_ok = True)
+
+            # Write out the file.
+            file_selected.write_text(text)
+
+            # Nice success message.
+            self.window.Print('Saved {} ({}) to {})'.format(
+                item.vfs_item.virtual_path,
+                version,
+                file_selected.as_posix(),
+                ))
         return
         
 

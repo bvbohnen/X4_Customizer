@@ -71,8 +71,14 @@
          </item>
          <item>
           <widget class="QCheckBox" name="widget_checkBox_0">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
            <property name="text">
             <string>CheckBox</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -92,7 +98,7 @@
             <string>CheckBox</string>
            </property>
            <property name="checked">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>

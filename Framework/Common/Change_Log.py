@@ -126,6 +126,8 @@ Change Log:
      be ignored when looking for loose files.
    - Gui script window will now check for external changes to the script.
    - Script editor swapped to using tab and shift-tab for indentation.
+ * 1.10
+   - Added Gui option to save xml files from the VFS tab.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

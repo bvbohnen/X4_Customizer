@@ -91,6 +91,8 @@ def Adjust_Mission_Reward_Mod_Chance(
     Adjusts generic mission chance to reward a mod instead of credits.
     The vanilla chance is 2% for a mod, 98% for credits.
 
+    Pending update for x4 3.0+.
+
     * mod_chance
       - Int, the new percent chance of rewarding a mod.
       - Should be between 0 and 100.
@@ -108,6 +110,9 @@ def Adjust_Mission_Reward_Mod_Chance(
     </do_any>
 
     Can hunt down the appropriate nodes to make the edit.
+
+    Update: X4 3.0 adjusts all of the missions to have a seminar reward
+    as well, and they vary in chances (90/2/8, 91/2/7, etc.).
     '''
     # Validate the mod_chance range.
     mod_chance = int(new_chance)
