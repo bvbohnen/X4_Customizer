@@ -12,7 +12,9 @@
     <Name>Framework</Name>
     <RootNamespace>X4_Customizer</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>Test</CommandLineArguments>
+    <CommandLineArguments>Test -dev</CommandLineArguments>
+    <IsWindowsApplication>False</IsWindowsApplication>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>

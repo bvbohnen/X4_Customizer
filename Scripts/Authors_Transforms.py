@@ -52,14 +52,13 @@ Print_Weapon_Stats()
 
 # Reduce the prices on inventory items, since they are often
 # obtained for free.
-Adjust_Ware_Prices(
-    ('container inventory'         , 0.5) ) 
+#Adjust_Ware_Prices(('container inventory', 0.5) ) 
 #Print_Ware_Stats()
 
 # Reduce generic mission rewards somewhat heavily.
-Adjust_Mission_Rewards(0.3)
+#Adjust_Mission_Rewards(0.3)
 # Make mods more likely from missions.
-Adjust_Mission_Reward_Mod_Chance(10)
+#Adjust_Mission_Reward_Mod_Chance(3)
 
 # Write modified files.
 Write_To_Extension()

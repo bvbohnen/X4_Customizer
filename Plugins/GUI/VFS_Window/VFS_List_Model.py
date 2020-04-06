@@ -1,5 +1,6 @@
 
 from pathlib import Path
+from collections import defaultdict
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QBrush
@@ -21,6 +22,10 @@ class VFS_List_Model(QStandardItemModel):
       - QMenu that will pop up on context menu requests.
     * selected_item
       - The currently selected item for a context menu.
+    * action_extensions
+      - Dict, keyed by QAction object, with a tuple of lists of associated
+        file type extensions the action applies to ([0]) or blacklists ([1]).
+      - Extensions are given with preceeding '.', and '.*' applies to all.
     '''
     def __init__(self, window, qt_view):
         super().__init__(window)
@@ -31,17 +36,25 @@ class VFS_List_Model(QStandardItemModel):
         
         self.qt_view .setModel(self)
         
+        # Set up the context menu.
         self.menu = QtWidgets.QMenu(self.qt_view)
+        self.action_extensions = {}
+        # TODO: how to filter events based on object selected?
         context_events = {
-            'view': 'Open in viewer',
-            'save_vanilla': 'Save to file (vanilla)',
-            'save_patched': 'Save to file (patched)',
+            'view'        : ('Open in viewer'        , ['.xml'], []),
+            'save_current': ('Save to file'          , ['.*']  , ['.xml']),
+            'save_vanilla': ('Save to file (vanilla)', ['.xml'], []),
+            'save_patched': ('Save to file (patched)', ['.xml'], []),
             }
-        for event_name, text in context_events.items():
-            open_action = self.menu.addAction(text)
-            # TODO: pass the name of the event, once there are multiple.
-            open_action.triggered.connect(
+        for event_name, (text, extensions, blacklist) in context_events.items():
+
+            action = self.menu.addAction(text)
+            # Pass the name of the event to the handler.
+            action.triggered.connect(
                 lambda x, y = event_name: self.Handle_contextMenuEvent(x, y))
+
+            # Record this action to be active for associated file types.
+            self.action_extensions[action] = (extensions, blacklist)
 
         # Items double clicked.
         self.qt_view.doubleClicked.connect(self.Handle_doubleClicked)
@@ -108,6 +121,16 @@ class VFS_List_Model(QStandardItemModel):
         # If the item is a folder, don't open the menu (for now).
         if item.vfs_item.is_folder:
             return
+
+        # Get the file type of the item.
+        ext = Path(item.vfs_item.name).suffix
+
+        # Set only associated actions as visible.
+        for action, (extensions, blacklist) in self.action_extensions.items():
+            if (ext not in blacklist) and ('.*' in extensions or ext in extensions):
+                action.setVisible(True)
+            else:
+                action.setVisible(False)
         
         # Feed this the mouse position to place the menu.
         # Record the item to carry it to the next event.
@@ -115,7 +138,7 @@ class VFS_List_Model(QStandardItemModel):
         self.menu.popup(QtGui.QCursor.pos())
         return
 
-    
+    # TODO: maybe support multi-select
     def Handle_selectionChanged(self, qitemselection = None):
         '''
         A different item was clicked on.
@@ -161,9 +184,9 @@ class VFS_List_Model(QStandardItemModel):
                 label = item.vfs_item.name,
                 virtual_path = item.vfs_item.virtual_path)
 
-        elif event_name in ['save_vanilla', 'save_patched']:
+        elif event_name in ['save_current', 'save_vanilla', 'save_patched']:
 
-            # Load the file text.
+            # Load the file.
             # TODO: wait on this until after save prompt.
             game_file = File_System.Load_File(
                           item.vfs_item.virtual_path,
@@ -175,15 +198,10 @@ class VFS_List_Model(QStandardItemModel):
                                   ).format(self.virtual_path))
                 return
 
-            # Get the right text version.
-            version = event_name.replace('save_','')            
-            xml_root = game_file.Get_Root_Readonly(version = version)
-            # TODO: this has a bit of an oddity in that newlines buried
-            # in attributes do not get preserved as unicode newlines;
-            # Perhaps print as utf-8, then convert that to unicode.
-            text = XML_Diff.Print(xml_root, encoding = 'unicode')
+            # Grab the binary.
+            version = event_name.replace('save_','')    
+            binary = game_file.Get_Binary(version = version, no_diff = True)
             
-
             # Pick the output directory default.
             if not self.window.last_dialog_path:
                 directory = Settings.path_to_x4_folder
@@ -220,7 +238,7 @@ class VFS_List_Model(QStandardItemModel):
             file_selected.parent.mkdir(parents = True, exist_ok = True)
 
             # Write out the file.
-            file_selected.write_text(text)
+            file_selected.write_bytes(binary)
 
             # Nice success message.
             self.window.Print('Saved {} ({}) to {})'.format(

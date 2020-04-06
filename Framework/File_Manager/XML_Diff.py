@@ -294,34 +294,18 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
             # Check for attribute edits.
             # These either end the xpath with '/@<name>' for remove/replace,
             #  or have a 'type' property for adding.
+            # Note: the xpath search can continue past the ref,
+            #  eg. "@ref[.='scenario_combat_arg_destroyer']" in split dlc,
+            #  so for replacements the full path needs to be kept.
             if '/@' in xpath:
                 type = 'attrib'
-
                 if xpath.count('/@') != 1:
                     Print_Error('multiple "/@"')
                     continue
-                # Pull off the /@; it is diff funkiness and not part of
-                #  a valid xpath.
-                xpath, attrib_name = xpath.rsplit('/@', 1)
 
-                # To ensure the xpath lookup still fails if the attrib
-                #  is missing, put it back on the xpath using [@...]
-                #  syntax.
-                #xpath += '[@{}]'.format(attrib_name)
-                # -Removed for now; x4 seems inconsistent on if this should
-                #  give an error when replacing an attribute that doesn't
-                #  exist.
-                # Example:
-                #  Fails in x4:
-                #    turret_arg_m_mining_01_mk1_macro.xml:
-                #    <replace sel="//macros/macro/properties/hull/@max">2500</replace>
-                #  Succeeds in x4:
-                #    bullet_par_m_railgun_01_mk1_macro.xml:
-                #    <replace sel="//macros/macro/properties/bullet/@angle">0.2</replace>
-                # Both lack this attribute in the base file.
-                # Most commonly, x4 seems to allow missing attributes
-                # TODO: revisit to sync up with x4 errors better.
-
+            # Check for attribute additions.
+            # These have a normal xpath, with a 'type' member holding
+            #  the attribute name prefixed with @, eg. type="@id".
             elif op_node.get('type'):
                 type = 'attrib'
 
@@ -346,8 +330,14 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
                 Print_Error('multiple xpath matches found')
                 continue
 
+            # If a string attribute was returned (which happens for
+            # attribute replacement paths), get the parent node.
+            matched_node = matched_nodes[0]
+            if isinstance(matched_node, ET._ElementUnicodeResult):
+                matched_node = matched_node.getparent()
+
             # Apply the patch op.
-            error_message = _Apply_Patch_Op(op_node, matched_nodes[0], type)
+            error_message = _Apply_Patch_Op(op_node, matched_node, type)
             # Print an error if it occurred.
             if error_message:
                 Print_Error(error_message)
@@ -391,6 +381,12 @@ def _Apply_Patch_Op(op_node, target_node, type):
         else:
             xpath = op_node.get('sel')
             attrib_name = xpath.rsplit('/@', 1)[1]
+            # There may be more xpath stuff after the actual wanted name,
+            # eg. "/@ref[.='scenario_combat_arg_destroyer']".
+            # TODO: full xml syntax to figure out the name.
+            # For now, just tackle the above situation.
+            if '[' in attrib_name:
+                attrib_name = attrib_name.split('[')[0]
 
         # Handle add and replace the same way.
         if op_node.tag in ('add', 'replace'):

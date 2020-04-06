@@ -53,24 +53,36 @@ class Extension_Summary:
     '''
     def __init__(
             self, 
-            ext_id,
-            content_xml_path, 
-            content_xml,
-            enabled, 
-            default_enabled,
-            is_current_output,
-            soft_dependencies,
-            hard_dependencies,
+            content_xml_path,
         ):
-        self.ext_id = ext_id
-        self.content_xml_path = content_xml_path
+        
         self.extension_name = content_xml_path.parent.name.lower()
-        self.content_xml = content_xml
-        self.enabled = enabled
-        self.default_enabled = default_enabled
-        self.is_current_output = is_current_output
-        self.soft_dependencies = soft_dependencies
-        self.hard_dependencies = hard_dependencies
+        self.content_xml_path = content_xml_path
+        self.is_current_output = False
+
+        # Load it and pick out the id.
+        self.content_xml = ET.parse(str(content_xml_path)).getroot()
+        self.ext_id = self.content_xml.get('id')
+
+        # Determine if this is enabled or disabled.
+        # Apparently a mod can use '1' for this instead of
+        # 'true', so try both.
+        # TODO: move this into the ext_summary constructor.
+        self.default_enabled =  self.content_xml.get('enabled', 'true').lower() in ['true','1']
+        self.enabled = self.default_enabled
+                
+        # Collect all the names of dependencies.
+        # Lowercase these to standardize name checks.
+        # Ignore those with no id, as they refer to the base X4 version.
+        dependencies = [x.get('id')
+                        for x in self.content_xml.xpath('dependency')
+                        if x.get('id') != None]
+        # Collect optional dependencies.
+        self.soft_dependencies = [x.get('id') 
+                        for x in self.content_xml.xpath('dependency[@optional="true"]')]
+        # Pick out hard dependencies (those not optional).
+        self.hard_dependencies = [x for x in dependencies
+                                    if x not in self.soft_dependencies ]
 
         self.display_name = self.Get_Attribute('name')
         return
@@ -153,53 +165,26 @@ def Find_Extensions():
         # Use glob to pick out all of the extension content.xml files.
         for content_xml_path in extensions_path.glob('*/content.xml'):
 
-            # Load it and pick out the id.
-            content_root = ET.parse(str(content_xml_path)).getroot()
-            ext_id = content_root.get('id')
+            ext_summary = Extension_Summary(content_xml_path)
+            ext_summary_list.append(ext_summary)
+            ext_id = ext_summary.ext_id
             
             # Warning for multiple same-name extensions.
             if ext_id in ext_ids_found:
                 # TODO: what is the best way to signal this?
                 # Can just send to Print for now.
                 Print(('Warning: duplicate extension id "{}" found, in'
-                       ' folder {}').format(ext_id, content_xml_path.parent.name))
+                        ' folder {}').format(ext_id, content_xml_path.parent.name))
             ext_ids_found.add(ext_id)
                             
-            # Determine if this is enabled or disabled.
-            # If it is in user content.xml, use that flag, else use the
+            # Check if this is enabled/disabled.
+            # If it is in user content.xml, use that flag, else keep the
             #  flag in the extension.
-
-            # Apparently a mod can use '1' for this instead of
-            # 'true', so try both.
-            # TODO: move this into the ext_summary constructor.
-            default_enabled =  content_root.get('enabled', 'true').lower() in ['true','1']
             if ext_id in user_extensions_enabled:
-                enabled = user_extensions_enabled[ext_id]
-            else:
-                enabled = default_enabled
+                ext_summary.enabled = user_extensions_enabled[ext_id]
 
-                
-            # Collect all the names of dependencies.
-            # Lowercase these to standardize name checks.
-            dependencies = [x.get('id')
-                            for x in content_root.xpath('dependency')]
-            # Collect optional dependencies.
-            soft_dependencies = [x.get('id') 
-                            for x in content_root.xpath('dependency[@optional="true"]')]
-            # Pick out hard dependencies (those not optional).
-            hard_dependencies = [x for x in dependencies
-                                    if x not in soft_dependencies ]
-
-            ext_summary_list.append( Extension_Summary(
-                ext_id            = ext_id,
-                content_xml_path  = content_xml_path, 
-                content_xml       = content_root,
-                enabled           = enabled, 
-                default_enabled   = default_enabled,
-                is_current_output = content_xml_path == output_content_path,
-                soft_dependencies = soft_dependencies,
-                hard_dependencies = hard_dependencies,
-                ))
+            # Note if this is the customizer output extension.
+            ext_summary.is_current_output = content_xml_path == output_content_path
                         
     return ext_summary_list
                 

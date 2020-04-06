@@ -30,6 +30,7 @@ class VFS_Window(Tab_Page_Widget, generated_class):
     * widget_label_path
     * widget_label_details
     * widget_text_details
+    * w_combobox_filetype
 
     Attributes:
     * window
@@ -58,8 +59,9 @@ class VFS_Window(Tab_Page_Widget, generated_class):
     def __init__(self, parent, window):
         super().__init__(parent, window)
         self.file_info_dict = {}
-        self.pattern = '*.xml'
         self.last_dialog_path = None
+        # Default pattern; gets overwritten below.
+        self.pattern = '.xml'
         
         # Set up initial, blank models.
         self.tree_model = VFS_Tree_Model(self, self.widget_treeView)
@@ -71,6 +73,18 @@ class VFS_Window(Tab_Page_Widget, generated_class):
         # Force the initial splitter position.
         self.hsplitter.setSizes([1000,3000])
         self.vsplitter.setSizes([3000,1000])
+        
+        # Set up the supported filetype patterns.
+        # TODO: more as they become interesting.
+        # TODO: maybe a way to select multiple.
+        for pattern in ['*.xml','*.*']:
+            self.w_combobox_filetype.addItem(pattern)
+        # Set the first pattern to default.
+        self.w_combobox_filetype.setCurrentIndex(0)
+        
+        # Catch changes to the file type combo box.
+        self.w_combobox_filetype.currentIndexChanged.connect(
+            self.Reset_From_File_System)
         
         return
     
@@ -90,6 +104,9 @@ class VFS_Window(Tab_Page_Widget, generated_class):
         #    self.table_name, 
         #    rebuild = True,
         #    )
+        
+        # Update to the current combobox pattern.
+        self.pattern = self.w_combobox_filetype.currentText()
         
         # Kick off the threads to update virtual paths and to
         # update the file info.
@@ -183,6 +200,7 @@ class VFS_Window(Tab_Page_Widget, generated_class):
         '''
         super().Save_Session_Settings(settings)
         settings.setValue('last_dialog_path', str(self.last_dialog_path))
+        settings.setValue('pattern', str(self.pattern))
         return
 
 
@@ -196,5 +214,14 @@ class VFS_Window(Tab_Page_Widget, generated_class):
         stored_value = settings.value('last_dialog_path', None)
         if stored_value not in [None, 'None']:
             self.last_dialog_path = Path(stored_value)
+
+        pattern = settings.value('pattern', None)
+        if pattern:
+            # Find the matching combobox entry and select it.
+            for i in range(self.w_combobox_filetype.maxCount()):
+                text = self.w_combobox_filetype.itemText(i)
+                if text == pattern:
+                    self.w_combobox_filetype.setCurrentIndex(i)
+                    break
         
         return

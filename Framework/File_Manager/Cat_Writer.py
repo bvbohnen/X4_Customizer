@@ -2,6 +2,16 @@
 Support for packing files to a cat/dat pair.
 See Cat_Reader for details on catalog files.
 
+Note on newlines:
+    X Tools produced dat files observed to use windows line feeds (\r\n),
+    perhaps just being a direct encoding of the input files. This can be dealt
+    with in the Game_File Get_Binary methods.
+    The cat files themselves use unix newlines (\n), so the code below
+    will match such behavior.
+    (The above did not seem to matter in testing, but was switched to
+    matching ego results as a potentential fix for some users complaining
+    about the extension not loading.)
+    X Tools does not add newlines between text files.
 '''
 import gzip
 import time
@@ -61,7 +71,8 @@ class Cat_Writer:
         for game_file in self.game_files:
 
             # Get the binary data; any text should be utf-8.
-            this_binary = game_file.Get_Binary()
+            this_binary = game_file.Get_Binary(for_cat = True)
+            x = bytes(this_binary)
 
             # Append to the existing dat binary.
             dat_binary += this_binary
@@ -82,8 +93,8 @@ class Cat_Writer:
         cat_lines.append('')
 
         # Convert the cat to utf-8 binary.
-        # TODO: x4 cats appear to be ansi with unix newlines; look into
-        # if this is needed (if bugs occur with utf8).
+        # Note: x4 cats appear to use unix newlines, which this bytes()
+        # method will match.
         cat_str = '\n'.join(cat_lines)
         cat_binary = bytes(cat_str, encoding = 'utf-8')
         

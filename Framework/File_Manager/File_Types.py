@@ -44,6 +44,11 @@ def New_Game_File(binary, **kwargs):
         or virtual_path == 'libraries/mousecursors.xml'):
             class_type = XML_Index_File
 
+    elif virtual_path.endswith('.xsd'):
+        # These are xml style documentation of xml syntax.
+        # May be compatible with xml, so try that.
+        class_type = XML_File
+
     else:
         # Generic binary file.
         class_type = Misc_File
@@ -203,8 +208,13 @@ class Game_File:
 
         # Handle everything else.
         # This was probably a mistake, so print a nice warning or error.
-        Plugin_Log.Print(('Error: Skipping merge for "{}", extension file from "{}", '
-            ).format( self.virtual_path,  other_file.file_source_path))
+        # TODO: also comes up with gz (gzipped) model files; 
+        #  maybe look into these, though not generally important.
+        # Manually suppress warning for gz files for now, so dlc has
+        # a clean printout.
+        if not self.virtual_path.endswith('.gz'):
+            Plugin_Log.Print(('Error: Skipping merge for "{}", extension file from "{}", '
+                ).format( self.virtual_path,  other_file.file_source_path))
         return self
 
 
@@ -224,6 +234,21 @@ class Game_File:
         Placeholder function for running any post-merging init.
         '''
         return
+
+    def Standardize_Binary_Newlines(self, binary):
+        '''
+        If the given binary represents text, has newlines, and does not
+        have carriage returns, this method adds the carriage returns
+        and passed back the modified binary.
+        '''
+        # Standardize newlines to \r\n.
+        newline = '\n'.encode()
+        creturn = '\r'.encode()
+        # Just in case it already uses \r\n, check for carriage returns first.
+        # (Assume they don't show up otherwise.)
+        if newline in binary and creturn not in binary:
+            binary = binary.replace(newline, creturn + newline)
+        return binary
 
 
 # Note: encoding assumed to be utf-8 in general.
@@ -268,8 +293,6 @@ class XML_File(Game_File):
     # Tag is generally or always the singular of a plural asset group.
     valid_asset_tags = {'macros'     : 'macro',
                         'components' : 'component'}
-    temp_44_binary = None
-    temp_49_binary = None
     def __init__(
             self, 
             binary = None, 
@@ -327,11 +350,13 @@ class XML_File(Game_File):
         # Normally there is just one for vanilla files, but there could
         # be multiple for mods.
         # If something is amiss, this might return none.
+        # Note: observed to be empty in dlc for zone highways, so avoid
+        #  printing error messages.
         asset_nodes = self.patched_root.findall('./'+node_tag)
         if not asset_nodes:
-            Plugin_Log.Print(('Error: asset file contains no assets;'
-                'in file {}; sources: {}.').format(
-                    self.virtual_path, self.source_extension_names))
+            #Plugin_Log.Print(('Error: asset file contains no assets;'
+            #    'in file {}; sources: {}.').format(
+            #        self.virtual_path, self.source_extension_names))
             return
 
         # Start a fresh dict to record these.
@@ -342,23 +367,25 @@ class XML_File(Game_File):
             assert asset_class_name != None
             assert asset_name != None
 
-            # It is possible that the same asset name was defined
-            #  multiple times, most likely due to a file format
-            #  mistake (eg. a replacement style file was dropped in
-            #  with extensions).
-            # Catch that here with a warning, and continue in the
-            #  x4 style of using the first match.
-            # Generated xpaths below will need to account for this.
-            if asset_class_name in self.asset_class_name_dict:
-                # Give the extensions sourced from in the log, to help
-                # the extension checker know which ext to assign the
-                # error to.
-                Plugin_Log.Print(('Error: multiple assets found with name'
-                       ' {} in file {}; sources: {}; only the first will be used.'
-                       ).format(asset_name, self.virtual_path,
-                                self.source_extension_names))
-            else:
-                self.asset_class_name_dict[asset_class_name].append(asset_name)
+            # -Removed; multiple assets of same class and different name
+            #  does come up, eg. in map cluster definitions.
+            ## It is possible that the same asset name was defined
+            ##  multiple times, most likely due to a file format
+            ##  mistake (eg. a replacement style file was dropped in
+            ##  with extensions).
+            ## Catch that here with a warning, and continue in the
+            ##  x4 style of using the first match.
+            ## Generated xpaths below will need to account for this.
+            #if asset_class_name in self.asset_class_name_dict:
+            #    # Give the extensions sourced from in the log, to help
+            #    # the extension checker know which ext to assign the
+            #    # error to.
+            #    Plugin_Log.Print(('Error: multiple assets found with name'
+            #           ' {} in file {}; sources: {}; only the first will be used.'
+            #           ).format(asset_name, self.virtual_path,
+            #                    self.source_extension_names))
+
+            self.asset_class_name_dict[asset_class_name].append(asset_name)
         return
 
 
@@ -486,25 +513,42 @@ class XML_File(Game_File):
         return patch_node
 
 
-    def Get_Binary(self):
+    def Get_Binary(self, version = 'current', no_diff = False, for_cat = False):
         '''
         Returns a bytearray with the full modified_root.
+
+        * version
+          - Version of the file to return binary for.
+        * no_diff
+          - Bool, set False to suppress diff packing and get the fully
+            expanded binary.
+          - Note: only edited source files, current version, return diff
+            files normally; others will always have full binary.
+        * for_cat
+          - Bool, set True if this binary is going to be placed in a catalog
+            file. Changes newline handling (simple linefeed).
         '''
         # Pack into an ElementTree, to get full header.
         # Modified source files will form a diff patch, others
         # just record full xml.
-        if self.from_source:
+        if self.from_source and not no_diff and version == 'current':
             tree = ET.ElementTree(self.Get_Diff())
         else:
-            tree = ET.ElementTree(self.Get_Root_Readonly())
+            tree = ET.ElementTree(self.Get_Root_Readonly(version))
 
         # Pretty print it. This returns bytes.
         binary = XML_Diff.Print(tree, encoding = 'utf-8', xml_declaration = True)
+
         # To be safe, add a newline at the end if not there, since
         # some file readers need it.
-        newline_char = '\n'.encode(encoding = 'utf-8')
-        if not binary.endswith(newline_char):
-            binary += newline_char
+        # -Removed for now; ego cat/dats do not add extra newlines.
+        #newline_char = '\n'.encode(encoding = 'utf-8')
+        #if not binary.endswith(newline_char):
+        #    binary += newline_char
+        
+        # TODO: maybe standardize always anyway.
+        if for_cat:
+            binary = self.Standardize_Binary_Newlines(binary)
         return binary
 
 
@@ -1002,18 +1046,32 @@ class Misc_File(Game_File):
         return self.text
 
     
-    def Get_Binary(self):
+    def Get_Binary(self, for_cat = False, **kwargs):
         '''
         Returns a bytearray with the file contents.
+        Does not currently support distinguishing vanilla from patched files.
+
+        * for_cat
+          - Bool, set True if this binary is going to be placed in a catalog
+            file. Changes newline handling (simple linefeed) for text.
         '''
         if self.binary != None:
             return self.binary
         else:
             assert self.text != None
-            binary = bytearray(self.text.encode())
-            # To be safe, add a newline at the end if there.
-            if not self.text.endswith('\n'):
-                binary += '\n'.encode()
+
+            # To be safe, add a newline at the end.
+            # -Removed for now; ego cat/dats do not add extra newlines.
+            #text = self.text
+            #if not text.endswith('\n'):
+            #    text += '\n'
+
+            # Encode it, using generic utf-8.
+            binary = bytearray(self.text.encode(encoding = 'utf-8'))
+
+            # TODO: maybe standardize always anyway.
+            if for_cat:
+                binary = self.Standardize_Binary_Newlines(binary)
             return binary
         
 
@@ -1022,19 +1080,14 @@ class Misc_File(Game_File):
         Write these contents to the target file_path.
         '''
         if self.text != None:
-            # Do a text write.
-            with open(file_path, 'w') as file:
-                # To be safe, add a newline at the end if there isn't
-                #  one, since some files require this (eg. bods) to
-                #  be read correctly.
-                file.write(self.text)
-                if not self.text.endswith('\n'):
-                    file.write('\n')
-
+            binary = self.Get_Binary()
         elif self.binary != None:
-            # Do a binary write.
-            with open(file_path, 'wb') as file:
-                file.write(self.binary)
-                
+            binary = self.binary
+        else:
+            return
+
+        # Do a binary write.
+        with open(file_path, 'wb') as file:
+            file.write(self.binary)                
         return
 

@@ -128,6 +128,14 @@ Change Log:
    - Script editor swapped to using tab and shift-tab for indentation.
  * 1.10
    - Added Gui option to save xml files from the VFS tab.
+ * 1.11
+   - Support all file types in the VFS viewer, with extract support.
+ * 1.12
+   - Fixed an xml diff bug and reduced warnings, so that the Split dlc
+     loads cleanly.
+   - Improved catalog unpack plugin's support for extensions.
+   - Adjusted newline encoding of packed dat files to better match
+     the egosoft tools.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

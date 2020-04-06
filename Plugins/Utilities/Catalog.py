@@ -69,9 +69,19 @@ def Cat_Unpack(
         
     # Sourcing behavior depends on if a folder or file given.
     if source_cat_path.is_dir():
+
         # Set up a reader for the source location.
+        # If this is an extension, it needs some more annotation; can
+        # test for the content.xml at the path.
+        extension_summary = None
+        content_xml_path = source_cat_path / 'content.xml'
+        if content_xml_path.exists():
+            extension_summary = File_Manager.Extension_Finder.Extension_Summary(content_xml_path)
+
         source_reader = File_Manager.Source_Reader.Location_Source_Reader(
-            location = source_cat_path)
+            location = source_cat_path,
+            extension_summary = extension_summary)
+
         # Print how many catalogs were found.
         Print(('{} catalog files found using standard naming convention.'
                ).format(len(source_reader.catalog_file_dict)))
