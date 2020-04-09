@@ -12,6 +12,8 @@ from .Jobs import Adjust_Job_Count
 #from .Weapon import *
 #from .Director import *
 
+from .Map import Scale_Sector_Size
+
 from .Misc import Apply_Live_Editor_Patches
 
 from .Ships import Adjust_Ship_Speed

@@ -7,3 +7,4 @@ from . import XML_Diff
 from . import Extension_Finder
 # Pull out the most common file system function for transforms to use.
 Load_File = File_System.Load_File
+Load_Files = File_System.Load_Files

@@ -55,6 +55,35 @@ def Standardize_Match_Rules(rules):
     return rule_list
 
 
+def XML_Modify_Int_Attribute(node, attr, rhs, operation):
+    '''
+    Operates on the given node attribute's value, eg. mult, sum, etc.
+    Value is treated as an integer, and rounded before replacement.
+    The value will be floored to 1 if the original was positive
+    and non-0 and the multiplier is non-0.
+
+    * rhs
+      - The right hand side of the operation.
+    * operation
+      - String, one of ['*','+'].
+    '''
+    # Convert to int.
+    value = int(node.get(attr))
+
+    # Operate on it.
+    if operation == '*':
+        new_value = value * rhs
+    elif operation == '+':
+        new_value = value + rhs
+    else:
+        raise Exception()
+
+    # Round, and re-int.
+    new_value = int(round(new_value))
+    node.set(attr, str(new_value))
+    return
+
+
 
 def XML_Multiply_Int_Attribute(node, attr, multiplier):
     '''
@@ -74,18 +103,46 @@ def XML_Multiply_Int_Attribute(node, attr, multiplier):
     return
 
 
-def XML_Multiply_Float_Attribute(node, attr, multiplier):
+def XML_Modify_Float_Attribute(node, attr, rhs, operation, precision = 4):
     '''
-    Multiplies the given node attribute's value by the multiplier.
-    Value is treated as an float, and stored with up to 2 decimal
-    places.
+    Operates on the given node attribute's value, eg. mult, sum, etc.
+    Value is treated as a float.
+
+    * rhs
+      - The right hand side of the operation.
+    * operation
+      - String, one of ['*','+'].
+    * precision
+      - Int, can set the number of decimal places, or None for unlimited.
+      - Defaults to 4.
     '''
+    # Convert to float.
     value = float(node.get(attr))
-    # Multiply.
-    new_value = value * multiplier
+
+    # Operate on it.
+    if operation == '*':
+        new_value = value * rhs
+    elif operation == '+':
+        new_value = value + rhs
+    else:
+        raise Exception()
+        
     # Limit string precision to a couple decimals.
     # For the sake of printouts, trim off trailing 0s; kinda ugly
     #  to do this in python, sadly.
-    new_value_str = '{:.2f}'.format(new_value).rstrip('0').rstrip('.')
+    format_spec = ':{}f'.format('.{}'.format(precision) if precision else '')
+    new_value_str = ('{'+format_spec+'}').format(new_value).rstrip('0').rstrip('.')
     node.set(attr, new_value_str)
     return
+
+
+def XML_Multiply_Float_Attribute(node, attr, multiplier, precision = 4):
+    '''
+    Multiplies the given node attribute's value by the multiplier.
+    Value is treated as an float, and converted to a string for storage.
+
+    * precision
+      - Int, can set the number of decimal places, or None for unlimited.
+      - Defaults to 4.
+    '''
+    XML_Modify_Float_Attribute(node, attr, multiplier, '*', precision)

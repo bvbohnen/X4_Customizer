@@ -1,4 +1,4 @@
-X4 Customizer 1.12
+X4 Customizer 1.13
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -184,6 +184,15 @@ Live_Editor Transforms:
   * Apply_Live_Editor_Patches
 
     This will apply all patches created by hand through the live editor in the GUI. This should be called no more than once per script, and currently should be called before any other transforms which might read the edited values. Pending support for running some transforms prior to hand edits.
+
+
+***
+
+Map Transforms:
+
+  * Scale_Sector_Size
+
+    Change the size of the maps by moving contents (zones, etc.) closer together or futher apart. Note: this will require a new game to take effect, as positions become part of a save file.
 
 
 ***

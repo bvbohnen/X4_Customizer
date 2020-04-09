@@ -173,6 +173,9 @@ class Location_Source_Reader:
         # though glob is case sensitive so this might not work great.
         # TODO: revisit this.
         for path_prefix in valid_virtual_path_prefixes:
+            # Ignore the extensions folder if this is the base cat reader.
+            if not self.extension_summary and path_prefix == 'extensions/':
+                continue
             for file_path in self.location.glob(path_prefix+'**/*'):
                 # Skip folders.
                 if not file_path.is_file():
@@ -258,6 +261,8 @@ class Location_Source_Reader:
         '''
         # Note: for large number of files, using a list for this
         # gives really bad performance; switch to a set().
+        # TODO: maybe have each subfunction return a list, then cast those
+        # to sets and merge.
         # TODO: consider finding a way to make this a generator,
         # though that may be impractical when needing to avoid
         # repeating names.

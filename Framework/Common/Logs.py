@@ -55,7 +55,8 @@ class Plugin_Log_class:
 # Static log object.
 Plugin_Log = Plugin_Log_class()
     
-
+# TODO: protection against files being edited externally, notably
+# for content.xml files (most others are probably fine).
 class Customizer_Log_class:
     '''
     Container for logged information from the customizer framework,

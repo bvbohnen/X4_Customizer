@@ -83,7 +83,8 @@ class Settings_class:
         unpack incorrectly assembled catalogs.
     * ignore_output_extension
       - Bool, if True, the target extension being generated will have
-        its prior content ignored.
+        its prior content ignored (this run works on the original files,
+        and not those changes made last run).
       - Defaults to True; should only be set False if not running
         transforms and wanting to analyse prior output.
 
@@ -100,6 +101,10 @@ class Settings_class:
       - Warning: any prior output on the original path will still exist,
         and is not cleaned out automatically at the time of this note.
       - Defaults to False, writing to <path_to_x4_folder/extensions>
+    * path_to_output_folder
+      - Optional, Path to the location to write the extension files to,
+        instead of the usual X4 or user documents extensions folders.
+      - This is the parent directory to the extension_name folder.
     * output_to_catalog
       - Bool, if True then the modified files will be written to a single
         cat/dat pair, otherwise they are written as loose files.
@@ -311,6 +316,7 @@ class Settings_class:
 
         defaults['extension_name'] = 'X4_Customizer'
         defaults['output_to_user_extensions'] = False
+        defaults['path_to_output_folder'] = None        
         defaults['path_to_source_folder'] = None
         defaults['prefer_single_files'] = False
         defaults['ignore_extensions'] = False
@@ -477,6 +483,8 @@ class Settings_class:
         self.path_to_user_folder   = Path(self.path_to_user_folder).resolve()
         if self.path_to_source_folder != None:
             self.path_to_source_folder = Path(self.path_to_source_folder).resolve()
+        if self.path_to_output_folder != None:
+            self.path_to_output_folder = Path(self.path_to_output_folder).resolve()
 
         # Verify the X4 path looks correct.
         if not self.path_to_x4_folder.exists():
@@ -550,15 +558,22 @@ class Settings_class:
         Returns the path to the output extension folder.
         Creates it if it does not exist.
         '''
-        # Pick the user or x4 folder.
-        if self.output_to_user_extensions:
-            path = self.path_to_user_folder
+        # Check for an override.
+        if self.path_to_output_folder:
+            path = self.path_to_output_folder
         else:
-            path = self.path_to_x4_folder
-        # Offset to the extension.
+            # Pick the user or x4 folder, extensions subfolder.
+            if self.output_to_user_extensions:
+                path = self.path_to_user_folder
+            else:
+                path = self.path_to_x4_folder
+            # Offset to the extension.
+            path = path / 'extensions'
+
         # Use a lowercase name to improve portability, as it may
         # be required for reliable operation on linux.
-        path = path / 'extensions' / (self.extension_name.lower())
+        path = path /  (self.extension_name.lower())
+
         # Create the output folder if it does not exist.
         if not path.exists():
             # Add any needed parents as well.

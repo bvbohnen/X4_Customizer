@@ -1,4 +1,4 @@
-X4 Customizer 1.12
+X4 Customizer 1.13
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -191,7 +191,7 @@ Example input file:
       - Bool, if True then when files extracted from cat/dat fail to verify their md5 hash, no exception will be thrown.
       - Defaults to False; consider setting True if needing to unpack incorrectly assembled catalogs.
     * ignore_output_extension
-      - Bool, if True, the target extension being generated will have its prior content ignored.
+      - Bool, if True, the target extension being generated will have its prior content ignored (this run works on the original files, and not those changes made last run).
       - Defaults to True; should only be set False if not running transforms and wanting to analyse prior output.
     
     Output:
@@ -204,6 +204,9 @@ Example input file:
       - Bool, if True then the generated extension holding output files will be under <path_to_user_folder/extensions>.
       - Warning: any prior output on the original path will still exist, and is not cleaned out automatically at the time of this note.
       - Defaults to False, writing to <path_to_x4_folder/extensions>
+    * path_to_output_folder
+      - Optional, Path to the location to write the extension files to, instead of the usual X4 or user documents extensions folders.
+      - This is the parent directory to the extension_name folder.
     * output_to_catalog
       - Bool, if True then the modified files will be written to a single cat/dat pair, otherwise they are written as loose files.
       - Defaults to False
@@ -375,6 +378,19 @@ Live_Editor Transforms:
     * file_name
       - Optional, alternate name of a json file holding the Live_Editor generated patches file.
       - Default uses the name in Settings.
+        
+
+
+***
+
+Map Transforms:
+
+  * Scale_Sector_Size
+
+    Change the size of the maps by moving contents (zones, etc.) closer together or futher apart. Note: this will require a new game to take effect, as positions become part of a save file.
+    
+    * scaling_factor
+      - Float, how much to adjust distances by.
         
 
 
@@ -764,3 +780,10 @@ Change Log:
    - Fixed an xml diff bug and reduced warnings, so that the Split dlc loads cleanly.
    - Improved catalog unpack plugin's support for extensions.
    - Adjusted newline encoding of packed dat files to better match the egosoft tools.
+ * 1.13
+   - Added Scale_Sector_Size transform.
+   - Added path_to_output_folder setting.
+   - Added symlink resolution when determining if an extension is the current output target.
+   - Removes empty folders when cleaning up files from a prior run.
+   - Added safety check for a file already existing on an output path.
+   - Minor bug fixes.

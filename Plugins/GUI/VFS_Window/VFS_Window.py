@@ -77,7 +77,11 @@ class VFS_Window(Tab_Page_Widget, generated_class):
         # Set up the supported filetype patterns.
         # TODO: more as they become interesting.
         # TODO: maybe a way to select multiple.
-        for pattern in ['*.xml','*.*']:
+        for pattern in [
+            '*.xml',
+            '*.xmf',
+            '*.*',
+            ]:
             self.w_combobox_filetype.addItem(pattern)
         # Set the first pattern to default.
         self.w_combobox_filetype.setCurrentIndex(0)

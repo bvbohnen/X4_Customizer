@@ -122,6 +122,9 @@
     <Compile Include="GUI\VFS_Window\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Transforms\Map.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Transforms\Misc.py">
       <SubType>Code</SubType>
     </Compile>

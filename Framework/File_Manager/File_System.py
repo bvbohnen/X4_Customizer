@@ -412,10 +412,20 @@ class File_System_class:
         # Find all files generated on a prior run, that still appear to be
         #  from that run (eg. were not changed externally), and remove
         #  them.
-        # TODO: clean up empty folders.
         for path in self.old_log.Get_File_Paths_From_Last_Run():
             if path.exists():
                 path.unlink()
+
+                # Clean up empty folders, going upward.
+                parent_dir = path.parent
+                while 1:
+                    try:
+                        # This fails if not empty.
+                        # Will naturally stop once reaching the old log.
+                        parent_dir.rmdir()
+                        parent_dir = parent_dir.parent
+                    except:
+                        break
         return
             
     
@@ -467,7 +477,7 @@ class File_System_class:
         '''
         Print('Writing output files' 
               + (' (diff encoded)' if not Settings.make_maximal_diffs else ''))
-        #to {}'.format(Settings.Get_Output_Folder()))
+        #Print('Output dir: {}'.format(Settings.Get_Output_Folder()))
 
         # Add copies of leftover files from the user source folder.
         # Do this before the proper writeout, so it can reuse functionality.
@@ -509,7 +519,14 @@ class File_System_class:
                 folder_path = file_path.parent
                 if not folder_path.exists():
                     folder_path.mkdir(parents = True)
-                
+
+                # If the file already exists, something went wrong, so
+                # throw an error. (It should have been deleted already
+                # if from last run.)
+                if file_path.exists():
+                    Print('Error: skipping write due to file existing on path: {}'.format(file_path))
+                    continue
+
                 # Write out the file, using the object's individual method.
                 file_object.Write_File(file_path)
 

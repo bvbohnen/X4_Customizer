@@ -184,7 +184,15 @@ def Find_Extensions():
                 ext_summary.enabled = user_extensions_enabled[ext_id]
 
             # Note if this is the customizer output extension.
-            ext_summary.is_current_output = content_xml_path == output_content_path
+            # In case there is a symlink involved, also check these paths
+            # with resolution.
+            ext_summary.is_current_output = False
+            if (content_xml_path == output_content_path 
+            or content_xml_path.resolve() == output_content_path.resolve()):
+                ext_summary.is_current_output = True
+
+            #print('content: {}\n output: {}\n is_current_output: {}\n'.format(
+            #    content_xml_path, output_content_path, ext_summary.is_current_output))
                         
     return ext_summary_list
                 

@@ -41,6 +41,8 @@ relative to the extension, anything in subst relative to x4 base.
 Can maybe verify that here, though currently it is not expected to
 change pathing logic.
 
+TODO: version based extensions.
+
 
 Loading order:
 
@@ -394,7 +396,7 @@ class Source_Reader_class:
             # Work through extensions.
             for ext_reader in self.extension_source_readers.values():
                 # Work through the paths with prefixing as needed.
-                for path in self.Gen_Extension_Virtual_Paths(ext_reader.extension_name):
+                for virtual_path in self.Gen_Extension_Virtual_Paths(ext_reader.extension_name):
                     self._virtual_paths_set.add(virtual_path)
 
         # With the set filled in, can do a pass to yield each path.

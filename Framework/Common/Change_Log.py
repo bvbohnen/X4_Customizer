@@ -136,6 +136,14 @@ Change Log:
    - Improved catalog unpack plugin's support for extensions.
    - Adjusted newline encoding of packed dat files to better match
      the egosoft tools.
+ * 1.13
+   - Added Scale_Sector_Size transform.
+   - Added path_to_output_folder setting.
+   - Added symlink resolution when determining if an extension is the current
+     output target.
+   - Removes empty folders when cleaning up files from a prior run.
+   - Added safety check for a file already existing on an output path.
+   - Minor bug fixes.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

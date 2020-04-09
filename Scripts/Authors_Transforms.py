@@ -60,5 +60,10 @@ Print_Weapon_Stats()
 # Make mods more likely from missions.
 #Adjust_Mission_Reward_Mod_Chance(3)
 
+# Rescale the sectors.
+# -Removed for now; while it works, it requires a new game, and
+# so isn't as suitable for sharing with others.
+#Scale_Sector_Size(0.5)
+
 # Write modified files.
 Write_To_Extension()
