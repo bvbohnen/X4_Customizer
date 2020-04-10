@@ -144,6 +144,10 @@ Change Log:
    - Removes empty folders when cleaning up files from a prior run.
    - Added safety check for a file already existing on an output path.
    - Minor bug fixes.
+ * 1.14
+   - Added wildcards to capture extension objects when listing weapons,
+     shields, etc. in the gui editor.
+   - Fixed bug in weapon rate of fire calc for burst weapons in the editor.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

@@ -1,4 +1,4 @@
-X4 Customizer 1.13
+X4 Customizer 1.14
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -787,3 +787,6 @@ Change Log:
    - Removes empty folders when cleaning up files from a prior run.
    - Added safety check for a file already existing on an output path.
    - Minor bug fixes.
+ * 1.14
+   - Added wildcards to capture extension objects when listing weapons, shields, etc. in the gui editor.
+   - Fixed bug in weapon rate of fire calc for burst weapons in the editor.

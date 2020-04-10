@@ -19,13 +19,13 @@ Settings(
 # code changes.
 test_all = 0
 
-# Test sector resizing.
 if 1:
-    Scale_Sector_Size(0.5)
-
-if 0:
     GUI.Start_GUI()
-    
+   
+# Test sector resizing.
+if 0:
+    Scale_Sector_Size(0.5)
+ 
 # Test the extension checker.
 if 0 or test_all:
     Check_Extension('test_mod')

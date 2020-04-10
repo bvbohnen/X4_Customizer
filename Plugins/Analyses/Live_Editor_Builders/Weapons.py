@@ -28,8 +28,8 @@ def _Build_Bullet_Objects():
 
     # Look up bullet files.
     # These can be in two locations.
-    File_System.Load_Files('assets/props/WeaponSystems/*.xml')
-    File_System.Load_Files('assets/fx/weaponFx/*.xml')
+    File_System.Load_Files('*assets/props/WeaponSystems/*.xml')
+    File_System.Load_Files('*assets/fx/weaponFx/*.xml')
 
     # Split out proper bullets from missiles and similar.
     bullet_game_files = File_System.Get_Asset_Files_By_Class('macros','bullet')
@@ -72,9 +72,14 @@ def Display_Update_RoF(
         # Note: game calculates this wrongly as of ~1.5, multiplying
         # the ammunition_rounds-1 by reload_rate instead of 1/reload_rate.
         # This will do it correctly (hopefully).
+        # Update: in 3.0 game computes ammo_rounds/reload_rate instead of
+        # subtracting one round; is that correct?
+        # Test: 1 round burst, 1 reload_rate, 1 reload_time => 1 round/sec, enc says 1.
+        # Test: 2 round burst, 1 reload_rate, 2 reload_time => 2 round/3 sec, enc says 0.5
+        # So, this calc is correct, enc is wrong (in latter case).
         burst_time = 1/float(reload_rate) * (float(ammunition_rounds)-1)
         time = float(ammunition_reload_time) + burst_time
-        return Float_to_String(1/time)
+        return Float_to_String(float(ammunition_rounds)/time)
 
     # If here, it is unknown.
     return ''
@@ -178,6 +183,7 @@ bullet_item_macros = [
     E('bullet_ricochet'           , './/bullet'          , 'ricochet'     , 'Bullet Ricochet', ''),
     E('bullet_scale'              , './/bullet'          , 'scale'        , 'Bullet Scale', ''),
     E('bullet_attach'             , './/bullet'          , 'attach'       , 'Bullet Attach', ''),
+    E('bullet_sticktime'          , './/bullet'          , 'sticktime'    , 'Bullet Stick Time', ''),
 
     E('heat'                      , './/heat'            , 'value'        , '+Heat', 'Heat added per bullet (or burst of bullets)'),
     ]
@@ -273,7 +279,7 @@ def _Build_Weapon_Objects():
 
 
 # Fields from the weapon macro file to look for and convert to Edit_Items.
-# Switch to full xpaths to hopefully speed up lxml processing time.
+# TODO: Switch to full xpaths to hopefully speed up lxml processing time.
 weapon_item_macros = [
     E('rotation_speed'       , './/rotationspeed'        , 'max'          , 'Rot. Speed', ''),
     E('rotation_acceleration', './/rotationacceleration' , 'max'          , 'Rot. Accel.', ''),

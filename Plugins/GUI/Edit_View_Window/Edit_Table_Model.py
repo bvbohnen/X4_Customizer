@@ -350,10 +350,21 @@ class Edit_Table_Model(QStandardItemModel):
                 
             # Fill in header defaults; these will be used to overwrite
             # old labels in the table.
+            # TODO: change defaults to use the first row/col data, typically
+            # a name, after string conversion. (Will not update it the
+            # text ref is changed, but that's okay.)
             if not vertical_headers:
-                vertical_headers   = ['']*num_rows
+                if horizontal_headers and horizontal_headers[0] == 'Name':
+                    vertical_headers = [x[0].Get_Value('current')
+                                        for x in table]
+                else:
+                    vertical_headers = ['']*num_rows
             if not horizontal_headers:
-                horizontal_headers = ['']*num_cols
+                if vertical_headers and vertical_headers[0] == 'Name':
+                    horizontal_headers = [x.Get_Value('current')
+                                        for x in table[0]]
+                else:
+                    horizontal_headers = ['']*num_cols
                 
 
             # Resize this model.
