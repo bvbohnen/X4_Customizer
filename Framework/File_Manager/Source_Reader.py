@@ -365,7 +365,7 @@ class Source_Reader_class:
                 yield 'extensions/{}/{}'.format(ext_name, ext_path)
         return
 
-
+    # TODO: speed this up somehow; a bit slow to search everything.
     def Gen_All_Virtual_Paths(self, pattern = None):
         '''
         Generator which yields all virtual_path names of all discovered files,
