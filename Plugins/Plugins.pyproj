@@ -185,6 +185,9 @@
     <Compile Include="Utilities\Check_Extension.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Utilities\Generate_Diffs.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Utilities\Write_To_Extension.py">
       <SubType>Code</SubType>
     </Compile>

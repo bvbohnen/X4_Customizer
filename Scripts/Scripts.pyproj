@@ -5,7 +5,7 @@
     <ProjectGuid>58b46218-4d3c-4dd2-9710-e5f2a717ea2d</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>Cat_Pack.py</StartupFile>
+    <StartupFile>Generate_Diffs.py</StartupFile>
     <SearchPath>..\Framework;..\Plugins;..\..\X4_Customizer</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -34,6 +34,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Check_Extensions.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Generate_Diffs.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Example_Transforms.py">

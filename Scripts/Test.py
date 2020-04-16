@@ -9,6 +9,7 @@ from pathlib import Path
 import Framework
 from Plugins import *
 
+this_dir = Path(__file__).resolve().parent
 
 Settings(
     path_to_x4_folder = r'C:\Steam\SteamApps\common\X4 Foundations',
@@ -19,12 +20,21 @@ Settings(
 # code changes.
 test_all = 0
 
-if 1:
+if 0:
     GUI.Start_GUI()
    
 # Test sector resizing.
 if 0:
     Scale_Sector_Size(0.5)
+    
+
+# Diff generator test.
+if 1 or test_all:
+    Generate_Diffs(
+        original_file_path = this_dir / '../test' / 'gamestarts.orig.xml',
+        modified_file_path = this_dir / '../test' / 'gamestarts.xml',
+        output_diff_path   = this_dir / '../test' / 'gamestarts.diff.xml',
+        )
  
 # Test the extension checker.
 if 0 or test_all:

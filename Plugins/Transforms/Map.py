@@ -24,6 +24,8 @@ TODO:
   - Maybe innaccessible god code?
 - Nap Fortune, further station at end of highway, 650 km from gate.
 - Fix slight highway graphic doubling near zone gates (harmless, visual quirk).
+  - Possibly a small y offset in the highway, spline, or gate?
+  - Could just scrap y changes, probably.
 
 - Sacred Relic spaced out; 250 km to furthest station.
 - debuglog complaint about superhighway002_cluster_29_macro (Hatikvah) splines?
@@ -451,23 +453,23 @@ class Region:
         self.does_damage = xml_node.find('.//damage') != None
 
         # Can come in different shapes, but all have an 'r' radius.
+        # Ignore the 'l' of cylinders for now; it is shorter than 'r'
+        # in spot checked cases, and may be used just for the vertical (y)
+        # which doesn't have notable conflicts.
         self.radius = float(size_node.get('r'))
 
-        # -Removed; this spacing is a bit overkill, and may not
-        #  really matter (depending on how effect and region radius
-        #  is handled, eg. region radius might override this).
-        ## If this does damage, the damage radius may be larger than
-        ## the basic radius. Bump it up in this case.
-        ## (Only comes up with the lightning damage in Lasting Vengeance
-        ###  Cluster_35.)
-        #if self.does_damage:
-        #    effect_node = xml_node.find('./fields/effect')
-        #    if effect_node != None:
-        #        effect_radius = effect_node.get('maxdistance')
-        #        if effect_radius:
-        #            effect_radius = float(effect_radius)
-        #            if effect_radius > self.radius:
-        #                self.radius = effect_radius
+        # If this does damage, the damage radius may be larger than
+        # the basic radius. Bump it up in this case.
+        # (Only comes up with the lightning damage in Lasting Vengeance
+        ##  Cluster_35.)
+        if self.does_damage:
+            effect_node = xml_node.find('./fields/effect')
+            if effect_node != None:
+                effect_radius = effect_node.get('maxdistance')
+                if effect_radius:
+                    effect_radius = float(effect_radius)
+                    if effect_radius > self.radius:
+                        self.radius = effect_radius
         return
 
     def Scale(self, scaling_factor):

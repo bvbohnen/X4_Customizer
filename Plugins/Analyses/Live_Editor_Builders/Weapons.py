@@ -88,7 +88,7 @@ def Display_Update_RoF(
 # Shared item types between bullets and missiles.
 reload_macros = [
     D('fire_rate'                 , Display_Update_RoF                    , 'Rate of Fire', ''),
-    E('reload_rate'               , './/reload'          , 'rate'         , 'Reload Rate', 'For burst weapons, time between shots in the burst'),
+    E('reload_rate'               , './/reload'          , 'rate'         , 'Reload Rate', 'For burst weapons, inverse of time between shots in the burst'),
     E('reload_time'               , './/reload'          , 'time'         , 'Reload Time', 'For non-burst weapons, time between shots'),
     E('ammunition_rounds'         , './/ammunition'      , 'value'        , 'Burst Rounds', 'For burst weapons, number of shots per burst.'),
     E('ammunition_reload_time'    , './/ammunition'      , 'reload'       , 'Interburst Time', 'For burst weapons, time from the end of a burst to the start of the next.'),
