@@ -1,9 +1,4 @@
-'''
-TODO:
-    Instead of manually matching nodes, try to use a text diff style approach
-    to identify lines which changed (insert/delete/whatever), and use that
-    to guide decision making.
-'''
+
 from pathlib import Path
 from itertools import zip_longest
 import difflib
@@ -37,17 +32,6 @@ def Generate_Diffs(
     assert output_diff_path != original_file_path
     assert output_diff_path != modified_file_path
 
-    '''
-    This will reuse existing infrastructure as much as reasonable.
-    Basic idea:
-    - Load the original file into a Game_File.
-    - Load the changed file, possibly to another temp Game_File.
-    - Striding through the pair, set the changed file node ids to match
-      those of the original file where nodes appear to be the same.
-    - Put the id-matched version of the changed xml back in the original
-      file's Game_File as its modified version.
-    - Tell the Game_File to write a diff patch to the output path.
-    '''
     # Load the original.
     base_game_file = XML_File(
         # Virtual path doesn't matter.
