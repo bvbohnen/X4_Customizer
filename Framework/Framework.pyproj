@@ -12,7 +12,7 @@
     <Name>Framework</Name>
     <RootNamespace>X4_Customizer</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>Generate_Diffs -argpass</CommandLineArguments>
+    <CommandLineArguments>Check_Extensions -argpass test_mod2</CommandLineArguments>
     <IsWindowsApplication>False</IsWindowsApplication>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>

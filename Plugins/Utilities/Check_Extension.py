@@ -6,7 +6,9 @@ from Framework import File_Manager
 from Framework import Load_File
 from Framework import Plugin_Log
 from Framework import Print
-from Framework import File_Missing_Exception, File_Loading_Error_Exception
+from Framework import File_Missing_Exception
+from Framework import File_Loading_Error_Exception
+from Framework import Unmatched_Diff_Exception
 from Framework import Settings
 
 @Utility_Wrapper()
@@ -165,21 +167,44 @@ def Check_Extension(
         # Loop over all files in the extension.
         for virtual_path in source_reader.Gen_Extension_Virtual_Paths(extension_name):
 
-            # Do a test load; this preserves any prior loads that
-            # may have occurred before this plugin was called.
-            try:
-                Load_File(virtual_path, test_load = True)
+            # Caught exception.
+            exception = None
 
-            # Some loading problems will be printed to the log and then
-            # ignored, but others can be passed through as an exception;
-            # catch the exceptions.
-            # TODO: maybe in developer mode reraise the exception to
-            # get the stack trace.
+            # The path could be to an original file, or to a patch on an
+            # existing file.  Without knowing, need to try out both cases
+            # and see if either works.
+            try:
+                Load_File(virtual_path, test_load = True, 
+                          error_if_unmatched_diff = True)
+
+            # If it was a diff, catch the error.
+            except Unmatched_Diff_Exception:
+
+                # Pop off the extensions/mod_name part of the path.
+                _, _, test_path = virtual_path.split('/', 2)
+
+                # Do a test load; this preserves any prior loads that
+                # may have occurred before this plugin was called.
+                try:
+                    Load_File(test_path, test_load = True)
+
+                # Some loading problems will be printed to the log and then
+                # ignored, but others can be passed through as an exception;
+                # catch the exceptions.
+                # TODO: maybe in developer mode reraise the exception to
+                # get the stack trace.
+                except Exception as ex:
+                    exception = ex
+
             except Exception as ex:
+                exception = ex
+
+            # Did either attempt get an exception?
+            if exception != None:
                 # Pass it to the logging function.
                 Logging_Function(
                     ('Error when loading file {}; returned exception: {}'
-                     ).format(virtual_path, ex))
+                        ).format(virtual_path, exception))
             
 
     Print('  Overall result: ' + ('Success' if success else 'Error detected'))

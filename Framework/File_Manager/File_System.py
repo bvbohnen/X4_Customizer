@@ -299,6 +299,7 @@ class File_System_class:
             self,
             virtual_path,
             error_if_not_found = True,
+            error_if_unmatched_diff = False,
             test_load = False,
             ):
         '''
@@ -316,6 +317,10 @@ class File_System_class:
         * error_if_not_found
           - Bool, if True and the file is not found, raises an exception,
             else returns None.
+        * error_if_unmatched_diff
+          - Bool, if True a Unmatched_Diff_Exception will be thrown
+            if the assumed base file is found to be a diff patch.
+          - Default is to log an error and return None.
         * test_load
           - Bool, if True then the file will be loaded regardless of
             any currently tracked version of it, and the results will
@@ -334,7 +339,10 @@ class File_System_class:
             #  a cat/dat pair.
             # Returns a Game_File object, of some subclass, or None
             #  if not found.
-            game_file = self.source_reader.Read(virtual_path, error_if_not_found = False)
+            game_file = self.source_reader.Read(
+                virtual_path, 
+                error_if_not_found = False,
+                error_if_unmatched_diff = error_if_unmatched_diff)
 
             # Problem if the file isn't found.
             if game_file == None:

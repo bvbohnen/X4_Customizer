@@ -8,6 +8,12 @@ class File_Missing_Exception(Exception):
     or the file is empty.
     '''
 
+class Unmatched_Diff_Exception(Exception):
+    '''
+    Exception raised when File_Manager.Load_File finds a diff patch
+    as the base version of a file.
+    '''
+
 class File_Loading_Error_Exception(Exception):
     '''
     Exception raised when File_Manager.Load_File runs into an exception

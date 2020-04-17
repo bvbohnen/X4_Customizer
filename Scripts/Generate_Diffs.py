@@ -4,9 +4,15 @@ Script for directly diffing pairs of files.
 
 from pathlib import Path
 import argparse, sys
-from Plugins import Generate_Diffs
+from Plugins import Generate_Diff, Generate_Diffs
 from Plugins import Settings
 from Framework import Get_Version
+
+# To avoid errors that print to the Plugin_Log trying to then load Settings
+# which may not be set (eg. where to write the plugin_log to), monkey
+# patch the log to do a pass through.
+from Framework import Plugin_Log
+Plugin_Log.logging_function = lambda line: print(str(line))
 
 
 # Set up command line arguments.
@@ -64,7 +70,6 @@ print('Mod  : {}'.format(mod))
 print('Out  : {}'.format(out))
 print()
 
-
 # Determine if this is file or directory mode.
 mode = 'file' if base.is_file() else 'dir'
 
@@ -81,7 +86,7 @@ if mode == 'file':
         Generate_Diff(
             original_file_path = base,
             modified_file_path = mod,
-            output_diff_path   = out,
+            output_file_path   = out,
             skip_unchanged     = args.skip_unchanged,
             verbose            = args.verbose,
             )

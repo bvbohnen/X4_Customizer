@@ -110,6 +110,17 @@ Note on lxml and xpath bugginess:
     However, lxml also has an 'xpath' method that will act like findall
     except with correct evaluation. Use that always.
 '''
+'''
+Note on namespaces:
+    In short, they are a mess.
+    Original xml uses namespace prefixes on eg. attribute names, eg. "xsi:bla".
+    Lxml replaces these with the namespace base, eg. "{stuff}bla".
+    Xpath applied to original xml needs to use the prefixed version.
+    Xpath applied to the lxml nodes needs to use the expanded version.
+
+    For now, this code will mostly punt on namespaces, outside of changing
+    basic attributes, eg. the schema path in the root node.
+'''
 from lxml import etree as ET
 from copy import deepcopy
 from itertools import zip_longest
@@ -190,6 +201,42 @@ def Print(xml_node, **kwargs):
     for node, tail in node_id_dict.items():
         node.tail = tail
     return text
+
+
+# Fixed namespaces; assume unchanged.
+namespaces = {'xsi':'http://www.w3.org/2001/XMLSchema-instance'}
+# Version of the above representing how the terms appear in code.
+# Keys are followed by a colon, values enclosed in braces.
+namespaces_lxml = { k+':' : '{'+v+'}' for k,v in namespaces.items()}
+
+def Is_NS_Attribute(term):
+    'Returns True if this lxml attribute uses a namespace.'
+    return any(x in term for x in namespaces_lxml.values())
+
+def NS_unqualify(term):
+    '''
+    Unqualify (eg. re-encode) namespaces in the term, since the normal
+    xpath() search function cannot handle qualified names.
+    '''
+    for k, v in namespaces_lxml.items():
+        term = term.replace(v, k)
+    return term
+
+def NS_qualify(term):
+    '''
+    Qualify a name using namespace replacement (eg. expand it), suitable
+    for use with lxml attributes.
+    '''
+    for k, v in namespaces_lxml.items():
+        term = term.replace(k, v)
+    return term
+
+def NS_xpath(node, xpath):
+    '''
+    Returns result of an xpath() lookup on the given node, after unqualifying
+    the provided xpath string.
+    '''
+    return node.xpath(NS_unqualify(xpath), namespaces=namespaces)
 
 
 def Apply_Patch(original_node, patch_node, error_prefix = None):
@@ -313,8 +360,10 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
             # Note: when switching from findall to xpath(), a
             # prefixed '.' was needed to get this to work.
             # Note: if the xpath is malformed, this will throw an exception.
+            # Note: this will support namespacing the xpath to some extent,
+            # just to enable modifying the schema path.
             try:
-                matched_nodes = temp_tree.xpath('.' + xpath)
+                matched_nodes = NS_xpath(temp_tree, '.' + xpath)
             except Exception as ex:
                 Print_Error('xpath exception: {}'.format(ex))
                 continue
@@ -388,11 +437,13 @@ def _Apply_Patch_Op(op_node, target_node, type):
             if '[' in attrib_name:
                 attrib_name = attrib_name.split('[')[0]
 
+        # Qualify the attribute name based on namespaces in the target node.
+        # TODO: maybe remove if dropping namespace support.
+        attrib_name = NS_qualify(attrib_name)
+
         # Handle add and replace the same way.
         if op_node.tag in ('add', 'replace'):
-            # Error check.
-            if not op_node.text:
-                return 'empty text value'
+            assert op_node.text != None
             target_node.set(attrib_name, op_node.text)
 
         if op_node.tag == 'remove':
@@ -506,11 +557,12 @@ def Make_Patch(original_node, modified_node, verify = True, maximal = True):
         Fill_Node_IDs(modified_node)
 
         # Get a list of op elements.
+        # Prune out Nones.
         patch_op_list = _Get_Patch_Ops_Recursive(original_copy, modified_node)
 
         # Construct the diff patch with these as children.
         patch_node = ET.Element('diff')
-        patch_node.extend(patch_op_list)
+        patch_node.extend([x for x in patch_op_list if x != None])
 
     # Verify the patch appears to work okay.
     if verify and not Verify_Patch(original_node, modified_node, patch_node):
@@ -528,7 +580,8 @@ def _Patch_Node_Constructor(
     ):
     '''
     Small support function for creating patch operation.
-    Returns a single Element.
+    Returns a single Element, or None if the patch is rejected
+    due to namespace usage.
     The patch operation is applied automatically to the target node.
 
     * op
@@ -588,8 +641,19 @@ def _Patch_Node_Constructor(
         # apparently offset 1. Other offsets might include tail
         # or similar.
         xpath += '/text()[1]'
+
     elif type == 'attrib' and op != 'add':
         # Target the attribute's name.
+        # Note: x4 cannot handle namespaced attributes: if given the
+        # qualified name, it chokes on the xpath; if given the unqualified
+        # name (with prefix), it replaces it with the qualified name
+        # and chokes anyway.
+        # As such, if this attribute is one of the namespace ones, just
+        # skip this whole patch.
+        if Is_NS_Attribute(name):
+            return
+
+        #name = NS_unqualify(name)
         xpath += '/@' + name
 
     # Create the initial node, where op is the tag.
@@ -901,7 +965,7 @@ def _Get_Xpath_Recursive(node):
         # Note: xpath is 1-based indexing.
         index = similar_elements.index(node) + 1
         xpath += '[{}]'.format(index)
-
+        
     return xpath
 
 
@@ -927,8 +991,13 @@ def Verify_Patch(original_node, modified_node, patch_node):
     # Compare by node, out to the longest list.
     for orig, mod in zip_longest(original_elements, modified_elements):
     
+        # Filter the attributes to remove namespaced ones, which will
+        # be allowed to mismatch.
+        orig_attr = {k:v for k,v in orig.attrib.items() if not Is_NS_Attribute(k)}
+        mod_attr  = {k:v for k,v in mod.attrib.items()  if not Is_NS_Attribute(k)}
+
         # Look at tag, attributes, text.
-        if orig.tag != mod.tag or dict(orig.attrib) != dict(mod.attrib) or orig.text != mod.text:
+        if orig.tag != mod.tag or orig_attr != mod_attr or orig.text != mod.text:
             # If it was succesful up to this point, print a message.
             if success:
                 Print_Log('Patch test failed on line {}.'.format(orig.sourceline))
@@ -940,7 +1009,7 @@ def Verify_Patch(original_node, modified_node, patch_node):
     # For checking, dump all of the xml to files.
     # This is mainly intended for use by the unit test.
     # TODO: attach to an input arg.
-    if 1:
+    if 0:
         if not success:
             with open('test_original_node.xml', 'w') as file:
                 file.write(Print(original_node, encoding = 'unicode'))

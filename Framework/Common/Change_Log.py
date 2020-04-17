@@ -153,6 +153,10 @@ Change Log:
    - Improved diff patch support for comment nodes.
  * 1.15.1
    - Removed dependency on Settings paths when using Generate_Diff.
+ * 1.15.2
+   - Diff patcher now ignores namespaced attribute changes due to lack
+     of support or necessity on x4 side.
+   - Extension checker now better supports mods patching other mods.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

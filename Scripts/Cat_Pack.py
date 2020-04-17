@@ -8,6 +8,11 @@ from Plugins import Cat_Pack
 from Plugins import Settings
 from Framework import Get_Version
 
+# To avoid errors that print to the Plugin_Log trying to then load Settings
+# which may not be set (eg. where to write the plugin_log to), monkey
+# patch the log to do a pass through.
+from Framework import Plugin_Log
+Plugin_Log.logging_function = lambda line: print(str(line))
 
 # Set up command line arguments.
 argparser = argparse.ArgumentParser(

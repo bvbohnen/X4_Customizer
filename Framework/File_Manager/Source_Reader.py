@@ -97,7 +97,7 @@ from fnmatch import fnmatch
 from . import File_Types
 from .. import Common
 from ..Common import Settings
-from ..Common import File_Missing_Exception
+from ..Common import File_Missing_Exception, Unmatched_Diff_Exception
 from ..Common import File_Loading_Error_Exception
 from ..Common import Plugin_Log, Print
 from .Source_Reader_Local import Location_Source_Reader
@@ -411,7 +411,8 @@ class Source_Reader_class:
     def Read(
             self, 
             virtual_path,
-            error_if_not_found = True
+            error_if_not_found = True,
+            error_if_unmatched_diff = False,
         ):
         '''
         Returns a Game_File intialized with the contents read from
@@ -429,6 +430,10 @@ class Source_Reader_class:
         * error_if_not_found
           - Bool, if True a File_Missing_Exception will be thrown if the file
             cannot be found, otherwise None is returned.
+        * error_if_unmatched_diff
+          - Bool, if True a Unmatched_Diff_Exception will be thrown
+            if the assumed base file is found to be a diff patch.
+          - Default is to log an error and return None.
         '''
         # Always work with lowercase virtual paths.
         # (Note: this may have been done already in the File_System, but
@@ -485,8 +490,11 @@ class Source_Reader_class:
         #  they give no warning).
         if (isinstance(game_file, File_Types.XML_File)
         and game_file.Get_Root_Readonly().tag == 'diff'):
-            Plugin_Log.Print(('Error: File found is a diff patch with nothing'
-                              ' to patch, on path "{}".').format(virtual_path))
+            message = ('Error: File found is a diff patch with nothing'
+                              ' to patch, on path "{}".').format(virtual_path)
+            if error_if_unmatched_diff:
+                raise Unmatched_Diff_Exception(message)
+            Plugin_Log.Print(message)
             return None
 
 
