@@ -258,7 +258,7 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
         temp_tree = ET.ElementTree(temp_root)
         
         # Work through the patch operation nodes.
-        for op_node in patch_node.getchildren():                
+        for op_node in patch_node.getchildren():
             # Skip comments.
             if op_node.tag is ET.Comment:
                 continue
@@ -612,7 +612,8 @@ def _Patch_Node_Constructor(
                 op_node.extend(value)
             else:
                 op_node.append(value)
-        # Test and attributes go into the text field.
+
+        # Text and attributes go into the text field.
         else:
             op_node.text = value
 
@@ -672,12 +673,16 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
 
     # Look for text changes.
     if original_node.text != None and modified_node.text == None:
+        # Don't expect this for comments.
+        assert not modified_node.tag is ET.Comment
         # Text removed.
         patch_nodes.append(_Patch_Node_Constructor(
             op     = 'remove', type = 'text',
             target = original_node ))
         
     elif original_node.text != modified_node.text:
+        # This should have been handled earlier for comments.
+        assert not modified_node.tag is ET.Comment
         # Text added or changed; both will use a replace.
         patch_nodes.append(_Patch_Node_Constructor(
             op     = 'replace', type = 'text',
@@ -699,11 +704,18 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
     change_occurred = True
     while change_occurred:
         change_occurred = False
+        
+        # Grab the child lists, pruning out comments (don't support
+        # diffing those).
+        # - Changed to support comments, since it helps with verification.
+        original_children = [x for x in original_node.getchildren()]
+                             #if not x.tag is ET.Comment]
+        modified_children = [x for x in modified_node.getchildren()]
+                             #if not x.tag is ET.Comment]
 
         # Loop through both children lists; keep going if one of them ends.
-        for orig_child, mod_child in zip_longest(
-                                        original_node.getchildren(),
-                                        modified_node.getchildren()):
+        for orig_child, mod_child in zip_longest(original_children, 
+                                                 modified_children):
 
             # If there are no more orig_child nodes, then the mod_child
             #  was appended.
@@ -718,7 +730,7 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
                 change_occurred = True
                 break
             
-            # If ther are no more mod_child nodes, then the orig_child
+            # If there are no more mod_child nodes, then the orig_child
             #  was removed.
             if mod_child == None:
                 patch_nodes.append(_Patch_Node_Constructor(
@@ -756,9 +768,9 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
                     # This case suggests a node was added.
                     patch_nodes.append(_Patch_Node_Constructor(
                         op     = 'add', type = 'node',
-                        # Insert after the original.
+                        # Insert before the original.
                         target = orig_child,
-                        pos = 'after',
+                        pos = 'before',
                         value  = deepcopy(mod_child) ))
                     change_occurred = True
                     break
@@ -783,6 +795,24 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
                         target = orig_child ))
                     change_occurred = True
                     break
+
+
+            # Comments may have had their text changed.
+            # Since diff patching these requires a full node replacement,
+            # handle it here instead of by modifying the existing node.
+            if (orig_child.tag is ET.Comment 
+            and orig_child.text != mod_child.text):
+                # Pack the text in a Comment node.
+                new_comment = ET.Comment(mod_child.text)
+                # Copy over the node id, else the next loop pass will
+                # replace it again.
+                new_comment.tail = orig_child.tail
+                patch_nodes.append(_Patch_Node_Constructor(
+                    op     = 'replace', type = 'node',
+                    target = orig_child,
+                    value  = new_comment ))
+                change_occurred = True
+                break
 
             # If here, then the nodes appear to be the same, superficially.
             # Still need to handle deeper changes, so recurse and pick out
@@ -813,41 +843,50 @@ def _Get_Xpath_Recursive(node):
     # So, it is extremely important that this xpath creator use
     #  attributes to clarify searches whenever possible.
 
-    # TODO: swap over to node tag and some attributes when they
-    #  are sufficient for unique lookup, either within a child list
-    #  or globally (with a prefix '//' to shorten the path).
+    # If this is a comment, it has no attributes, so skip some of this 
+    # code. Comments are found using <parent_path>/comment()[#].
+    if node.tag is ET.Comment:
+        xpath = 'comment()'
+        similar_elements = parent.xpath(xpath)
 
-    # The xpath is just the path to the parent, combined with the tag
-    #  of the child node and its attributes, and the index among 
-    #  nodes with that tag and attributes (as a backup).
-    # To reduce fluff, a first check will just use the tag, and if
-    #  there are multiple matches, a loop will add attributes iteratively
-    #  until a single node matches.
-    # (This could just start with all attributes, but they are often
-    #  not needed and clutter up the output diff patch.)
-    xpath = node.tag
-    # Get elements with the same tag.
-    similar_tag_elements = parent.xpath(xpath)
-    # Store this into a temp var; want to use the same-tag version later.
-    similar_elements = similar_tag_elements
-    # Loop while there is more than 1 similar element (want just self).
-    if len(similar_elements) > 1:
-        # Add attributes.
-        for key, value in node.items():
-            # Note: the xpath will itself be an attribute in double
-            # quotes, so to avoid nested double quotes (which get
-            # output as &quot; in the xml, which xpath then can't
-            # deal with reliably), just use single quotes for this
-            # inner term.
-            xpath += '''[@{}='{}']'''.format(key, value)
-            # Check element matches again.
-            similar_elements = parent.xpath(xpath)
-            # If just one match, done.
-            if len(similar_elements):
-                break
+    else:
+        # The xpath is just the path to the parent, combined with the tag
+        #  of the child node and its attributes, and the index among 
+        #  nodes with that tag and attributes (as a backup).
+        # To reduce fluff, a first check will just use the tag, and if
+        #  there are multiple matches, a loop will add attributes iteratively
+        #  until a single node matches.
+        # (This could just start with all attributes, but they are often
+        #  not needed and clutter up the output diff patch.)
+        xpath = node.tag
+        # Get elements with the same tag.
+        similar_tag_elements = parent.xpath(xpath)
+        # Store this into a temp var; want to use the same-tag version later.
+        similar_elements = similar_tag_elements
 
-    # Verify this node was matched with the current xpath.
-    assert len(similar_elements) >= 1
+        # Loop while there is more than 1 similar element (want just self).
+        if len(similar_elements) > 1:
+            # Add attributes.
+            for key, value in node.items():
+                # Note: the xpath will itself be an attribute in double
+                # quotes, so to avoid nested double quotes (which get
+                # output as &quot; in the xml, which xpath then can't
+                # deal with reliably; other attempts at escaping also failed),
+                # just use single quotes for this inner term.
+                # If the value has quotes, nothing googled has worked, so
+                # consider that an impossible match.
+                if '"' in value or "'" in value:
+                    continue
+                xpath += '''[@{}='{}']'''.format(key, value)
+
+                # Check element matches again.
+                similar_elements = parent.xpath(xpath)
+                # If just one match, done.
+                if len(similar_elements):
+                    break
+
+        # Verify this node was matched with the current xpath.
+        assert len(similar_elements) >= 1
 
 
     # Flesh out the xpath with the parent prefix.
@@ -857,7 +896,8 @@ def _Get_Xpath_Recursive(node):
     # Note: the xpath index is relative to other nodes matched with
     # the same attributes (which differs from find/findall if there
     # were preceeding attributes).
-    if len(similar_elements) > 1:
+    # Note: comments in documentation always show up with a bracket as well.
+    if len(similar_elements) > 1 or node.tag is ET.Comment:
         # Note: xpath is 1-based indexing.
         index = similar_elements.index(node) + 1
         xpath += '[{}]'.format(index)
@@ -873,39 +913,46 @@ def Verify_Patch(original_node, modified_node, patch_node):
     # Copy the original, to do the patching without changing the input.
     original_node_patched = deepcopy(original_node)
     original_node_patched = Apply_Patch(original_node_patched, patch_node)
+    
+    # Line comparison works poorly if the attributes are out of
+    # order, which can happen since the diff patch adds attributes to
+    # the end of a dict that may have been earlier in the original.
+    # As such, since lxml has no way to order attributes on printout,
+    # this comparison needs to be done in a way that allows ordering
+    # differences.
+    original_elements = [x for x in original_node_patched.iter()]
+    modified_elements = [x for x in modified_node.iter()]
 
-    # Easiest is just to convert both to strings, but it can be helpful
-    # to break them up for line-by-line compare for debug.
-    original_node_patched_lines = Print(original_node_patched, encoding = 'unicode').splitlines()
-    modified_node_lines         = Print(modified_node        , encoding = 'unicode').splitlines()
-
-    # Compare by line, out to the longest line list.
     success = True
-    for line_number, (patched_line, mod_line) in enumerate(
-            zip_longest(original_node_patched_lines, modified_node_lines)):
-
-        if patched_line != mod_line:
+    # Compare by node, out to the longest list.
+    for orig, mod in zip_longest(original_elements, modified_elements):
+    
+        # Look at tag, attributes, text.
+        if orig.tag != mod.tag or dict(orig.attrib) != dict(mod.attrib) or orig.text != mod.text:
             # If it was succesful up to this point, print a message.
             if success:
-                Print_Log('Patch test failed on line {}.'.format(line_number))
-                # For checking, dump all of the xml to files.
-                # This is mainly intended for use by the unit test.
-                # TODO: attach to an input arg.
-                if 0:
-                    with open('test_original_node.xml', 'w') as file:
-                        file.write(Print(original_node, encoding = 'unicode'))
-                    with open('test_modified_node.xml', 'w') as file:
-                        file.write(Print(modified_node, encoding = 'unicode'))
-                    with open('test_patch_node.xml', 'w') as file:
-                        file.write(Print(patch_node, encoding = 'unicode'))
-                    with open('test_original_node_patched.xml', 'w') as file:
-                        file.write(Print(original_node_patched, encoding = 'unicode'))
-                    # Pause; allow time to peek at files or ctrl-C.
-                    #input('Press enter to continue testing.')
-                    
+                Print_Log('Patch test failed on line {}.'.format(orig.sourceline))
             # Flag as a failure.
             success = False
             break
+
+    
+    # For checking, dump all of the xml to files.
+    # This is mainly intended for use by the unit test.
+    # TODO: attach to an input arg.
+    if 1:
+        if not success:
+            with open('test_original_node.xml', 'w') as file:
+                file.write(Print(original_node, encoding = 'unicode'))
+            with open('test_modified_node.xml', 'w') as file:
+                file.write(Print(modified_node, encoding = 'unicode'))
+            with open('test_patch_node.xml', 'w') as file:
+                file.write(Print(patch_node, encoding = 'unicode'))
+            with open('test_original_node_patched.xml', 'w') as file:
+                file.write(Print(original_node_patched, encoding = 'unicode'))
+            # Pause; allow time to peek at files or ctrl-C.
+            #input('Press enter to continue testing.')
+
     return success
 
 
