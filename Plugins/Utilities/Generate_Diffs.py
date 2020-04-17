@@ -11,7 +11,7 @@ from Framework.File_Manager.Cat_Reader import Get_Hash_String
 from Framework.File_Manager.XML_Diff import Print as XML_Print
 
 
-@Utility_Wrapper()
+@Utility_Wrapper(uses_paths_from_settings = False)
 def Generate_Diffs(
         original_dir_path,
         modified_dir_path,
@@ -70,7 +70,7 @@ def Generate_Diffs(
     return
 
 
-@Utility_Wrapper()
+@Utility_Wrapper(uses_paths_from_settings = False)
 def Generate_Diff(
         original_file_path,
         modified_file_path,
@@ -105,7 +105,9 @@ def Generate_Diff(
         'Prints all pending messages.'
         while messages:
             message = messages.pop(0)
-            Plugin_Log.Print(message)
+            # TODO: maybe allow this if Settings are set up, otherwise
+            # might give an error on eg. missing x4 path.
+            #Plugin_Log.Print(message)
             if verbose:
                 Print(message)
 
@@ -205,7 +207,8 @@ class Element_Wrap:
         return not self.__eq__(other)
 
     def __hash__(self):
-        # TODO: normal hash is probably fine.
+        # Note: just doing something like id(self) gives horrible results;
+        # the hash appears to be part of the comparison.
         hash_str = '{},{},{}'.format(
             self.tag, 
             ','.join(['{}:{}'.format(k,v) for k,v in sorted(self.attrib.items())]),

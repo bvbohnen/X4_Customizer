@@ -1,4 +1,4 @@
-X4 Customizer 1.15
+X4 Customizer 1.15.1
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -829,3 +829,5 @@ Change Log:
  * 1.15
    - Added Generate_Diff support, for auto diff generation between two files.
    - Improved diff patch support for comment nodes.
+ * 1.15.1
+   - Removed dependency on Settings paths when using Generate_Diff.

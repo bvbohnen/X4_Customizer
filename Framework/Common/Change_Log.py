@@ -151,6 +151,8 @@ Change Log:
  * 1.15
    - Added Generate_Diff support, for auto diff generation between two files.
    - Improved diff patch support for comment nodes.
+ * 1.15.1
+   - Removed dependency on Settings paths when using Generate_Diff.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.
