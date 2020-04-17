@@ -11,26 +11,104 @@ from Framework.File_Manager.Cat_Reader import Get_Hash_String
 from Framework.File_Manager.XML_Diff import Print as XML_Print
 
 
-
 @Utility_Wrapper()
 def Generate_Diffs(
-        original_file_path,
-        modified_file_path,
-        output_diff_path,
+        original_dir_path,
+        modified_dir_path,
+        output_dir_path,
+        skip_unchanged = False,
+        verbose = False,
     ):
     '''
     Generate diffs for changes between two xml files, creating a diff patch.
+
+    * original_dir_path
+      - Path to the original xml file that acts as the baseline.
+    * modified_dir_path
+      - Path to the modified version of the xml file.
+    * output_dir_path
+      - Path to write the diff patch to.
+    * skip_unchanged
+      - Bool, skip output for files that are unchanged (removing any
+        existing diff patch).
+      - Default will generate empty diff patches.
+    * verbose
+      - Bool, print the path of the outputs on succesful writes.
+    '''
+    # Gather all xml files from the input directorys.
+    # Make dicts for ease of use, keyed by relative path from the
+    # base folder.
+    #original_paths = {x.relative_to(original_dir_path) : x for x in original_dir_path.glob('**/*.xml')}
+    modified_paths = {x.relative_to(modified_dir_path) : x for x in modified_dir_path.glob('**/*.xml')}
+
+    # Pair off the modified files with originals by name.
+    # If an original is not found, error.
+    # Ignore excess originals.
+    for rel_path, mod_path in modified_paths.items():
+
+        orig_path = original_dir_path / rel_path
+        if not orig_path.exists() and orig_path.is_file():
+            Print('No matching original file found for {}'.format(name))
+            continue
+
+        # Set up the output.
+        out_path = output_dir_path / rel_path
+
+        if verbose:
+            Print('Generating diff for {}'.format(rel_path.name))
+
+        # Generate the diff. If this errors, the file will be skipped
+        # (due to plugin wrapper).
+        Generate_Diff(
+            original_file_path = orig_path,
+            modified_file_path = mod_path,
+            output_file_path   = out_path,
+            skip_unchanged     = skip_unchanged,
+            verbose            = verbose
+        )
+
+    return
+
+
+@Utility_Wrapper()
+def Generate_Diff(
+        original_file_path,
+        modified_file_path,
+        output_file_path,
+        skip_unchanged = False,
+        verbose = False,
+    ):
+    '''
+    Generate a diff of changes between two xml files, creating a diff patch.
 
     * original_file_path
       - Path to the original xml file that acts as the baseline.
     * modified_file_path
       - Path to the modified version of the xml file.
-    * output_diff_path
+    * output_file_path
       - Path to write the diff patch to.
+    * skip_unchanged
+      - Bool, skip output for files that are unchanged (removing any
+        existing diff patch).
+      - Default will generate empty diff patches.
+    * verbose
+      - Bool, print the path of the outputs on succesful writes.
     '''
-    assert original_file_path != modified_file_path
-    assert output_diff_path != original_file_path
-    assert output_diff_path != modified_file_path
+    if (original_file_path == modified_file_path
+    or  output_file_path == original_file_path
+    or  output_file_path == modified_file_path):
+        raise Exception('Path conflict error')
+
+    # List of messages to print out.
+    messages = []
+    def Print_Messages():
+        'Prints all pending messages.'
+        while messages:
+            message = messages.pop(0)
+            Plugin_Log.Print(message)
+            if verbose:
+                Print(message)
+
 
     # Load the original.
     base_game_file = XML_File(
@@ -67,16 +145,40 @@ def Generate_Diffs(
     # Returns a dict pairing original with modified nodes.
     text_based_node_matches = Get_Text_Diff_Matches(original_root, modified_root)
 
-    # Follow up with a manual traversal of the trees, completing matches.
-    Match_Trees(original_root, modified_root, text_based_node_matches)
+    # Note: if all nodes were matches on both sides, then the
+    # file hasn't been changed (except maybe formatting and such).
+    num_matches = len(text_based_node_matches)
+    num_orig_nodes = len([x for x in original_root.iter()])
+    num_mod_nodes  = len([x for x in modified_root.iter()])
+    unchanged = num_matches == num_orig_nodes == num_mod_nodes
 
+    # If files match, check arg for skipping the file.
+    if unchanged and skip_unchanged:
 
-    # Put the modified xml back in the game_file.
-    base_game_file.Update_Root(modified_root)
+        messages.append('File unchanged: {}'.format(modified_file_path))
+        # Check if an output file already exists and delete it.
+        if output_file_path.exists():
+            output_file_path.unlink()
+            messages.append('Removing prior diff: {}'.format(output_file_path))
 
-    # Write to file. This will trigger the diff patch generation. 
-    base_game_file.Write_File(output_diff_path)
+    else:
+        # Don't need to put the modified root back if there are no changes.
+        if not unchanged:
+            # Follow up with a manual traversal of the trees, completing matches.
+            Match_Trees(original_root, modified_root, text_based_node_matches)
 
+            # Put the modified xml back in the game_file.
+            base_game_file.Update_Root(modified_root)
+
+        # Write to file. This will trigger the diff patch generation,
+        # empty if no changes.
+        # This also makes the directory if needed.
+        base_game_file.Write_File(output_file_path)
+
+        # The above can be handy as a print message to verify the update.
+        messages.append('Generated diff written to: {}'.format(output_file_path))
+
+    Print_Messages()
     return
 
 
@@ -96,12 +198,14 @@ class Element_Wrap:
         or self.attrib != other.attrib
         or self.text != other.text):
             return False
+        # TODO: maybe check parent tags as well, for conservative matching.
         return True
 
     def __ne__(self, other):
         return not self.__eq__(other)
 
     def __hash__(self):
+        # TODO: normal hash is probably fine.
         hash_str = '{},{},{}'.format(
             self.tag, 
             ','.join(['{}:{}'.format(k,v) for k,v in sorted(self.attrib.items())]),
@@ -332,6 +436,9 @@ def Match_Children(
         and not list(mod_child)):
             weak_match = True
                     
+        # TODO: if a node was inserted, and the following node changed,
+        # the above can get confused and think a node was changed then
+        # inserted.  Think of a general way to better handle such cases.
 
         if strong_match:
             # Copy over the IDs, for all children as well.

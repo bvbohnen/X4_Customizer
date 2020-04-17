@@ -126,13 +126,14 @@ def Run(*args):
 
     else:
         # Pick out the -h flag, so help can be printed in the
-        # control script instead of here.
-        pass_help_arg = False
-        if '-h' in args:
-            pass_help_arg = True
-            # Need to swap from tuple to list to remove an item.
-            args = list(args)
-            args.remove('-h')
+        # control script instead of here. Also catch --help.
+        pass_help_arg = None
+        for help_str in ['-h','--help']:
+            if help_str in args:
+                pass_help_arg = help_str
+                # Need to swap from tuple to list to remove an item.
+                args = list(args)
+                args.remove(help_str)
 
         # Do a partial parsing.
         args, remainder = argparser.parse_known_args(args)
@@ -143,7 +144,7 @@ def Run(*args):
         sys.argv = [sys.argv[0]] + remainder
         # Add back in the -h flag.
         if pass_help_arg:
-            sys.argv.append('-h')
+            sys.argv.append(pass_help_arg)
 
 
     # Check for a gui launch.

@@ -1,4 +1,4 @@
-X4 Customizer 1.14
+X4 Customizer 1.15
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -269,6 +269,14 @@ Utilities:
   * Check_Extension
 
     Checks an extension for xml diff patch errors and dependency errors. Problems are printed to the console. Returns True if no errors found, else False.
+
+  * Generate_Diff
+
+    Generate a diff of changes between two xml files, creating a diff patch.
+
+  * Generate_Diffs
+
+    Generate diffs for changes between two xml files, creating a diff patch.
 
   * Write_To_Extension
 

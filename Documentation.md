@@ -1,4 +1,4 @@
-X4 Customizer 1.14
+X4 Customizer 1.15
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -391,6 +391,8 @@ Map Transforms:
     
     * scaling_factor
       - Float, how much to adjust distances by.
+    * debug
+      - Bool, if True then write runtime state to the plugin log.
         
 
 
@@ -657,6 +659,40 @@ Utilities:
       - Does not stop the normal message Prints.
         
 
+  * Generate_Diff
+
+    Generate a diff of changes between two xml files, creating a diff patch.
+    
+    * original_file_path
+      - Path to the original xml file that acts as the baseline.
+    * modified_file_path
+      - Path to the modified version of the xml file.
+    * output_file_path
+      - Path to write the diff patch to.
+    * skip_unchanged
+      - Bool, skip output for files that are unchanged (removing any existing diff patch).
+      - Default will generate empty diff patches.
+    * verbose
+      - Bool, print the path of the outputs on succesful writes.
+        
+
+  * Generate_Diffs
+
+    Generate diffs for changes between two xml files, creating a diff patch.
+    
+    * original_dir_path
+      - Path to the original xml file that acts as the baseline.
+    * modified_dir_path
+      - Path to the modified version of the xml file.
+    * output_dir_path
+      - Path to write the diff patch to.
+    * skip_unchanged
+      - Bool, skip output for files that are unchanged (removing any existing diff patch).
+      - Default will generate empty diff patches.
+    * verbose
+      - Bool, print the path of the outputs on succesful writes.
+        
+
   * Write_To_Extension
 
     Write all currently modified game files to the extension folder. Existing files at the location written on a prior call will be cleared out. Content.xml will have dependencies added for files modified from existing extensions.
@@ -790,3 +826,6 @@ Change Log:
  * 1.14
    - Added wildcards to capture extension objects when listing weapons, shields, etc. in the gui editor.
    - Fixed bug in weapon rate of fire calc for burst weapons in the editor.
+ * 1.15
+   - Added Generate_Diff support, for auto diff generation between two files.
+   - Improved diff patch support for comment nodes.

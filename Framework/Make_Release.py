@@ -83,6 +83,7 @@ def Make(*args):
         'Clean_Script.bat',
         'Run_Script.bat',
         'Start_Gui.bat',
+        'Generate_Diffs.bat',
         'Documentation.md',
         'README.md',
         'License.txt',
@@ -92,6 +93,7 @@ def Make(*args):
         'Cat_Pack.py',
         'Cat_Unpack.py',
         'Check_Extensions.py',
+        'Generate_Diffs.py',
         'Example_Transforms.py',
         'Default_Script_template.py',
         )

@@ -148,9 +148,13 @@ Change Log:
    - Added wildcards to capture extension objects when listing weapons,
      shields, etc. in the gui editor.
    - Fixed bug in weapon rate of fire calc for burst weapons in the editor.
+ * 1.15
+   - Added Generate_Diff support, for auto diff generation between two files.
+   - Improved diff patch support for comment nodes.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.
+# TODO: convert this change_log to a standalone md file.
 
 def Get_Version():
     '''

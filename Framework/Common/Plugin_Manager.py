@@ -141,7 +141,7 @@ def _Plugin_Wrapper(
                 # (This may not be the case in dev mode, but that will
                 #  have other messages to indicate the problem.)
                 if Settings.verbose:
-                    Print('Successfully ran {}'.format(
+                    Print('Successfully completed {}'.format(
                         func.__name__
                         ))
 

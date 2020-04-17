@@ -30,10 +30,15 @@ if 0:
 
 # Diff generator test.
 if 1 or test_all:
-    Generate_Diffs(
-        original_file_path = this_dir / '../test' / 'gamestarts.orig.xml',
-        modified_file_path = this_dir / '../test' / 'gamestarts.xml',
-        output_diff_path   = this_dir / '../test' / 'gamestarts.diff.xml',
+    #Generate_Diff(
+    #    original_file_path = this_dir / '../private/test' / 'gamestarts.orig.xml',
+    #    modified_file_path = this_dir / '../private/test' / 'gamestarts.xml',
+    #    output_file_path   = this_dir / '../private/test' / 'gamestarts.diff.xml',
+    #    )
+    Generate_Diff(
+        original_file_path = this_dir / '../private/test' / 'fight.attack.object.bigtarget.orig.xml',
+        modified_file_path = this_dir / '../private/test' / 'fight.attack.object.bigtarget.xml',
+        output_file_path   = this_dir / '../private/test' / 'fight.attack.object.bigtarget.diff.xml',
         )
  
 # Test the extension checker.

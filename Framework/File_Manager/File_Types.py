@@ -556,6 +556,10 @@ class XML_File(Game_File):
         '''
         Write these contents to the target file_path.
         '''
+        # Create the directory as needed.
+        if not file_path.parent.exists():
+            file_path.parent.mkdir(parents = True)
+
         # Do a binary write.
         with open(file_path, 'wb') as file:
             file.write(self.Get_Binary())                      
@@ -1079,6 +1083,10 @@ class Misc_File(Game_File):
         '''
         Write these contents to the target file_path.
         '''
+        # Create the directory as needed.
+        if not file_path.parent.exists():
+            file_path.parent.mkdir(parents = True)
+
         if self.text != None:
             binary = self.Get_Binary()
         elif self.binary != None:
