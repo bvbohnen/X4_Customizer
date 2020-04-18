@@ -71,7 +71,7 @@ def Scale_Sector_Size(
     ):
     '''
     Change the size of the maps by moving contents (zones, etc.) closer
-    together or futher apart. Note: this will require a new game to
+    together or further apart. Note: this will require a new game to
     take effect, as positions become part of a save file.
 
     * scaling_factor
@@ -199,9 +199,9 @@ class Position:
         Should be called at the end of all processing.
         '''
         if self.xml_node != None:
-            self.xml_node.set('x', str(int(self.x)))
-            self.xml_node.set('y', str(int(self.y)))
-            self.xml_node.set('z', str(int(self.z)))
+            self.xml_node.set('x', str(self.x))
+            self.xml_node.set('y', str(self.y))
+            self.xml_node.set('z', str(self.z))
         return
 
     def Update(self, other):
@@ -306,7 +306,7 @@ class Spline_Position(Position):
         for attr in ['tx','ty','tz']:
             self.xml_node.set(attr, str(getattr(self, attr)))
         for attr in ['inlength','outlength']:
-            self.xml_node.set(attr, str(int(getattr(self, attr))))
+            self.xml_node.set(attr, str(getattr(self, attr)))
         return
 
 

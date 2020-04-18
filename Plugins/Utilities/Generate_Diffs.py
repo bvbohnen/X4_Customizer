@@ -20,7 +20,8 @@ def Generate_Diffs(
         verbose = False,
     ):
     '''
-    Generate diffs for changes between two xml files, creating a diff patch.
+    Generate diffs for changes between two xml containing folders, 
+    creating diff patches.
 
     * original_dir_path
       - Path to the original xml file that acts as the baseline.
