@@ -10,7 +10,7 @@ from .Support import XML_Multiply_Float_Attribute
 @Transform_Wrapper()
 def Adjust_Job_Count(
         # Allow job multipliers to be given as a loose list of args.
-        *job_multipliers
+        *job_multipliers,
     ):
     '''
     Adjusts job ship counts using a multiplier, affecting all quota fields.
@@ -19,18 +19,21 @@ def Adjust_Job_Count(
     Resulting non-integer job counts are rounded, with a minimum of 1 unless
     the multiplier or original count were 0.
 
-    * job_multipliers:
+    * job_multipliers
       - Tuples holding the matching rules and job count multipliers,
         ("key  value", multiplier).
       - The "key" specifies the job field to look up, which will
         be checked for a match with "value".
       - If a job matches multiple rules, the first match is used.
+      - Subordinates will never be matched except by an exact 'id' match, to
+        avoid accidental job multiplication (eg. XL ship with a wing of L
+        ships which have wings of M ships which have wings of S ships).
       - Supported keys:
-        - 'id'      : Name of the job entry; supports wildcards.
+        - 'id'      : Name of the job entry; supports wildcards for non-wings.
         - 'faction' : The name of the faction.
         - 'tags'    : One or more tags, space separated.
         - 'size'    : The ship size suffix, 'xs','s','m','l', or 'xl'.
-        - '*'       : Matches all jobs; takes no value term.
+        - '*'       : Matches all non-wing jobs; takes no value term.
 
     Examples:
     <code>
@@ -53,6 +56,11 @@ def Adjust_Job_Count(
     # Loop over the jobs.
     for job in xml_root.findall('./job'):
         
+        quota = job.find('quota')
+        # Check if this is a wing ship.
+        # Could also check modifiers.subordinate.
+        is_wing = quota.get('wing') != None
+        
         # Look up the tags and a couple other properties of interest.
         job_id      = job.get('id')
         # The category node may not be present.
@@ -68,26 +76,38 @@ def Adjust_Job_Count(
             size     = None
             tags     = []
 
+        # Always ignore the dummy_job, to be safe.
+        if job_id == 'dummy_job':
+            continue
+
         # Check the matching rules.
         multiplier = None
         for key, value, mult in rules:
-            if((key == '*')
-            or (key == 'id' and fnmatch(job_id, value))
-            or (key == 'faction' and faction == value)
-            # Check all tags, space separated.
-            or (key == 'tags' and all(x in tags for x in value.split(' ')))
-            # For sizes, add a 'ship_' prefix to the match_str.
-            or (key == 'size' and size == ('ship_'+value)) ):
-                multiplier = mult
-                break
+
+            # Non-wing matches.
+            if not is_wing:
+                if((key == '*')
+                or (key == 'id' and fnmatch(job_id, value))
+                or (key == 'faction' and faction == value)
+                # Check all tags, space separated.
+                or (key == 'tags' and all(x in tags for x in value.split(' ')))
+                # For sizes, add a 'ship_' prefix to the match_str.
+                or (key == 'size' and size == ('ship_'+value)) ):
+                    multiplier = mult
+                    break
+
+            # Restrictive wing matches.
+            else:
+                # Only support on a perfect id match.
+                if key == 'id' and job_id == value:
+                    multiplier = mult
+                    break
+
         # Skip if no match.
         if multiplier == None:
             continue
 
-        # Apply the multiplier to all fields of the quota node.
-        # The only quota that might be skipped is 'variation', but
-        #  go ahead and adjust it too for now.
-        quota = job.find('quota')
+        # Apply the multiplier to fields of the quota node.
         for name, value in quota.items():
             XML_Multiply_Int_Attribute(quota, name, multiplier)
                         

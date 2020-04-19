@@ -1,4 +1,4 @@
-X4 Customizer 1.15.2
+X4 Customizer 1.15.3
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -342,16 +342,17 @@ Jobs Transforms:
     
     Resulting non-integer job counts are rounded, with a minimum of 1 unless the multiplier or original count were 0.
     
-    * job_multipliers:
+    * job_multipliers
       - Tuples holding the matching rules and job count multipliers, ("key  value", multiplier).
       - The "key" specifies the job field to look up, which will be checked for a match with "value".
       - If a job matches multiple rules, the first match is used.
+      - Subordinates will never be matched except by an exact 'id' match, to avoid accidental job multiplication (eg. XL ship with a wing of L ships which have wings of M ships which have wings of S ships).
       - Supported keys:
-        - 'id'      : Name of the job entry; supports wildcards.
+        - 'id'      : Name of the job entry; supports wildcards for non-wings.
         - 'faction' : The name of the faction.
         - 'tags'    : One or more tags, space separated.
         - 'size'    : The ship size suffix, 'xs','s','m','l', or 'xl'.
-        - '*'       : Matches all jobs; takes no value term.
+        - '*'       : Matches all non-wing jobs; takes no value term.
     
     Examples:
     
@@ -387,7 +388,7 @@ Map Transforms:
 
   * Scale_Sector_Size
 
-    Change the size of the maps by moving contents (zones, etc.) closer together or futher apart. Note: this will require a new game to take effect, as positions become part of a save file.
+    Change the size of the maps by moving contents (zones, etc.) closer together or further apart. Note: this will require a new game to take effect, as positions become part of a save file.
     
     * scaling_factor
       - Float, how much to adjust distances by.
@@ -678,7 +679,7 @@ Utilities:
 
   * Generate_Diffs
 
-    Generate diffs for changes between two xml files, creating a diff patch.
+    Generate diffs for changes between two xml containing folders, creating diff patches.
     
     * original_dir_path
       - Path to the original xml file that acts as the baseline.
@@ -834,3 +835,5 @@ Change Log:
  * 1.15.2
    - Diff patcher now ignores namespaced attribute changes due to lack of support or necessity on x4 side.
    - Extension checker now better supports mods patching other mods.
+ * 1.15.3
+   - Tweaked Adjust_Job_Count to generally ignore subordinate counts, to avoid ship counts multiplying to very large numbers.

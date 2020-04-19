@@ -12,6 +12,9 @@ Apply_Live_Editor_Patches()
 # (There may also be a way to adjust this in-game now.)
 Adjust_Job_Count(('id masstraffic*', 0.5))
 
+# Testing reducing jobs globally.
+#Adjust_Job_Count(('*', 2))
+
 # Toy around with coloring.
 # This is Pious Mists.
 # Color_Text((20005,3021,'C'))
@@ -63,7 +66,7 @@ Print_Weapon_Stats()
 # Rescale the sectors.
 # -Removed for now; while it works, it requires a new game, and
 # so isn't as suitable for sharing with others.
-#Scale_Sector_Size(0.5)
+Scale_Sector_Size(0.4)
 
 # Write modified files.
 Write_To_Extension()

@@ -157,6 +157,9 @@ Change Log:
    - Diff patcher now ignores namespaced attribute changes due to lack
      of support or necessity on x4 side.
    - Extension checker now better supports mods patching other mods.
+ * 1.15.3
+   - Tweaked Adjust_Job_Count to generally ignore subordinate counts, to avoid
+     ship counts multiplying to very large numbers.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

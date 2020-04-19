@@ -1,4 +1,4 @@
-X4 Customizer 1.15.2
+X4 Customizer 1.15.3
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -192,7 +192,7 @@ Map Transforms:
 
   * Scale_Sector_Size
 
-    Change the size of the maps by moving contents (zones, etc.) closer together or futher apart. Note: this will require a new game to take effect, as positions become part of a save file.
+    Change the size of the maps by moving contents (zones, etc.) closer together or further apart. Note: this will require a new game to take effect, as positions become part of a save file.
 
 
 ***
@@ -276,7 +276,7 @@ Utilities:
 
   * Generate_Diffs
 
-    Generate diffs for changes between two xml files, creating a diff patch.
+    Generate diffs for changes between two xml containing folders, creating diff patches.
 
   * Write_To_Extension
 
