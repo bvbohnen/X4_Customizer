@@ -59,6 +59,16 @@ argparser.add_argument(
     nargs = '*',
     help =  'Wildcard patterns for files to be excluded, space separated.')
 
+argparser.add_argument(
+    '-g', '--gen-sigs',
+    action='store_true',
+    help =  'Generate any missing signature files.')
+
+argparser.add_argument(
+    '-s', '--split-sigs',
+    action='store_true',
+    help =  'Move any signature files into a second cat/dat suffixed with .sig.')
+
 args = argparser.parse_args(sys.argv[1:])
 
 
@@ -88,4 +98,6 @@ Cat_Pack(
     dest_cat_path   = args.dest,
     include_pattern = args.include,
     exclude_pattern = args.exclude,
+    generate_sigs   = args.gen_sigs,
+    separate_sigs   = args.split_sigs,
     )

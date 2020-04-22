@@ -87,6 +87,15 @@ class Settings_class:
         and not those changes made last run).
       - Defaults to True; should only be set False if not running
         transforms and wanting to analyse prior output.
+    * X4_exe_name
+      - String, name of the X4.exe file, to be used when sourcing the file
+        for any exe transforms (if used).
+      - Defaults to "X4.exe", but may be useful to change based on the
+        source exe file for transforms, eg. "X4_nonsteam.exe",
+        "X4_steam.exe", or similar.
+      - Note: the customized exe is placed in the extension folder,
+        and needs to be manually copied or symlinked back to the 
+        root X4 folder to run.
 
     Output:
     * extension_name
@@ -109,6 +118,9 @@ class Settings_class:
       - Bool, if True then the modified files will be written to a single
         cat/dat pair, otherwise they are written as loose files.
       - Defaults to False
+    * generate_sigs
+      - Bool, if True then dummy signature files will be created.
+      - Defaults to True.
     * make_maximal_diffs
       - Bool, if True then generated xml diff patches will do the
         maximum full tree replacement instead of using the algorithm
@@ -322,6 +334,7 @@ class Settings_class:
         defaults['ignore_extensions'] = False
         defaults['allow_cat_md5_errors'] = False
         defaults['ignore_output_extension'] = True
+        defaults['X4_exe_name'] = 'X4.exe'        
         defaults['make_maximal_diffs'] = False
         defaults['plugin_log_file_name'] = 'plugin_log.txt'
         defaults['live_editor_log_file_name'] = 'live_editor_log.json'        
@@ -336,6 +349,7 @@ class Settings_class:
         defaults['verbose'] = True
         defaults['allow_path_error'] = False
         defaults['output_to_catalog'] = False
+        defaults['generate_sigs'] = False
         return defaults
 
 

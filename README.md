@@ -1,4 +1,4 @@
-X4 Customizer 1.15.3
+X4 Customizer 1.16
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -166,6 +166,19 @@ Director Transforms:
   * Adjust_Mission_Rewards
 
     Adjusts generic mission credit and notoriety rewards by a flat multiplier.
+
+
+***
+
+Exe Transforms:
+
+  * Remove_Modified
+
+    Partially removes the modified flag, eg. from the top menu. Written for Windows v3.10 exe.
+
+  * Remove_Sig_Errors
+
+    Suppresses file sigature errors from printing to the debug log, along with file-not-found errors. Written for Windows v3.10 exe.
 
 
 ***

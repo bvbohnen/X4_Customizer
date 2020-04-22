@@ -9,7 +9,8 @@ from fnmatch import fnmatch
 
 from .Source_Reader import Source_Reader_class
 from .Cat_Writer import Cat_Writer
-from .File_Types import Misc_File, XML_File
+from .File_Types import Misc_File, XML_File, Signature_File, Machine_Code_File
+from .File_Types import Generate_Signatures
 from ..Common import Settings
 from ..Common import File_Missing_Exception
 from ..Common import Customizer_Log_class
@@ -478,10 +479,8 @@ class File_System_class:
     def Write_Files(self):
         '''
         Write output files for all source file content used or
-         created by transforms, either to loose files or to a catalog
-         depending on settings.
-        Existing files which may conflict with the new writes will be renamed,
-         including files of the same name as well as their .pck versions.
+        created by transforms, either to loose files or to a catalog
+        depending on settings.
         '''
         Print('Writing output files' 
               + (' (diff encoded)' if not Settings.make_maximal_diffs else ''))
@@ -503,6 +502,10 @@ class File_System_class:
         # Pick the path to the catalog folder and file.
         cat_path = Settings.Get_Output_Folder() / 'ext_01.cat'
 
+        # TODO: second cat for subst files, with some way to flag
+        # which game_files are substitutions (eg. anything not xml
+        # that path matches some vanilla or other extension file).
+
         # Note: this path may be the same as used in a prior run, but
         #  the prior cat file should have been removed by cleanup.
         assert not cat_path.exists()
@@ -511,19 +514,29 @@ class File_System_class:
         # Set up the content.xml file. -Moved to plugin.
         #self.Make_Extension_Content_XML()
 
+        # Handle generic sig file creation.
+        if Settings.generate_sigs:
+            for game_file in Generate_Signatures(self.game_file_dict.values()):
+                self.game_file_dict[game_file.virtual_path] = game_file
+
+
         # Loop over the files that were loaded.
         for file_name, file_object in self.game_file_dict.items():
 
-            # Skip if not modified.
+            # Skip if not modified and not a sig.
             if not file_object.modified:
                 continue
 
             # In case the target directory doesn't exist, such as on a
             #  first run, make it, but only when not sending to a catalog.
-            if not Settings.output_to_catalog:
+            # Machine_Code_File files will never go in a catalog.
+            if (not Settings.output_to_catalog 
+            or isinstance(file_object, Machine_Code_File)):
+
                 # Look up the output path.
-                file_path = Settings.Get_Output_Folder() / file_object.virtual_path
+                file_path = file_object.Get_Output_Path()
         
+                # Generate the folder if needed.
                 folder_path = file_path.parent
                 if not folder_path.exists():
                     folder_path.mkdir(parents = True)
@@ -532,7 +545,8 @@ class File_System_class:
                 # throw an error. (It should have been deleted already
                 # if from last run.)
                 if file_path.exists():
-                    Print('Error: skipping write due to file existing on path: {}'.format(file_path))
+                    Print(('Error: skipping write due to file existing on path: {}'
+                           ).format(file_path))
                     continue
 
                 # Write out the file, using the object's individual method.

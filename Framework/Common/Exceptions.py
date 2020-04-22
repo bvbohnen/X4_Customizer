@@ -20,9 +20,9 @@ class File_Loading_Error_Exception(Exception):
     when loading a found file, eg. bad xml syntax or similar.
     '''
 
-class Obj_Patch_Exception(Exception):
+class Binary_Patch_Exception(Exception):
     '''
-    Exception raised when an obj binary patch fails to find a
+    Exception raised when a binary patch fails to find a
     matching reference pattern.
     '''
     

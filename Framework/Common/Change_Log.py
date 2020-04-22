@@ -160,6 +160,10 @@ Change Log:
  * 1.15.3
    - Tweaked Adjust_Job_Count to generally ignore subordinate counts, to avoid
      ship counts multiplying to very large numbers.
+ * 1.16
+   - Tweaked xpath generation to select more human pleasing attributes.
+   - Added support for generating dummy sig files.
+   - Added Remove_Sig_Errors exe transform.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

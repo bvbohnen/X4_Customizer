@@ -8,6 +8,8 @@ from Plugins import Generate_Diff, Generate_Diffs
 from Plugins import Settings
 from Framework import Get_Version
 
+# TODO: support for generating sig files as well.
+
 def Run():
 
     # To avoid errors that print to the Plugin_Log trying to then load Settings

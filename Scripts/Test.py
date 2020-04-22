@@ -22,23 +22,27 @@ test_all = 0
 
 if 0:
     GUI.Start_GUI()
+
+# Test exe edits.
+if 0:
+    Remove_Sig_Errors()
    
 # Test sector resizing.
-if 0:
-    Scale_Sector_Size(0.5)
+if 0 or test_all:
+    Scale_Sector_Size(0.4, _test = True)
     
 
 # Diff generator test.
-if 1 or test_all:
-    #Generate_Diff(
-    #    original_file_path = this_dir / '../private/test' / 'gamestarts.orig.xml',
-    #    modified_file_path = this_dir / '../private/test' / 'gamestarts.xml',
-    #    output_file_path   = this_dir / '../private/test' / 'gamestarts.diff.xml',
-    #    )
+if 0 or test_all:
     Generate_Diff(
-        original_file_path = this_dir / '../private/test' / 'fight.attack.object.bigtarget.orig.xml',
-        modified_file_path = this_dir / '../private/test' / 'fight.attack.object.bigtarget.xml',
-        output_file_path   = this_dir / '../private/test' / 'fight.attack.object.bigtarget.diff.xml',
+        original_file_path = this_dir / '../private/test' / 'test_original_node.xml',
+        modified_file_path = this_dir / '../private/test' / 'test_modified_node.xml',
+        output_file_path   = this_dir / '../private/test' / 'test_patch_node.xml',
+        )
+    Generate_Diffs(
+        original_dir_path = this_dir / '../private/test' / 'orig_files',
+        modified_dir_path = this_dir / '../private/test' / 'mod_files',
+        output_dir_path   = this_dir / '../private/test' / 'diff_files',
         )
  
 # Test the extension checker.
@@ -169,7 +173,7 @@ if 0 or test_all:
 
 
 # Cat pack test.
-if 0 or test_all:
+if 1 or test_all:
     # Pick where to grab files from.
     # Could also call this script from that directory and use relative
     # paths for the cat file names.
@@ -188,7 +192,9 @@ if 0 or test_all:
         source_dir_path = dir_path,
         dest_cat_path   = dir_path / cat_name,
         include_pattern = include_pattern,
-        exclude_pattern = exclude_pattern
+        exclude_pattern = exclude_pattern,
+        generate_sigs   = True,
+        separate_sigs   = True,
         )
 
     

@@ -22,6 +22,9 @@ from .Utilities  import *
 #  for convenience.
 from Framework import Settings
 
+# Make the printer generally available.
+from Framework import Print
+
 # The gui is not really a plugin, but there isn't a better place
 # to put it, since the layout .ui file has somewhat difficult
 # to modify import paths that only work well with raw python

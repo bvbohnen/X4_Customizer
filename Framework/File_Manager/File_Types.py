@@ -49,6 +49,14 @@ def New_Game_File(binary, **kwargs):
         # May be compatible with xml, so try that.
         class_type = XML_File
 
+    elif virtual_path.endswith('.exe') or virtual_path.endswith('dll'):
+        # Raw x86 code files.
+        class_type = Machine_Code_File
+
+    elif virtual_path.endswith('.sig'):
+        # Generic signature.
+        class_type = Signature_File
+
     else:
         # Generic binary file.
         class_type = Misc_File
@@ -56,6 +64,36 @@ def New_Game_File(binary, **kwargs):
     # Build and return the game file.
     return class_type(binary = binary, **kwargs)
 
+
+def Generate_Signatures(game_file_list):
+    '''
+    Given a list of Game_Files, identifies which are missing signatures
+    and creates them. All sig files are set as modified if their base
+    file is also modified. Returns a list with the new Signature_Files.
+    '''
+    ret_list = []
+    game_file_dict = {x.virtual_path : x for x in game_file_list}
+
+    # Figure out which game_files do not already have a sig.
+    std_virtual_paths = [x.virtual_path for x in game_file_list
+                        if not isinstance(x, Signature_File)]
+    sig_virtual_paths = [x.virtual_path for x in game_file_list
+                        if isinstance(x, Signature_File)]
+
+    for path in std_virtual_paths:
+        sig_path = path + '.sig'
+
+        # Create a sig file if needed.
+        if sig_path not in sig_virtual_paths:
+            # Empty sig for now. Could also give a 1024 byte value.
+            sig_file = Signature_File(virtual_path = sig_path)
+            game_file_dict[sig_path] = sig_file
+            ret_list.append(sig_file)
+
+        # Copy over the modified flag.
+        game_file_dict[sig_path].modified = game_file_dict[path].modified
+
+    return ret_list
 
 
 class Game_File:
@@ -155,6 +193,14 @@ class Game_File:
         Returns True if this file has been modified by the customizer.
         '''
         return self.modified
+    
+
+    def Set_Modified(self):
+        '''
+        Sets this file as modified by the customizer.
+        '''
+        self.modified = True
+        return
 
 
     # TODO: maybe merge this into usage locations.
@@ -163,7 +209,7 @@ class Game_File:
         Returns the full path to be used when writing out this file
         after any modifications, including file name.
         '''
-        return Settings.Get_Output_Path() / self.virtual_path
+        return Settings.Get_Output_Folder() / self.virtual_path
 
 
     #def Is_Patch(self):
@@ -303,12 +349,18 @@ class XML_File(Game_File):
 
         # Should receive either the binary or the xml itself.
         assert binary != None or xml_root != None
-        
+
         if binary != None:
             # Process into an xml tree.
             # Strip out blank text here, so that prettyprint works later.
             # Note: this could throw xml parsing errors if there are problems
             # with the file. Let the higher level catch such problems.
+
+            # Note: in testing, if the xml file starts with a comment block,
+            # and that block has a blank line, this XML function will double
+            # count that line, causing the sourceline attributes on nodes
+            # to be off. (This doesn't happen when using parse() on file
+            # objects.) No clear fix at this time.
             self.original_root = ET.XML(
             binary,
             parser = ET.XMLParser(remove_blank_text=True))
@@ -316,7 +368,7 @@ class XML_File(Game_File):
         elif xml_root != None:
             assert isinstance(xml_root, ET._Element)
             self.original_root = xml_root
-
+            
         # Init the patched version to the original.
         # Deepcopy this, since patching will edit it in place.
         self.patched_root = deepcopy(self.original_root)
@@ -1096,6 +1148,63 @@ class Misc_File(Game_File):
 
         # Do a binary write.
         with open(file_path, 'wb') as file:
-            file.write(self.binary)                
+            file.write(self.binary)
         return
 
+    
+
+class Machine_Code_File(Game_File):
+    '''
+    Contents of an exe or dll file, holding the binary data.
+    These files are not packed into cats/dats, and may have some
+    other special handling.
+    
+    Attributes:
+    * binary
+      - Bytearray object holding the machine binary (may be given as bytes).
+    '''
+    def __init__(
+            self, 
+            binary, 
+            **kwargs):
+        super().__init__(**kwargs)
+        self.binary = bytearray(binary)
+        return
+    
+    def Get_Output_Path(self):
+        '''
+        Returns a path back to the X4 main folder to write to, using
+        a modified file name. Avoids overwriting the original.
+        '''
+        suffix = self.virtual_path.split('.')[-1]
+        return Settings.Get_X4_Folder() / self.virtual_path.replace(suffix, 'mod.'+suffix)
+    
+    # Note: no Get_Binary method for now; this shouldn't be
+    # packed with anything, which is the primary use of such a method.
+
+    def Write_File(self, file_path):
+        '''
+        Write these contents to the target file_path.
+        '''
+        # Create the directory as needed.
+        if not file_path.parent.exists():
+            file_path.parent.mkdir(parents = True)
+
+        # Do a binary write.
+        with open(file_path, 'wb') as file:
+            file.write(self.binary)
+        return
+
+    
+
+class Signature_File(Misc_File):
+    '''
+    Small file holding the 1024-byte signature (or 0-byte dummy)
+    of some other file. This is an alias of Misc_File.
+    '''
+    def __init__(self, text = None, binary = None, **kwargs):
+        super().__init__(**kwargs)
+        # Give default empty binary.
+        if self.text == None and self.binary == None:
+            self.binary = b''
+        return

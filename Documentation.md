@@ -1,4 +1,4 @@
-X4 Customizer 1.15.3
+X4 Customizer 1.16
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -193,6 +193,10 @@ Example input file:
     * ignore_output_extension
       - Bool, if True, the target extension being generated will have its prior content ignored (this run works on the original files, and not those changes made last run).
       - Defaults to True; should only be set False if not running transforms and wanting to analyse prior output.
+    * X4_exe_name
+      - String, name of the X4.exe file, to be used when sourcing the file for any exe transforms (if used).
+      - Defaults to "X4.exe", but may be useful to change based on the source exe file for transforms, eg. "X4_nonsteam.exe", "X4_steam.exe", or similar.
+      - Note: the customized exe is placed in the extension folder, and needs to be manually copied or symlinked back to the root X4 folder to run.
     
     Output:
     * extension_name
@@ -210,6 +214,9 @@ Example input file:
     * output_to_catalog
       - Bool, if True then the modified files will be written to a single cat/dat pair, otherwise they are written as loose files.
       - Defaults to False
+    * generate_sigs
+      - Bool, if True then dummy signature files will be created.
+      - Defaults to True.
     * make_maximal_diffs
       - Bool, if True then generated xml diff patches will do the maximum full tree replacement instead of using the algorithm to find and patch only edited nodes.
       - Turn on to more easily view xml changes.
@@ -329,6 +336,21 @@ Director Transforms:
       - Bool, if True (default) changes the credit reward.
     * adjust_notoriety
       - Bool, if True (default) changes the notoriety reward.
+        
+
+
+***
+
+Exe Transforms:
+
+  * Remove_Modified
+
+    Partially removes the modified flag, eg. from the top menu. Written for Windows v3.10 exe.
+        
+
+  * Remove_Sig_Errors
+
+    Suppresses file sigature errors from printing to the debug log, along with file-not-found errors. Written for Windows v3.10 exe.
         
 
 
@@ -613,6 +635,10 @@ Utilities:
     * exclude_pattern
       - String or list of strings, optional, wildcard patterns for file names to include in the unpacked output.
       - Eg. "['*.lua','*.dae']" to skip lua and dae files.
+    * generate_sigs
+      - Bool, if True then dummy signature files will be created.
+    * separate_sigs
+      - Bool, if True then any signatures will be moved to a second cat/dat pair suffixed with .sig.
         
 
   * Cat_Unpack
@@ -837,3 +863,7 @@ Change Log:
    - Extension checker now better supports mods patching other mods.
  * 1.15.3
    - Tweaked Adjust_Job_Count to generally ignore subordinate counts, to avoid ship counts multiplying to very large numbers.
+ * 1.16
+   - Tweaked xpath generation to select more human pleasing attributes.
+   - Added support for generating dummy sig files.
+   - Added Remove_Sig_Errors exe transform.

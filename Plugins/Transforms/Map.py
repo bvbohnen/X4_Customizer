@@ -7,7 +7,7 @@ from copy import copy
 import math
 from itertools import combinations
 
-from Framework import Transform_Wrapper, Load_File, Load_Files, Plugin_Log
+from Framework import Transform_Wrapper, Load_File, Load_Files, Plugin_Log, Print
 from .Support import XML_Modify_Int_Attribute
 from .Support import XML_Modify_Float_Attribute
 
@@ -26,6 +26,9 @@ TODO:
 - Fix slight highway graphic doubling near zone gates (harmless, visual quirk).
   - Possibly a small y offset in the highway, spline, or gate?
   - Could just scrap y changes, probably.
+- Play with god.xml station placement defaults.
+- Insert new zones within the desired area, as they are preferred for new
+  stations before creating new zones.
 
 - Sacred Relic spaced out; 250 km to furthest station.
 - debuglog complaint about superhighway002_cluster_29_macro (Hatikvah) splines?
@@ -67,7 +70,8 @@ Maybe aim for 0.33?
 @Transform_Wrapper()
 def Scale_Sector_Size(
         scaling_factor,
-        debug = True
+        debug = True,
+        _test = False
     ):
     '''
     Change the size of the maps by moving contents (zones, etc.) closer
@@ -84,9 +88,8 @@ def Scale_Sector_Size(
     # Store the game_file as key, xml root as value.
     # Below transforms exit the xml root, which gets committed at the end
     # if there were no errors.
-    # Note: for testing, just grab the basic files, no wildcards.
-    test = 1
-    if test:
+    # Note: for quick testing, just grab the basic files, no wildcards.
+    if _test:
         gamefile_roots = {
         'sectors'       : [(x, x.Get_Root()) for x in [Load_File('maps/xu_ep2_universe/sectors.xml')]],
         'zones'         : [(x, x.Get_Root()) for x in [Load_File('maps/xu_ep2_universe/zones.xml')]],
@@ -112,29 +115,49 @@ def Scale_Sector_Size(
         }
         
 
+    def Safe_Update_MD(xml_root, xpath, attr, old_text, new_text):
+        'Helper function for editing md nodes.'
+        # Note: add some safety incase the lookups fail.
+        nodes = xml_root.xpath(xpath)
+        if not nodes:
+            msg = 'Scale_Sector_Size failed to find a target MD script node; skipping this node.'
+            Plugin_Log.Print(msg)
+            Print(msg)
+        else:
+            nodes[0].set(attr, nodes[0].get(attr).replace(old_text, new_text))
+
+
     # Tweak faction logic to spawn stations closer/further.
-    # (Maybe low priority.)
     faction_stations_file = Load_File('md/FactionLogic_Stations.xml')
     faction_stations_root = faction_stations_file.Get_Root()
 
-    # Look up a couple nodes with 400km values.
-    node_0 = faction_stations_root.xpath(".//match_distance[@max='[$ChosenSector.coresize / 2.0f, 400km].min']")[0]
-    node_0.set('max', node_0.get('max').replace('400km', '{}km'.format(
-        int(400 * scaling_factor))))
-    node_1 = faction_stations_root.xpath(".//set_value[@exact='[$ChosenSector.size / 2.0f, 400km].min']")[0]
-    node_1.set('exact', node_1.get('exact').replace('400km', '{}km'.format(
-        int(400 * scaling_factor))))
-
-
+    # TODO: what is the difference between sector.size and sector.coresize?
+    Safe_Update_MD(
+        faction_stations_root, 
+        ".//match_distance[@max='[$ChosenSector.coresize / 2.0f, 400km].min']",
+        'max',
+        '400km',
+        str(int(400 * scaling_factor) ))
+    
+    Safe_Update_MD(
+        faction_stations_root, 
+        ".//set_value[@exact='[$ChosenSector.size / 2.0f, 400km].min']",
+        'exact',
+        '400km',
+        str(int(400 * scaling_factor) ))
+    
     # FactionLogic.xml:
     # <match_distance space="$Sector" value="$Sector.coreposition" max="[$Sector.coresize, 400km].min"/>
     faction_logic_file = Load_File('md/FactionLogic.xml')
     faction_logic_root = faction_logic_file.Get_Root()
+    
+    Safe_Update_MD(
+        faction_logic_root, 
+        ".//match_distance[@max='[$Sector.coresize, 400km].min']",
+        'max',
+        '400km',
+        str(int(400 * scaling_factor) ))
 
-    # Look up a couple nodes with 400km values.
-    node_0 = faction_logic_root.xpath(".//match_distance[@max='[$Sector.coresize, 400km].min']")[0]
-    node_0.set('max', node_0.get('max').replace('400km', '{}km'.format(
-        int(400 * scaling_factor))))
 
 
     # Load in data of interest, to the local data structure.

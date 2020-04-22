@@ -69,18 +69,19 @@ def Make_Extension_Content_XML():
         'content',
         attrib = {
             # Swap spaces to _; unclear on if x4 accepts spaces.
-            'id'        : this_id,
-            'name'      : Settings.extension_name,
-            'author'    : 'X4_Customizer',
-            'version'   : version,
-            'date'      : File_System.Get_Date(),
+            'id'         : this_id,
+            'name'       : Settings.extension_name,
+            'author'     : 'X4_Customizer',
+            'version'    : version,
+            'date'       : File_System.Get_Date(),
             # TODO: maybe track when changes are save breaking, eg. if
             #  adding in new ships or similar. Though in practice, it
             #  may be best to always keep this false, and offer transforms
             #  that can undo breaking changes safely before uninstall.
-            'save'      : 'false',
-            'sync'      : 'false',
-            'enabled'   : 'true',
+            'save'       : 'false',
+            'sync'       : 'false',
+            'enabled'    : 'true',
+            'description': ' ',
             })
 
     
@@ -88,9 +89,7 @@ def Make_Extension_Content_XML():
     # This loops over all language ids noticed in the cat/dat t files.
     for lang_id in ['7','33','37','39','44','49','55','81','82','86','88']:
         # Set up a new text node.
-        text_node = ET.Element('langugage', attrib={
-            'language' : lang_id,
-            'description':''})
+        text_node = ET.Element('language', language = lang_id, description = '')
 
         # Fill in description for 44, english, if no other.
         if lang_id == '44':
@@ -130,8 +129,7 @@ def Make_Extension_Content_XML():
             Print('Error: output extension appears in its own dependencies,'
                   ' indicating it transformed its own prior output.')
         else:
-            content_node.append( ET.Element('dependency', attrib={
-                'id' : ext_id }))
+            content_node.append( ET.Element('dependency', id = ext_id ))
 
     # Record it.
     File_System.Add_File( Framework.File_Manager.XML_File(

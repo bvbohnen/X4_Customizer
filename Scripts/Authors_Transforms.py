@@ -6,14 +6,22 @@ actual good ideas for game modifications.
 # Import all transform functions.
 from Plugins import *
 
+# Adjust the exe to point at a saved copy, since X4.exe will be symlinked
+# to the customized version.
+Settings(X4_exe_name = 'X4_nonsteam.exe')
+
 Apply_Live_Editor_Patches()
+
+# Exe edits.
+Remove_Sig_Errors()
+Remove_Modified()
 
 # Prune some mass traffic.
 # (There may also be a way to adjust this in-game now.)
 Adjust_Job_Count(('id masstraffic*', 0.5))
 
-# Testing reducing jobs globally.
-#Adjust_Job_Count(('*', 2))
+# Testing adjusting jobs globally.
+#Adjust_Job_Count(('*', 1))
 
 # Toy around with coloring.
 # This is Pious Mists.
@@ -70,3 +78,4 @@ Scale_Sector_Size(0.4)
 
 # Write modified files.
 Write_To_Extension()
+

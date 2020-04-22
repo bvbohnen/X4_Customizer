@@ -158,7 +158,9 @@ def Cat_Pack(
         source_dir_path,
         dest_cat_path,
         include_pattern = None,
-        exclude_pattern = None
+        exclude_pattern = None,
+        generate_sigs = True,
+        separate_sigs = False,
     ):
     '''
     Packs all files in subdirectories of the given directory into a
@@ -183,6 +185,11 @@ def Cat_Pack(
       - String or list of strings, optional, wildcard patterns for file
         names to include in the unpacked output.
       - Eg. "['*.lua','*.dae']" to skip lua and dae files.
+    * generate_sigs
+      - Bool, if True then dummy signature files will be created.
+    * separate_sigs
+      - Bool, if True then any signatures will be moved to a second
+        cat/dat pair suffixed with .sig.
     '''
     # Do some error checking on the paths.
     try:
@@ -256,7 +263,10 @@ def Cat_Pack(
     # If no files found, skip cat creation.
     if num_writes != 0:
         # Generate the actual cat file.
-        cat_writer.Write()
+        cat_writer.Write(
+            generate_sigs = generate_sigs,
+            separate_sigs = separate_sigs,
+            )
     
     Print('Files written                    : {}'.format(num_writes))
     Print('Files skipped (pattern mismatch) : {}'.format(num_pattern_skips))

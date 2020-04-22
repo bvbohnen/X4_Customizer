@@ -5,6 +5,9 @@ Subpackage with all transforms.
 from .Director import Adjust_Mission_Rewards
 from .Director import Adjust_Mission_Reward_Mod_Chance
 
+from .Exe import Remove_Modified
+from .Exe import Remove_Sig_Errors
+
 from .Jobs import Adjust_Job_Count
 
 # Subpackages; these can import all since these already picked out

@@ -16,17 +16,27 @@ from ..Common import Plugin_Log, Print
 # Other folders can generally be ignored.
 # TODO: maybe expand on this and look at everything.
 valid_virtual_path_prefixes =  (
-        'aiscripts/','assets/',
-        'cutscenes/','extensions/',
-        'index/',
-        'libraries/','maps/',
-        'md/','music/',
-        'particles/','sfx/',
-        'shadergl/','t/',
-        'textures/',
-        'ui/','voice-L044/',
-        'voice-L049/','vulkan/',
-        )    
+    # Base folder is only for non-extensions, to binary edit exe/dll files.
+    '',
+    'aiscripts/',
+    'assets/',
+    'cutscenes/',
+    'extensions/',
+    'index/',
+    'libraries/',
+    'maps/',
+    'md/',
+    'music/',
+    'particles/',
+    'sfx/',
+    'shadergl/',
+    't/',
+    'textures/',
+    'ui/',
+    'voice-L044/',
+    'voice-L049/',
+    'vulkan/',
+    )
 
 class Location_Source_Reader:
     '''
@@ -173,10 +183,23 @@ class Location_Source_Reader:
         # though glob is case sensitive so this might not work great.
         # TODO: revisit this.
         for path_prefix in valid_virtual_path_prefixes:
+
             # Ignore the extensions folder if this is the base cat reader.
             if not self.extension_summary and path_prefix == 'extensions/':
                 continue
-            for file_path in self.location.glob(path_prefix+'**/*'):
+            # Ignore the base folder for extensions.
+            if self.extension_summary and path_prefix == '':
+                continue
+
+            # Pick the globbing pattern.
+            # If a path_prefix is given, get everything under it.
+            # If no prefix given, just the flat directory, select files.
+            if path_prefix:
+                glob_pattern = path_prefix+'**/*'
+            else:
+                glob_pattern = '*.exe'
+
+            for file_path in self.location.glob(glob_pattern):
                 # Skip folders.
                 if not file_path.is_file():
                     continue

@@ -930,8 +930,16 @@ def _Get_Xpath_Recursive(node):
 
         # Loop while there is more than 1 similar element (want just self).
         if len(similar_elements) > 1:
+
+            # To make the generated xpaths more human pleasing, attributes
+            # will be selected based on some priority rules that should
+            # be suitable to general X4 files.
+            attribute_names = Sort_Attributes(node.keys())
+
             # Add attributes.
-            for key, value in node.items():
+            for key in attribute_names:
+                value = node.get(key)
+
                 # Note: the xpath will itself be an attribute in double
                 # quotes, so to avoid nested double quotes (which get
                 # output as &quot; in the xml, which xpath then can't
@@ -946,7 +954,7 @@ def _Get_Xpath_Recursive(node):
                 # Check element matches again.
                 similar_elements = parent.xpath(xpath)
                 # If just one match, done.
-                if len(similar_elements):
+                if len(similar_elements) == 1:
                     break
 
         # Verify this node was matched with the current xpath.
@@ -967,6 +975,45 @@ def _Get_Xpath_Recursive(node):
         xpath += '[{}]'.format(index)
         
     return xpath
+
+
+def Sort_Attributes(attr_names):
+    '''
+    Sort attribute names, placing the highest priority first, to aid
+    in making more human-pleasing diff xpaths.
+    '''
+    ret_list = []
+    low_prio_list = []
+
+    # High priority attributes.
+    # id is normally unique. 
+    # Name is often unique, possibly a text lookup.
+    # Ware can be a ware name.
+    # ref is a connection name.
+    # macro is often a name.
+    # start is for sound library.
+    # sinceversion for aiscript patches.
+    # By request, include method (for wares).
+    for name in ['id','name','ware','ref','macro','sinceversion','start','method']:
+        if name in attr_names:
+            attr_names.remove(name)
+            ret_list.append(name)
+
+    # Low priority attributes.
+    # chance is common in md scripts debug nodes.
+    # weight is often the same value.
+    for name in ['chance','weight']:
+        if name in attr_names:
+            attr_names.remove(name)
+            low_prio_list.append(name)
+
+    # Everything else can be prioritized by length of the attribute.
+    # Too short and it may not be unique, but too long and it is just
+    # ugly to look at.  Center priority around ~10 characters.
+    for name in sorted(attr_names, key = lambda x: max(0, (10 - len(x))) + max(0, (len(x) - 10))):
+        ret_list.append(name)
+
+    return ret_list + low_prio_list
 
 
 def Verify_Patch(original_node, modified_node, patch_node):

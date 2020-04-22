@@ -12,7 +12,7 @@
     <Name>Framework</Name>
     <RootNamespace>X4_Customizer</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>Check_Extensions -argpass test_mod2</CommandLineArguments>
+    <CommandLineArguments>Authors_Transforms -dev</CommandLineArguments>
     <IsWindowsApplication>False</IsWindowsApplication>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
@@ -93,9 +93,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Make_Documentation.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="File_Manager\Misc.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Make_Executable.py">

@@ -10,6 +10,10 @@ from Framework.File_Manager import XML_File
 from Framework.File_Manager.Cat_Reader import Get_Hash_String
 from Framework.File_Manager.XML_Diff import Print as XML_Print
 
+# TODO: merge this in with the Game_File system if run as part of
+# a script and not from the command line launcher, where the outputs
+# would instead be to the corresponding path in the dest extension.
+# TODO: maybe add generate_sigs support.
 
 @Utility_Wrapper(uses_paths_from_settings = False)
 def Generate_Diffs(
@@ -36,6 +40,11 @@ def Generate_Diffs(
     * verbose
       - Bool, print the path of the outputs on succesful writes.
     '''
+    # Cast to paths to be safe.
+    original_dir_path = Path(original_dir_path).resolve()
+    modified_dir_path = Path(modified_dir_path).resolve()
+    output_dir_path   = Path(output_dir_path).resolve()
+
     # Gather all xml files from the input directorys.
     # Make dicts for ease of use, keyed by relative path from the
     # base folder.
@@ -95,6 +104,11 @@ def Generate_Diff(
     * verbose
       - Bool, print the path of the outputs on succesful writes.
     '''
+    # Cast to paths to be safe.
+    original_file_path = Path(original_file_path).resolve()
+    modified_file_path = Path(modified_file_path).resolve()
+    output_file_path   = Path(output_file_path).resolve()
+
     if (original_file_path == modified_file_path
     or  output_file_path == original_file_path
     or  output_file_path == modified_file_path):
