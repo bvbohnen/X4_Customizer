@@ -64,6 +64,12 @@ class Extension_Summary:
         self.content_xml = ET.parse(str(content_xml_path)).getroot()
         self.ext_id = self.content_xml.get('id')
 
+        # If id was missing, give a default.
+        if self.ext_id == None:
+            self.ext_id = '*undefined*'
+            Print(('Warning: blank extension id found in folder {}; setting'
+                   ' as *undefined*.').format(content_xml_path.parent.name))
+
         # Determine if this is enabled or disabled.
         # Apparently a mod can use '1' for this instead of
         # 'true', so try both.
@@ -168,7 +174,7 @@ def Find_Extensions():
             ext_summary = Extension_Summary(content_xml_path)
             ext_summary_list.append(ext_summary)
             ext_id = ext_summary.ext_id
-            
+
             # Warning for multiple same-name extensions.
             if ext_id in ext_ids_found:
                 # TODO: what is the best way to signal this?

@@ -164,6 +164,8 @@ Change Log:
    - Tweaked xpath generation to select more human pleasing attributes.
    - Added support for generating dummy sig files.
    - Added Remove_Sig_Errors exe transform.
+ * 1.16.1
+   - Improved handling of extensions with no defined id.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.
