@@ -166,6 +166,9 @@ Change Log:
    - Added Remove_Sig_Errors exe transform.
  * 1.16.1
    - Improved handling of extensions with no defined id.
+ * 1.17
+   - Added High_Precision_Systemtime transform for code profiling.
+   - Fixed gui crash bug when saving files before Settings path polishing.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

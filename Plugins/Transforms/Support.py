@@ -264,17 +264,34 @@ def _String_To_Bytes(string, add_escapes = False):
     return new_bytes
 
 
-def Int_To_Hex_String(value, byte_count):
+def Int_To_Hex_String(value, byte_count, byteorder = 'big'):
     '''
     Converts an int into a hex string, with the given byte_count
     for encoding. Always uses big endian.
     Eg. Int_To_Hex_String(62, 2) -> '003e'
+
+    * byteorder
+      - String, either 'big' or 'little', where 'big' puts the MSB first,
+        little puts the MSB last.
     '''
+    # Get the highest amount represented by this byte count, plus 1.
+    max_plus_1 = 1 << (byte_count*8)
+
+    # If a negative value given, treat as wanting negative signed hex.
+    # Python doesn't handle this well, so convert manually.
+    if value < 0:
+        # Example: given -1, 1 byte, so 256 - 1 = 255.
+        value = max_plus_1 + value
+        
+    # Size check.
+    if value > max_plus_1:
+        raise Exception(f"value {value} does not fit in {byte_count} bytes")
+
     # Convert this into a byte string, hex, then back to string.
     # Always big endian.
     # Kinda messy: need to encode the int to bytes, then go from the
     #  byte string to a hex string, then decode that back to unicode.
-    return bin2hex(value.to_bytes(byte_count, byteorder = 'big')).decode()
+    return bin2hex(value.to_bytes(byte_count, byteorder = byteorder)).decode()
     
 
 def _Get_Matches(patch):

@@ -125,7 +125,37 @@
     <Compile Include="Transforms\Exe.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Transforms\Map.py">
+    <Compile Include="Transforms\Map\Classes\Galaxy.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Map\Classes\Highways.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Map\Classes\Misc.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Map\Classes\Position.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Map\Classes\Region.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Map\Classes\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Map\Classes\Macros.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Map\Scale_Sector_Size.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Map\Classes\Objects.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Map\Scaling.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Map\__init__.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Transforms\Misc.py">
@@ -219,6 +249,8 @@
     <Folder Include="GUI\Script_Window\" />
     <Folder Include="GUI\Settings_Window\" />
     <Folder Include="GUI\" />
+    <Folder Include="Transforms\Map\" />
+    <Folder Include="Transforms\Map\Classes\" />
     <Folder Include="Utilities\" />
     <Folder Include="Transforms\" />
   </ItemGroup>

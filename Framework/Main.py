@@ -204,6 +204,8 @@ def Run(*args):
     # This will often just by the Scripts folder, which is already in
     # the sys.path, but for cases when it is not, put this path
     # early in the search order.
+    # TODO: remove this path when done, for use in gui when it might
+    # switch between multiple scripts.
     control_script_dir = args.control_script.parent
     if str(control_script_dir) not in sys.path:
         sys.path.insert(0, str(control_script_dir))
@@ -230,6 +232,9 @@ def Run(*args):
     Print('Calling {}'.format(args.control_script))
     try:
         # Attempt to load/run the module.
+        # TODO: some way to detect if this is not a valid script, other
+        # than whatever possible error occurring, eg. if the user tried
+        # to run one of the plugin files.
         import importlib        
         module = importlib.machinery.SourceFileLoader(
             # Provide the name sys will use for this module.

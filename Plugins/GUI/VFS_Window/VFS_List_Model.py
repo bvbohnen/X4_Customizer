@@ -12,6 +12,7 @@ from Framework import File_System, XML_Diff, Print, Settings
 class VFS_List_Model(QStandardItemModel):
     '''
     Model to represent a list layout of a folder in the VFS.
+    TODO: set to scroll down, not sideways (why is that the default??).
 
     Attributes:
     * qt_view
@@ -42,7 +43,7 @@ class VFS_List_Model(QStandardItemModel):
         # TODO: how to filter events based on object selected?
         context_events = {
             'view'        : ('Open in viewer'        , ['.xml'], []),
-            'save_current': ('Save to file'          , ['.*']  , ['.xml']),
+            'save_current': ('Save to file (current)', ['.*', '.xml'], []),
             'save_vanilla': ('Save to file (vanilla)', ['.xml'], []),
             'save_patched': ('Save to file (patched)', ['.xml'], []),
             }
@@ -204,7 +205,7 @@ class VFS_List_Model(QStandardItemModel):
             
             # Pick the output directory default.
             if not self.window.last_dialog_path:
-                directory = Settings.path_to_x4_folder
+                directory = Settings.Get_X4_Folder()
             else:
                 directory = self.window.last_dialog_path
 
@@ -277,5 +278,14 @@ class VFS_List_Model(QStandardItemModel):
             # Open it locally; do this last, since it
             # overwrites current_vfs_item.
             self.Update(item.vfs_item)
+
+        # If xml, open in viewer.
+        elif item.vfs_item.virtual_path.endswith('.xml'):
+            # Create a new tab for the viewer.
+            # TODO: clean up this window.window thing.
+            self.window.window.Create_Tab(
+                class_name = 'File_Viewer_Window', 
+                label = item.vfs_item.name,
+                virtual_path = item.vfs_item.virtual_path)
 
         return

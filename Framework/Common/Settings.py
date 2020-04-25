@@ -89,13 +89,15 @@ class Settings_class:
         transforms and wanting to analyse prior output.
     * X4_exe_name
       - String, name of the X4.exe file, to be used when sourcing the file
-        for any exe transforms (if used).
+        for any exe transforms (if used), assumed to be in the x4 folder.
       - Defaults to "X4.exe", but may be useful to change based on the
         source exe file for transforms, eg. "X4_nonsteam.exe",
         "X4_steam.exe", or similar.
-      - Note: the customized exe is placed in the extension folder,
-        and needs to be manually copied or symlinked back to the 
-        root X4 folder to run.
+      - Note: the modified exe is written to the x4 folder with a ".mod.exe"
+        extension, and will not be removed on subsequent runs even
+        if they do not select any exe editing transforms. If wanting this
+        to work with steam, then the X4.exe may need to be replaced with
+        this modified exe manually.
 
     Output:
     * extension_name

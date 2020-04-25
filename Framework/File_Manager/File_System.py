@@ -411,17 +411,19 @@ class File_System_class:
          are not removed if the new run had an error during a transform.
         '''
         Print('Cleaning up old files')
-
-        # TODO: maybe just completely delete the extension/customizer contents,
-        # though that would mess with logs and messages that have been written
-        # to up to this point.
-        # It is cleaner other than that, though. Maybe manually skip the logs
-        # or somesuch.
-
+        
         # Find all files generated on a prior run, that still appear to be
         #  from that run (eg. were not changed externally), and remove
-        #  them.
+        #  them. Note: change check has been removed for now, since it
+        #  is not so important for x4 as it was for x3.
         for path in self.old_log.Get_File_Paths_From_Last_Run():
+            # Make a special exception for files created outside of
+            # the extension (mainly the exe); those tend to be more
+            # expensive to create, and could be from other customizer
+            # extension runs, so leave it to the user to handle them.
+            if Settings.Get_Output_Folder() not in path.parents:
+                continue
+
             if path.exists():
                 path.unlink()
 
@@ -543,8 +545,9 @@ class File_System_class:
 
                 # If the file already exists, something went wrong, so
                 # throw an error. (It should have been deleted already
-                # if from last run.)
-                if file_path.exists():
+                # if from last run.) Skip this check for exe files, which
+                # use custom naming to get around overwrite dangers.
+                if file_path.exists() and not isinstance(file_object, Machine_Code_File):
                     Print(('Error: skipping write due to file existing on path: {}'
                            ).format(file_path))
                     continue

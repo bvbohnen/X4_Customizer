@@ -2,11 +2,12 @@
 Subpackage with all transforms.
 '''
 
+# TODO: convert all of these to * syntax with __all__ defined.
+
 from .Director import Adjust_Mission_Rewards
 from .Director import Adjust_Mission_Reward_Mod_Chance
 
-from .Exe import Remove_Modified
-from .Exe import Remove_Sig_Errors
+from .Exe import *
 
 from .Jobs import Adjust_Job_Count
 

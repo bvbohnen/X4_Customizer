@@ -192,9 +192,11 @@ class VFS_Item:
         elif self.Is_Patched():
             color = 'blue'
         elif self.Is_Loaded():
-            color = 'black'
+            # Go with something interesting, maybe green?
+            color = 'green'
         else:
-            color = 'gray'
+            # To make viewing nicer, default to black.
+            color = 'black'
         Set_Foreground_Color(q_item, color)
         return
 
