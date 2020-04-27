@@ -1,4 +1,4 @@
-X4 Customizer 1.16.1
+X4 Customizer 1.17.1
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -194,9 +194,9 @@ Example input file:
       - Bool, if True, the target extension being generated will have its prior content ignored (this run works on the original files, and not those changes made last run).
       - Defaults to True; should only be set False if not running transforms and wanting to analyse prior output.
     * X4_exe_name
-      - String, name of the X4.exe file, to be used when sourcing the file for any exe transforms (if used).
+      - String, name of the X4.exe file, to be used when sourcing the file for any exe transforms (if used), assumed to be in the x4 folder.
       - Defaults to "X4.exe", but may be useful to change based on the source exe file for transforms, eg. "X4_nonsteam.exe", "X4_steam.exe", or similar.
-      - Note: the customized exe is placed in the extension folder, and needs to be manually copied or symlinked back to the root X4 folder to run.
+      - Note: the modified exe is written to the x4 folder with a ".mod.exe" extension, and will not be removed on subsequent runs even if they do not select any exe editing transforms. If wanting this to work with steam, then the X4.exe may need to be replaced with this modified exe manually.
     
     Output:
     * extension_name
@@ -343,6 +343,19 @@ Director Transforms:
 
 Exe Transforms:
 
+  * High_Precision_Systemtime
+
+    Changes the player.systemtime property to use a higher precision underlying timer, where a printed "second" will actually have a stepping of 100 ns. Useful for performance profiling of code blocks.
+    
+    Underlying precision comes from Windows GetSystemTimePreciseAsFileTime, which is presumably as accurate as its 100 ns unit size.
+    
+    Time will roll over roughly every 7 minutes, going back to 1970, due to limitations of the underlying string format functions.
+    
+    For short measurements, roughly 8 ms or less, just the lower part of the timer may be used, up to hour: player.systemtime.{'%H,%M,%S'}. For longer measurements, this needs to expand into the day field and account for leap years: player.systemtime.{'%G,%j,%H,%M,%S'}.
+    
+    As these are strings, conversion to an actual time relies on processing outside of the normal script engine, eg. in lua. Note: 1972 was a leap year, and every 4 after, which needs to be considered for full accuracy.
+        
+
   * Remove_Modified
 
     Partially removes the modified flag, eg. from the top menu. Written for Windows v3.10 exe.
@@ -406,7 +419,7 @@ Live_Editor Transforms:
 
 ***
 
-Map Transforms:
+Scale_Sector_Size Transforms:
 
   * Scale_Sector_Size
 
@@ -414,6 +427,17 @@ Map Transforms:
     
     * scaling_factor
       - Float, how much to adjust distances by.
+    * recenter_sectors
+      - Adjust objects in a sector to approximately place the coreposition near 0,0,0.
+      - In testing, this makes debugging harder, and may lead to unwanted results.  Pending further testing to improve confidence.
+    * randomize_new_zones
+      - Randomizes the positions of new zones each run.
+      - False for testing to ensure zones are constant, but set True to get a fresh universe layout.
+    * num_steps
+      - Int, over how many movement steps to perform the scaling.
+      - Higher step counts take longer, but each movement is smaller and will better detect objects getting too close to each other.
+      - Recommend lower step counts when testing, high step count for a final map.
+      - Defaults to 10.
     * debug
       - Bool, if True then write runtime state to the plugin log.
         
@@ -869,3 +893,9 @@ Change Log:
    - Added Remove_Sig_Errors exe transform.
  * 1.16.1
    - Improved handling of extensions with no defined id.
+ * 1.17
+   - Added High_Precision_Systemtime transform for code profiling.
+   - Various refinements to Scale_Sector_Size.
+   - Fixed gui crash bug when saving files before Settings path polishing.
+ * 1.17.1
+   - Fixed bug in generate_diffs that could miss files with just attribute changes.

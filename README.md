@@ -1,4 +1,4 @@
-X4 Customizer 1.16.1
+X4 Customizer 1.17.1
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -172,6 +172,10 @@ Director Transforms:
 
 Exe Transforms:
 
+  * High_Precision_Systemtime
+
+    Changes the player.systemtime property to use a higher precision underlying timer, where a printed "second" will actually have a stepping of 100 ns. Useful for performance profiling of code blocks.
+
   * Remove_Modified
 
     Partially removes the modified flag, eg. from the top menu. Written for Windows v3.10 exe.
@@ -201,7 +205,7 @@ Live_Editor Transforms:
 
 ***
 
-Map Transforms:
+Scale_Sector_Size Transforms:
 
   * Scale_Sector_Size
 

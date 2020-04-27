@@ -612,9 +612,11 @@ class XML_File(Game_File):
         if not file_path.parent.exists():
             file_path.parent.mkdir(parents = True)
 
-        # Do a binary write.
+        # Do a binary write. Get binary first, in case of error, then
+        # open the file to write.
+        binary = self.Get_Binary()
         with open(file_path, 'wb') as file:
-            file.write(self.Get_Binary())                      
+            file.write(binary)
         return
 
     

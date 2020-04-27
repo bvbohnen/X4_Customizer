@@ -59,6 +59,11 @@ Note on patch generation approach:
     In that case, printing will need to go through an intermediate
     function that clears out the tail id strings first.
 
+    Update: when an lxml element is appended to using addnext(),
+    it transfers its tail to the appended element, breaking node ids.
+    TODO: think of a workaround. For now, disallow addnext().
+    (TODO: think of how to disallow addnext.)
+
     Refining this further:
         When the original nodes are given ids, and those are copied
         into the modified tree (for nice matching), any new nodes
@@ -802,6 +807,11 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
                     target = orig_child ))
                 change_occurred = True
                 break
+            
+            if (orig_child.tag == 'wait' 
+            and mod_child.tag == 'raise_lua_event' 
+            and mod_child.get('param') == "'ai.masstraffic.watchdog,wait 85,entry,' + player.systemtime.{'%Y-%j-%H-%M-%S'} "):
+                bla = 0
 
 
             # Something went wrong if both have None for node ids.
@@ -859,6 +869,12 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
                         target = orig_child ))
                     change_occurred = True
                     break
+
+            else:
+                # Quick error check: if tails match, tags must match,
+                # else something weird happened.
+                if orig_child.tag != mod_child.tag:
+                    raise Exception('Node pair found with same id but mismatched tags')
 
 
             # Comments may have had their text changed.
@@ -1058,6 +1074,8 @@ def Verify_Patch(original_node, modified_node, patch_node):
     # TODO: attach to an input arg.
     if 0:
         if not success:
+            from pathlib import Path
+            cwd = Path.cwd()
             with open('test_original_node.xml', 'w') as file:
                 file.write(Print(original_node, encoding = 'unicode'))
             with open('test_modified_node.xml', 'w') as file:

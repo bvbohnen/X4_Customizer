@@ -168,7 +168,11 @@ Change Log:
    - Improved handling of extensions with no defined id.
  * 1.17
    - Added High_Precision_Systemtime transform for code profiling.
+   - Various refinements to Scale_Sector_Size.
    - Fixed gui crash bug when saving files before Settings path polishing.
+ * 1.17.1
+   - Fixed bug in generate_diffs that could miss files with just
+     attribute changes.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

@@ -160,17 +160,10 @@ def Generate_Diff(
     # parentage.  Not so good at handling attribute changes or data
     # structure changes.
     # Returns a dict pairing original with modified nodes.
-    text_based_node_matches = Get_Text_Diff_Matches(original_root, modified_root)
-
-    # Note: if all nodes were matches on both sides, then the
-    # file hasn't been changed (except maybe formatting and such).
-    num_matches = len(text_based_node_matches)
-    num_orig_nodes = len([x for x in original_root.iter()])
-    num_mod_nodes  = len([x for x in modified_root.iter()])
-    unchanged = num_matches == num_orig_nodes == num_mod_nodes
+    text_based_node_matches, changed = Get_Text_Diff_Matches(original_root, modified_root)
 
     # If files match, check arg for skipping the file.
-    if unchanged and skip_unchanged:
+    if not changed and skip_unchanged:
 
         messages.append('File unchanged: {}'.format(modified_file_path))
         # Check if an output file already exists and delete it.
@@ -180,7 +173,7 @@ def Generate_Diff(
 
     else:
         # Don't need to put the modified root back if there are no changes.
-        if not unchanged:
+        if changed:
             # Follow up with a manual traversal of the trees, completing matches.
             Match_Trees(original_root, modified_root, text_based_node_matches)
 
@@ -236,7 +229,8 @@ def Get_Text_Diff_Matches(original_root, modified_root):
     '''
     Identify modifications with the help of a text diff library.
     Returns a dict matching original elements to modified elements that
-    appear to be the same.
+    appear to be the same, along with a bool "changed" flag indicating
+    if any changes were found.
     '''
 
     # Flatten out all of the nodes, and wrap them with custom
@@ -263,12 +257,22 @@ def Get_Text_Diff_Matches(original_root, modified_root):
             orig_mod_matches[orig_node] = mod_node
             
 
+    # Set a flag indicating if there are any mismatches, since the following
+    # code will match up some nodes that just have attribute changes and
+    # might make this check think the nodes are unchanged if done later.
+    if len(orig_mod_matches) == len(original_nodes) == len(modified_nodes):
+        changed = False
+    else:
+        changed = True
+
     # When a node changed attributes, if it had children, they may have
     # been matched. Can treat the parent as matched if any children matched.
     # This is easiest to do backwards: for all matched nodes, set their
     # parents as matched if not already.
+
     # Error if any mod nodes are matched again.
     mod_nodes_matched = set([x for x in orig_mod_matches.values()])
+
     # Loop until all orig nodes processed; this list will extend on
     # each new match.
     orig_nodes_to_check = [x for x in orig_mod_matches]
@@ -297,7 +301,7 @@ def Get_Text_Diff_Matches(original_root, modified_root):
             orig_nodes_to_check.append(orig_parent)
             mod_nodes_matched.add(mod_parent)
 
-    return orig_mod_matches
+    return orig_mod_matches, changed
 
 
 
