@@ -92,7 +92,8 @@ Note on case:
 '''
 from lxml import etree as ET
 from collections import OrderedDict, defaultdict
-from fnmatch import fnmatch
+import fnmatch
+from time import time
 
 from . import File_Types
 from .. import Common
@@ -142,6 +143,9 @@ class Source_Reader_class:
         children for all locations being sourced from.
         This should be run after paths have been set up in Settings.
         '''
+        if Settings.profile:
+            start = time()
+
         # Set up the base X4 folder.
         self.base_x4_source_reader = Location_Source_Reader(
             location = Settings.Get_X4_Folder())
@@ -181,7 +185,13 @@ class Source_Reader_class:
                 self.extension_source_readers[reader.extension_name] = reader
                 
         # Now sort the extension order to satisfy dependencies.
-        self.Sort_Extensions()        
+        self.Sort_Extensions()
+        
+        if Settings.profile:
+            Print('Source_Reader.Init time: {:.3f} s'.format(
+                time() - start
+                ))
+
         return
 
 
@@ -374,11 +384,18 @@ class Source_Reader_class:
         * pattern
           - String, optional, wildcard pattern to use for matching names.
         '''
+
         # Results will be cached for quick lookups.
         # TODO: maybe move this into a normal attribute for use by
         # other methods.
-        if not hasattr(self, '_virtual_paths_set'):
-            self._virtual_paths_set = set()
+        # To speed up somewhat, first pass collects virtual_paths into
+        # a list, which will then be converted to a set() to clear
+        # any duplicates.
+        if not hasattr(self, '_all_virtual_paths'):
+            path_list = []
+
+            if Settings.profile:
+                start = time()
             
             # Loop over readers.
             # Note: multiple readers may produce the same file, in which
@@ -391,20 +408,53 @@ class Source_Reader_class:
                     continue
                 # Pick out the cat and loose file virtual_paths.
                 for virtual_path in reader.Get_Virtual_Paths():
-                    self._virtual_paths_set.add(virtual_path)
+                    path_list.append(virtual_path)
 
             # Work through extensions.
             for ext_reader in self.extension_source_readers.values():
                 # Work through the paths with prefixing as needed.
                 for virtual_path in self.Gen_Extension_Virtual_Paths(ext_reader.extension_name):
-                    self._virtual_paths_set.add(virtual_path)
+                    path_list.append(virtual_path)
 
-        # With the set filled in, can do a pass to yield each path.
-        for virtual_path in self._virtual_paths_set:
-            # If a pattern given, filter based on it.
-            if pattern != None and not fnmatch(virtual_path, pattern):
-                continue
-            yield virtual_path
+            # Cache the result, casting to set to uniquify paths.
+            self._all_virtual_paths = set(path_list)
+
+            if Settings.profile:
+                Print('Source_Reader.Gen_All_Virtual_Paths build time: {:.3f} s'.format(
+                    time() - start
+                    ))
+                
+        # -Removed for now, in favor of building a list below.
+        # With the paths filled in, can do a pass to yield each path.
+        #for virtual_path in self._all_virtual_paths:
+        #    # If a pattern given, filter based on it.
+        #    if pattern != None and not fnmatch.fnmatch(virtual_path, pattern):
+        #        continue
+        #    yield virtual_path
+        
+        # Pick the paths to return, based on if a pattern is provided. 
+        if not pattern:
+            paths = self._all_virtual_paths
+        else:
+            # Profile this, as it's a tad slow.
+            if Settings.profile:
+                start = time()
+
+            # Note: it takes close to 1 second to do all fnmatches
+            # individually.  Use a fnmatch.filter instead to speed
+            # this up.
+            #paths = [x for x in self._all_virtual_paths
+            #         if fnmatch.fnmatch(x, pattern)]
+            paths = fnmatch.filter(self._all_virtual_paths, pattern)
+
+            if Settings.profile:
+                Print('Source_Reader.Gen_All_Virtual_Paths fnmatch time: {:.3f} s'.format(
+                    time() - start
+                    ))
+
+        for path in paths:
+            yield path
+                
         return
     
 

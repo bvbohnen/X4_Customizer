@@ -173,6 +173,9 @@ Change Log:
  * 1.17.1
    - Fixed bug in generate_diffs that could miss files with just
      attribute changes.
+ * 1.17.2
+   - Performance optimizations for XML_Diff.Make_Patch, Find_Files, and gui VFS.
+   - Improved quality of generate_diff output patches.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

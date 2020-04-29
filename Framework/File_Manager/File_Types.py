@@ -8,10 +8,12 @@ from lxml import etree as ET
 from copy import deepcopy
 from collections import OrderedDict, defaultdict
 import re
-from fnmatch import fnmatch
+import fnmatch
+import time
 
 from ..Common import Plugin_Log
 from ..Common import Settings
+from ..Common import Print
 #Settings = Common.Settings
 from . import XML_Diff
 
@@ -158,7 +160,7 @@ class Game_File:
         # catalog name.
         self.is_substitution = False
         if (self.file_source_path 
-        and fnmatch(self.file_source_path.name, 'subst_*.cat')):
+        and fnmatch.fnmatch(self.file_source_path.name, 'subst_*.cat')):
             self.is_substitution = True
             
         self.modified = modified
@@ -557,11 +559,18 @@ class XML_File(Game_File):
         Generates an xml tree holding a diff patch, will convert from
         the original tree to the modified tree.
         '''
+        if Settings.profile:
+            start = time.time()
+
         patch_node = XML_Diff.Make_Patch(
             original_node = self.patched_root, 
             modified_node = self.Get_Root_Readonly(),
             maximal = Settings.make_maximal_diffs,
             verify = True)
+
+        if Settings.profile:
+            Print('XML_Diff.Make_Patch for {} time: {:.2f}'.format(
+                self.name, time.time() - start))
         return patch_node
 
 
@@ -952,11 +961,14 @@ class XML_Index_File(XML_File):
         self.Refresh_Cache()
 
         # Seach the keys.
-        ret_list = set()
-        for key, value in self.name_path_dict.items():
-            if fnmatch(key, pattern):
-                ret_list.add(value)
-        return ret_list
+        #ret_list = []
+        #for key, value in self.name_path_dict.items():
+        #    if fnmatch(key, pattern):
+        #        ret_list.add(value)
+        # Switch to filter() for speed.
+        keys = fnmatch.filter(self.name_path_dict.keys(), pattern)
+        # TODO: is the set cast needed?
+        return set([self.name_path_dict[x] for x in keys])
 
 
 class XML_Wares_File(XML_File):

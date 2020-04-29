@@ -171,6 +171,10 @@ class Settings_class:
       - Bool, if True then enable some behavior meant just for development,
         such as leaving exceptions uncaught.
       - Defaults to False
+    * profile
+      - Bool, if True then some extra profiling of customizer operations
+        is performed, and times printed. For use during development.
+      - Defaults to False.
     * disable_threading
       - Bool, if True then threads will not be used in the gui to
         call scripts and plugins. Will cause the gui to lock up
@@ -347,6 +351,7 @@ class Settings_class:
         defaults['use_scipy_for_scaling_equations'] = True
         defaults['show_scaling_plots'] = False
         defaults['developer'] = False
+        defaults['profile'] = False
         defaults['disable_threading'] = False        
         defaults['verbose'] = True
         defaults['allow_path_error'] = False

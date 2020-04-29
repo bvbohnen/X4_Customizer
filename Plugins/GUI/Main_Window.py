@@ -490,9 +490,11 @@ class GUI_Main_Window(qt_base_class, generated_class):
         self.show()
 
         # Kick off a file system refresh.
-        # Skip this when not using threads, since it extends gui startup
-        # by too much.
-        if not Settings.disable_threading and Settings.Paths_Are_Valid():
+        # -Removed: most tabs dont work without this signal.
+        #  Skip this when not using threads, since it extends gui startup
+        #  by too much. 
+        # if not Settings.disable_threading and Settings.Paths_Are_Valid():
+        if Settings.Paths_Are_Valid():
             self.Send_Signal('file_system_reset')
 
         # Flag startup as completed.

@@ -492,7 +492,13 @@ def _Apply_Patch_Op(op_node, target_node, type):
                 #  the target, so that the first child is closest to
                 #  the target.
                 for child in reversed(op_node_children):
+                    # Note: lxml might move tails when using addnext.
+                    # Fix them here.
+                    target_tail = target_node.tail
+                    child_tail = child.tail
                     target_node.addnext(child)
+                    target_node.tail = target_tail
+                    child.tail = child_tail
             else:
                 return 'pos {} not understood'.format(pos)
 
@@ -767,137 +773,148 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
     # Each time a patch is made, the original_node will be updated with
     #  the change, meaning this search can be restarted and will make
     #  it at least one step further. Enough loops will get through it.
+    # Note: full recursions that go through the child lists again from
+    #  start will be slow, particularly for large lists (eg. wares),
+    #  so the below code is designed to do all updates in one pass.
 
-    # Loop until the original_node children stop being modified.
-    # When all loops are done, children lists will match.
-    change_occurred = True
-    while change_occurred:
-        change_occurred = False
+    # Grab the child lists.
+    orig_children = [x for x in original_node.iterchildren()]
+    mod_children  = [x for x in modified_node.iterchildren()]
         
-        # Grab the child lists, pruning out comments (don't support
-        # diffing those).
-        # - Changed to support comments, since it helps with verification.
-        original_children = [x for x in original_node.getchildren()]
-                             #if not x.tag is ET.Comment]
-        modified_children = [x for x in modified_node.getchildren()]
-                             #if not x.tag is ET.Comment]
-
-        # Loop through both children lists; keep going if one of them ends.
-        for orig_child, mod_child in zip_longest(original_children, 
-                                                 modified_children):
-
-            # If there are no more orig_child nodes, then the mod_child
-            #  was appended.
-            if orig_child == None:
-                patch_nodes.append(_Patch_Node_Constructor(
-                    op     = 'add', type = 'node',
-                    # Append to the end of the original_node.
-                    target = original_node,
-                    # Be sure to copy this to avoid xml node confusion,
-                    # since this gets put in the patch tree.
-                    value  = deepcopy(mod_child) ))
-                change_occurred = True
-                break
+    # Loop while nodes remain in both lists.
+    # Once one runs out, there are no more matches.
+    while orig_children or mod_children:
             
-            # If there are no more mod_child nodes, then the orig_child
-            #  was removed.
-            if mod_child == None:
+        # Sample elements from both lists; don't remove yet.
+        orig_child = orig_children[0] if orig_children else None
+        mod_child  = mod_children[0]  if mod_children  else None
+        
+
+        # If there are no more orig_child nodes, then the mod_child
+        #  was appended.
+        if orig_child == None:
+            patch_nodes.append(_Patch_Node_Constructor(
+                op     = 'add', type = 'node',
+                # Append to the end of the original_node.
+                target = original_node,
+                # Be sure to copy this to avoid xml node confusion,
+                # since this gets put in the patch tree.
+                # Note: this copies over the node id, so the patched
+                # orig child will now match at this position.
+                value  = deepcopy(mod_child) ))
+
+            mod_children.remove(mod_child)
+            continue
+            
+        # If there are no more mod_child nodes, then the orig_child
+        #  was removed.
+        if mod_child == None:
+            # Remove from the original node.
+            patch_nodes.append(_Patch_Node_Constructor(
+                op     = 'remove', type = 'node',
+                target = orig_child ))
+            
+            orig_children.remove(orig_child)
+            continue
+            
+        # Something went wrong if both have None for node ids.
+        if orig_child.tail == None and mod_child.tail == None:
+            raise XML_Patch_Exception('node ids not filled in well enough')
+
+
+        # Check for a difference.
+        if orig_child.tail != mod_child.tail:
+
+            # Want to know what happened.
+            # Check if the mod_child is elsewhere later in the original.
+            mod_child_in_orig = any(mod_child.tail == x.tail 
+                                    for x in orig_children[1:])
+            # Check if the orig_child is elsewhere in the child.
+            orig_child_in_mod = any(orig_child.tail == x.tail 
+                                    for x in mod_children[1:])
+
+            if mod_child_in_orig == True and orig_child_in_mod == False:
+
+                # This case suggests the orig node was removed.
                 patch_nodes.append(_Patch_Node_Constructor(
                     op     = 'remove', type = 'node',
                     target = orig_child ))
-                change_occurred = True
-                break
+
+                orig_children.remove(orig_child)
+                continue
             
-            if (orig_child.tag == 'wait' 
-            and mod_child.tag == 'raise_lua_event' 
-            and mod_child.get('param') == "'ai.masstraffic.watchdog,wait 85,entry,' + player.systemtime.{'%Y-%j-%H-%M-%S'} "):
-                bla = 0
+            elif mod_child_in_orig == False and orig_child_in_mod == True:
 
+                # This case suggests a node was added.
+                patch_nodes.append(_Patch_Node_Constructor(
+                    op     = 'add', type = 'node',
+                    # Insert before the original.
+                    target = orig_child,
+                    pos = 'before',
+                    value  = deepcopy(mod_child) ))
 
-            # Something went wrong if both have None for node ids.
-            if orig_child.tail == None and mod_child.tail == None:
-                raise XML_Patch_Exception('node ids not filled in well enough')
+                mod_children.remove(mod_child)
+                continue
 
+            elif mod_child_in_orig == False and orig_child_in_mod == False:
 
-            # Check for a difference.
-            if orig_child.tail != mod_child.tail:
-
-                # Want to know what happened.
-                # Check if the mod_child is elsewhere in the original.
-                mod_child_in_orig = any(mod_child.tail == x.tail 
-                                        for x in original_node.getchildren())
-                # Check if the orig_child is elsewhere in the child.
-                orig_child_in_mod = any(orig_child.tail == x.tail 
-                                        for x in modified_node.getchildren())
-
-                if mod_child_in_orig == True and orig_child_in_mod == False:
-                    # This case suggests a node was removed.
-                    patch_nodes.append(_Patch_Node_Constructor(
-                        op     = 'remove', type = 'node',
-                        target = orig_child ))
-                    change_occurred = True
-                    break
-            
-                elif mod_child_in_orig == False and orig_child_in_mod == True:
-                    # This case suggests a node was added.
-                    patch_nodes.append(_Patch_Node_Constructor(
-                        op     = 'add', type = 'node',
-                        # Insert before the original.
-                        target = orig_child,
-                        pos = 'before',
-                        value  = deepcopy(mod_child) ))
-                    change_occurred = True
-                    break
-
-                elif mod_child_in_orig == False and orig_child_in_mod == False:
-                    # Neither node is in the other; can handle this with
-                    #  a replacement.
-                    patch_nodes.append(_Patch_Node_Constructor(
-                        op     = 'replace', type = 'node',
-                        target = orig_child,
-                        value  = deepcopy(mod_child) ))
-                    change_occurred = True
-                    break
-
-                else:
-                    # Something weird happened; nodes somehow got reordered.
-                    # There is no diff operation for reordering, so as a backup
-                    # just delete the original node (later passes will put it
-                    # back in later in the list).
-                    patch_nodes.append(_Patch_Node_Constructor(
-                        op     = 'remove', type = 'node',
-                        target = orig_child ))
-                    change_occurred = True
-                    break
-
-            else:
-                # Quick error check: if tails match, tags must match,
-                # else something weird happened.
-                if orig_child.tag != mod_child.tag:
-                    raise Exception('Node pair found with same id but mismatched tags')
-
-
-            # Comments may have had their text changed.
-            # Since diff patching these requires a full node replacement,
-            # handle it here instead of by modifying the existing node.
-            if (orig_child.tag is ET.Comment 
-            and orig_child.text != mod_child.text):
-                # Pack the text in a Comment node.
-                new_comment = ET.Comment(mod_child.text)
-                # Copy over the node id, else the next loop pass will
-                # replace it again.
-                new_comment.tail = orig_child.tail
+                # Neither node is in the other; can handle this with
+                #  a replacement.
                 patch_nodes.append(_Patch_Node_Constructor(
                     op     = 'replace', type = 'node',
                     target = orig_child,
-                    value  = new_comment ))
-                change_occurred = True
-                break
+                    value  = deepcopy(mod_child) ))
 
-            # If here, then the nodes appear to be the same, superficially.
-            # Still need to handle deeper changes, so recurse and pick out
-            #  lower level patches.
-            patch_nodes += _Get_Patch_Ops_Recursive(orig_child, mod_child)
+                orig_children.remove(orig_child)
+                mod_children.remove(mod_child)
+                continue
+
+            else:
+                # Something weird happened; nodes somehow got reordered.
+                # There is no diff operation for reordering, so as a backup
+                # just delete the original node (later passes will put it
+                # back in later in the list).
+                patch_nodes.append(_Patch_Node_Constructor(
+                    op     = 'remove', type = 'node',
+                    target = orig_child ))
+                
+                orig_children.remove(orig_child)
+                continue
+
+        else:
+            # Quick error check: if tails match, tags must match,
+            # else something weird happened.
+            if orig_child.tag != mod_child.tag:
+                raise Exception('Node pair found with same id but mismatched tags')
+
+
+        # Comments may have had their text changed.
+        # Since diff patching these requires a full node replacement,
+        # handle it here instead of by modifying the existing node.
+        if (orig_child.tag is ET.Comment 
+        and orig_child.text != mod_child.text):
+            # Pack the text in a Comment node.
+            new_comment = ET.Comment(mod_child.text)
+            # Copy over the node id, else the next loop pass will
+            # replace it again. TODO: maybe unnecessary now that
+            # children aren't reiterated.
+            new_comment.tail = orig_child.tail
+            patch_nodes.append(_Patch_Node_Constructor(
+                op     = 'replace', type = 'node',
+                target = orig_child,
+                value  = new_comment ))
+            
+            orig_children.remove(orig_child)
+            mod_children.remove(mod_child)
+            continue
+
+
+        # If here, then the nodes appear to be the same, superficially.
+        # Still need to handle deeper changes, so recurse and pick out
+        #  lower level patches.
+        patch_nodes += _Get_Patch_Ops_Recursive(orig_child, mod_child)
+        orig_children.remove(orig_child)
+        mod_children.remove(mod_child)
 
     return patch_nodes
 
@@ -939,17 +956,28 @@ def _Get_Xpath_Recursive(node):
         # (This could just start with all attributes, but they are often
         #  not needed and clutter up the output diff patch.)
         xpath = node.tag
-        # Get elements with the same tag.
-        similar_tag_elements = parent.xpath(xpath)
-        # Store this into a temp var; want to use the same-tag version later.
-        similar_elements = similar_tag_elements
 
-        # Loop while there is more than 1 similar element (want just self).
+        # If the parent has a large number of children, eg. for
+        # the top level of the wares file or similar cases, then the xpath
+        # is expected to initially match everything. To save some time,
+        # these cases can skip to the first attribute addition (eg. "id").
+        # The check can be for something like num_children > 30.
+        # Ensure the node has at least one attribute to add.
+        # (In quick tests on some larger files, this saves ~10%.)
+        if len(parent) > 30 and len(node.attrib) >= 1:
+            # Give a couple dummy entries to trigger node addition.
+            similar_elements = [None, None]
+        else:
+            # Get elements with the same tag.
+            similar_elements = parent.xpath(xpath)
+
+        # Add attributes if there is more than 1 similar element.
         if len(similar_elements) > 1:
 
             # To make the generated xpaths more human pleasing, attributes
             # will be selected based on some priority rules that should
-            # be suitable to general X4 files.
+            # be suitable to general X4 files. This also increases the
+            # chances of hitting on a unique attribute.
             attribute_names = Sort_Attributes(node.keys())
 
             # Add attributes.
@@ -980,7 +1008,7 @@ def _Get_Xpath_Recursive(node):
     # Flesh out the xpath with the parent prefix.
     xpath = _Get_Xpath_Recursive(parent) + '/' + xpath
 
-    # If there were multiple element matches, add a suffix.
+    # If there are still multiple element matches, add a suffix.
     # Note: the xpath index is relative to other nodes matched with
     # the same attributes (which differs from find/findall if there
     # were preceeding attributes).

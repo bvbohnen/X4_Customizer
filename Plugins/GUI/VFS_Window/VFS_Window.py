@@ -55,6 +55,12 @@ class VFS_Window(Tab_Page_Widget, generated_class):
       - Hardcoded initially.
     * last_dialog_path
       - Path last used in the Save dialog box, to be reused.
+    * paths_by_suffix
+      - Dict of lists of virtual_paths, keyed by extension (as "*.ext").
+      - A path is expected to show up under * and it's specific extension.
+    * combobox_updating
+      - Bool, set True temporarily when rebuilding the combo box items,
+        to suppress its signals.
     '''
     def __init__(self, parent, window):
         super().__init__(parent, window)
@@ -62,6 +68,10 @@ class VFS_Window(Tab_Page_Widget, generated_class):
         self.last_dialog_path = None
         # Default pattern; gets overwritten below.
         self.pattern = '.xml'
+        self.combobox_updating = False
+
+        # Paths by suffix are filled in below with a threaded call.
+        self.paths_by_suffix = defaultdict(list)
         
         # Set up initial, blank models.
         self.tree_model = VFS_Tree_Model(self, self.widget_treeView)
@@ -77,6 +87,7 @@ class VFS_Window(Tab_Page_Widget, generated_class):
         # Set up the supported filetype patterns.
         # TODO: more as they become interesting.
         # TODO: maybe a way to select multiple.
+        # TODO: auto-extend based on found file suffixes.
         for pattern in [
             '*.xml',
             '*.xmf',
@@ -88,11 +99,12 @@ class VFS_Window(Tab_Page_Widget, generated_class):
         
         # Catch changes to the file type combo box.
         self.w_combobox_filetype.currentIndexChanged.connect(
-            self.Reset_From_File_System)
+            self.File_Pattern_Changed)
         
         return
     
     
+
     def Reset_From_File_System(self):
         '''
         Load the virtual paths from the File_System.
@@ -110,8 +122,10 @@ class VFS_Window(Tab_Page_Widget, generated_class):
         #    )
         
         # Update to the current combobox pattern.
+        # TODO: probably unnecessary.
         self.pattern = self.w_combobox_filetype.currentText()
         
+        # TODO: 
         # Kick off the threads to update virtual paths and to
         # update the file info.
         self.Threaded_Gather_Virtual_Paths()
@@ -125,15 +139,54 @@ class VFS_Window(Tab_Page_Widget, generated_class):
         Starts thread that accesses the file system and gathers all
         virtual paths, and some file summary info for loaded files.
         '''
+        # Get all paths, no pattern, since fnmatch is slow.
         self.Queue_Thread(File_System.Gen_All_Virtual_Paths,
-                          pattern = self.pattern,
+                          pattern = None,
                           callback_function = self._Threaded_Gather_Virtual_Paths_pt2)
         return
 
     def _Threaded_Gather_Virtual_Paths_pt2(self, virtual_paths):
-        'Threaded_Gather_Virtual_Paths part 2, post-thread'    
-        # Update the tree.
-        self.tree_model.Set_File_Listing(virtual_paths, self.file_info_dict)
+        'Threaded_Gather_Virtual_Paths part 2, post-thread'
+
+        # Clear old info.
+        self.paths_by_suffix.clear()
+
+        for path in virtual_paths:
+
+            # Ignore the top level exe files, which are a special case
+            # and not pulled from cat/dat files.
+            if path.endswith('.exe'):
+                continue
+
+            self.paths_by_suffix['*.*'].append(path)
+            # Look for an extension, with safety if it's missing.
+            parts = path.split('/')[-1].rsplit('.')
+            if len(parts) > 1:
+                self.paths_by_suffix[f'*.{parts[-1]}'].append(path)
+
+
+        # Build a list of suffixes to stick in the combo box.
+        suffixes = sorted(self.paths_by_suffix.keys())
+        # Set *.* to go last.
+        suffixes.remove('*.*')
+        suffixes.append('*.*')
+        
+        # Clear out old items. Suppress callback handling during this.
+        self.combobox_updating = True
+
+        self.w_combobox_filetype.clear()
+        # Add in the suffixes, in order.
+        for suffix in suffixes:
+            self.w_combobox_filetype.addItem(suffix)
+
+        # Reselect the index of the current pattern.
+        self.w_combobox_filetype.setCurrentIndex(suffixes.index(self.pattern))
+        
+        # Reenable callback handling.
+        self.combobox_updating = False
+        
+        # Update the tree, sending over the stuff in this pattern.
+        self.tree_model.Set_File_Listing(self.paths_by_suffix[self.pattern], self.file_info_dict)
         return
 
 
@@ -143,7 +196,7 @@ class VFS_Window(Tab_Page_Widget, generated_class):
         file_info_dict.
         '''
         self.Queue_Thread(File_System.Get_Loaded_Files,
-                          pattern = pattern,
+                          pattern = None,
                           short_run = True,
                           callback_function = self._Threaded_Gather_File_Info_pt2)
         return
@@ -172,6 +225,28 @@ class VFS_Window(Tab_Page_Widget, generated_class):
         # The tree_model updates the list_model currently, so only
         # refresh the tree.
         self.tree_model.Soft_Refresh()
+        return
+    
+
+    def File_Pattern_Changed(self):
+        '''
+        Update the file listing when a different extension is selected.
+        '''
+        # Ignore if updating; the pattern isn't actually changing in
+        # such cases.
+        if self.combobox_updating:
+            return
+
+        # Update to the current combobox pattern.
+        self.pattern = self.w_combobox_filetype.currentText()
+        
+        # Note: this could be called during Load"_Session_Settings
+        # before this window has been gathered the file info.
+        # If called later, update the tree view.
+        if self.paths_by_suffix:
+            # At this point, the file paths should already be loaded.
+            self.tree_model.Set_File_Listing(self.paths_by_suffix[self.pattern], self.file_info_dict)
+            self.tree_model.Soft_Refresh()
         return
 
 
@@ -221,11 +296,29 @@ class VFS_Window(Tab_Page_Widget, generated_class):
 
         pattern = settings.value('pattern', None)
         if pattern:
+            self.pattern = pattern
+
+            # Note: the following update isn't strictly necessary if
+            # some other code is tweaked, but it does make the code
+            # in general more robust since it ensures the combobox
+            # has this pattern selected right away.
+
             # Find the matching combobox entry and select it.
-            for i in range(self.w_combobox_filetype.maxCount()):
+            # Note: at this point, the combobox may not have the pattern
+            # initialized yet.
+            box_updated = False
+            for i in range(self.w_combobox_filetype.count()):
                 text = self.w_combobox_filetype.itemText(i)
-                if text == pattern:
+                if text == self.pattern:
                     self.w_combobox_filetype.setCurrentIndex(i)
+                    box_updated = True
                     break
+                
+            # If the pattern wasn't found, add it in and select it.
+            # Don't worry about order; this gets resorted once files
+            # are loaded.
+            if not box_updated:
+                self.w_combobox_filetype.insertItem(0, pattern)
+                self.w_combobox_filetype.setCurrentIndex(0)        
         
         return

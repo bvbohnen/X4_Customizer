@@ -89,7 +89,7 @@ def Create_Objects_From_Asset_Files(
         is_macro = None
     ):
     '''
-    Returns an Edit_Object for the given asset style game_file,
+    Returns a list of Edit_Objects for the given asset style game_file,
     applying a set of custom Item building macros.
     '''
     object_list = []

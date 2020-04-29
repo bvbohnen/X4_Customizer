@@ -83,7 +83,7 @@ class VFS_List_Model(QStandardItemModel):
         # Clear out old stuff.
         self.clear()
         
-        # Get the parent item, to enable going back up.
+        # Create a parent q item, to enable going back up.
         parent_q_item = vfs_item.Get_Parent_Q_Item()
         if parent_q_item != None:
             Set_Icon(parent_q_item, 'SP_FileDialogToParent')
@@ -93,7 +93,9 @@ class VFS_List_Model(QStandardItemModel):
 
         # Add all children items, building them uniquely.
         for q_item in vfs_item.Get_Child_Q_Items(
-            include_folders = True, include_files = True):
+                include_folders = True,
+                include_files = True,
+            ):
             self.appendRow(q_item)
             # Annotate it.
             q_item.is_parent = False

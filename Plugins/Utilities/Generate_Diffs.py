@@ -129,8 +129,9 @@ def Generate_Diff(
 
     # Load the original.
     base_game_file = XML_File(
-        # Virtual path doesn't matter.
-        virtual_path = '',
+        # Virtual path doesn't matter, though can be useful for debug,
+        # so try to fill in something.
+        virtual_path = output_file_path.name,
         binary = original_file_path.read_bytes(),
         # Flag as the source; this will trigger diff patch generation later.
         from_source = True,
@@ -202,27 +203,70 @@ class Element_Wrap:
         self.attrib = dict(xml.attrib)
         self.text = xml.text
 
-    def __eq__(self, other):
-        # Check tags, attributes, text.
-        if(self.tag != other.tag 
-        or self.attrib != other.attrib
-        or self.text != other.text):
-            return False
+        # String version of this element, flattened, for easy comparison.
         # TODO: maybe check parent tags as well, for conservative matching.
-        return True
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def __hash__(self):
-        # Note: just doing something like id(self) gives horrible results;
-        # the hash appears to be part of the comparison.
-        hash_str = '{},{},{}'.format(
+        self.hash_str = '{}{{{}}}{}'.format(
             self.tag, 
             ','.join(['{}:{}'.format(k,v) for k,v in sorted(self.attrib.items())]),
             self.text)
-        hash_int = hash(hash_str)
-        return hash_int
+        
+        # Hash to be used.
+        # Note: just doing something like id(self) gives horrible results;
+        # the hash appears to be part of the comparison.
+        self.hash_int = hash(self.hash_str)        
+        return
+
+    def __eq__(self, other):
+        return self.hash_str == other.hash_str
+    def __ne__(self, other):
+        return not self.__eq__(other)
+    def __hash__(self):
+        return self.hash_int
+
+
+# Alternative to the above: breaks out the element into a series
+# of pieces for finer grain matching.
+class Element_Piece:
+    '''
+    For better difflib matching, this will be just a piece of an xml
+    element.
+
+    * text
+      - String, text for this piece.
+    * is_tag
+      - Bool, True if this is the tag string.
+    * xml
+      - Original XML Element.
+    '''
+    def __init__(self, text, is_tag = False, xml = None):
+        self.text = text
+        self.is_tag = is_tag
+        self.xml = xml
+
+        # Stich the is_tag flag in the hash/comparison string for
+        # robustness.
+        self.hash_str = f'{"_t_" if is_tag else ""}{text}'
+        self.hash_int = hash(self.hash_str)
+        return
+    
+    def __eq__(self, other):
+        return self.hash_str == other.hash_str
+    def __ne__(self, other):
+        return not self.__eq__(other)
+    def __hash__(self):
+        return self.hash_int
+
+
+def Element_To_Pieces(node):
+    '''
+    Returns a list of Element_Pieces for a given xml node.
+    '''
+    ret_list = [Element_Piece(node.tag, is_tag = True, xml = node)]
+    for k,v in sorted(node.attrib.items()):
+        ret_list.append(Element_Piece(f'{k}:{v}'))
+    if node.text:
+        ret_list.append(Element_Piece(node.text))
+    return ret_list
 
 
 def Get_Text_Diff_Matches(original_root, modified_root):
@@ -237,25 +281,55 @@ def Get_Text_Diff_Matches(original_root, modified_root):
     # match logic.
     original_nodes = [Element_Wrap(x) for x in original_root.iter()]
     modified_nodes = [Element_Wrap(x) for x in modified_root.iter()]
+    
+    # -Removed; expanded style didn't help, and just ran a lot slower.
+    # Alternative: get tighter matching logic by breaking apart tags,
+    # attributes, and tails (eg. an element expands to 2+ subelements), since
+    # the difflib really wants to match sequences, and does poorly at matching
+    # a full xml element that has changes on both sides.
+    #original_nodes = [y for x in original_root.iter() for y in Element_To_Pieces(x)]
+    #modified_nodes = [y for x in modified_root.iter() for y in Element_To_Pieces(x)]
 
     # Sequence matcher will pair up the nodes.
-    matcher = difflib.SequenceMatcher(None, original_nodes, modified_nodes)
+    matcher = difflib.SequenceMatcher(
+        # Lambda function that takes an element and returns if it is ignorable.
+        # Nothing ignorable, so no function.
+        None, 
+        original_nodes, 
+        modified_nodes,
+        # There is some weird background algorithm that selects elements
+        # to ignore based on frequency? Anyway, in practice on a big
+        # wares file it caused a bunch of matches to be missed, so
+        # disable it.
+        autojunk = False)
     
     # Dict pairing original to modified nodes that the sequencer matched.
     orig_mod_matches = {}
     
     # get_matching_blocks returns a series of tuples of
-    # (i, j, n) where a[i:i+n] == a[j:j+n]
+    # (i, j, n) where a[i:i+n] == b[j:j+n]
     # Note: this may end up matching nodes from one parent's child elements
     # to those of another parent. However, this is not expected to be a
     # problem, since the diff generator just checks for matches under
     # an already matched parent.
-    for orig_base, mod_base, num_lines in matcher.get_matching_blocks():    
-        for offset in range(num_lines):
-            orig_node = original_nodes[orig_base + offset].xml
-            mod_node  = modified_nodes[mod_base + offset].xml
-            orig_mod_matches[orig_node] = mod_node
+    for orig_base, mod_base, length in matcher.get_matching_blocks():    
+        for offset in range(length):
+
+            # -Removed; expanded style didn't help.
+            #orig_piece = original_nodes[orig_base + offset]
+            #mod_piece  = modified_nodes[mod_base + offset]
+            ## When a non-tag is matched, ignore it. Only care about
+            ## the tags.
+            #if not orig_piece.is_tag:
+            #    continue
+            #assert mod_piece.is_tag
+            #orig_node = orig_piece.xml
+            #mod_node  = mod_piece.xml
             
+            orig_node = original_nodes[orig_base + offset].xml
+            mod_node  = modified_nodes[mod_base + offset].xml            
+            orig_mod_matches[orig_node] = mod_node
+                        
 
     # Set a flag indicating if there are any mismatches, since the following
     # code will match up some nodes that just have attribute changes and
@@ -423,13 +497,13 @@ def Match_Children(
         strong_match = False
         weak_match   = False
         
-        # Check if there is a perfect match later, either direction.
-        #mod_child_in_orig = any( Is_Attr_Match(x, mod_child) for x in orig_children[1:])
-        #orig_child_in_mod = any( Is_Attr_Match(orig_child, x) for x in mod_children[1:])
-
         # Check if the text diff thinks there is a later match, either direction.
         mod_child_in_orig = any( Is_Text_Diff_Match(x, mod_child) for x in orig_children[1:])
         orig_child_in_mod = any( Is_Text_Diff_Match(orig_child, x) for x in mod_children[1:])
+
+        # Check if there is a perfect match later, either direction.
+        #mod_child_in_orig = any( Is_Attr_Match(x, mod_child) for x in orig_children[1:])
+        #orig_child_in_mod = any( Is_Attr_Match(orig_child, x) for x in mod_children[1:])
 
 
         # If node tags differ, not a match ever.
@@ -448,19 +522,75 @@ def Match_Children(
                 # Set to look for nested changes.
                 weak_match = True
 
+        # If either node is a better match to something upcoming,
+        # based on text_diff, then dont match.
+        # (Note: this is different than the node being present in the
+        # text diff pairs, since that check could be confused if the
+        # text diff tried to match children from different parents,
+        # or some other mistake.)
+        elif mod_child_in_orig or orig_child_in_mod:
+            pass
+
         # If the attributes differed and the node had no children, there
-        # is no existing match from the text diff.
-        # In such cases, these nodes also don't match anything else later,
-        # so can treat as the same if childless.
-        elif (not mod_child_in_orig 
-        and not orig_child_in_mod 
-        and not list(orig_child) 
-        and not list(mod_child)):
+        # is no existing match from the text diff, but the nodes may
+        # have originally been the same.
+        # In such cases, since neither node matches anything later,
+        # treat as matched.
+        # TODO: merge into checks below.
+        elif len(orig_child) == len(mod_child) == 0:
             weak_match = True
                     
-        # TODO: if a node was inserted, and the following node changed,
-        # the above can get confused and think a node was changed then
-        # inserted.  Think of a general way to better handle such cases.
+        # Sometimes the difflib fails to match two nodes even though
+        # they have the same tag and attributes, perhaps because there
+        # are a large number of attribute changes among children.
+        # Can polish up this case somewhat by checking if they match
+        # without attributes.
+        # TODO: merge into checks below.
+        elif Is_No_Attr_Match(orig_child, mod_child):
+            weak_match = True
+
+        else:
+            # Gather the lists of orig and mod children up until the
+            # next test_diff match. Note: these lists include the
+            # current nodes, regardless of if they have text_diff matches,
+            # since this point is only reached if such text_diff matches
+            # have no upcoming matching node (eg. they matched children of
+            # different parents, or something like that).
+            upcoming_origs = []
+            for node in orig_children:
+                if node is orig_child or node not in text_based_node_matches.keys():
+                    upcoming_origs.append(node)
+                else:
+                    break
+                
+            upcoming_mods = []
+            for node in mod_children:
+                if node is mod_child or node not in text_based_node_matches.values():
+                    upcoming_mods.append(node)
+                else:
+                    break
+
+            # If there is just one node in each list, then these nodes
+            # probably match, since the next orig and mod elements have
+            # text_diff matches.
+            if len(upcoming_origs) == len(upcoming_mods) == 1:
+                weak_match = True
+                
+            # TODO: compare possible cross-pairings between lists, and
+            # try to determine if the current node pair is the best fit,
+            # or if there is a better fit later.
+            # Fit quality: count matching tags/attributes/children
+            # (recursively) for components that are the same or different,
+            # then match quality is same / (same + different), where something
+            # like >0.5 can be considered a likely match. This may be tricky
+            # to do well if there were new children added. Can maybe preparse
+            # using difflib in some way.
+
+            # TODO: on mismatch, use this logic to pick which node to
+            # consider as inserted (eg. the one that does not have a high
+            # quality match to a later node in the other list), since the
+            # text_diff may not have enough info to guide the choice well.
+
 
         if strong_match:
             # Copy over the IDs, for all children as well.
@@ -509,6 +639,10 @@ def Match_Children(
                 # just remove one of these.
                 orig_children.remove(orig_child)
                 mod_children .remove(mod_child)
+
+            # TODO: add more annotation from earlier match checks, which
+            # can pick up cases where the text_diff didn't match the nodes,
+            # but above logic can guess which node might have a later match.
 
             else:
                 # This indicates a reordering.

@@ -69,6 +69,11 @@ class Location_Source_Reader:
         for where the file is located, for loose files at the location
         folder.
       - The key will always be lowercased, though the path may not be.
+    * cat_path_entry_dict
+      - Dict, keyed by virtual_path, holding Cat_Entry objects taken
+        from each of the catalog readers.
+    * all_virtual_paths
+      - Set of all virtual paths in the catalogs or loose files.
     '''
     def __init__(
             self, 
@@ -81,6 +86,8 @@ class Location_Source_Reader:
                                if extension_summary else None)
         self.catalog_file_dict = OrderedDict()
         self.source_file_path_dict = None
+        self.cat_path_entry_dict = None
+        self.all_virtual_paths = None
 
         # Search for cats and loose files if location given.
         if location != None:
@@ -260,19 +267,25 @@ class Location_Source_Reader:
         taken from all catalog readers, using the highest priority one when
         a file is repeated.
         '''
-        path_entry_dict = {}
-        # Loop over the cats in priority order.
-        for cat_path in self.catalog_file_dict:
-            cat_reader = self.Get_Catalog_Reader(cat_path)
+        # Caches the result to avoid doing this more than once.
+        # Build the dict on first call.
+        if self.cat_path_entry_dict == None:
+            path_entry_dict = {}
+            self.cat_path_entry_dict = path_entry_dict
 
-            # Get all the entries for this cat.
-            for virtual_path, cat_entry in cat_reader.Get_Cat_Entries().items():
+            # Loop over the cats in priority order.
+            for cat_path in self.catalog_file_dict:
+                cat_reader = self.Get_Catalog_Reader(cat_path)
 
-                # If the path wasn't seen before, record it.
-                # If it was seen, then the prior one has higher priority.
-                if not virtual_path in path_entry_dict:
-                    path_entry_dict[virtual_path] = cat_entry
-        return path_entry_dict
+                # Get all the entries for this cat.
+                for virtual_path, cat_entry in cat_reader.Get_Cat_Entries().items():
+
+                    # If the path wasn't seen before, record it.
+                    # If it was seen, then the prior one has higher priority.
+                    if not virtual_path in path_entry_dict:
+                        path_entry_dict[virtual_path] = cat_entry
+
+        return self.cat_path_entry_dict
 
 
     def Get_Virtual_Paths(self):
@@ -282,20 +295,22 @@ class Location_Source_Reader:
         These may need prefixing for extension files that
         are not present at the base x4 location.
         '''
-        # Note: for large number of files, using a list for this
-        # gives really bad performance; switch to a set().
-        # TODO: maybe have each subfunction return a list, then cast those
-        # to sets and merge.
-        # TODO: consider finding a way to make this a generator,
-        # though that may be impractical when needing to avoid
-        # repeating names.
-        virtual_paths = set()
-        # Use the keys returned by Get_All_Loose_Files and Get_Cat_Entries.
-        for virtual_path in chain(  self.Get_All_Loose_Files().keys(),
-                                    self.Get_Cat_Entries().keys() ):
-            # Include each path once, if repeated.
-            virtual_paths.add(virtual_path)
-        return virtual_paths
+        # Cache the results to avoid doing more than once.
+        if self.all_virtual_paths == None:
+            # Not many loose files, so can use the normal dict generating
+            #  function without slowdown.
+            loose_paths = list(self.Get_All_Loose_Files().keys())
+
+            # Cat files have their entries fleshed out automatically,
+            # and the overall Get_Cat_Entries will often be called
+            # anyway for transforms seeking a file, so just reuse its
+            # dict keys.
+            cat_paths = list(self.Get_Cat_Entries().keys())
+
+            # Join the lists and cast to a set to uniquify.
+            self.all_virtual_paths = set(loose_paths + cat_paths)
+
+        return self.all_virtual_paths
 
 
     def Read_Loose_File(self, virtual_path, **kwargs):

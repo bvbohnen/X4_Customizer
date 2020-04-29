@@ -5,7 +5,8 @@ import datetime
 from collections import defaultdict
 from lxml import etree as ET
 from functools import wraps
-from fnmatch import fnmatch
+import fnmatch
+from time import time
 
 from .Source_Reader import Source_Reader_class
 from .Cat_Writer import Cat_Writer
@@ -287,12 +288,17 @@ class File_System_class:
         Optionally, loads only files with virtual_paths matching
         the given pattern.
         '''
+        if not pattern:
+            return list(self.game_file_dict.values())
+
         # Start with the pattern processing.
-        ret_list = []
-        for path, game_file in self.game_file_dict.items():
-            if pattern == None or fnmatch(path, pattern):
-                ret_list.append(game_file)
-        return ret_list
+        #ret_list = []
+        #for path, game_file in self.game_file_dict.items():
+        #    if pattern == None or fnmatch(path, pattern):
+        #        ret_list.append(game_file)
+        # Speed up with filter().
+        paths = fnmatch.filter(self.game_file_dict.keys(), pattern)
+        return [self.game_file_dict[x] for x in paths]
     
 
     @_Verify_Init

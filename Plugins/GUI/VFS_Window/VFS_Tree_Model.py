@@ -1,5 +1,7 @@
 
 from collections import OrderedDict
+from time import time
+from Framework import Settings
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtCore import QItemSelectionModel
@@ -16,6 +18,8 @@ class VFS_Tree_Model(QStandardItemModel):
         directories, with a top node at ''.
     * path_q_item_dict
       - As above, but holding the generated QTreeWidgetItems.
+    * q_expanded_vfs_items
+      - List of VFS_Items which have had their q_item children expanded.
     * qt_view
       - Tree view in qt showing this model.
     * last_selected_virtual_path
@@ -32,6 +36,7 @@ class VFS_Tree_Model(QStandardItemModel):
         super().__init__(window)
         self.path_item_dict = None
         self.path_q_item_dict = {}
+        self.q_expanded_vfs_items = []
         self.last_selected_virtual_path = None
         self.qt_view = qt_view
         self.window = window
@@ -43,9 +48,47 @@ class VFS_Tree_Model(QStandardItemModel):
         # Catch some viewer signals.
         self.qt_view.selectionModel().selectionChanged.connect(
             self.Handle_selectionChanged)
+        self.qt_view.expanded.connect(
+            self.Handle_expanded)
 
         return
         
+
+    def Gen_Child_Q_Items(self, vfs_or_q_item):
+        '''
+        For a given vfs_item or q_item, tell it to generated its q_item
+        children, and record the generated nodes.  Does nothing if the
+        vfs_item has already been expanded.  (Used to delay child q item
+        generation, to avoid startup slowdown.)
+
+        Returns any new child q_items.
+        '''
+        # Check if given a q or vfs item.
+        if isinstance(vfs_or_q_item, VFS_Item):
+            vfs_item = vfs_or_q_item
+            q_item = None
+        else:
+            vfs_item = vfs_or_q_item.vfs_item
+            q_item = vfs_or_q_item
+
+        # Skip if already expanded.
+        if vfs_item in self.q_expanded_vfs_items:
+            return []
+        self.q_expanded_vfs_items.append(vfs_item)
+
+        # Expand one level. This will automatically add the children
+        # to the given q_item as a subrow. Folders only.
+        # This will hand down the q_item for children to attach to, if any.
+        child_q_items = vfs_item.Get_Child_Q_Items(
+            include_folders = True,
+            base_q_item = q_item
+            )
+
+        # Record the children.
+        for child in child_q_items:
+            self.path_q_item_dict[child.vfs_item.virtual_path] = child
+        return child_q_items
+    
 
     def Set_File_Listing(self, virtual_paths, file_info_dict):
         '''
@@ -75,32 +118,72 @@ class VFS_Tree_Model(QStandardItemModel):
 
         # Convert to vfs items.
         self.Convert_Paths_To_VFS_Items(virtual_paths, file_info_dict)
+        
+        # Clear old q_item tracking stuff.
+        self.path_q_item_dict.clear()
+        self.q_expanded_vfs_items.clear()
 
         # Grab the top node.
-        top_item = self.path_item_dict['']
+        top_vfs_item = self.path_item_dict['']
 
-        # Convert its children to Q items and add them.
-        q_items = top_item.Get_Child_Q_Items(
-                include_folders = True, 
-                recursive = True
-            )
-        for q_item in q_items:
-            self.appendRow(q_item)
+        # Note: the top node is root.  It could either be set to have
+        # a q_item, the top level for the menu which needs to be expanded
+        # to see anything interesting, or it could be skipped entirely
+        # and just its children placed in the menu directly.
+        # The latter looks nicer most of the time, but have one major
+        # drawback: files in the top folder (eg. html) cannot be viewed
+        # since root cannot be selected.
+
+        # Since the vfs should prioritize showing all files, the root will
+        # be included and auto expanded.
+        top_q_item = top_vfs_item.Get_Q_Item()
+        self.path_q_item_dict[top_vfs_item.virtual_path] = top_q_item
+        self.appendRow(top_q_item)
+
+        # Ensure its children are generated, so it's expandable.
+        self.Gen_Child_Q_Items(top_q_item)
+
+        # Force it to be expanded.
+        # TODO: there was one instance of opening the vfs tab and
+        # root not being expanded after a script run and some other
+        # tabs being opened. Maybe try to reproduce and fix.
+        self.qt_view.setExpanded(self.indexFromItem(top_q_item), True)
+
+
+        # -Removed in favor of having a root q_item.
+        ## Convert its children to Q items and add them.
+        #q_items = self.Gen_Child_Q_Items(top_vfs_item)
+        ##q_items = top_item.Get_Child_Q_Items(
+        ##        include_folders = True, 
+        ##        recursive = True
+        ##    )
+        #for q_item in q_items:
+        #    self.appendRow(q_item)
+        #
+        ## The above is sufficient for top level folders, but doesn't
+        ## fill in subchild q_items, so no folder will be expandable.
+        ## Fix that by also generating the first level children for
+        ## all of the q_items.
+        #for q_item in q_items:
+        #    # Don't do anything with their nested children; they will
+        #    # be looked up in path_q_item_dict and processed when 
+        #    # expanded in the gui.
+        #    self.Gen_Child_Q_Items(q_item)
             
 
-        # Record all q_items present, at any level.
-        # This is kinda messy, since apparently qt doesn't have any
-        # function for iterating over children.
-        self.path_q_item_dict.clear()
-        search_items = q_items
-        while search_items:
-            q_item = search_items.pop()
-            # Record this item.
-            self.path_q_item_dict[q_item.vfs_item.virtual_path] = q_item
-            # Queue all children; in column 0.
-            for row in range(q_item.rowCount()):
-                child = q_item.child(row,0)
-                search_items.append(child)
+        # -Removed in favor of more selective approach.
+        ## Record all q_items present, at any level.
+        ## This is kinda messy, since apparently qt doesn't have any
+        ## function for iterating over children.
+        #search_items = q_items
+        #while search_items:
+        #    q_item = search_items.pop()
+        #    # Record this item.
+        #    self.path_q_item_dict[q_item.vfs_item.virtual_path] = q_item
+        #    # Queue all children; in column 0.
+        #    for row in range(q_item.rowCount()):
+        #        child = q_item.child(row,0)
+        #        search_items.append(child)
 
 
         ## Try to find the item matching the last selected non-branch item's
@@ -129,7 +212,7 @@ class VFS_Tree_Model(QStandardItemModel):
         # TODO: tell the list view to open the top level, maybe.
         return
 
-
+    # TODO: speed this up somehow; kinda slow.
     def Convert_Paths_To_VFS_Items(self, virtual_paths, file_info_dict):
         '''
         Generate VFS_Items for the given virtual_paths.
@@ -139,6 +222,9 @@ class VFS_Tree_Model(QStandardItemModel):
         for directories.
         The top level node will have an empty path string.
         '''
+        if Settings.profile:
+            start = time()
+
         path_item_dict = {}
         def Record_Parents(vfs_item):
             '''
@@ -158,7 +244,9 @@ class VFS_Tree_Model(QStandardItemModel):
                 parent = VFS_Item(
                     virtual_path = parent_path,
                     is_folder = True,
-                    shared_file_info_dict = file_info_dict)
+                    shared_file_info_dict = file_info_dict,
+                    window = self.window,
+                    )
 
                 # Record it, and its parents recursively.
                 path_item_dict[parent_path] = parent
@@ -194,7 +282,9 @@ class VFS_Tree_Model(QStandardItemModel):
                 parent = VFS_Item(
                     virtual_path = parent_path,
                     is_folder = True,
-                    shared_file_info_dict = file_info_dict )
+                    shared_file_info_dict = file_info_dict,
+                    window = self.window,
+                    )
                 
                 # Record it, and its parents recursively.
                 path_item_dict[parent_path] = parent
@@ -216,6 +306,11 @@ class VFS_Tree_Model(QStandardItemModel):
             #Record_Parents(vfs_item)
 
         self.path_item_dict = path_item_dict
+
+        if Settings.profile:
+            self.window.Print('VFS Tree build time: {:.3f} s'.format(
+                time() - start
+                ))
         return
 
 
@@ -261,7 +356,7 @@ class VFS_Tree_Model(QStandardItemModel):
 
     def Handle_selectionChanged(self, qitemselection = None):
         '''
-        A different item was clicked on.
+        A different item was clicked on. Change to it.
         '''
         # This takes a bothersome object that needs indexes
         # extracted, that then need to be converted to items,
@@ -269,21 +364,35 @@ class VFS_Tree_Model(QStandardItemModel):
         new_item = self.itemFromIndex(qitemselection.indexes()[0])
         self.Change_Item(new_item)
         return
+    
+
+    def Handle_expanded(self, qmodelindex = None):
+        '''
+        An item was expanded. Generate grandchildren.
+        '''
+        q_item = self.itemFromIndex(qmodelindex)
+
+        # TODO: clean up redundancy with Open_Folder.
+        # This q_item should have had its children generated previously,
+        # but make sure the children's children are generated.
+        for row in range(q_item.rowCount()):
+            self.Gen_Child_Q_Items(q_item.child(row,0))
+        return
 
 
-    def Change_Item(self, new_item):
+    def Change_Item(self, q_item):
         '''
         Change the selected item.
         '''
         # Note: it appears when the tree refreshes this event
         # triggers with None as the selection, so catch that case.
-        if new_item == None:
+        if q_item == None:
             return
 
         # Record it for refresh restoration.
-        self.last_selected_virtual_path = new_item.vfs_item.virtual_path
+        self.last_selected_virtual_path = q_item.vfs_item.virtual_path
         # Pass the object_view to the display widget.
-        self.window.list_model.Update(new_item.vfs_item)
+        self.window.list_model.Update(q_item.vfs_item)
         return
 
 
@@ -297,10 +406,18 @@ class VFS_Tree_Model(QStandardItemModel):
             item.vfs_item.Color_Q_Item(item)
 
         # Send the selected item off for re-display, if there is
-        # a selection.
+        # a selection, and it is still valid for the file suffix.
         if self.last_selected_virtual_path != None:
-            item = self.path_q_item_dict[self.last_selected_virtual_path]
-            self.Change_Item(item)
+            # Item may or may not still exist.
+            item = self.path_q_item_dict.get(self.last_selected_virtual_path)
+            # If not, clear the path, else change item.
+            if item == None:
+                self.last_selected_virtual_path = None
+            else:
+                self.Change_Item(item)
+                
+        # TODO: refresh the list view on suffix change, or just in general.
+
         # TODO: recolor existing items, once coloring support
         # is added to them.
         return
@@ -316,6 +433,12 @@ class VFS_Tree_Model(QStandardItemModel):
         if not vfs_item.virtual_path:
             return
         q_item = self.path_q_item_dict[vfs_item.virtual_path]
+
+        # This q_item should have had its children generated previously,
+        # but make sure the children's children are generated.
+        for row in range(q_item.rowCount()):
+            self.Gen_Child_Q_Items(q_item.child(row,0))
+
         self.qt_view.setExpanded(self.indexFromItem(q_item), True)
 
         # TODO: maybe select it too, though for now skip such

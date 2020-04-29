@@ -252,6 +252,8 @@ class Worker_Thread_Handler(QtCore.QThread):
             try:
                 self.current_request.callback_function(self.return_value)
             except Exception as ex:
+                if Settings.developer:
+                    self.Print(traceback.format_exc())
                 # On error, just ignore the request.
                 self.Print(ex)
                 self.Print('Error in thread callback function "{}"'.format(

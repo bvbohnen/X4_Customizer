@@ -97,7 +97,16 @@ def Cat_Unpack(
     num_writes        = 0
     num_pattern_skips = 0
     num_hash_skips    = 0
-    num_md5_skips     = 0    
+    num_md5_skips     = 0
+    
+
+    # TODO:
+    # Switch to pulling out all virtual_paths first, then use fnmatch.filter
+    # on them for each pattern, then use some set operations to merge the
+    # results down to the desired set of paths.
+    # This would mostly be useful if switching to storing hashes from
+    # prior extractions for fast comparison, as currently the hashing
+    # takes far more time than the fnmatching.
 
     # Loop over the Cat_Entry objects; the reader takes care of
     #  cat priorities.

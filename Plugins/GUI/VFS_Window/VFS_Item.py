@@ -1,6 +1,9 @@
 
+from time import time
 from itertools import chain
 from collections import OrderedDict
+from Framework import Settings
+
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 
@@ -44,17 +47,21 @@ class VFS_Item:
       - This dict link is ensured never to change, though the contents
         may be swapped around (eg. nested dicts could be removed and
         remade).
+    * window
+      - The gui window holding this item. Used for Print lookup.
     '''
     def __init__(
             self,
             virtual_path,
             is_folder,
             shared_file_info_dict,
+            window,
         ):
         self.virtual_path = virtual_path
         self.is_folder = is_folder
         self.shared_file_info_dict = shared_file_info_dict
         self.parent = None
+        self.window = window
 
         # Split on the last '/', though it may not be present.
         *parent, self.name = virtual_path.rsplit('/',1)
@@ -119,7 +126,8 @@ class VFS_Item:
             self.Add_Item(VFS_Item(
                 virtual_path, 
                 is_folder = False,
-                shared_file_info_dict = self.shared_file_info_dict
+                shared_file_info_dict = self.shared_file_info_dict,
+                window = self.window,
                 ))
         return
 
@@ -134,27 +142,10 @@ class VFS_Item:
     #    return File_System.Load_File(self.virtual_path)
     
     
-    def Get_Q_Item(
-            self, 
-            include_folders = False, 
-            include_files = False,
-            recursive = False
-        ):
+    def Get_Q_Item(self):
         '''
-        Returns a QStandardItem representing this item, annotated with
+        Returns a new QStandardItem representing this item, annotated with
         'vfs_item' to link back here.
-
-        * include_folders
-          - Bool, if True and this is a folder, all child folders
-            will have items included as row children of this item,
-            recursively, and passing the include_files flag along.
-          - Folders will be sorted and placed before sorted files.
-        * include_files
-          - Bool, as above but for files.
-          - If both include_folders and include_files are True, then
-            the entire tree below this point will be included.
-        * recursive
-          - Bool, if True then recursively include child folder chidren.
         '''
         q_item = QStandardItem(self.name)
         q_item.vfs_item = self
@@ -167,12 +158,14 @@ class VFS_Item:
 
         self.Color_Q_Item(q_item)
 
-        # Add any children q items.
-        for child_q_item in self.Get_Child_Q_Items(
-                    include_folders = include_folders,
-                    include_files = include_files,
-                    recursive = recursive):
-            q_item.appendRow(child_q_item)
+        # -Removed; regulate when children are expanded.
+        ## Add any children q items.
+        #for child_q_item in self.Get_Child_Q_Items(
+        #            include_folders = include_folders,
+        #            include_files = include_files,
+        #            recursive = recursive,
+        #            top_call = False):
+        #    q_item.appendRow(child_q_item)
 
         return q_item
 
@@ -205,31 +198,33 @@ class VFS_Item:
             self, 
             include_folders = False, 
             include_files = False,
-            recursive = False
+            base_q_item = None,
             ):
         '''
         Returns a list of QStandardItems for each of its children.
+        If given a parent q_item (should have been generated previously
+        by Get_Q_Item on this vfs_item), the children will be appended
+        to it as subrows.
         If neither flag is set, returns an emtpy list.
 
         * include_folders
           - Bool, include child folders.
         * include_files
           - Bool, include child files.
-        * recursive
-          - Bool, if True then recursively include child folder chidren.
+        * base_q_item
+          - Optional, QStandardItem linked to this vfs_item which will
+            attach to the child q_items as a parent.
         '''
         if not self.is_folder:
             return []
+        
+        if Settings.profile:
+            start = time()
 
         ret_list = []
         if include_folders:
             for subitem in sorted(self.folders, key = lambda x : x.name):
-                ret_list.append( subitem.Get_Q_Item(
-                    # Don't have it include its children if this
-                    # is not a recursive request.
-                    include_folders = include_folders and recursive,
-                    include_files = include_files and recursive,
-                    recursive = recursive))
+                ret_list.append( subitem.Get_Q_Item())
 
         if include_files:
             # Make sure files are built.
@@ -249,13 +244,26 @@ class VFS_Item:
                                     x.name)
                 ):
                 ret_list.append( subitem.Get_Q_Item())
+                
+        # Add the children to the parent q_item, if provided.
+        if base_q_item != None:
+            # Verify the base_q_item links back to this vfs_item.
+            assert base_q_item.vfs_item is self
+            # Add children as subrows.
+            for child_q_item in ret_list:
+                base_q_item.appendRow(child_q_item)
+                
+        if Settings.profile:
+            self.window.Print('VFS_Item.Get_Child_Q_Items time: {:.3f} s'.format(
+                time() - start
+                ))
 
         return ret_list
 
 
     def Get_Parent_Q_Item(self):
         '''
-        Returns a QStandardItem for this item's parent.
+        Returns a new QStandardItem for this item's parent.
         It will have no file/folder children.
         If there is no parent, returns None.
         '''

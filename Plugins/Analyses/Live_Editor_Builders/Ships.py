@@ -11,6 +11,10 @@ from .Support import physics_item_macros
 from .Support import connection_item_macros
 from ...Transforms.Support import Float_to_String
 
+# TODO:
+# Speed calculations depend on the engine. However, can make an assumption
+# about the engine to estimate speed.
+
 
 @Live_Editor_Object_Builder('ships')
 def _Build_Storage_Objects():
@@ -18,11 +22,21 @@ def _Build_Storage_Objects():
     Live_Editor.Get_Category_Objects('storage')
     Live_Editor.Get_Category_Objects('dockingbays')
     Live_Editor.Get_Category_Objects('cockpits')
+
     # TODO: dynamic connections.
+    # These would require looking up and processing the component file,
+    # to try to identify eg. how many engines the ship has, and of which
+    # tags, then to go look up engine data and determine what the thrusts are.
+    # Overall, this route is plausible, but would be best served by a wider
+    # scale parsing of data into custom classes for cross referencing,
+    # whereas the code here just runs on xpaths in the original xml.
+    #Live_Editor.Get_Category_Objects('engines')
 
     game_files = File_System.Get_All_Indexed_Files('macros','ship_*')
     return Create_Objects_From_Asset_Files(game_files, ship_item_macros)
 
+#def Display_Update_Speed(component, ship_type, purpose_primary, physics_drag_forward):
+#    return ''
 
 
 ship_item_macros = [
@@ -36,6 +50,7 @@ ship_item_macros = [
     E('thruster_tags'             , './properties/thruster'            , 'tags'       , 'Thruster Tags'   , ''),
     E('secrecy_level'             , './properties/secrecy'             , 'level'      , 'Secrecy Level'   , ''),
     
+    #D('speed'                     , Display_Update_Speed               , 'Speed', 'Assumes combat mk3 engines'),
     *physics_item_macros,
 
     E('sounds_ship'               , './properties/sounds/shipdetail'   , 'ref'        , 'Sound Effect'    , ''),
