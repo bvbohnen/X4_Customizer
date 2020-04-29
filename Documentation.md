@@ -1,4 +1,4 @@
-X4 Customizer 1.17.1
+X4 Customizer 1.17.2
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -255,6 +255,9 @@ Example input file:
     * developer
       - Bool, if True then enable some behavior meant just for development, such as leaving exceptions uncaught.
       - Defaults to False
+    * profile
+      - Bool, if True then some extra profiling of customizer operations is performed, and times printed. For use during development.
+      - Defaults to False.
     * disable_threading
       - Bool, if True then threads will not be used in the gui to call scripts and plugins. Will cause the gui to lock up during processing.
       - Intended for development use, to enable breakpoints during calls.
@@ -899,3 +902,6 @@ Change Log:
    - Fixed gui crash bug when saving files before Settings path polishing.
  * 1.17.1
    - Fixed bug in generate_diffs that could miss files with just attribute changes.
+ * 1.17.2
+   - Performance optimizations for XML_Diff.Make_Patch, Find_Files, and gui VFS.
+   - Improved quality of generate_diff output patches.
