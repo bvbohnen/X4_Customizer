@@ -523,14 +523,27 @@ def _Apply_Patch_Op(op_node, target_node, type):
 
     return
 
+# Global holding the list of forced attributes.
+# Put here to avoid passing in function calls, due to so many calls.
+forced_attributes = None
 
-def Make_Patch(original_node, modified_node, verify = True, maximal = True):
+def Make_Patch(
+    original_node,
+    modified_node, 
+    forced_attributes = None,
+    verify = True, 
+    maximal = True
+   ):
     '''
     Returns an xml diff node, suitable for converting from
     original_node to modified_node. Expects Fill_Node_IDs
     to have been run on the original_node, and node_ids to have
     been originally carried into modified_node.
 
+    * forced_attributes
+      - String or list of strings, optional, list of attributes (comma
+        separated if string) which will always be included in the xpath
+        for elements which have them.
     * verify
       - Bool, if True the patch will verified, and an exception raised
         on apparent error.
@@ -551,6 +564,20 @@ def Make_Patch(original_node, modified_node, verify = True, maximal = True):
         patch_node.append(replace_node)
 
     else:
+        # Set up a config dict.
+        # This was added just for holding forced_attributes in a slightly
+        # cleaner way. Short name for easier passing (since passes often).
+        cfg = {
+            'forced_attributes' : [],
+            }
+
+        # Break up forced attributes strings into a list.
+        if isinstance(forced_attributes, str):
+            cfg['forced_attributes'] = forced_attributes.split(',')
+        # Lists and tuples pass through normally.
+        elif isinstance(forced_attributes, (list, tuple)):
+            cfg['forced_attributes'] = forced_attributes
+
         # Note: it is possible to do a non-diff patch if just adding nodes
         #  to the original, but that case is almost as easy with a diff
         #  patch and series of adds, so just always diff for now.
@@ -569,7 +596,7 @@ def Make_Patch(original_node, modified_node, verify = True, maximal = True):
 
         # Get a list of op elements.
         # Prune out Nones.
-        patch_op_list = _Get_Patch_Ops_Recursive(original_copy, modified_node)
+        patch_op_list = _Get_Patch_Ops_Recursive(original_copy, modified_node, cfg)
 
         # Construct the diff patch with these as children.
         patch_node = ET.Element('diff')
@@ -585,9 +612,10 @@ def _Patch_Node_Constructor(
         op,
         type,
         target,
+        cfg,
         name         = None,
         value        = None,
-        pos          = None
+        pos          = None,
     ):
     '''
     Small support function for creating patch operation.
@@ -611,7 +639,7 @@ def _Patch_Node_Constructor(
       - One of ['prepend','before','after'].
     '''
     # Start with the base xpath.
-    xpath = _Get_Xpath_Recursive(target)
+    xpath = _Get_Xpath_Recursive(target, cfg)
 
     # Test: trim the xpath down with // syntax as much as can be
     # done. This code will be a little messy, since throwaway
@@ -700,7 +728,7 @@ def _Patch_Node_Constructor(
     return op_node
 
 
-def _Get_Patch_Ops_Recursive(original_node, modified_node):
+def _Get_Patch_Ops_Recursive(original_node, modified_node, cfg):
     '''
     Recursive function which will return a list of patch operation elements
     to convert from the original_node to the modified_node.
@@ -725,7 +753,8 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
             patch_nodes.append(_Patch_Node_Constructor(
                 op     = 'remove', type = 'attrib',
                 target = original_node,
-                name   = name))            
+                name   = name,
+                cfg    = cfg))            
 
         elif value != modified_node.get(name):
             # Attribute was changed.
@@ -733,7 +762,8 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
                 op     = 'replace', type = 'attrib',
                 target = original_node,
                 name   = name,
-                value  = modified_node.get(name) ))
+                value  = modified_node.get(name),
+                cfg    = cfg ))
 
     # Search the modified_node for additions.
     for name, value in modified_node.items():
@@ -743,7 +773,8 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
                 op     = 'add', type = 'attrib',
                 target = original_node,
                 name   = name,
-                value  = modified_node.get(name) ))
+                value  = modified_node.get(name),
+                cfg    = cfg ))
             
 
     # Look for text changes.
@@ -753,7 +784,8 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
         # Text removed.
         patch_nodes.append(_Patch_Node_Constructor(
             op     = 'remove', type = 'text',
-            target = original_node ))
+            target = original_node,
+            cfg    = cfg ))
         
     elif original_node.text != modified_node.text:
         # This should have been handled earlier for comments.
@@ -762,7 +794,8 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
         patch_nodes.append(_Patch_Node_Constructor(
             op     = 'replace', type = 'text',
             target = original_node,
-            value  = modified_node.text ))
+            value  = modified_node.text,
+            cfg    = cfg ))
 
 
     # Look for child node changes.
@@ -801,7 +834,8 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
                 # since this gets put in the patch tree.
                 # Note: this copies over the node id, so the patched
                 # orig child will now match at this position.
-                value  = deepcopy(mod_child) ))
+                value  = deepcopy(mod_child),
+                cfg    = cfg ))
 
             mod_children.remove(mod_child)
             continue
@@ -812,7 +846,8 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
             # Remove from the original node.
             patch_nodes.append(_Patch_Node_Constructor(
                 op     = 'remove', type = 'node',
-                target = orig_child ))
+                target = orig_child,
+                cfg    = cfg ))
             
             orig_children.remove(orig_child)
             continue
@@ -838,7 +873,8 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
                 # This case suggests the orig node was removed.
                 patch_nodes.append(_Patch_Node_Constructor(
                     op     = 'remove', type = 'node',
-                    target = orig_child ))
+                    target = orig_child,
+                    cfg    = cfg ))
 
                 orig_children.remove(orig_child)
                 continue
@@ -851,7 +887,8 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
                     # Insert before the original.
                     target = orig_child,
                     pos = 'before',
-                    value  = deepcopy(mod_child) ))
+                    value  = deepcopy(mod_child),
+                    cfg    = cfg ))
 
                 mod_children.remove(mod_child)
                 continue
@@ -863,7 +900,8 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
                 patch_nodes.append(_Patch_Node_Constructor(
                     op     = 'replace', type = 'node',
                     target = orig_child,
-                    value  = deepcopy(mod_child) ))
+                    value  = deepcopy(mod_child),
+                    cfg    = cfg ))
 
                 orig_children.remove(orig_child)
                 mod_children.remove(mod_child)
@@ -876,7 +914,8 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
                 # back in later in the list).
                 patch_nodes.append(_Patch_Node_Constructor(
                     op     = 'remove', type = 'node',
-                    target = orig_child ))
+                    target = orig_child,
+                    cfg    = cfg ))
                 
                 orig_children.remove(orig_child)
                 continue
@@ -902,7 +941,8 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
             patch_nodes.append(_Patch_Node_Constructor(
                 op     = 'replace', type = 'node',
                 target = orig_child,
-                value  = new_comment ))
+                value  = new_comment,
+                cfg    = cfg ))
             
             orig_children.remove(orig_child)
             mod_children.remove(mod_child)
@@ -912,14 +952,14 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node):
         # If here, then the nodes appear to be the same, superficially.
         # Still need to handle deeper changes, so recurse and pick out
         #  lower level patches.
-        patch_nodes += _Get_Patch_Ops_Recursive(orig_child, mod_child)
+        patch_nodes += _Get_Patch_Ops_Recursive(orig_child, mod_child, cfg)
         orig_children.remove(orig_child)
         mod_children.remove(mod_child)
 
     return patch_nodes
 
 
-def _Get_Xpath_Recursive(node):
+def _Get_Xpath_Recursive(node, cfg):
     '''
     Construct and return an xpath to select the given node.
     Recursively gets called on parent nodes, using their xpaths
@@ -957,14 +997,29 @@ def _Get_Xpath_Recursive(node):
         #  not needed and clutter up the output diff patch.)
         xpath = node.tag
 
+        # Add forced attributes.
+        forced_attr_added = False
+        for key in cfg['forced_attributes']:
+            value = node.get(key)
+            # Often nodes will not have the attribute; skip those cases.
+            if value == None:
+                continue
+            # Skip anything with quotes (see comments below on why).
+            if '"' in value or "'" in value:
+                continue
+            xpath += '''[@{}='{}']'''.format(key, value)
+            forced_attr_added = True
+
         # If the parent has a large number of children, eg. for
         # the top level of the wares file or similar cases, then the xpath
         # is expected to initially match everything. To save some time,
         # these cases can skip to the first attribute addition (eg. "id").
-        # The check can be for something like num_children > 30.
-        # Ensure the node has at least one attribute to add.
+        # The check can be for something like num_children > 30, though
+        # even 500 should catch the worst cases.
+        # Ensure the node has at least one attribute to add, and skip
+        # this shortcut if a forced attribute was already added.
         # (In quick tests on some larger files, this saves ~10%.)
-        if len(parent) > 30 and len(node.attrib) >= 1:
+        if len(parent) > 50 and len(node.attrib) >= 1 and not forced_attr_added:
             # Give a couple dummy entries to trigger node addition.
             similar_elements = [None, None]
         else:
@@ -982,6 +1037,10 @@ def _Get_Xpath_Recursive(node):
 
             # Add attributes.
             for key in attribute_names:
+                # Skip if this was a forced attribute, already added.
+                if key in cfg['forced_attributes']:
+                    continue
+
                 value = node.get(key)
 
                 # Note: the xpath will itself be an attribute in double
@@ -1006,7 +1065,7 @@ def _Get_Xpath_Recursive(node):
 
 
     # Flesh out the xpath with the parent prefix.
-    xpath = _Get_Xpath_Recursive(parent) + '/' + xpath
+    xpath = _Get_Xpath_Recursive(parent, cfg) + '/' + xpath
 
     # If there are still multiple element matches, add a suffix.
     # Note: the xpath index is relative to other nodes matched with

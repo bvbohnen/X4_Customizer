@@ -20,7 +20,8 @@ from .Map import Scale_Sector_Size
 
 from .Misc import Apply_Live_Editor_Patches
 
-from .Ships import Adjust_Ship_Speed
+from .Scripts import *
+from .Ships import *
 from .Text import Color_Text
 
 from .Wares import Adjust_Ware_Price_Spread

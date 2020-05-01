@@ -9,19 +9,37 @@ from Plugins import *
 # Adjust the exe to point at a saved copy, since X4.exe will be symlinked
 # to the customized version.
 Settings(X4_exe_name = 'X4_nonsteam.exe')
+#Settings(X4_exe_name = 'X4.vanilla.exe')
 
 Apply_Live_Editor_Patches()
 
+#@Transform_Wrapper()
+#def Test():
+#    assert False
+#    return
+#
+#Test()
+
 # Exe edits.
-Remove_Sig_Errors()
-Remove_Modified()
+# Disabled when not refreshing; the prior produced exe will not
+# be deleted by the customizer.
+if 0:
+    Remove_Sig_Errors()
+    Remove_Modified()
 
 # Prune some mass traffic.
 # (There may also be a way to adjust this in-game now.)
 Adjust_Job_Count(('id masstraffic*', 0.5))
 
 # Testing adjusting jobs globally.
-#Adjust_Job_Count(('*', 1))
+#Adjust_Job_Count(('*', .0001))
+
+# Slow down ai scripts a bit for better fps.
+# Note on 20k ships save 300km out of vision:
+#  1x/1x: 37 fps (vanilla)
+#  2x/4x: 41 fps (default args)
+#  4x/8x: 46 fps
+#Increase_AI_Script_Waits(multiplier = 4, seta_multiplier = 8)
 
 # Toy around with coloring.
 # This is Pious Mists.

@@ -554,6 +554,8 @@ class XML_File(Game_File):
     #  and isn't new.
     # TODO: set up a flag for new, non-diff xml files. For now, all need
     #  a diff.
+    # TODO: allow forced_xpath_attributes as an override arg for
+    #  selective files.
     def Get_Diff(self):
         '''
         Generates an xml tree holding a diff patch, will convert from
@@ -565,6 +567,7 @@ class XML_File(Game_File):
         patch_node = XML_Diff.Make_Patch(
             original_node = self.patched_root, 
             modified_node = self.Get_Root_Readonly(),
+            forced_attributes = Settings.forced_xpath_attributes,
             maximal = Settings.make_maximal_diffs,
             verify = True)
 

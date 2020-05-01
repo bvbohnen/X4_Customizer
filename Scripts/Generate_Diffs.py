@@ -1,23 +1,32 @@
 '''
 Script for directly diffing pairs of files.
+Supports argument parsing for direct calls from a bat file.
+
+Note: not for running from the GUI.
 '''
 
 from pathlib import Path
 import argparse, sys
 from Plugins import Generate_Diff, Generate_Diffs
 from Plugins import Settings
-from Framework import Get_Version
+from Framework import Get_Version, Print
 
 # TODO: support for generating sig files as well.
 
 def Run():
+
+    # Test if the gui window is open; error message if so.
+    from Plugins.GUI import Main_Window
+    if Main_Window.qt_application != None:
+        Print('Error: Generate_Diffs standalone script is only supported by'
+              ' command line calls, not from the GUI.')
+        return
 
     # To avoid errors that print to the Plugin_Log trying to then load Settings
     # which may not be set (eg. where to write the plugin_log to), monkey
     # patch the log to do a pass through.
     from Framework import Plugin_Log
     Plugin_Log.logging_function = lambda line: print(str(line))
-
 
     # Set up command line arguments.
     argparser = argparse.ArgumentParser(
@@ -43,6 +52,14 @@ def Run():
     argparser.add_argument(
         'out',
         help =  'Path name of the output diff file, or directory to write files.')
+    
+    argparser.add_argument(
+        '-f', '--force-attr',
+        default = None,
+        # Consume all following plain args.
+        nargs = '*',
+        help =  'Element attributes that xpaths are forced to use, even when'
+                ' not necessary, as a space separated list.' )
 
     argparser.add_argument(
         '-s', '--skip-unchanged',
@@ -79,6 +96,13 @@ def Run():
         if not path.exists():
             print('Error: No folder or file found on path {}'.format(path))
             return
+
+    # Stick any forced attributes in Settings.
+    # TODO: maybe move to a Generate_Diff(s) arg.
+    # If not given, leave Settings alone; it may already have some generic
+    # attributes set.
+    if args.force_attr:
+        Settings(forced_xpath_attributes = args.force_attr)
 
     # Determine if this is file or directory mode.
     mode = 'file' if base.is_file() else 'dir'

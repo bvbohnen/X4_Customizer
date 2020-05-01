@@ -17,20 +17,29 @@ Settings(
     )
 
 # For all tests to run, mostly to tease out exceptions after
-# code changes.
+# code changes. Note: some tests may be a bit outdated.
 test_all = 0
 
-if 0:
+if 1:
     GUI.Start_GUI()
 
-# Test exe edits.
-if 0:
-    Remove_Sig_Errors()
-   
 # Test sector resizing.
 if 0 or test_all:
     Scale_Sector_Size(0.4, _test = True)
     
+# Test exe edits.
+if 0:
+    Remove_Sig_Errors()
+if 0:
+    Remove_Modified()
+if 0:
+    High_Precision_Systemtime()
+   
+if 0:
+    Increase_AI_Script_Waits()
+
+if 0:
+    Adjust_OOV_Damage(0.5)
 
 # Diff generator test.
 if 0 or test_all:
@@ -44,7 +53,16 @@ if 0 or test_all:
         modified_dir_path = this_dir / '../private/test' / 'mod_files',
         output_dir_path   = this_dir / '../private/test' / 'diff_files',
         )
- 
+    
+if 0 or test_all:
+    # Try forcing an attribute.
+    Settings(forced_xpath_attributes = 'id,method,tags')
+    Generate_Diffs(
+        original_dir_path = this_dir / '../private/test/deadair/orig',
+        modified_dir_path = this_dir / '../private/test/deadair/mod',
+        output_dir_path   = this_dir / '../private/test/deadair/diff',
+        )
+
 # Test the extension checker.
 if 0 or test_all:
     Check_Extension('test_mod')
@@ -65,6 +83,7 @@ if 0 or test_all:
 if 0 or test_all:
     Adjust_Mission_Reward_Mod_Chance(10)
 
+# Ship transforms.
 if 0 or test_all:
     Adjust_Ship_Speed(
         ('name ship_xen_xl_carrier_01_a*', 1.2),
@@ -72,6 +91,33 @@ if 0 or test_all:
         ('type corvette'                 , 1.5),
         ('purpose fight'                 , 1.2),
         ('*'                             , 1.1) )
+
+    Adjust_Ship_Crew_Capacity(
+        ('class ship_xl'                 , 2.0),
+        ('*'                             , 1.5)
+        )
+    Adjust_Ship_Drone_Storage(
+        ('class ship_xl'                 , 2.0),
+        ('*'                             , 1.5)
+        )
+    Adjust_Ship_Missile_Storage(
+        ('class ship_xl'                 , 2.0),
+        ('*'                             , 1.5)
+        )
+    Adjust_Ship_Hull(
+        ('class ship_xl'                 , 2.0),
+        ('*'                             , 1.5)
+        )
+    Adjust_Ship_Turning(
+        ('class ship_xl'                 , 2.0),
+        ('*'                             , 1.5)
+        )
+
+if 0:
+    Adjust_Ship_Hull(
+        ('class ship_l' , 1.5), 
+        ('class ship_xl', 1.5))
+
 
 # Test the gui live editor, doing a transform before and after
 # the patch application. Transform before should show up in the
@@ -135,7 +181,7 @@ if 0 or test_all:
         ('size      s'                 , 1.5),
         ('faction   argon'             , 1.2),
         ('*'                           , 1.1) )
-
+    
 
 # Simple cat unpack, allowing errors.
 if 0 or test_all:
@@ -173,7 +219,7 @@ if 0 or test_all:
 
 
 # Cat pack test.
-if 1 or test_all:
+if 0 or test_all:
     # Pick where to grab files from.
     # Could also call this script from that directory and use relative
     # paths for the cat file names.
@@ -209,7 +255,7 @@ if 0 or test_all:
         edits_per_test = 5,
         rand_seed      = 1,
         )
-
+    
 
 # Manual testing of cat reading.
 if 0 or test_all:

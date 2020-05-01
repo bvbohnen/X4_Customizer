@@ -165,8 +165,6 @@ def XML_Multiply_Float_Attribute(node, attr, multiplier, precision = 4):
 # Binary patching support, brought over from X3 Customizer.
 # Originally this was for obj files, but naming is tweaked for general binary.
 
-
-
 class Binary_Patch:
     '''
     Patch to apply to a binary file.

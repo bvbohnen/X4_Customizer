@@ -235,6 +235,7 @@ def Run(*args):
         # TODO: some way to detect if this is not a valid script, other
         # than whatever possible error occurring, eg. if the user tried
         # to run one of the plugin files.
+
         import importlib        
         module = importlib.machinery.SourceFileLoader(
             # Provide the name sys will use for this module.

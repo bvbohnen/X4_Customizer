@@ -129,6 +129,15 @@ class Settings_class:
         to find and patch only edited nodes.
       - Turn on to more easily view xml changes.
       - Defaults to False.
+    * forced_xpath_attributes
+      - String, optional comma separate list of XML node attributes which,
+        if found when constructing xpaths for output diffs, will be
+        included in the xpath regardless of if they are needed.
+      - Example: "id,name" will always include "id" and "name" attributes
+        of elements in the xpath.
+      - Can be used to make xpaths more specific, and more likely to break
+        if an unknown extension is applied before the output extension
+        (eg. when the customizer output is distributed to other users).
 
     Logging:
     * live_editor_log_file_name
@@ -186,6 +195,7 @@ class Settings_class:
         equations, for smoother curves between the boundaries.
       - If False or scipy is not found, then a simple linear scaling
         will be used instead.
+      - May be unused currently.
       - Defaults to True
     * show_scaling_plots
       - Bool, if True and matplotlib and numpy are available, any
@@ -193,6 +203,7 @@ class Settings_class:
         x and y vectors printed for reference). Close the plot window
         manually to continue plugin processing.
       - Primarily for development use.
+      - May be unused currently.
       - Defaults to False
     '''
     '''
@@ -342,6 +353,7 @@ class Settings_class:
         defaults['ignore_output_extension'] = True
         defaults['X4_exe_name'] = 'X4.exe'        
         defaults['make_maximal_diffs'] = False
+        defaults['forced_xpath_attributes'] = ''
         defaults['plugin_log_file_name'] = 'plugin_log.txt'
         defaults['live_editor_log_file_name'] = 'live_editor_log.json'        
         defaults['customizer_log_file_name'] = 'customizer_log.json'

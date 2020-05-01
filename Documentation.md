@@ -1,4 +1,4 @@
-X4 Customizer 1.17.2
+X4 Customizer 1.18
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -221,6 +221,10 @@ Example input file:
       - Bool, if True then generated xml diff patches will do the maximum full tree replacement instead of using the algorithm to find and patch only edited nodes.
       - Turn on to more easily view xml changes.
       - Defaults to False.
+    * forced_xpath_attributes
+      - String, optional comma separate list of XML node attributes which, if found when constructing xpaths for output diffs, will be included in the xpath regardless of if they are needed.
+      - Example: "id,name" will always include "id" and "name" attributes of elements in the xpath.
+      - Can be used to make xpaths more specific, and more likely to break if an unknown extension is applied before the output extension (eg. when the customizer output is distributed to other users).
     
     Logging:
     * live_editor_log_file_name
@@ -265,10 +269,12 @@ Example input file:
     * use_scipy_for_scaling_equations
       - Bool, if True then scipy will be used to optimize scaling equations, for smoother curves between the boundaries.
       - If False or scipy is not found, then a simple linear scaling will be used instead.
+      - May be unused currently.
       - Defaults to True
     * show_scaling_plots
       - Bool, if True and matplotlib and numpy are available, any generated scaling equations will be plotted (and their x and y vectors printed for reference). Close the plot window manually to continue plugin processing.
       - Primarily for development use.
+      - May be unused currently.
       - Defaults to False
         
 
@@ -448,6 +454,43 @@ Scale_Sector_Size Transforms:
 
 ***
 
+Scripts Transforms:
+
+  * Adjust_OOV_Damage
+
+    Adjusts all out-of-vision damage-per-second by a multiplier. For instance, if OOV combat seems to run too fast, it can be multiplied by 0.5 to slow it down by half.
+        
+    * multiplier
+      - Float, how much to multiply damage by.
+        
+
+  * Increase_AI_Script_Waits
+
+    Increases wait times in ai scripts, to reduce their background load and improve performance.  Waits under "visible" attention will not be modified. Expected to have high impact on fps, at some cost of ai efficiency.
+    
+    * multiplier
+      - Float, how much to multiply wait times by. Default is 2.
+    * seta_multiplier
+      - Float, alternate multiplier to apply if the player is in SETA mode. Default is 4.
+      - Eg. if multiplier is 2 and seta_multiplier is 4, then waits will be 2x longer when not in SETA, 4x longer when in SETA.
+    * max_wait
+      - Float, optional, the longest wait that this multiplier can achieve, in seconds.
+      - Defaults to 15.
+      - If the original wait is longer than this, it will be unaffected.
+    * filter
+      - String, possibly with wildcards, matching names of ai scripts to modify; default is plain '*' to match all aiscripts.
+      - Example: "*trade.*" to modify only trade scripts.
+    * include_extensions
+      - Bool, if True then aiscripts added by extensions are also modified.
+      - Defaults False.
+    * skip_combat_scripts
+      - Bool, if True then scripts which control OOS damage application will not be modified. Otherwise, they are modified and their attack strength per round is increased to match the longer wait times.
+      - Defaults False.
+        
+
+
+***
+
 Ships Transforms:
 
   * Common documentation
@@ -492,9 +535,49 @@ Ships Transforms:
     
         
 
+  * Adjust_Ship_Crew_Capacity
+
+    Adjusts the crew capacities of ships. Note: crewmen contributions to ship combined skill appears to adjust downward based on max capacity, so increasing capacity can lead to a ship performing worse (unverified).
+    
+    * match_rule_multipliers:
+      - Series of matching rules paired with the multipliers to use.
+        
+
+  * Adjust_Ship_Drone_Storage
+
+    Adjusts the drone ("unit") storage of ships.
+    
+    * match_rule_multipliers:
+      - Series of matching rules paired with the multipliers to use.
+        
+
+  * Adjust_Ship_Hull
+
+    Adjusts the hull values of ships.
+    
+    * match_rule_multipliers:
+      - Series of matching rules paired with the multipliers to use.
+        
+
+  * Adjust_Ship_Missile_Storage
+
+    Adjusts the missile storage of ships.
+    
+    * match_rule_multipliers:
+      - Series of matching rules paired with the multipliers to use.
+        
+
   * Adjust_Ship_Speed
 
     Adjusts the speed and acceleration of ships, in each direction.
+    
+    * match_rule_multipliers:
+      - Series of matching rules paired with the multipliers to use.
+        
+
+  * Adjust_Ship_Turning
+
+    Adjusts the turning rate of ships, in each direction.
     
     * match_rule_multipliers:
       - Series of matching rules paired with the multipliers to use.
@@ -905,3 +988,6 @@ Change Log:
  * 1.17.2
    - Performance optimizations for XML_Diff.Make_Patch, Find_Files, and gui VFS.
    - Improved quality of generate_diff output patches.
+ * 1.18
+   - Added support for forcing xpath attributes in generated diff patches.
+   - Added transforms: Increase_AI_Script_Waits, Adjust_OOV_Damage, Adjust_Ship_Turning, Adjust_Ship_Hull, Adjust_Ship_Crew_Capacity, Adjust_Ship_Drone_Storage, Adjust_Ship_Missile_Storage.

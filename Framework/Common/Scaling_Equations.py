@@ -1,5 +1,6 @@
 '''
 Code for generation scaling equations, used by various transforms.
+Note: copied from X3 Customizer; may be unused by X4 Customizer.
 '''
 
 '''

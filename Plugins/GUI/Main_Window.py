@@ -660,6 +660,16 @@ class GUI_Main_Window(qt_base_class, generated_class):
         # Start by looking up the tab page.
         widget = self.widget_tab_container.widget(index)
 
+        # Note: this has been observed to be called with a None widget?
+        # Unclear on cause (was the click registered twice before close?).
+        # Could the index be wrong in some cases? Though if it was accidental
+        # double click on a tab before the end, two tabs will be closed,
+        # which the user can see happening and maybe recognize their double
+        # click (unless it is a Qt problem registering two clicks).
+        # At any rate, add a safety check for None.
+        if widget == None:
+            return
+
         # If this is a unique page, just hide it.
         # TODO: maybe check for its class_name being in the
         # unique dict instead, if that is safer.

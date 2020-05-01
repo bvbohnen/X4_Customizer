@@ -176,6 +176,11 @@ Change Log:
  * 1.17.2
    - Performance optimizations for XML_Diff.Make_Patch, Find_Files, and gui VFS.
    - Improved quality of generate_diff output patches.
+ * 1.18
+   - Added support for forcing xpath attributes in generated diff patches.
+   - Added transforms: Increase_AI_Script_Waits, Adjust_OOV_Damage, 
+     Adjust_Ship_Turning, Adjust_Ship_Hull, Adjust_Ship_Crew_Capacity,
+     Adjust_Ship_Drone_Storage, Adjust_Ship_Missile_Storage.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

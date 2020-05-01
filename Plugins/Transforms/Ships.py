@@ -5,6 +5,15 @@ from .Support import Standardize_Match_Rules
 from .Support import XML_Multiply_Int_Attribute
 from .Support import XML_Multiply_Float_Attribute
 
+__all__ = [
+    'Adjust_Ship_Speed',
+    'Adjust_Ship_Turning',
+    'Adjust_Ship_Hull',
+    'Adjust_Ship_Crew_Capacity',
+    'Adjust_Ship_Drone_Storage',
+    'Adjust_Ship_Missile_Storage',
+    ]
+
 doc_matching_rules = '''
     Ship transforms will commonly use a group of matching rules
     to determine which ships get modified, and by how much.   
@@ -54,13 +63,12 @@ doc_matching_rules = '''
 
 # TODO:
 '''
-Ships can only be directly, easily edited for a few fields.
-- Speed/turning (by adjusting mass/inertia/drag)
-- Crew #
-- Missile storage #
-- hull
 - explosion damage
 - maybe default/compatible software
+
+Complex speed adjustment that retuns ship classes relative to each other,
+eg. making scouts > fighters > heavy fighters > corvettes > ...
+(This might be joint changed alongside thrusters.)
 
 Other fields will require editing the connected ship components,
 which may be shared across multiple ships.
@@ -86,8 +94,172 @@ def Adjust_Ship_Speed(
     * match_rule_multipliers:
       - Series of matching rules paired with the multipliers to use.
     '''
+    def Node_Update(ship_macro, multiplier):
+        # These will all work on the inverted multiplier, since
+        # they reduce speed/acceleration.
+        inv_mult = 1/multiplier
+
+        # The fields to change are scattered under the physics node.
+        physics_node = ship_macro.find('./properties/physics')
+        drag_node = physics_node.find('./drag')
+        inertia_node = physics_node.find('./inertia')
+
+        XML_Multiply_Float_Attribute(physics_node, 'mass', inv_mult)
+        for drag_field in ['forward', 'reverse', 'horizontal', 'vertical']:
+            XML_Multiply_Float_Attribute(drag_node, drag_field, inv_mult)
+        return True
+
+    # Hand off to shared code to run updates.
+    Update_Nodes_By_Rules(match_rule_multipliers, Node_Update)
+    return
+
+
+@Transform_Wrapper(shared_docs = doc_matching_rules)
+def Adjust_Ship_Turning(
+        *match_rule_multipliers
+    ):
+    '''
+    Adjusts the turning rate of ships, in each direction.
+
+    * match_rule_multipliers:
+      - Series of matching rules paired with the multipliers to use.
+    '''
+    def Node_Update(ship_macro, multiplier):
+        # These will all work on the inverted multiplier, since
+        # they reduce speed/acceleration.
+        inv_mult = 1/multiplier
+
+        # The fields to change are scattered under the physics node.
+        physics_node = ship_macro.find('./properties/physics')
+        drag_node = physics_node.find('./drag')
+        inertia_node = physics_node.find('./inertia')
+
+        for drag_field in ['pitch', 'yaw', 'roll']:
+            # Terms show up under inertia and drag.
+            # Presumably, intertia is roughly equivelent to mass for raw
+            # speed, determining the acceleration.
+            XML_Multiply_Float_Attribute(drag_node, drag_field, inv_mult)
+            XML_Multiply_Float_Attribute(inertia_node, drag_field, inv_mult)
+        return True
+
+    # Hand off to shared code to run updates.
+    Update_Nodes_By_Rules(match_rule_multipliers, Node_Update)
+    return
+
+
+@Transform_Wrapper(shared_docs = doc_matching_rules)
+def Adjust_Ship_Hull(
+        *match_rule_multipliers
+    ):
+    '''
+    Adjusts the hull values of ships.
+
+    * match_rule_multipliers:
+      - Series of matching rules paired with the multipliers to use.
+    '''
+    def Node_Update(ship_macro, multiplier):
+        # These are in the 'hull' node, 'max' attribute.
+        hull_node = ship_macro.find('./properties/hull')
+        XML_Multiply_Int_Attribute(hull_node, 'max', multiplier)
+        return True
+
+    # Hand off to shared code to run updates.
+    Update_Nodes_By_Rules(match_rule_multipliers, Node_Update)
+    return
+
+
+@Transform_Wrapper(shared_docs = doc_matching_rules)
+def Adjust_Ship_Missile_Storage(
+        *match_rule_multipliers
+    ):
+    '''
+    Adjusts the missile storage of ships.
+
+    * match_rule_multipliers:
+      - Series of matching rules paired with the multipliers to use.
+    '''
+    def Node_Update(ship_macro, multiplier):
+        # These are in the 'storage' node, 'missile' attribute.
+        storage = ship_macro.find('./properties/storage')
+        # Some ships don't have storage.
+        if storage != None and storage.get('missile'):
+            XML_Multiply_Int_Attribute(storage, 'missile', multiplier)
+            return True
+        return False
+
+    # Hand off to shared code to run updates.
+    Update_Nodes_By_Rules(match_rule_multipliers, Node_Update)
+    return
+
+
+@Transform_Wrapper(shared_docs = doc_matching_rules)
+def Adjust_Ship_Drone_Storage(
+        *match_rule_multipliers
+    ):
+    '''
+    Adjusts the drone ("unit") storage of ships.
+
+    * match_rule_multipliers:
+      - Series of matching rules paired with the multipliers to use.
+    '''
+    def Node_Update(ship_macro, multiplier):
+        # These are in the 'storage' node, 'unit' attribute.
+        storage = ship_macro.find('./properties/storage')
+        # Some ships don't have storage.
+        if storage != None and storage.get('unit'):
+            XML_Multiply_Int_Attribute(storage, 'unit', multiplier)
+            return True
+        return False
+
+    # Hand off to shared code to run updates.
+    Update_Nodes_By_Rules(match_rule_multipliers, Node_Update)
+    return
+
+
+@Transform_Wrapper(shared_docs = doc_matching_rules)
+def Adjust_Ship_Crew_Capacity(
+        *match_rule_multipliers
+    ):
+    '''
+    Adjusts the crew capacities of ships. Note: crewmen contributions to
+    ship combined skill appears to adjust downward based on max capacity,
+    so increasing capacity can lead to a ship performing worse (unverified).
+
+    * match_rule_multipliers:
+      - Series of matching rules paired with the multipliers to use.
+    '''
+    def Node_Update(ship_macro, multiplier):
+        people = ship_macro.find('./properties/people')
+        if people != None and people.get('capacity'):
+            XML_Multiply_Int_Attribute(people, 'capacity', multiplier)
+            return True
+        return False
+    # Hand off to shared code to run updates.
+    Update_Nodes_By_Rules(match_rule_multipliers, Node_Update)
+    return
+
+
+
+##############################################################################
+# Support functions.
+
+def Update_Nodes_By_Rules(
+    match_rules,
+    update_function,
+    ):
+    '''
+    Shared function which will check all ships for rules matches, and pass
+    the corresponding args for the rule to an update function.
+
+    * match_rules
+      - User provided list of rules, before Standardize_Match_Rules.
+    * update_function
+      - Function will takes (ship_macro_element, *args), and does 
+        any necessary xml edits. This should return change_occurred,
+        a boolean True on change and False or None on no change.
+    '''
     # Put matching rules in standard form.
-    rules = Standardize_Match_Rules(match_rule_multipliers)
+    rules = Standardize_Match_Rules(match_rules)
            
     game_files = File_System.Get_All_Indexed_Files('macros','ship_*')
     for game_file in game_files:
@@ -96,33 +268,19 @@ def Adjust_Ship_Speed(
         # this isn't expected).
         ship_macros = xml_root.findall('./macro')
 
+        change_occurred = False
         for ship_macro in ship_macros:
-            multiplier = Get_Match_Rule_Args(ship_macro, rules)
-            if multiplier == None:
+            args = Get_Match_Rule_Args(ship_macro, rules)
+            if not args:
                 continue
 
-            # These will all work on the inverted multiplier, since
-            # they reduce speed/acceleration.
-            inv_mult = 1/multiplier
-
-            # The fields to change are scattered under the physics node.
-            physics_node = ship_macro.find('./properties/physics')
-            drag_node = physics_node.find('./drag')
-            inertia_node = physics_node.find('./inertia')
-
-            XML_Multiply_Float_Attribute(physics_node, 'mass', inv_mult)
-            for drag_field in ['forward', 'reverse', 'horizontal', 'vertical']:
-                XML_Multiply_Float_Attribute(drag_node, drag_field, inv_mult)
+            change_occurred |= update_function(ship_macro, args)
                 
-        # Put the changes back.
-        game_file.Update_Root(xml_root)
-
+        if change_occurred:
+            # Put the changes back.
+            game_file.Update_Root(xml_root)
     return
-
-
     
-##############################################################################
-# Support functions.
 
 def Get_Match_Rule_Args(ship_macro_xml, rules):
     '''

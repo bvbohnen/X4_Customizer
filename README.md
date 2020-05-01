@@ -1,4 +1,4 @@
-X4 Customizer 1.17.2
+X4 Customizer 1.18
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -214,12 +214,45 @@ Scale_Sector_Size Transforms:
 
 ***
 
+Scripts Transforms:
+
+  * Adjust_OOV_Damage
+
+    Adjusts all out-of-vision damage-per-second by a multiplier. For instance, if OOV combat seems to run too fast, it can be multiplied by 0.5 to slow it down by half.
+
+  * Increase_AI_Script_Waits
+
+    Increases wait times in ai scripts, to reduce their background load and improve performance.  Waits under "visible" attention will not be modified. Expected to have high impact on fps, at some cost of ai efficiency.
+
+
+***
+
 Ships Transforms:
 
+
+  * Adjust_Ship_Crew_Capacity
+
+    Adjusts the crew capacities of ships. Note: crewmen contributions to ship combined skill appears to adjust downward based on max capacity, so increasing capacity can lead to a ship performing worse (unverified).
+
+  * Adjust_Ship_Drone_Storage
+
+    Adjusts the drone ("unit") storage of ships.
+
+  * Adjust_Ship_Hull
+
+    Adjusts the hull values of ships.
+
+  * Adjust_Ship_Missile_Storage
+
+    Adjusts the missile storage of ships.
 
   * Adjust_Ship_Speed
 
     Adjusts the speed and acceleration of ships, in each direction.
+
+  * Adjust_Ship_Turning
+
+    Adjusts the turning rate of ships, in each direction.
 
 
 ***
