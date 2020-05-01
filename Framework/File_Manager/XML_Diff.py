@@ -293,6 +293,8 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
         # Small convenience function for printing errors in various
         # conditions.
         # TODO: note which extensions the files come from.
+        # TODO: maybe respect a "silent" attribute to suppress errors,
+        #  or maybe just suppress when checking extensions (done elsewhere).
         def Print_Error(message):
             Plugin_Log.Print(('{}Error: Problem occured when handling diff '
                 'node "{}" on line {}, xpath "{}"; skipping; error message: {}.'
@@ -572,7 +574,7 @@ def Make_Patch(
             }
 
         # Break up forced attributes strings into a list.
-        if isinstance(forced_attributes, str):
+        if forced_attributes and isinstance(forced_attributes, str):
             cfg['forced_attributes'] = forced_attributes.split(',')
         # Lists and tuples pass through normally.
         elif isinstance(forced_attributes, (list, tuple)):

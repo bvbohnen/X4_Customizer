@@ -1,4 +1,4 @@
-X4 Customizer 1.18
+X4 Customizer 1.18.1
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -174,6 +174,8 @@ Example input file:
     * path_to_source_folder
       - Optional path to a source folder that holds high priority source files, which will be used instead of reading the x4 cat/dat files.
       - For use when running plugins on manually edited files.
+      - Not needed in general use.
+      - All files from the source folder will be copied into the extension.
       - Defaults to None
     * allow_path_error
       - Bool, if True and the x4 or user folder path looks wrong, the customizer will still attempt to run (with a warning).
@@ -991,3 +993,6 @@ Change Log:
  * 1.18
    - Added support for forcing xpath attributes in generated diff patches.
    - Added transforms: Increase_AI_Script_Waits, Adjust_OOV_Damage, Adjust_Ship_Turning, Adjust_Ship_Hull, Adjust_Ship_Crew_Capacity, Adjust_Ship_Drone_Storage, Adjust_Ship_Missile_Storage.
+ * 1.18.1
+   - Bug fix when forced xpath attributes not specified.
+   - Bug fixed when copying files at the path_to_source_folder.

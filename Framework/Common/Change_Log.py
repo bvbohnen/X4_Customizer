@@ -181,6 +181,9 @@ Change Log:
    - Added transforms: Increase_AI_Script_Waits, Adjust_OOV_Damage, 
      Adjust_Ship_Turning, Adjust_Ship_Hull, Adjust_Ship_Crew_Capacity,
      Adjust_Ship_Drone_Storage, Adjust_Ship_Missile_Storage.
+ * 1.18.1
+   - Bug fix when forced xpath attributes not specified.
+   - Bug fixed when copying files at the path_to_source_folder.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

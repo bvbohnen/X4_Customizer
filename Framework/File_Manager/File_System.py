@@ -479,7 +479,7 @@ class File_System_class:
                                    virtual_path = virtual_path))
 
             # Set as modified to force writeout.
-            self.game_file_dict['virtual_path'].modified = True
+            self.game_file_dict[virtual_path].modified = True
         return
 
                 

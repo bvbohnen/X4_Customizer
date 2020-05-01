@@ -57,6 +57,8 @@ class Settings_class:
       - Optional path to a source folder that holds high priority source
         files, which will be used instead of reading the x4 cat/dat files.
       - For use when running plugins on manually edited files.
+      - Not needed in general use.
+      - All files from the source folder will be copied into the extension.
       - Defaults to None
     * allow_path_error
       - Bool, if True and the x4 or user folder path looks wrong, the
