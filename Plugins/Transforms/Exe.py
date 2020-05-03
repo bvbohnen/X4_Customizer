@@ -5,6 +5,7 @@ __all__ = [
     'Remove_Modified',
     'Remove_Sig_Errors',
     'High_Precision_Systemtime',
+    'Remove_Workshop_Tool_Dependency_Check',
     ]
 
 from datetime import datetime
@@ -555,4 +556,70 @@ def High_Precision_Systemtime(
     ]
     
     Apply_Binary_Patch_Group(patches)
+    return
+
+
+
+@Transform_Wrapper()
+def Remove_Workshop_Tool_Dependency_Check():
+    '''
+    From the steam workshop upload tool, remove the dependency check that
+    requires dependencies start with "ws_" and be present on the workshop.
+    Experimental; developed to allow dependnencies on egosoft dlc.
+
+    Put WorkshopTool.exe in the main x4 folder, so the customizer
+    can find it, then copy the modified version back to the x tools dir.
+    '''
+    '''
+    Can just skip over the error handler for this case:
+
+    uVar17 = FUN_1400e7c50((longlong)local_5c98);
+    if ((char)uVar17 == '\0') {
+      pwVar51 = L"ERROR: There are dependencies on non-Workshop extensions\n";
+      goto LAB_1400e779f;
+    }
+
+    ` 1400e5715 48 8d      LEA     param_1=>local_5c98,[RBP + 0x80]
+    `           8d 80 
+    `           00 00 00
+    ` 1400e571c e8 2f      CALL    FUN_1400e7c50                     ulonglong FUN_1400e7c5
+    `           25 00 00
+    ` 1400e5721 84 c0      TEST    AL,AL
+    ` 1400e5723 75 0c      JNZ     LAB_1400e5731
+    ` 1400e5725 48 8d      LEA     param_2,[u_ERROR:_There_are_depe  = u"ERROR: There are d
+    `           15 c4 
+    `           92 03 00
+    ` 1400e572c e9 6e      JMP     LAB_1400e779f
+    `           20 00 00
+
+
+    Convert it to nops.
+    '''
+    patch = Binary_Patch(
+        file = 'WorkshopTool.exe',
+        ref_code = '''
+        48 8d   
+        8d .. 
+        .. .. ..
+        e8 ..   
+        .. .. ..
+        84 c0   
+        75 0c   
+        48 8d   
+        .. .. 
+        .. .. ..
+        e9 ..   
+        .. .. ..
+        ''',
+        # Keep the lea and call, nop the rest.
+        new_code = '''
+        48 8d   
+        8d .. 
+        .. .. ..
+        e8 ..   
+        .. .. ..
+        ''' + NOP * 16,
+        )
+    
+    Apply_Binary_Patch(patch)
     return
