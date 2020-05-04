@@ -1,4 +1,4 @@
-X4 Customizer 1.18.2
+X4 Customizer 1.18.3
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -1019,3 +1019,6 @@ Change Log:
    - Added support for 0001.xml language files. Text lookups should now be done through File_System.Read_Text.
    - Added better support for XR ship pack file naming and quirks.
    - Refinements to Scale_Sector_Size size estimation of sectors.
+ * 1.18.3
+   - Improved support for extensions patching other extensions.
+   - Added better support for VRO quirks.

@@ -125,6 +125,24 @@
     <Compile Include="GUI\VFS_Window\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Transforms\Classes\Component.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Classes\Connection.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Classes\Engine.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Classes\Macro.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Classes\Ship.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Classes\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Transforms\Exe.py">
       <SubType>Code</SubType>
     </Compile>
@@ -137,7 +155,7 @@
     <Compile Include="Transforms\Map\Classes\Misc.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Transforms\Map\Classes\Position.py">
+    <Compile Include="Transforms\Classes\Position.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Transforms\Map\Classes\Region.py">
@@ -257,6 +275,7 @@
     <Folder Include="GUI\" />
     <Folder Include="Transforms\Map\" />
     <Folder Include="Transforms\Map\Classes\" />
+    <Folder Include="Transforms\Classes\" />
     <Folder Include="Utilities\" />
     <Folder Include="Transforms\" />
   </ItemGroup>

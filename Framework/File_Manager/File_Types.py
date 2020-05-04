@@ -687,7 +687,10 @@ class XML_File(Game_File):
 
         # Diff patches have a series of add, remove, replace nodes.
         # Operated on the patched_root, leaving the original_root untouched.
-        XML_Diff.Apply_Patch(
+        # Note: the patched_node root may be replaced, so need to capture
+        # the result and restore it (normally it will just be the same
+        # patched_root object).
+        self.patched_root = XML_Diff.Apply_Patch(
             original_node = self.patched_root, 
             patch_node    = other_xml_file.patched_root,
             # For any errors, print out the file name, the patch extension

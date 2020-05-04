@@ -2,137 +2,35 @@
 from copy import copy
 from itertools import combinations
 
-from .Position import Position
+from ...Classes import *
 from .Region import Region
 from ...Support import XML_Modify_Float_Attribute
 
 __all__ = [
-    'Connection',
-    'Macro',
+    'Map_Macro',
     'Region_Macro',
     'Zone',
     'Cluster',
     'Sector',
     ]
 
-class Connection:
+
+class Map_Macro(Macro):
     '''
-    Generic connection, used by zones, sectors, etc.
+    Macro subtype for map macros.
 
-    * parent_macro
-      - Macro that holds this connection.
-    * xml_node
-    * name
-      - Name attribute, or None.
-    * ref
-      - Ref attribute (never None?).
-    * position
-      - Current Position for this connection.
-    * orig_position
-      - Original Position when this connection was parsed.
-    * macro_ref
-      - String, name of the macro this connects to, if known.
-    * macro
-      - Macro that this connects to (filled in post-init).
-    '''
-    def __init__(self, parent, xml_node):
-        self.parent_macro = parent
-        self.xml_node = xml_node
-        self.name       = xml_node.get('name')
-        self.ref        = xml_node.get('ref')
-
-        macro_node = xml_node.find('./macro')
-        if macro_node != None:
-            self.macro_ref  = macro_node.get('ref')
-        else:
-            self.macro_ref  = None
-        self.macro = None
-
-        pos_node        = xml_node.find('./offset/position')
-        if pos_node != None:
-            self.position = Position(pos_node)
-        else:
-            # When position is not specified, it seems to often default to 0,
-            # so 0-fill here.
-            # (Eg. happens regularly with one sector per cluster.)
-            # TODO: is this always accurate? Maybe sometimes there is no
-            # associated position.
-            self.position = Position()
-
-        # Make a safe copy as the original.
-        self.orig_position = copy(self.position)
-        return
-
-    def Get_Offset(self):
-        '''
-        Returns a Position offset between the current position and
-        original xml position.
-        '''
-        return self.position - self.orig_position
-
-    def Set_Macro(self, macro):
-        '''
-        Set the child macro this connection links to.
-        '''
-        self.macro = macro
-        # Reverse link.
-        macro.parent_conns.append(self)
-        return
-    
-    def Update_XML(self):
-        '''
-        Update the xml node position, if an xml_node attached.
-        '''
-        if self.position:
-            self.position.Update_XML()
-        return
-
-
-class Macro:
-    '''
-    Generic macro, holding a set of connections.
-    
-    * xml_node
-      - Macro xml node.
-    * conns
-      - Dict of Connections, keyed by a tuple of (name, ref), where name
-        may be None.
-    * parent_conns
-      - List of external connections that link to this macro (will belong to
-        some other macro).
-      - Filled in post-init.
     * radius
-      - Float, radius of this macro.
-      - Objects should not move closer than their combined radiuses.
+      - Float, radius of this macro, mainly for map objects.
     * inner_radius
       - Float or None, objects already closer than the inner_radius
         can move freely, as long as the inner_radius is not breeched.
     '''
     def __init__(self, xml_node):
-        self.xml_node = xml_node
-        self.name = xml_node.get('name')
-        self.parent_conns = []
-        self.conns = {}
+        super().__init__(xml_node)
         # Generic default radius.
         self.radius = 6000
         self.inner_radius = None
-        for conn_node in xml_node.xpath("./connections/connection"):
-            conn = Connection(self, conn_node)
-            # Verify the name/ref combo hasn't been seen.
-            key = (conn.name, conn.ref)
-            assert key not in self.conns
-            self.conns[key] = conn
-        return
-
-    def Update_XML(self):
-        '''
-        Update the xml node positions of all connections.
-        May be wrapped by subclasses to fill in extra changes.
-        '''
-        for connection in self.conns.values():
-            connection.Update_XML()
-        return
-
+        
     def Contains_Gate(self):
         'Dummy function returns False, for easy of use with zones.'
         return False
@@ -142,7 +40,7 @@ class Macro:
         return False
 
 
-class Region_Macro(Macro):
+class Region_Macro(Map_Macro):
     '''
     Special region dummy. These don't have connections like other macros.
     Regions are defined in Clusters, but associated with sectors later.
@@ -184,7 +82,7 @@ class Region_Macro(Macro):
         return
 
 
-class Zone(Macro):
+class Zone(Map_Macro):
     '''
     Basic zone info. Note: zone objects can be up to 50km or so away from
     the zone center.
@@ -221,7 +119,7 @@ class Zone(Macro):
         '''
         # There are often two connections, so need to find the right one.
         for conn in self.parent_conns:
-            if isinstance(conn.parent_macro, Sector):
+            if isinstance(conn.parent, Sector):
                 return conn
         raise Exception()
 
@@ -289,7 +187,7 @@ class Zone(Macro):
         return sum_pos
     
 
-class Cluster(Macro):
+class Cluster(Map_Macro):
     '''
     Information on a cluster of sectors. Often just has one sector.
     '''
@@ -306,7 +204,7 @@ class Cluster(Macro):
         return
 
 
-class Sector(Macro):
+class Sector(Map_Macro):
     '''
     Information on a cluster of sectors. Often just has one sector.
 

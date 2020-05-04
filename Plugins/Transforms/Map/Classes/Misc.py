@@ -1,6 +1,6 @@
 
+from ...Classes import *
 from .Macros import *
-from .Position import *
 from ...Support import XML_Modify_Int_Attribute
 
 __all__ = [

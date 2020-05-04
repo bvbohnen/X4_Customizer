@@ -20,7 +20,7 @@ Settings(
 # code changes. Note: some tests may be a bit outdated.
 test_all = 0
 
-if 1:
+if 0:
     GUI.Start_GUI()
 
 # Test sector resizing.
@@ -80,6 +80,8 @@ if 0 or test_all:
     # Live editor tree builders.
     edit_tree = Framework.Live_Editor.Get_Tree_View('components')
     edit_tree = Framework.Live_Editor.Get_Tree_View('weapons')
+if 0 or test_all:
+    edit_tree = Framework.Live_Editor.Get_Tree_View('ships')
 
 
 if 0 or test_all:
@@ -117,7 +119,7 @@ if 0 or test_all:
     
     Print_Ship_Stats('ship_stats_postmod')
 
-if 0:
+if 1:
     Adjust_Ship_Hull(
         ('class ship_l' , 1.5), 
         ('class ship_xl', 1.5))

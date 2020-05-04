@@ -1,6 +1,5 @@
 
-
-from .Position import *
+from ...Classes import *
 from ...Support import XML_Modify_Float_Attribute
 
 __all__ = [

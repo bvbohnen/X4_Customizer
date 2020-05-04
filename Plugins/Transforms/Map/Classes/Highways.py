@@ -1,6 +1,6 @@
 
-from .Macros import Macro
-from .Position import *
+from ...Classes import *
+from .Macros import Map_Macro
 
 __all__ = [
     'Highway',
@@ -8,7 +8,7 @@ __all__ = [
     'Sector_Highway',
     ]
 
-class Highway(Macro):
+class Highway(Map_Macro):
     '''
     Parent class for zone highways and sector highways.
     

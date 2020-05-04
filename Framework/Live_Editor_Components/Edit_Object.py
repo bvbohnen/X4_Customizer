@@ -611,10 +611,12 @@ class Edit_Object:
         # Do some verification.
         # All labels should be in sync, all indexes should have a non-None
         # item.
-        for item_row in zip(*version_items.values()):
+        error_row_indices = []
+        for index, item_row in enumerate( zip(*version_items.values())):
             assert any(x != None for x in item_row)
             # Name check is a little trickier.
             name = None
+            error_row = False
             for item in item_row:
                 if item == None:
                     continue
@@ -623,6 +625,19 @@ class Edit_Object:
                     name = item.name
                 # Else verify.
                 else:
-                    assert name == item.name
+                    if name != item.name:
+                        error_row = True
+                        break
+
+            # This came up in vro where a connection was deleted, causing
+            # mismatches (between ship storage and general storage).
+            # As a generic fallback, just delete rows that don't match.
+            if error_row:
+                error_row_indices.append(index)
+
+        # Remove the error rows, back to front.
+        for index in reversed(error_row_indices):
+            for item_list in version_items.values():
+                item_list.pop(index)
 
         return version_items

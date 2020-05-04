@@ -3,8 +3,8 @@ from collections import defaultdict
 from lxml import etree
 from lxml.etree import Element
 
+from ...Classes import *
 from .Region import *
-from .Position import *
 from .Macros import *
 from .Highways import *
 from .Misc import *
@@ -330,7 +330,7 @@ class Galaxy:
             # Exctract connection and sector.
             assert len(zone.parent_conns) == 1
             conn = zone.parent_conns[0]
-            sector = conn.parent_macro
+            sector = conn.parent
 
             # Connection adds to the sector node connections element.
             sector_conns_node = sector.xml_node.find('./connections')

@@ -2,6 +2,7 @@
 import random
 
 from Framework import Plugin_Log, Print
+from ..Classes import *
 from .Classes import *
 
 
@@ -465,7 +466,7 @@ def Scale_Sector(galaxy, sector, scaling_factor, debug, precision_steps):
 
             
         # Everything else should be sector-level connections.
-        elif object.connection and object.connection.parent_macro is sector:
+        elif object.connection and object.connection.parent is sector:
             object.connection.position.Update(object.sector_pos)
 
         # Shouldn't be here.

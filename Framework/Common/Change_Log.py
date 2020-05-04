@@ -190,6 +190,9 @@ Change Log:
      be done through File_System.Read_Text.
    - Added better support for XR ship pack file naming and quirks.
    - Refinements to Scale_Sector_Size size estimation of sectors.
+ * 1.18.3
+   - Improved support for extensions patching other extensions.
+   - Added better support for VRO quirks.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

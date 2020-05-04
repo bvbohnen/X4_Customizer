@@ -2,7 +2,7 @@
 from collections import namedtuple, defaultdict
 import json
 
-from ..Common import Settings, Print
+from ..Common import Settings, Print, Plugin_Log
 from .Edit_Items import Edit_Item, Display_Item
 from ..File_Manager import Load_File
 
@@ -181,10 +181,24 @@ class Live_Editor_class:
         was added from outside the expected builder function.
         '''
         # Verify there is no name collision in any category.
+        # Note: some question mods just copy/paste and edit a macro
+        # file instead of doing a proper diff, which can result in that
+        # file having two copies of the same macro; make this a strong
+        # warning instead of a hard error.
         if not all(edit_object.name not in x 
                    for x in self.category_objects_dict.values()):
-            raise AssertionError(('Object name "{}" is already in use')
-                                 .format(edit_object.name))
+
+            # Prevent from printing more than once, else it will tend to
+            # print 3x (once per category).
+            if not hasattr(self, '_error_object_name_conflicts'):
+                self._error_object_name_conflicts = []
+            if edit_object.name not in self._error_object_name_conflicts:
+                self._error_object_name_conflicts.append(edit_object.name)
+
+                msg = (f'Warning: Object name "{edit_object.name}" is already in'
+                        ' use; the most recent will overwrite prior versions.'
+                        ' May be due to an xml copy/paste instead of diff patch.')
+                Plugin_Log.Print(msg)
 
         # Record to the given category.
         self.category_objects_dict[category][edit_object.name] = edit_object

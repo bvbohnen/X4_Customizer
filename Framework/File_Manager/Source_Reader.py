@@ -355,7 +355,7 @@ class Source_Reader_class:
         '''
         Returns the virtual paths for the given extension.
         Paths will be prefixed with 'extension/name/' for files that
-        do not match any at the base x4 location.
+        do not match any at the base x4 location or another extension.
         If the name doesn't match a known extension, this returns 
         an empty list.
         '''
@@ -365,6 +365,20 @@ class Source_Reader_class:
         # Get the base x4 paths, to check against.
         base_paths = self.base_x4_source_reader.Get_Virtual_Paths()
 
+        # Also get other extensions.
+        # Note: since such cases would indicate diff patching, and file
+        # loading goes before diff patching, the other extension could
+        # be later in the load order and its file would still be found fine.
+        ext_paths = []
+        for reader_name, ext_reader in self.extension_source_readers.items():
+            if reader_name == ext_name:
+                continue
+            for ext_path in ext_reader.Get_Virtual_Paths():
+                # In this case, the file will be found by prefixing the
+                # path with the extension folder.
+                ext_paths.append(f'extensions/{reader_name}/{ext_path}')
+        base_paths |= set(ext_paths)
+
         # Go through the paths returned by the extension reader.
         for ext_path in self.extension_source_readers[ext_name].Get_Virtual_Paths():
             # If this matches a base_path, return it as-is.
@@ -372,10 +386,10 @@ class Source_Reader_class:
                 yield ext_path
             # Otherwise, prefix it.
             else:
-                yield 'extensions/{}/{}'.format(ext_name, ext_path)
+                yield f'extensions/{ext_name}/{ext_path}'
         return
 
-    # TODO: speed this up somehow; a bit slow to search everything.
+    
     def Gen_All_Virtual_Paths(self, pattern = None):
         '''
         Generator which yields all virtual_path names of all discovered files,
