@@ -514,7 +514,8 @@ class Source_Reader_class:
 
                 # Fix the virtual_path that was attached to the file.
                 # The reader only give its local path.
-                game_file.virtual_path = virtual_path
+                if game_file != None:
+                    game_file.virtual_path = virtual_path
         else:
             # Read from the source and base x4 locations.
             if self.loose_source_reader != None:
@@ -522,6 +523,14 @@ class Source_Reader_class:
             if game_file == None:
                 game_file = self.base_x4_source_reader.Read(virtual_path)
 
+            # Special case: if the game_file is not found, and it is a
+            # text file, generate a dummy version of it. This is so that
+            # extensions can add to 0001.xml, which doesn't normally exist.
+            if game_file == None and virtual_path.startswith('t/'):
+                game_file = File_Types.XML_Text_File(
+                    virtual_path = virtual_path,
+                    xml_root = ET.Element('language'),
+                    )
 
         # Deal with cases where the file is not found.
         if game_file == None:

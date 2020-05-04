@@ -184,6 +184,12 @@ Change Log:
  * 1.18.1
    - Bug fix when forced xpath attributes not specified.
    - Bug fixed when copying files at the path_to_source_folder.
+ * 1.18.2
+   - Changed user folder check to look for uidata.xml instead of config.xml.
+   - Added support for 0001.xml language files. Text lookups should now
+     be done through File_System.Read_Text.
+   - Added better support for XR ship pack file naming and quirks.
+   - Refinements to Scale_Sector_Size size estimation of sectors.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

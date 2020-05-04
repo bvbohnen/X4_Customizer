@@ -33,6 +33,7 @@ valid_virtual_path_prefixes =  (
     't/',
     'textures/',
     'ui/',
+    # TODO: all voice folders for different languages.
     'voice-L044/',
     'voice-L049/',
     'vulkan/',

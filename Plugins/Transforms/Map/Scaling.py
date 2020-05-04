@@ -18,14 +18,35 @@ def Scale_Sectors(galaxy, scaling_factor, debug, precision_steps):
     '''
     Scale all sectors to roughly match the scaling factor.
     '''
+    # For debug, print out starting sector attributes.
+    def Print_Gate_Distances(title):
+        lines = [f'{title} sector gate distances:']
+        distances = [x.Get_Gate_Distance() for x in galaxy.class_macros['sectors'].values()]
+        lines.append(', '.join([str(int(x)) for x in sorted(distances)]))
+        # Pick out those of significant separation, eg. over 50 km.
+        distances_over_50 = [x for x in distances if x > 50000]
+        lines.append(f'Average (>50km): {sum(distances_over_50) / len(distances_over_50)}')
+        Plugin_Log.Print('\n'.join(lines))
+
+    if debug:
+        Print_Gate_Distances('Pre-scaling')
+     
+    # Quick check for duplicate names; none found.
+    #for name in sorted(galaxy.class_macros['sectors'].keys()):
+    #    Print(name)
+
     # Apply to all sectors individually.
     for sector in galaxy.class_macros['sectors'].values():
         # Testing, pick a sector.
-        #if sector.name != 'Cluster_18_Sector001_macro':
+        #if sector.name != 'Cluster_416_Sector002_macro':
         #    continue
         Scale_Sector(galaxy, sector, scaling_factor, debug, precision_steps)
         # In testing, skip after first sector.
         #break
+        
+    # For debug, print out ending sector attributes.
+    if debug:
+        Print_Gate_Distances('Post-scaling')
 
 
     # Scale the god station defaults.
@@ -337,7 +358,7 @@ def Scale_Sector(galaxy, sector, scaling_factor, debug, precision_steps):
                 # since only highway splines need to be kept together.
 
                 # Are they close enough that they should merge?
-                if this_group.Should_Merge_With(other_group, target_sector_size):
+                if this_group.Should_Merge_With(other_group, target_sector_size, step_scaling):
                     
                     # Prune both original groups out.
                     object_groups.remove(this_group)

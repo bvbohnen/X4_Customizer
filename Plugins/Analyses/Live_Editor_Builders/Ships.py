@@ -9,6 +9,7 @@ G = Item_Group_Macro
 from .Support import Create_Objects_From_Asset_Files
 from .Support import physics_item_macros
 from .Support import connection_item_macros
+from ..Shared import Get_Ship_Macro_Files
 from ...Transforms.Support import Float_to_String
 
 # TODO:
@@ -32,7 +33,9 @@ def _Build_Storage_Objects():
     # whereas the code here just runs on xpaths in the original xml.
     #Live_Editor.Get_Category_Objects('engines')
 
-    game_files = File_System.Get_All_Indexed_Files('macros','ship_*')
+    # Switch to shared function that finds more mod ships.
+    #game_files = File_System.Get_All_Indexed_Files('macros','ship_*')
+    game_files = Get_Ship_Macro_Files()
     return Create_Objects_From_Asset_Files(game_files, ship_item_macros)
 
 #def Display_Update_Speed(component, ship_type, purpose_primary, physics_drag_forward):

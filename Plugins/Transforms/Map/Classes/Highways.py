@@ -48,6 +48,9 @@ class Highway(Macro):
                 # offset propagation doesn't get confused.
                 conn.orig_position.Update(spline_pos)
         return
+    
+    def Contains_Gate_Or_Highway(self):
+        return True
 
     def Update_Splines(self):
         'Adjust splines for tx/ty/tz/inlength/outlength'
@@ -120,6 +123,9 @@ class Sector_Highway(Highway):
     '''
     Information on sector highway.
     '''    
+    def Contains_Gate(self):
+        return True
+
     def Update_Splines(self):
         'Adjust spline positions based on endpoint positions.'
 

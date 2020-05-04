@@ -44,8 +44,8 @@ class Object:
     * inner_radius
       - Float, inner radius of this object, inside which other objects
         already present will be allowed to move.
-    * contains_gate_or_highway
-      - Flag, True if the object is a zone with a gate or highway entry/exit.
+    * contains_gate
+      - Flag, True if the object is a zone with a gate or sec highway entry/exit.
     '''
     def __init__(self, name, type, connection = None, 
                  cluster_pos = None, sector_pos = None, md_object = None,
@@ -59,7 +59,7 @@ class Object:
         self.spline_pos = spline_pos
         self.sector_pos = sector_pos
         self.orig_sector_pos = copy(sector_pos)
-        self.contains_gate_or_highway = False        
+        self.contains_gate = False        
 
         # Default radius to that of zones, splines, misc.
         # Zones are 10km apart in vanilla, which can be considered 5km radius
@@ -84,8 +84,8 @@ class Object:
             # getting too short.
             if isinstance(connection.macro, Zone):
                 zone = connection.macro
-                if zone.Contains_Gate_Or_Highway():
-                    self.contains_gate_or_highway = True
+                if zone.Contains_Gate():
+                    self.contains_gate = True
                     # Some extra spacing.
                     self.radius += 5000
 
@@ -98,7 +98,7 @@ class Object:
         return
 
 
-    def Should_Merge_With(self, other, sector_size = 200000):
+    def Should_Merge_With(self, other, sector_size = 200000, scaling = 1):
         '''
         Returns True if this object should merge with another object that
         is too close.
@@ -119,7 +119,8 @@ class Object:
         # to roughly a fraction of the desired sector size.
         # To be safe, add this to the radiuses, since the gates in
         # the zones may be placed near to each other's zone.
-        if self.contains_gate_or_highway and other.contains_gate_or_highway:
+        # Only do this when scaling down.
+        if scaling < 1 and self.contains_gate and other.contains_gate:
             allowed_dist += sector_size / 2
 
         # Check proximity.
@@ -263,7 +264,7 @@ class Object_Group:
         return
     
 
-    def Should_Merge_With(self, other, sector_size):
+    def Should_Merge_With(self, other, sector_size, scaling):
         '''
         Returns True if this group should merge with the other group based
         on internal objects between groups getting too close.
@@ -280,7 +281,7 @@ class Object_Group:
         # Check all object combos between groups.
         for object_1 in self.objects:
             for object_2 in other.objects:
-                if object_1.Should_Merge_With(object_2, sector_size):
+                if object_1.Should_Merge_With(object_2, sector_size, scaling):
                     return True
         return False
 

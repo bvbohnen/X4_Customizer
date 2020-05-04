@@ -21,6 +21,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Analyses\Shared.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Analyses\Live_Editor_Builders\Components.py">
       <SubType>Code</SubType>
     </Compile>

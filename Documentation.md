@@ -1,4 +1,4 @@
-X4 Customizer 1.18.1
+X4 Customizer 1.18.2
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -299,6 +299,17 @@ Analyses:
       - Defaults to 'current'.
         
 
+  * Print_Ship_Stats
+
+    Gather up all ship statistics, and print them out. This is a convenience wrapper around Print_Object_Stats, filling in the category and a default file name.
+    
+    * file_name
+      - String, name to use for generated files, without extension.
+      - Defaults to "ship_stats".
+    * version
+      - Optional string, version of the objects to use.
+        
+
   * Print_Ware_Stats
 
     Gather up all ware statistics, and print them out. This is a convenience wrapper around Print_Object_Stats, filling in the category and a default file name.
@@ -375,6 +386,13 @@ Exe Transforms:
   * Remove_Sig_Errors
 
     Suppresses file sigature errors from printing to the debug log, along with file-not-found errors. Written for Windows v3.10 exe.
+        
+
+  * Remove_Workshop_Tool_Dependency_Check
+
+    From the steam workshop upload tool, remove the dependency check that requires dependencies start with "ws_" and be present on the workshop. Experimental; developed to allow dependnencies on egosoft dlc.
+    
+    Put WorkshopTool.exe in the main x4 folder, so the customizer can find it, then copy the modified version back to the x tools dir.
         
 
 
@@ -803,11 +821,11 @@ Utilities:
     Generate a diff of changes between two xml files, creating a diff patch.
     
     * original_file_path
-      - Path to the original xml file that acts as the baseline.
+      - Path to the original xml files that act as the baseline.
     * modified_file_path
-      - Path to the modified version of the xml file.
+      - Path to the modified versions of the xml files.
     * output_file_path
-      - Path to write the diff patch to.
+      - Path to write the diff patches to.
     * skip_unchanged
       - Bool, skip output for files that are unchanged (removing any existing diff patch).
       - Default will generate empty diff patches.
@@ -996,3 +1014,8 @@ Change Log:
  * 1.18.1
    - Bug fix when forced xpath attributes not specified.
    - Bug fixed when copying files at the path_to_source_folder.
+ * 1.18.2
+   - Changed user folder check to look for uidata.xml instead of config.xml.
+   - Added support for 0001.xml language files. Text lookups should now be done through File_System.Read_Text.
+   - Added better support for XR ship pack file naming and quirks.
+   - Refinements to Scale_Sector_Size size estimation of sectors.

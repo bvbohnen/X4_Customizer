@@ -92,11 +92,11 @@ def Generate_Diff(
     Generate a diff of changes between two xml files, creating a diff patch.
 
     * original_file_path
-      - Path to the original xml file that acts as the baseline.
+      - Path to the original xml files that act as the baseline.
     * modified_file_path
-      - Path to the modified version of the xml file.
+      - Path to the modified versions of the xml files.
     * output_file_path
-      - Path to write the diff patch to.
+      - Path to write the diff patches to.
     * skip_unchanged
       - Bool, skip output for files that are unchanged (removing any
         existing diff patch).

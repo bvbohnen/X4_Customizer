@@ -326,24 +326,26 @@ class Settings_class:
         defaults['path_to_user_folder'] = (Path(os.environ.get('HOMEPATH','.'))  
                                     / 'Documents/Egosoft/X4')
         
-        # If the user folder exists but has no config.xml, check an id folder.
+        # If the user folder exists but has no uidata.xml, check an id folder.
         # Note: while content.xml is wanted, it apparently not always
         # created (maybe only made the first time a mod gets enabled/disabled
         # in the menu?).
+        # Note: on a new profile, only uidata.xml and pipelinecache.bin
+        # are created, so can only rely on one of those being present.
         if (defaults['path_to_user_folder'].exists() 
-        and not (defaults['path_to_user_folder'] / 'config.xml').exists()):
+        and not (defaults['path_to_user_folder'] / 'uidata.xml').exists()):
             # Iterate through all files and dirs.
             for dir in defaults['path_to_user_folder'].iterdir():
                 # Skip non-dirs.
                 if not dir.is_dir():
                     continue
-                # Check for the config.xml.
+                # Check for the uidata.xml.
                 # Probably don't need to check folder name for digits;
                 # common case just has one folder.
-                if (dir / 'config.xml').exists():
+                if (dir / 'uidata.xml').exists():
                     # Record it and stop looping.
                     defaults['path_to_user_folder'] = dir
-                    break                
+                    break
 
         defaults['extension_name'] = 'X4_Customizer'
         defaults['output_to_user_extensions'] = False
@@ -539,17 +541,17 @@ class Settings_class:
                 Print(message)
             else:
                 # Hard error.
-                raise AssertionError(message)
+                raise AssertionError(message + '\nEnable "allow_path_error" to bypass this check.')
             
-        # Check the user folder for config.xml.
-        if not (self.path_to_user_folder / 'config.xml').exists():
+        # Check the user folder for uidata.xml.
+        if not (self.path_to_user_folder / 'uidata.xml').exists():
             message = ('Path to the user folder appears incorrect, lacking'
-                    ' config.xml.\n (path: {})').format(self.path_to_user_folder)
+                    ' uidata.xml.\n (path: {})').format(self.path_to_user_folder)
             if self.allow_path_error:
                 Print(message)
             else:
                 # Hard error.
-                raise AssertionError(message)
+                raise AssertionError(message + '\nEnable "allow_path_error" to bypass this check.')
 
         # Check that file names are given, and not blank.
         # TODO

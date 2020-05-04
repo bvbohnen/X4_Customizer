@@ -4,6 +4,7 @@ from Framework import Transform_Wrapper, Load_File, File_System
 from .Support import Standardize_Match_Rules
 from .Support import XML_Multiply_Int_Attribute
 from .Support import XML_Multiply_Float_Attribute
+from ..Analyses.Shared import Get_Ship_Macro_Files
 
 __all__ = [
     'Adjust_Ship_Speed',
@@ -261,7 +262,10 @@ def Update_Nodes_By_Rules(
     # Put matching rules in standard form.
     rules = Standardize_Match_Rules(match_rules)
            
-    game_files = File_System.Get_All_Indexed_Files('macros','ship_*')
+    # Switch to shared function that finds more mod ships.
+    #game_files = File_System.Get_All_Indexed_Files('macros','ship_*')
+    game_files = Get_Ship_Macro_Files()
+
     for game_file in game_files:
         xml_root = game_file.Get_Root()
         # There may be multiple macros in a file (though generally

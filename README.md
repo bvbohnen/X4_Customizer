@@ -1,4 +1,4 @@
-X4 Customizer 1.18.1
+X4 Customizer 1.18.2
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -146,6 +146,10 @@ Analyses:
 
     Print out statistics for objects of a given category. This output will be similar to that viewable in the gui live editor pages, except formed into one or more tables. Produces csv and html output. Will include changes from enabled extensions.
 
+  * Print_Ship_Stats
+
+    Gather up all ship statistics, and print them out. This is a convenience wrapper around Print_Object_Stats, filling in the category and a default file name.
+
   * Print_Ware_Stats
 
     Gather up all ware statistics, and print them out. This is a convenience wrapper around Print_Object_Stats, filling in the category and a default file name.
@@ -183,6 +187,10 @@ Exe Transforms:
   * Remove_Sig_Errors
 
     Suppresses file sigature errors from printing to the debug log, along with file-not-found errors. Written for Windows v3.10 exe.
+
+  * Remove_Workshop_Tool_Dependency_Check
+
+    From the steam workshop upload tool, remove the dependency check that requires dependencies start with "ws_" and be present on the workshop. Experimental; developed to allow dependnencies on egosoft dlc.
 
 
 ***

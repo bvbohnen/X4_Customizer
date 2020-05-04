@@ -128,9 +128,10 @@ def Update_Name(
         # This will manually prune the _macro term if found.
         return codename.replace('_macro','')
     else:
-        t_file = File_System.Load_File('t/0001-L044.xml')
+        #t_file = File_System.Load_File('t/0001-L044.xml')
+        #name = t_file.Read(t_name_entry)
         # Let the t-file Read handle the lookup.
-        name = t_file.Read(t_name_entry)
+        name = File_System.Read_Text(t_name_entry)
         # TODO: maybe replace with something when the name is blank.
         return name
     
@@ -141,9 +142,10 @@ def Update_Description(
     if not t_descrip_entry:
         return ''
     else:
-        t_file = File_System.Load_File('t/0001-L044.xml')
+        #t_file = File_System.Load_File('t/0001-L044.xml')
         # Let the t-file Read handle the lookup.
-        return t_file.Read(t_descrip_entry)
+        #return t_file.Read(t_descrip_entry)
+        return File_System.Read_Text(t_descrip_entry)
 
 _item_macros = [
     _D('name'                 , Update_Name                                            , 'Name', ''),

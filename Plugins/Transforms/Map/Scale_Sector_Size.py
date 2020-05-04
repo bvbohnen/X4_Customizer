@@ -9,10 +9,6 @@ from .Scaling import Scale_Regions, Scale_Sectors
 
 '''
 TODO:
-- Lots of 'unsuitable location' god spam after adjusting corerange.
-  - Decrease zone size somehow?  Add artificial zones to help at high density?
-  - Change coreboundaryzoneheight to allow more verticality, maybe zone stacks?
-  - Change zone quota from 3 to something higher? Probably this.
 - Adjust misc md scripts
   - PlacedObjects maybe.
     - Data vaults are close to center anyway (generally within 50km any dim).
@@ -20,24 +16,14 @@ TODO:
 - Change mass traffic draw distance in parameters.xml.
   - Generally want to reduce this due to performance.
   - Maybe optional, or separate transform.
-- Stations still spawning far away, eg. 200+ km, sometimes.
-  - Maybe still closer than they used to be, but perhaps a second scaling
-    to reduce god variance might be handy.
-- Nap Fortune, further station at end of highway, 650 km from gate.
 - Fix slight highway graphic doubling near zone gates (harmless, visual quirk).
   - Possibly a small y offset in the highway, spline, or gate?
   - Could just scrap y changes, probably.
-- Play with god.xml station placement defaults.
-  - Checking godlog, 
-- Insert new zones within the desired area, as they are preferred for new
-  stations before creating new zones.
-- Change all sector.coresize references to just sector.size.
-  - Note: factionlogic_stations only uses coresize for finding
-    an existing zone, so this one isn't critical.
 - Per-sector scaling factors, adjust more if highway is removed.
 - Dynamic scaling based on initial sector size; smaller sectors scale less.
   - Maybe use four data points: scaling vs gate distance, two points, and
     extrapolate linearly with saturation at endpoints.
+  - Or something more automated.
 
 - Sacred Relic spaced out; 250 km to furthest station.
 - Hatikvah station 308km from gate (cluster_29).
@@ -60,8 +46,14 @@ Note on gate sizing and distance:
     X4 gates are larger than X3.  Assuming 2x wider (not sure on exact ratio),
     then gates need to be 2x further away to have the same visual footprint.
     Assuming X3 has a 50 km gate-to-gate distance, and X4 has a ~230 km
-    distance, then want a scaling of 100/230 = 0.43.
-    TODO: check these numbers.
+    distance, then want a scaling of 100/230 = 0.43 (based on argon prime).
+
+    Actual gate distances in x4 range from 133843 to 465930 km, with
+    an average of 276060 (for those with distances >50km).
+    X3 only ranges ~50km to ~100km (Avarice), so the x4 variance is
+    much larger.
+    If wanting to scale 465930 to 200000, need 0.43 scaling, which
+    matches nicely to the argon prime case above.
 
 Notes on sector properties:
     Sector.size scales with how spaced out the objects are,
@@ -101,10 +93,23 @@ Note on travel times:
 
     So X3 takes about half the time of X4 in general.
     If x4 travel drive removed, to meet x3 times, need scaling of 40/153= 0.26.
-    To maint x4 travel drive times, need scaling of 76/153 = 0.5
+    To maintain x4 travel drive times, need scaling of 76/153 = 0.5
 
 Overall ideal scaling from the above is between 0.26 and 0.5.
 Maybe aim for 0.33?
+
+Note on save game:
+    These edits potentially somewhat update an existing save. However, it
+    was observed in Guiding Star, in a game with normal sectors and loaded
+    with 0.4x sectors, that the superhighway entry/exit gates only moved
+    3/4 of the distance they were supposed to, but the actual spline
+    moved the full distance, so the gates and the highway entry were offset.
+    (Which is weird; taking off the 0.4x scaling returns it to normal.)
+    Also, the newly added sector, once used for anything, cannot be
+    removed.
+    So, in general, this should require a new game, and not be removed.
+    Zones can potentially be moved around, but should not be removed
+    (eg. the same names should be present).
 
 '''
 @Transform_Wrapper()

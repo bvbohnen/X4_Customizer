@@ -182,9 +182,10 @@ def Display_Update_Ware_Name(
     if not t_name_entry:
         return id
     else:
-        t_file = File_System.Load_File('t/0001-L044.xml')
+        #t_file = File_System.Load_File('t/0001-L044.xml')
         # Let the t-file Read handle the lookup.
-        name = t_file.Read(t_name_entry)
+        #name = t_file.Read(t_name_entry)
+        name = File_System.Read_Text(t_name_entry)
         return name
     
 
@@ -193,9 +194,10 @@ def Display_Update_Factory_Name(
     ):
     'Look up factory name.'
     if t_factory:
-        t_file = File_System.Load_File('t/0001-L044.xml')
+        #t_file = File_System.Load_File('t/0001-L044.xml')
         # Let the t-file Read handle the lookup.
-        return t_file.Read(t_factory)
+        #return t_file.Read(t_factory)
+        return File_System.Read_Text(t_factory)
     return
 
 

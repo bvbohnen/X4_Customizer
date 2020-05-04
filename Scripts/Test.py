@@ -25,7 +25,7 @@ if 1:
 
 # Test sector resizing.
 if 0 or test_all:
-    Scale_Sector_Size(0.4, _test = True)
+    Scale_Sector_Size(0.4, _test = False)
     
 # Test exe edits.
 if 0:
@@ -34,6 +34,8 @@ if 0:
     Remove_Modified()
 if 0:
     High_Precision_Systemtime()
+if 0:
+    Remove_Workshop_Tool_Dependency_Check()
    
 if 0:
     Increase_AI_Script_Waits()
@@ -112,6 +114,8 @@ if 0 or test_all:
         ('class ship_xl'                 , 2.0),
         ('*'                             , 1.5)
         )
+    
+    Print_Ship_Stats('ship_stats_postmod')
 
 if 0:
     Adjust_Ship_Hull(
@@ -134,7 +138,6 @@ if 0:
 if 0 or test_all:
     Adjust_Mission_Rewards(0.5)
     #Write_To_Extension()
-
 
 # Ware transforms and printout.
 if 0 or test_all:

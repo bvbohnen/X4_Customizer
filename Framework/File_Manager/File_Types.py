@@ -7,7 +7,6 @@ import os
 from lxml import etree as ET
 from copy import deepcopy
 from collections import OrderedDict, defaultdict
-import re
 import fnmatch
 import time
 
@@ -418,8 +417,19 @@ class XML_File(Game_File):
         for node in asset_nodes:
             asset_class_name = node.get('class')
             asset_name       = node.get('name')
-            assert asset_class_name != None
-            assert asset_name != None
+
+            # Note: XR shippack has a garbage dock.xml file which has
+            # no class defined. Skip errors, maybe with warning.
+            if asset_class_name == None or asset_name == None:
+                Plugin_Log.Print(('Error: asset file contains oddities;'
+                    'in file {}; sources: {}; asset {} of class {}; skipping.'
+                    ).format(
+                        self.virtual_path, 
+                        self.source_extension_names,
+                        asset_class_name,
+                        asset_name
+                        ))
+                continue
 
             # -Removed; multiple assets of same class and different name
             #  does come up, eg. in map cluster definitions.
@@ -709,7 +719,7 @@ class XML_Text_File(XML_File):
     Attributes:
     * page_text_dict
       - Dict, keyed by 'page[id]' then 't[id]', holding the current
-        text values.
+        text values. Keys are kept as strings.
       - Added to speed up performance compared to looking up
         text each time in the xml with xpath.
     * requests_until_refresh
@@ -772,13 +782,15 @@ class XML_Text_File(XML_File):
         return
 
 
-    # TODO: maybe a version that takes separate page and id terms.
-    def Read(self, text = None, page = None, id = None):
+    def Read(
+            self, 
+            text = None, 
+            page = None, 
+            id = None,
+            ):
         '''
         Reads and returns the text at the given {page,id}.
-        Recursively expands nested references.
-        Removes comments in parentheses.
-        Returns None if no text found.
+        Returns None if no text found, or an error occurs.
 
         * text
           - String, including any internal '{page,id}' terms.
@@ -792,80 +804,40 @@ class XML_Text_File(XML_File):
             if self.requests_until_refresh <= 0:
                 self.Refresh_Cache()
 
-        # If page and id given, pack them in a string to reuse the
-        # following code. Probably don't need to worry about performance
-        # of this.
-        if text == None:
-            text = '{{{},{}}}'.format(page,id)
-                       
-        # Remove any comments, in parentheses.
-        if '(' in text:
-            # .*?     : Non-greed match a series of chars.
-            # \( \)   : Match parentheses
-            # (?<!\\) : Look behind for no preceeding escape char.
-            # Note: put all this in a raw string to avoid python escapes.
-            text = ''.join(re.split(r'(?<!\\)\(.*?(?<!\\)\)', text))
-        #if text.startswith('(') and ')' in text:
-        #    text = text.split(')',1)[1]
-
-        # Remove leftover escape characters, blindly for now (assume
-        # they are never escaped themselves).
-        text = text.replace('\\','')
-
-        # If lookups are present, deal with them recursively.
-        # TODO: isn't this always the case with the current setup?
-        #  -Maybe remove this check.
-        if '{' in text:
-            if not self.page_text_dict or 1:
-                root = self.Get_Root_Readonly()
-
-            # RE pattern used:
-            #  .*    : Match a series of chars.
-            #  .*?   : As above, but changes to non-greedy.
-            #  {.*?} : Matches between { and }.
-            #  ()    : When put around pattern in re.split, returns the
-            #          separators (eg. the text lookups).
-            new_text = ''
-            for term in re.split('({.*?})', text):
-                # Skip empty terms (eg. when there is no text before the 
-                # first '{').
-                if not term:
-                    continue
-
-                # Check if it is a nested lookup.
-                if term.startswith('{'):
+        # Verify if text is given, it is just in brackets, and split it.
+        if text != None:
+            try:
+                # Split it apart.
+                page, id = (text.replace(' ','').replace('{','')
+                            .replace('}','').split(','))
+            except Exception as ex:
+                # Failure case; something weird was given as input.
+                return
+        else:
+            # Verify page/id are given; failure it not.
+            # TODO: maybe failure message.
+            if page == None or id == None:
+                return
+            # Convert page/id to strings if needed.
+            page = str(page)
+            id = str(id)
             
-                    # Split it apart.
-                    page, id = (term.replace(' ','').replace('{','')
-                                .replace('}','').split(','))
-            
-                    # Look up the initial replacement.
-                    # Use xpath if the page_text_dict is not ready,
-                    # else use the dict for faster lookup.
-                    if self.page_text_dict:
-                        try:
-                            replacement_text = self.page_text_dict[page][id]
-                        except KeyError:
-                            return
-                    else:
-                        nodes = root.xpath('./page[@id="{}"]/t[@id="{}"]'.format(page, id))
-                        if not nodes:
-                            return
-                        replacement_text = nodes[0].text
-            
-                    # In case this replacement has nested terms,
-                    # recursively process it, and append to the running
-                    # result.
-                    new_text += self.Read(replacement_text)
-                else:
-                    # There was no lookup for this term; just append
-                    # it back to the text string.
-                    new_text += term
+        # Look up the entry.
+        # Use xpath if the page_text_dict is not ready,
+        # else use the dict for faster lookup.
+        ret_text = None
+        if self.page_text_dict:
+            try:
+                ret_text = self.page_text_dict[page][id]
+            except KeyError:
+                return
+        else:
+            nodes = self.Get_Root_Readonly().xpath(f'./page[@id="{page}"]/t[@id="{id}"]')
+            if not nodes:
+                return
+            ret_text = nodes[0].text
 
-            # Overwrite the text with the replacements.
-            text = new_text
-            
-        return text
+        return ret_text
 
     
 class XML_Index_File(XML_File):

@@ -8,6 +8,12 @@ from Framework import Settings
 from Framework import Live_Editor
 from Framework import Print
 
+__all__ = [
+    'Print_Object_Stats',
+    'Print_Ship_Stats',
+    'Print_Weapon_Stats',
+    'Print_Ware_Stats',
+    ]
 
 # TODO: make file_name automated based on category.
 @Analysis_Wrapper()
@@ -75,6 +81,26 @@ def Print_Object_Stats(
 
     # Write results.
     Write_Tables(file_name, *table_list)
+    return
+
+
+@Analysis_Wrapper()
+def Print_Ship_Stats(file_name = 'ship_stats', version = None):
+    '''
+    Gather up all ship statistics, and print them out.
+    This is a convenience wrapper around Print_Object_Stats,
+    filling in the category and a default file name.
+
+    * file_name
+      - String, name to use for generated files, without extension.
+      - Defaults to "ship_stats".
+    * version
+      - Optional string, version of the objects to use.
+    '''
+    Print_Object_Stats(
+        category = 'ships',
+        file_name = file_name,
+        version = version)
     return
 
 

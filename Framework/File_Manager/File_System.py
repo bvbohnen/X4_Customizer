@@ -7,6 +7,7 @@ from lxml import etree as ET
 from functools import wraps
 import fnmatch
 from time import time
+import re
 
 from .Source_Reader import Source_Reader_class
 from .Cat_Writer import Cat_Writer
@@ -15,7 +16,7 @@ from .File_Types import Generate_Signatures
 from ..Common import Settings
 from ..Common import File_Missing_Exception
 from ..Common import Customizer_Log_class
-from ..Common import Change_Log, Print
+from ..Common import Change_Log, Plugin_Log, Print
 from ..Common import home_path
 
 
@@ -212,6 +213,7 @@ class File_System_class:
         Returns the list of loaded asset XML_Files matching the
         given tag and class_names. Accepts multiple class names.
         Returns an empty list if no matching files are loaded yet.
+        Can preceed with Load_Files for expected file names.
 
         Example: Get_Asset_Files('macros','bullet','missile')
         '''
@@ -248,6 +250,8 @@ class File_System_class:
         index matching the given pattern.
         Loads the files as needed. Broken links are skipped.
         Duplicate links are ignored.
+        Can be followed by Get_Assets_By_Class if extra class checking
+        safety is wanted.
 
         * index
           - String, one of 'macros','components'.
@@ -265,11 +269,24 @@ class File_System_class:
         for path in virtual_paths:
             # If there is no file of this name, or it is empty,
             # skip it; there seem to be broken links in the
-            # index files. TODO: maybe warn on broken links.
+            # index files.
             game_file = self.Load_File(path, error_if_not_found = False)
             if game_file != None:
                 ret_list.append(game_file)
-        return ret_list
+            else:
+                # Warn on broken link.
+                # Add some little state to prevent warning multiple times
+                # on the same file.
+                if not hasattr(self, '_index_file_not_found_paths'):
+                    self._index_file_not_found_paths = []
+                if path not in self._index_file_not_found_paths:
+                    Plugin_Log.Print(f'Warning: no file found on index.xml specified path: {path}')
+                    self._index_file_not_found_paths.append(path)
+
+        # On the off-chance there are duplicates (eg. one file provides
+        # multiple macros), filter them out here.
+        # TODO: maybe think about maintaining ordering.
+        return list(set(ret_list))
 
 
     def File_Is_Loaded(self, virtual_path):
@@ -645,6 +662,141 @@ class File_System_class:
         #  and adding to them new files that get added during runtime.
         yield from self.source_reader.Gen_All_Virtual_Paths(pattern)
         return
+
+    
+    @_Verify_Init
+    def Read_Text(self, text = None, page = None, id = None):
+        '''
+        Reads and returns the text at the given {page,id}.
+        Recursively expands nested references.
+        Removes comments in parentheses.
+        Returns None if no text found.
+
+        * text
+          - String, including any internal '{page,id}' terms.
+        * page, id
+          - Int or string, page and id separated; give for direct
+            dereference instead of a full text string.
+        '''
+        # Currently expect all text to be in the 0001 file, but could
+        # be split between currently language (eg. 0001-l044.xml) and
+        # a generic fallback (eg. 0001.xml).
+        # TODO: get a language code from Settings.
+
+        # Kick it off with the language specific lookup.
+        t_files = [
+            File_System.Load_File('t/0001-L044.xml'),
+            # This one may not be present; ego doesn't use it, but mods might.
+            # TODO: what happens if two mods use this? are strings joined?
+            # TODO: will tend to fail since there is no vanilla version of
+            # this file; will need special handling to create a vanilla
+            # dummy that extensions can append to.
+            File_System.Load_File('t/0001.xml', error_if_not_found = False),
+            ]
+
+        
+        # If page and id given, pack them in a string to reuse the
+        # following code. Probably don't need to worry about performance
+        # of this.
+        if text == None:
+            assert page != None and id != None
+            text = '{{{},{}}}'.format(page,id)
+                       
+        # Remove any comments, in parentheses.
+        if '(' in text:
+            # .*?     : Non-greed match a series of chars.
+            # \( \)   : Match parentheses
+            # (?<!\\) : Look behind for no preceeding escape char.
+            # Note: put all this in a raw string to avoid python escapes.
+            text = ''.join(re.split(r'(?<!\\)\(.*?(?<!\\)\)', text))
+        #if text.startswith('(') and ')' in text:
+        #    text = text.split(')',1)[1]
+
+        # Remove leftover escape characters, blindly for now (assume
+        # they are never escaped themselves).
+        text = text.replace('\\','')
+
+        # If lookups are present, deal with them recursively.
+        if '{' in text:
+            # RE pattern used:
+            #  .*    : Match a series of chars.
+            #  .*?   : As above, but changes to non-greedy.
+            #  {.*?} : Matches between { and }.
+            #  ()    : When put around pattern in re.split, returns the
+            #          separators (eg. the text lookups).
+            new_text = ''
+            for term in re.split('({.*?})', text):
+                # Skip empty terms (eg. when there is no text before the 
+                # first '{').
+                if not term:
+                    continue
+
+                # Check if it is a nested lookup.
+                if term.startswith('{'):
+
+                    # Search each of the t_files in order to see if any
+                    # of them have it, taking the first hit.
+                    replacement_text = None
+                    for file in t_files:
+                        replacement_text = file.Read(term)
+                        if replacement_text != None:
+                            break
+
+                    # If the text wasn't found, just leave the term as-is.
+                    if replacement_text == None:
+                        replacement_text = term
+
+                    # Otherwise, recursively process it, since it could
+                    # have more nested references.
+                    else:
+                        new_text += self.Read_Text(replacement_text)
+
+                else:
+                    # There was no lookup for this term; just append
+                    # it back to the text string.
+                    new_text += term
+
+            # Overwrite the text with the replacements.
+            text = new_text
+            
+        # Send back the processed text.
+        return text
+
+        
+        # Search for the text.
+        ret_text = None
+        for file in t_files:
+            if file == None:
+                continue
+            # If this runs into a nested reference, point it back to this
+            # function for the next step lookup.
+            # TODO: how to avoid this Read failing to find a term, call
+            # back to Read_Text, and Read_Text calling Read on the same
+            # t_file again (inf loop). Protection should also avoid bouncing
+            # between two t_files each failing their Read.
+            ret_text = file.Read(
+                text = text, 
+                page = page, 
+                id = id,
+                nested_read_text_func = self.Read_Text)
+
+            # If the above returned something useful, use it.
+            if ret_text != None:
+                break
+            # Otherwise keep looping.
+
+        # If text is still None, something failed to resolve.
+        # Could potentially return None, which will cause any higher level
+        # calls to this function (this could be the bottom of a reference
+        # stack) to fail and return None.
+        # Alternatively, use a "read_text" fallback, which will also help
+        # references resolve.
+        if ret_text == None:
+            if text != None:
+                ret_text = text
+            else:
+                ret_text = f'{{{page},{id}}}'
+        return ret_text
     
 
 # Static copy of the file system object.

@@ -133,7 +133,7 @@ class Macro:
             connection.Update_XML()
         return
 
-    def Contains_Gate_Or_Highway(self):
+    def Contains_Gate(self):
         'Dummy function returns False, for easy of use with zones.'
         return False
 
@@ -206,6 +206,7 @@ class Zone(Macro):
         self.god_objects = []
 
         # Zones with standard gates have a connection of ref="gates" type.
+        # This applies to accelerators as well.
         for conn in self.conns.values():
             if conn.ref == 'gates':
                 self.has_gate = True
@@ -224,6 +225,14 @@ class Zone(Macro):
                 return conn
         raise Exception()
 
+    def Contains_Gate(self):
+        '''
+        Returns True if this zone has a gate (including accelerator
+        or zone highway).
+        '''
+        return self.has_gate or self.has_sector_highway
+
+    # Note: unused currently.
     def Contains_Gate_Or_Highway(self):
         '''
         Returns True if this zone has a gate or highway entry/exit.
@@ -341,6 +350,26 @@ class Sector(Macro):
         return
     
 
+    def Get_Gate_Distance(self):
+        '''
+        Returns the maximum distance between any two gates, accelerators,
+        or highways.  If there is just one, returns 0.
+        '''
+        conns = [x for x in self.conns.values()
+                if x.macro and x.macro.Contains_Gate()]
+        max_dist = 0
+
+        # Find the highest inter-object distance.
+        for conn_0, conn_1 in combinations(conns, 2):
+            pos_0 = conn_0.position
+            pos_1 = conn_1.position
+            this_dist = pos_0.Get_Distance_To(pos_1)
+            if this_dist > max_dist:
+                max_dist = this_dist
+
+        return max_dist
+
+
     def Get_Size(self):
         '''
         Returns approximate sector size, as a diamater, based on distances
@@ -350,9 +379,15 @@ class Sector(Macro):
         # Similar to sector.size property in game.
         # Presumably this is based on the gate distances.
         conns = [x for x in self.conns.values()
-                if x.macro and x.macro.Contains_Gate_Or_Highway()]
-        # If there is only one gate, use all macro connections.
-        if len(conns) < 2:
+                if x.macro and x.macro.Contains_Gate()]
+
+        # Check the gate distances.
+        gate_dist = self.Get_Gate_Distance()
+        # If the above was <50km, assume it was a single gate, single
+        # sector-highway pair, or a couple gate/highway links placed
+        # next to each other, such that the sector heart is further away
+        # and needs to check all zones.
+        if gate_dist < 50000:
             conns = [x for x in self.conns.values()]
 
         # Initialize this to the minimum.
@@ -376,28 +411,25 @@ class Sector(Macro):
         Returns the center point of this sector, based on gate zones,
         or all zones if there is only one gate.
         '''
-        gate_zones = [x.macro for x in self.conns.values()
-                      if x.macro and x.macro.Contains_Gate_Or_Highway()]
-
         sum_pos = Position()
-
-        if len(gate_zones) > 1:
-            for zone in gate_zones:
-                # Count sector highways as half, since there are normally
-                # (always) a pair of zones for the entry and exit.
-                if zone.has_sector_highway:
-                    sum_pos += (zone.Get_Sector_Conn().position / 2)
-                else:
-                    sum_pos += zone.Get_Sector_Conn().position
-            sum_pos /= len(gate_zones)
-
+        
+        # As above, use inter-gate region if gates >50km apart, else 
+        # use everything with macros.
+        gate_dist = self.Get_Gate_Distance()
+        if gate_dist > 50000:
+            conns = [x for x in self.conns.values()
+                      if x.macro and x.macro.Contains_Gate()]
         else:
-            # Use all macro connections as a fallback.
             conns = [x for x in self.conns.values() if x.macro]
-            for conn in conns:
-                sum_pos += conn.position
-            sum_pos /= len(conns)
 
+        for conn in conns:
+            # Count sector highways as half, since there are normally
+            # (always) a pair of zones for the entry and exit.
+            if isinstance(conn.macro, Zone) and conn.macro.has_sector_highway:
+                sum_pos += conn.position / 2
+            else:
+                sum_pos += conn.position
+        sum_pos /= len(conns)
         return sum_pos
 
 
