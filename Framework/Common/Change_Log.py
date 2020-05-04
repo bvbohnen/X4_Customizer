@@ -193,6 +193,8 @@ Change Log:
  * 1.18.3
    - Improved support for extensions patching other extensions.
    - Added better support for VRO quirks.
+ * 1.18.4
+   - Tweaked Generate_Diffs script mixed file/folder error check.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

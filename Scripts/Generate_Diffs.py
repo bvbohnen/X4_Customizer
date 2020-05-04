@@ -112,8 +112,9 @@ def Run():
         # TODO: maybe verify xml files were given, though perhaps someone
         # might use this for other xml-style types (xsd, etc), so skip for now.
 
-        # All args should be files.
-        if not base.is_file() or not mod.is_file() or not out.is_file():
+        # All args should be files (output can be non-existing, but
+        # shouldn't be a folder).
+        if not base.is_file() or not mod.is_file() or out.is_dir():
             print('Error: mixed files and directories.')
             return
             
@@ -128,8 +129,9 @@ def Run():
 
     else:
 
-        # All args should be dirs.
-        if not base.is_dir() or not mod.is_dir() or not out.is_dir():
+        # All args should be dirs (output can be non-existing, but
+        # shouldn't be a file).
+        if not base.is_dir() or not mod.is_dir() or out.is_file():
             print('Error: mixed files and directories.')
             return
            
@@ -139,8 +141,8 @@ def Run():
             original_dir_path = base,
             modified_dir_path = mod,
             output_dir_path   = out,
-            skip_unchanged     = args.skip_unchanged,
-            verbose            = args.verbose,
+            skip_unchanged    = args.skip_unchanged,
+            verbose           = args.verbose,
             )
 
 

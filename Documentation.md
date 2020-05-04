@@ -1,4 +1,4 @@
-X4 Customizer 1.18.3
+X4 Customizer 1.18.4
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -1022,3 +1022,5 @@ Change Log:
  * 1.18.3
    - Improved support for extensions patching other extensions.
    - Added better support for VRO quirks.
+ * 1.18.4
+   - Tweaked Generate_Diffs.bat mixed file/folder error check.
