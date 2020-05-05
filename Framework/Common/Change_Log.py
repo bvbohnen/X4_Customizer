@@ -195,6 +195,8 @@ Change Log:
    - Added better support for VRO quirks.
  * 1.18.4
    - Tweaked Generate_Diffs script mixed file/folder error check.
+ * 1.18.5
+   - Teaked Cat_Pack to include "extensions" subfolder files.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

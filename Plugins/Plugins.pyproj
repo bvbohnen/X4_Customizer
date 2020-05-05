@@ -131,6 +131,9 @@
     <Compile Include="Transforms\Classes\Connection.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Transforms\Classes\Database.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Transforms\Classes\Engine.py">
       <SubType>Code</SubType>
     </Compile>

@@ -22,8 +22,8 @@ class Engine(Macro):
       - Tags related to engine connections.
     '''
 
-    def __init__(self, xml_node):
-        super().__init__(xml_node)
+    def __init__(self, xml_node, *args, **kwargs):
+        super().__init__(xml_node, *args, **kwargs)
 
         # Of notable interest is the main component
         self.component_name = xml_node.find('./component').get('ref')
@@ -31,6 +31,15 @@ class Engine(Macro):
 
         # Read out info of interest, as it comes up.
         return
+
+    def Get_mk(self):
+        return self.Get('./properties/identification', 'mk')
+    
+    def Get_makerrace(self):
+        return self.Get('./properties/identification', 'makerrace')
+
+    def Get_Forward_Thrust(self):
+        return self.Get('./properties/thrust', 'forward')
     
 
 '''

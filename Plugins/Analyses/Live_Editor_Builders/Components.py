@@ -1,5 +1,6 @@
 '''
 Build misc ship component objects in 'assets/props/'.
+TODO: rename, to avoid confusion with game component vs macro.
 '''
 
 from Framework import File_System

@@ -1,4 +1,4 @@
-X4 Customizer 1.18.4
+X4 Customizer 1.18.5
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -484,6 +484,11 @@ Scripts Transforms:
       - Float, how much to multiply damage by.
         
 
+  * Disable_AI_Travel_Drive
+
+    Disables usage of travel drives for all ai scripts. When applied to a save, existing move orders may continue to use travel drive until they complete.
+        
+
   * Increase_AI_Script_Waits
 
     Increases wait times in ai scripts, to reduce their background load and improve performance.  Waits under "visible" attention will not be modified. Expected to have high impact on fps, at some cost of ai efficiency.
@@ -531,7 +536,7 @@ Ships Transforms:
         - 'type'    : The ship type. List of types:
           - courier, resupplier, transporter, freighter, miner, largeminer, builder
           - scout, interceptor, fighter, heavyfighter
-          - bomber, corvette, frigate, scavenger
+          - gunboat, corvette, frigate, scavenger
           - destroyer, carrier, battleship
           - xsdrone, smalldrone, police, personalvehicle, escapepod, lasertower
         - 'class'   : The class of ship. List of classes:
@@ -601,6 +606,19 @@ Ships Transforms:
     
     * match_rule_multipliers:
       - Series of matching rules paired with the multipliers to use.
+        
+
+  * Rescale_Ship_Speeds
+
+    Rescales the speeds of different ship classes, centering on the give target average speeds. Ships are assumed to be using their fastest race mk2 engines. Averaged across all ships of the rule match.
+    
+    In development.
+    
+    * match_rule_averages
+      - Series of matching rules paired with the target average speed to rescale toward.
+      - Ships within a match will maintain their relative speed differences.
+    * use_arg_engine
+      - Bool, if True then Argon engines will be assumed for all ships instead of their race engines.
         
 
 
@@ -1023,4 +1041,6 @@ Change Log:
    - Improved support for extensions patching other extensions.
    - Added better support for VRO quirks.
  * 1.18.4
-   - Tweaked Generate_Diffs.bat mixed file/folder error check.
+   - Tweaked Generate_Diffs script mixed file/folder error check.
+ * 1.18.5
+   - Teaked Cat_Pack to include "extensions" subfolder files.

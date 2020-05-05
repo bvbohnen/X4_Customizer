@@ -1,10 +1,11 @@
 
 from fnmatch import fnmatch
-from Framework import Transform_Wrapper, Load_File, File_System
+from Framework import Transform_Wrapper, Load_File, File_System, Plugin_Log
 from .Support import Standardize_Match_Rules
 from .Support import XML_Multiply_Int_Attribute
 from .Support import XML_Multiply_Float_Attribute
 from ..Analyses.Shared import Get_Ship_Macro_Files
+from .Classes import *
 
 __all__ = [
     'Adjust_Ship_Speed',
@@ -13,6 +14,7 @@ __all__ = [
     'Adjust_Ship_Crew_Capacity',
     'Adjust_Ship_Drone_Storage',
     'Adjust_Ship_Missile_Storage',
+    'Rescale_Ship_Speeds',
     ]
 
 doc_matching_rules = '''
@@ -36,7 +38,7 @@ doc_matching_rules = '''
           - courier, resupplier, transporter, freighter, miner,
             largeminer, builder
           - scout, interceptor, fighter, heavyfighter
-          - bomber, corvette, frigate, scavenger
+          - gunboat, corvette, frigate, scavenger
           - destroyer, carrier, battleship
           - xsdrone, smalldrone, police, personalvehicle,
             escapepod, lasertower
@@ -83,6 +85,10 @@ Component changes could either work like weapon bullets (edit based on the
 first one found), or the components could be made unique per-ship, in
 which case all of these fields become unique but may only apply
 to newly constructed ships.
+'''
+'''
+Maybe switch to using class repacking of the xml to do edits; though that
+has overhead, it should be quick, and standardizes changes.
 '''
 
 @Transform_Wrapper(shared_docs = doc_matching_rules)
@@ -240,6 +246,59 @@ def Adjust_Ship_Crew_Capacity(
     return
 
 
+##############################################################################
+# Newer style: pack ships into class objects for the edits.
+
+@Transform_Wrapper(shared_docs = doc_matching_rules)
+def Rescale_Ship_Speeds(
+        *match_rule_averages,
+        use_arg_engine = False,
+    ):
+    '''
+    Rescales the speeds of different ship classes, centering on the give
+    target average speeds. Ships are assumed to be using their fastest race
+    mk2 engines. Averaged across all ships of the rule match.
+
+    In development.
+
+    * match_rule_averages
+      - Series of matching rules paired with the target average speed
+        to rescale toward.
+      - Ships within a match will maintain their relative speed differences.
+    * use_arg_engine
+      - Bool, if True then Argon engines will be assumed for all ships
+        instead of their race engines.
+    '''
+    # Put matching rules in standard form.
+    rules = Standardize_Match_Rules(match_rule_averages)
+    
+    database = Database()
+    ship_macros = database.Get_Macros('ship_*') + database.Get_Macros('units_*')
+    engine_macros = database.Get_Macros('engine_*')
+
+
+    # Select an engine for every ship.
+    for ship in ship_macros:
+        ship.Select_Engine(
+            engine_macros = engine_macros,
+            mk = '2',
+            makerrace = 'argon' if use_arg_engine else ship.Get_Race(),
+            )
+
+    class_ship_dict = {}
+    for ship_class in ['ship_xs','ship_s','ship_m','ship_l','ship_xl']:
+        this_dict = {}
+        class_ship_dict[ship_class] = this_dict
+
+        for macro in ship_macros:
+            if macro.class_name == ship_class:
+                this_dict[macro.Get_Game_Name()] = macro.Get_Speed()
+
+        lines = [f'{k} : {v}' for k,v in sorted(this_dict.items())]
+        Plugin_Log.Print('\n'.join(lines))
+
+    return
+
 
 ##############################################################################
 # Support functions.
@@ -285,6 +344,48 @@ def Update_Nodes_By_Rules(
             game_file.Update_Root(xml_root)
     return
     
+
+def Get_Match_Rule_Args(ship_macro_xml, rules):
+    '''
+    Checks a ship macro against the given rules, and returns args from
+    the first matched rule (as a tuple of there is more than 1 arg).
+    On no match, returns None.
+
+    * ship_macro_xml
+      - The xml node with the specific ship macro.
+    '''
+    assert ship_macro_xml.tag == 'macro'
+
+    # Look up properties of interest.
+    name = ship_macro_xml.get('name')
+    class_name = ship_macro_xml.get('class')
+
+    # Not all ships have a type or purpose (mainly just spacesuits don't).
+    try:
+        type = ship_macro_xml.find('./properties/ship').get('type')
+    except Exception:
+        type = None
+    try:
+        purpose = ship_macro_xml.find('./properties/purpose').get('primary')
+    except Exception:
+        purpose = None
+
+    # Check the matching rules.
+    for key, value, *args in rules:
+        if((key == '*')
+        or (key == 'name'    and fnmatch(name, value))
+        or (key == 'class'   and class_name == value)
+        or (key == 'type'    and type == value)
+        or (key == 'purpose' and purpose == value)
+        ):
+            # Want to return 1 item is there are 1 arg, else a tuple
+            # or list of them. Python has no clean syntax for this
+            # that is obvious.
+            if len(args) == 1:
+                return args[0]
+            return args
+    return None
+
 
 def Get_Match_Rule_Args(ship_macro_xml, rules):
     '''

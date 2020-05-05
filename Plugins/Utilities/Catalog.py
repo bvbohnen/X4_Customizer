@@ -231,8 +231,11 @@ def Cat_Pack(
                 cat_path = dest_cat_path)
 
     # Set up a reader for the source location.
+    # Assume in the general case that this is an extension, and will
+    # want to grab stuff from a nested "extensions" subfolder.
     source_reader = File_Manager.Source_Reader.Location_Source_Reader(
-        location = source_dir_path)
+        location = source_dir_path,
+        is_extension = True)
 
     # Pick out the subfolders to be included.
     subfolder_names = File_Manager.Source_Reader_Local.valid_virtual_path_prefixes

@@ -1,13 +1,19 @@
 
+from Framework import Load_File, File_System, Plugin_Log
 from .Connection import Connection
+from .Component import Component
 __all__ = ['Macro']
 
 class Macro:
     '''
     Generic macro, holding a set of connections.
     
+    * database
+      - Database recording this macro.
     * xml_node
       - Macro xml node.
+    * name
+      - String, name.
     * class_name
       - String, class name.
     * conns
@@ -22,8 +28,9 @@ class Macro:
     * component
       - Component, filled in by Get_Component.
     '''
-    def __init__(self, xml_node):
+    def __init__(self, xml_node, database = None):
         self.xml_node = xml_node
+        self.database = database
         self.name = xml_node.get('name')
         self.class_name = xml_node.get('class')
         
@@ -38,21 +45,32 @@ class Macro:
             key = (conn.name, conn.ref)
             assert key not in self.conns
             self.conns[key] = conn
+
+        return
+
+
+    def Get(self, xpath, attr):
+        '''
+        Return an attribute or element matching the given xpath and attribute.
+        '''
+        node = self.xml_node.find(xpath)
+        if node != None:
+            return node.get(attr)
         return
     
+    def Set(self, xpath, attr, value):
+        '''
+        Set an attribute matching the given xpath and attribute.
+        '''
+        self.xml_node.find(xpath).set(attr, value)
+    
+
     def Get_Component(self):
         '''
         Returns the component for this macro.
         '''
         if self.component == None:
-            # Load from the index.
-            game_file = File_System.Get_Indexed_File('components', self.component_name)
-            # If not found, error.
-            if game_file == None:
-                return
-            # Load its xml into a Component and store.
-            # TODO: will this always be readonly? Can speed up if so.
-            self.component = Component(game_file.Get_XML_Root())
+            self.component = self.database.Get_Component(self.component_name)
         return self.component
     
 
@@ -61,12 +79,7 @@ class Macro:
         Returns the component connection tags, including 'component', or
         None if there is no such connection.
         '''
-        comp = self.Get_Component()
-        for conn in comp.conns.values():
-            # Looking for a 'component' tag.
-            if 'component' in conn.tags:
-                return conn.tags
-        return
+        return self.Get_Component().Get_Connection_Tags()
 
 
     def Update_XML(self):

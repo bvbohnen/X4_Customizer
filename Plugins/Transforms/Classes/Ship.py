@@ -4,7 +4,10 @@ from .Connection import Connection
 from .Component  import Component
 from Framework import File_System
 
-__all__ = ['Ship']
+__all__ = [
+    'Ship',
+    ]
+
 
 class Ship(Macro):
     '''
@@ -18,17 +21,43 @@ class Ship(Macro):
       - Set of tags related to engine connections, including 'engine'.
     '''
 
-    def __init__(self, xml_node):
-        super().__init__(xml_node)
-
-        # Read out info of interest, as it comes up.
+    def __init__(self, xml_node, *args, **kwargs):
+        super().__init__(xml_node, *args, **kwargs)
+        
+        self.engine_count = None
+        self.engine_tags = None
+        self.engine_macro = None
+        self._race = None
         return
 
     def Get_Game_Name(self):
         'Return the in-game name of this ship.'
-        if self.game_name == None:
-            self.game_name = File_System.Read_Text(self.xml_root.find('./properties/identification').get('name'))
-        return self.game_name
+        if not hasattr(self, '_game_name'):
+            self._game_name = File_System.Read_Text(self.xml_node.find('./properties/identification').get('name'))
+        return self._game_name
+
+
+    def Get_Race(self):
+        '''
+        Returns the expected race for this ship, based on wares group,
+        defaulting to argon if not found.
+        '''
+        if self._race == None:
+            race = 'argon'
+            wares_file = File_System.Load_File('libraries/wares.xml')
+            xml_root = wares_file.Get_Root_Readonly()
+
+            # /wares/ware[./component/@ref="ship_arg_l_destroyer_01_a_macro"]
+            ware_entries = xml_root.xpath(f'./ware[./component/@ref="{self.name}"]')
+            if ware_entries:
+                assert len(ware_entries) == 1
+                group = ware_entries[0].get('group')
+                if group and group.startswith('ships_'):
+                    # The race should be the term after "ships_".
+                    race = group.replace('ships_', '')
+            self._race = race
+        return self._race
+
 
     def Load_Engine_Data(self):
         'Helper function that loads engine count and tags.'
@@ -39,10 +68,9 @@ class Ship(Macro):
         self.engine_tags = []
         for conn in component.conns.values():
             if 'engine' in conn.tags:
-                self.engine_count += 0
+                self.engine_count += 1
                 self.engine_tags = conn.tags
         return
-
 
     def Get_Engine_Count(self):
         'Returns the number of engine connections.'
@@ -59,7 +87,53 @@ class Ship(Macro):
     # and annotated back to here for convenience.
     # Maybe a Loadout class?
 
-        
+
+    def Select_Engine(self, engine_macros, mk = None, makerrace = None):
+        '''
+        From the given engine macros, select a matching engine.
+        '''
+        matches = []
+
+        # Add "component" to the engine tags, to match up with the other macro.
+        engine_tags = self.Get_Engine_Tags()
+        engine_tags.add('component')
+
+        for macro in engine_macros:
+            if macro.name == 'engine_arg_s_combat_01_mk2_macro' and self.name == 'ship_kha_m_fighter_01_a_macro':
+                bla = 0
+            macro_tags = macro.Get_Component_Connection_Tags()
+            if macro_tags != engine_tags:
+                continue
+            if mk and macro.Get_mk() != mk:
+                continue
+            if makerrace and macro.Get_makerrace() != makerrace:
+                continue
+            matches.append(macro)
+
+        if not matches:
+            bla = 0
+
+        # From matches, pick fastest engine.
+        self.engine_macro = None
+        for macro in matches:
+            if not self.engine_macro or macro.Get_Forward_Thrust() > self.engine_macro.Get_Forward_Thrust():
+                self.engine_macro = macro
+        return
+
+    def Get_Engine_Macro(self):
+        'Return the currently selected engine macro.'
+        return self.engine_macro
+
+    def Get_Speed(self):
+        'Return the ship speed with currently selected engine.'
+        if not self.engine_macro:
+            return 0
+        thrust = float(self.engine_macro.Get_Forward_Thrust()) * self.engine_count
+        drag = float(self.Get('./properties/physics/drag', 'forward'))
+        speed = thrust / drag
+        return speed
+
+
 '''
     For reference, paths/attributes of interest.
     './properties/identification'   , 'name'

@@ -54,6 +54,10 @@ class Location_Source_Reader:
     * folder_name_lower
       - Name of the final folder of the location, lower cased.
       - To be used in ordering extensions.
+    * is_extension
+      - Bool, True if this is an extension.
+      - May be set explicitly if a summary is not available, else will
+        be set based on the presence of extension_summary.
     * extension_summary
       - Extension_Summary object, if this is for an extension.
     * extension_name
@@ -80,9 +84,11 @@ class Location_Source_Reader:
             self, 
             location = None, 
             extension_summary = None,
+            is_extension = None,
         ):
         self.location = location
         self.extension_summary = extension_summary
+        self.is_extension = is_extension if is_extension != None else (extension_summary != None)
         self.extension_name = (extension_summary.extension_name 
                                if extension_summary else None)
         self.catalog_file_dict = OrderedDict()
@@ -131,7 +137,7 @@ class Location_Source_Reader:
 
         # Put the prefixes in reverse priority, so subst will get
         # found first in general searches.
-        if self.extension_summary:
+        if self.is_extension:
             prefixes = ['ext_','subst_']
         else:
             prefixes = ['']
@@ -193,10 +199,10 @@ class Location_Source_Reader:
         for path_prefix in valid_virtual_path_prefixes:
 
             # Ignore the extensions folder if this is the base cat reader.
-            if not self.extension_summary and path_prefix == 'extensions/':
+            if not self.is_extension and path_prefix == 'extensions/':
                 continue
             # Ignore the base folder for extensions.
-            if self.extension_summary and path_prefix == '':
+            if self.is_extension and path_prefix == '':
                 continue
 
             # Pick the globbing pattern.

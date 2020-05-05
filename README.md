@@ -1,4 +1,4 @@
-X4 Customizer 1.18.4
+X4 Customizer 1.18.5
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -228,6 +228,10 @@ Scripts Transforms:
 
     Adjusts all out-of-vision damage-per-second by a multiplier. For instance, if OOV combat seems to run too fast, it can be multiplied by 0.5 to slow it down by half.
 
+  * Disable_AI_Travel_Drive
+
+    Disables usage of travel drives for all ai scripts. When applied to a save, existing move orders may continue to use travel drive until they complete.
+
   * Increase_AI_Script_Waits
 
     Increases wait times in ai scripts, to reduce their background load and improve performance.  Waits under "visible" attention will not be modified. Expected to have high impact on fps, at some cost of ai efficiency.
@@ -261,6 +265,10 @@ Ships Transforms:
   * Adjust_Ship_Turning
 
     Adjusts the turning rate of ships, in each direction.
+
+  * Rescale_Ship_Speeds
+
+    Rescales the speeds of different ship classes, centering on the give target average speeds. Ships are assumed to be using their fastest race mk2 engines. Averaged across all ships of the rule match.
 
 
 ***

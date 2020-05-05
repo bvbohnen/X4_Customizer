@@ -9,7 +9,9 @@ from .Support import XML_Multiply_Float_Attribute
 __all__ = [
     'Increase_AI_Script_Waits',
     'Adjust_OOV_Damage',
+    'Disable_AI_Travel_Drive',
     ]
+
 
 
 @Transform_Wrapper()
@@ -189,3 +191,51 @@ def Adjust_OOV_Damage(multiplier):
         game_file.Update_Root(xml_root)
 
     return
+
+
+
+@Transform_Wrapper()
+def Disable_AI_Travel_Drive():
+    '''
+    Disables usage of travel drives for all ai scripts. When applied to
+    a save, existing move orders may continue to use travel drive
+    until they complete.
+    '''
+    # Travel drive is part of the move commands, as one of the arguments.
+    # Can set to false always, to disable use.
+    # (This appears to only apply to plain move_to?)
+    
+    aiscript_files = Load_Files(f"*aiscripts/*.xml")
+    
+    for game_file in aiscript_files:
+        xml_root = game_file.Get_Root()
+        file_name = game_file.name.replace('.xml','')
+        
+        change_occurred = False
+        for tag in [
+            #'move_approach_path',
+            #'move_docking',
+            #'move_undocking',
+            #'move_gate',
+            #'move_navmesh',
+            #'move_strafe',
+            #'move_target_points',
+            #'move_waypoints',
+            'move_to',
+            ]:
+            nodes = xml_root.xpath(".//{}".format(tag))
+            if not nodes:
+                continue
+
+            for node in nodes:
+                # Check if this uses the travel arg; if not, it defaults to
+                # false, so no change needed.
+                if node.get('travel') != None:
+                    node.set('travel', 'false')
+                    change_occurred = True
+                    
+        if change_occurred:
+            game_file.Update_Root(xml_root)
+
+    return
+
