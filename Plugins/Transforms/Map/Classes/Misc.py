@@ -1,10 +1,11 @@
 
-from ...Classes import *
+from ....Classes import *
 from .Macros import *
 from ...Support import XML_Modify_Int_Attribute
 
 __all__ = [
     'MD_Object',
+    'MD_Placed_Object',
     'MD_Headquarters',
     'God_Object',
     ]
@@ -49,6 +50,39 @@ class MD_Object:
 
     def Update_XML(self):
         raise NotImplementedError()
+
+
+class MD_Placed_Object(MD_Object):
+    '''
+    Object from PlacedObjects: ships, data vaults.
+
+    * xml_node
+      - A sector_find md operation.
+    '''
+    def __init__(self, xml_node):
+        super().__init__(xml_node)
+
+        # Pick out the sector name.
+        self.sector_name = xml_node.get('macro').replace('macro.','')
+        '''
+        Syntax on ships is:
+        <find_sector macro="macro.cluster_27_sector001_macro" .../>
+        <do_if ...
+        <create_ship ...>
+         <position ...
+        '''
+        # Next is do_if; find the position inside it.
+        pos_node = xml_node.getnext().find('.//position')
+        if pos_node != None:
+            # These are similar to normal positions.
+            self.position = Position(pos_node)
+            # Radius can be pretty small.
+            self.radius = 2000
+        
+    def Update_XML(self):
+        # TODO: maybe put in km.
+        if self.position:
+            self.position.Update_XML()
 
 
 class MD_Headquarters(MD_Object):

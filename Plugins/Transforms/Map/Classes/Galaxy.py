@@ -3,7 +3,7 @@ from collections import defaultdict
 from lxml import etree
 from lxml.etree import Element
 
-from ...Classes import *
+from ....Classes import *
 from .Region import *
 from .Macros import *
 from .Highways import *
@@ -38,12 +38,20 @@ class Galaxy:
     * randomize_new_zones
       - Bool, True if new zone placements should be fully randomized, eg.
         not seeded with the sector name.
+    * move_free_ships
+      - Bool, if True then freebie ships from PlacedObjects are moved.
     * new_zones
       - List of Zones that have been freshly created, and are pending insertion
         into the xml files.
       - These are also present in the macros.
     '''
-    def __init__(self, gamefile_roots, recenter_sectors = False, randomize_new_zones = False):
+    def __init__(
+            self, 
+            gamefile_roots, 
+            recenter_sectors = False, 
+            randomize_new_zones = False, 
+            move_free_ships = True,
+            ):
         self.gamefile_roots = gamefile_roots
         self.macros = {}
         self.class_macros = defaultdict(dict)
@@ -53,6 +61,7 @@ class Galaxy:
         self.new_zones = []
         self.recenter_sectors = recenter_sectors
         self.randomize_new_zones = randomize_new_zones
+        self.move_free_ships = move_free_ships
 
         # Read the various macros from the xml files.
         for field_name, macro_name, base_class in [
@@ -199,8 +208,33 @@ class Galaxy:
         # object.
         self.md_objects.append(MD_Headquarters(gamefile_roots['md_hq'][0][1]))
 
+        # Also gather all freebie ships and data vaults.
+        '''        
+        Syntax on ships is:
+        <find_sector macro="macro.cluster_27_sector001_macro" .../>
+        <do_if ...
+        <create_ship ...>
+         <position ...
+        
+        Syntax on data vaults is:
+        <find_zone macro="macro.Zone003_Cluster_28_Sector001_macro" .../>
+        <do_if ...
+        <create_object ...>
+         <position ...
+
+        For the zone case, nothing needs to be done, since zones are moved.
+        For the sector case, special logic is needed to fine the templates.
+        '''
+        if self.move_free_ships:
+            for sec_find in gamefile_roots['md_objects'][0][1].xpath('.//find_sector'):
+                self.md_objects.append(MD_Placed_Object(sec_find))
+        
+
         # Link md objects to their sectors.
         for md_object in self.md_objects:
+            # Skip if no position was found.
+            if md_object.position == None:
+                continue
             # Note: md names are not case sensetive.
             sector = self.macros[md_object.sector_name]
             md_object.Set_Sector(sector)
@@ -290,7 +324,7 @@ class Galaxy:
         #  </offset>
         #  <macro ref="Zone002_Cluster_46_Sector001_macro" connection="sector" />
         #</connection>
-        conn = Connection(
+        conn = Map_Connection(
             parent = sector,
             xml_node = etree.fromstring('''
             <connection name="CONN" ref="zones">

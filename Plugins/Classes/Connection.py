@@ -19,10 +19,6 @@ class Connection:
       - Set of strings holding tags.
     * ref
       - Ref attribute, if present.
-    * position
-      - Current Position for this connection.
-    * orig_position
-      - Original Position when this connection was parsed.
     * macro_ref
       - String, name of the macro this connects to, if known.
     * macro
@@ -47,29 +43,15 @@ class Connection:
         else:
             self.macro_ref  = None
         self.macro = None
-
-        # TODO: maybe move position stuff to a map-specific subclass.
-        pos_node        = xml_node.find('./offset/position')
-        if pos_node != None:
-            self.position = Position(pos_node)
-        else:
-            # When position is not specified, it seems to often default to 0,
-            # so 0-fill here.
-            # (Eg. happens regularly with one sector per cluster.)
-            # TODO: is this always accurate? Maybe sometimes there is no
-            # associated position.
-            self.position = Position()
-
-        # Make a safe copy as the original.
-        self.orig_position = copy(self.position)
         return
-
-    def Get_Offset(self):
+    
+    def Replace_XML(self, replacements):
         '''
-        Returns a Position offset between the current position and
-        original xml position.
+        Swap xml element references out for their replacements. 
+        Called when switching to writable xml.
         '''
-        return self.position - self.orig_position
+        self.xml_node = replacements[self.xml_node]
+        return
 
     def Set_Macro(self, macro):
         '''
@@ -80,10 +62,3 @@ class Connection:
         macro.parent_conns.append(self)
         return
     
-    def Update_XML(self):
-        '''
-        Update the xml node position, if an xml_node attached.
-        '''
-        if self.position:
-            self.position.Update_XML()
-        return

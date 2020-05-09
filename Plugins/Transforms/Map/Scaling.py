@@ -1,21 +1,40 @@
 
 import random
+from collections import defaultdict
 
 from Framework import Plugin_Log, Print
-from ..Classes import *
+from ...Classes import *
 from .Classes import *
 
 
-def Scale_Regions(galaxy, scaling_factor, debug):
+def Scale_Regions(galaxy, sector_scaling_factors, debug):
     '''
     Scale all regions up if scaling_factor.
     '''
+    # Since regions can be shared between sectors, aim to find the
+    # regions in each sector, and record all associated scalings.
+    # The overall region scaling will be an average of the sectors.
+    region_scaling_lists = defaultdict(list)
+    for sector in galaxy.class_macros['sectors'].values():
+        for macro in sector.cluster_connected_macros:
+            if not macro.region:
+                continue
+            region_scaling_lists[macro.region].append(sector_scaling_factors[sector])
+
+    # Compute averages.
+    region_scalings = {}
+    for region, scaling_list in region_scaling_lists.items():
+        region_scalings[region] = sum(scaling_list) / len(scaling_list)
+
     for region in galaxy.regions.values():
-        region.Scale(scaling_factor)
+        # Skip if this region isn't used.
+        if region not in region_scalings:
+            continue
+        region.Scale(region_scalings[region])
     return
 
     
-def Scale_Sectors(galaxy, scaling_factor, debug, precision_steps):
+def Scale_Sectors(galaxy, sector_scaling_factors, debug, precision_steps):
     '''
     Scale all sectors to roughly match the scaling factor.
     '''
@@ -41,7 +60,7 @@ def Scale_Sectors(galaxy, scaling_factor, debug, precision_steps):
         # Testing, pick a sector.
         #if sector.name != 'Cluster_416_Sector002_macro':
         #    continue
-        Scale_Sector(galaxy, sector, scaling_factor, debug, precision_steps)
+        Scale_Sector(galaxy, sector, sector_scaling_factors[sector], debug, precision_steps)
         # In testing, skip after first sector.
         #break
         
@@ -51,7 +70,7 @@ def Scale_Sectors(galaxy, scaling_factor, debug, precision_steps):
 
 
     # Scale the god station defaults.
-    galaxy.god_default_obj.Scale(scaling_factor)
+    galaxy.god_default_obj.Scale(sector_scaling_factors[sector])
 
     # Clean up sector highways.
     '''

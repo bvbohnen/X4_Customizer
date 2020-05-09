@@ -115,11 +115,19 @@ Note on save game:
 @Transform_Wrapper()
 def Scale_Sector_Size(
         scaling_factor,
+        scaling_factor_2 = None,
+        transition_size_start = 200000,
+        transition_size_end   = 400000,
         # TODO: make a decision on if this is good or not.
         # Maybe helps with hatikvahs highway/asteroid overlap?
         recenter_sectors = False,
         randomize_new_zones = False,
         precision_steps = 10,
+        remove_ring_highways = False,
+        remove_nonring_highways = False,
+        extra_scaling_for_removed_highways = 0.7,
+        scale_regions = True,
+        move_free_ships = True,
         debug = True,
         _test = False
     ):
@@ -130,22 +138,58 @@ def Scale_Sector_Size(
 
     * scaling_factor
       - Float, how much to adjust distances by.
+      - Eg. 0.5 to cut sector size roughly in half.
+    * scaling_factor_2
+      - Float, optional, secondary scaling factor to apply to large sectors.
+      - If not given, scaling_factor is used for all sectors.
+    * transition_size_start
+      - Int, sector size at which to start transitioning from
+        scaling_factor to scaling_factor_2.
+      - Defaults to 200000.
+      - Sectors smaller than this will use scaling_factor.
+    * transition_size_end
+      - Int, optional, sector size at which to finish transitioning to
+        scaling_factor_2.
+      - Defaults to 400000 (400 km).
+      - Sectors larger than this will use scaling_factor_2.
+      - Sectors of intermediate size have their scaling factor interpolated.
     * recenter_sectors
       - Adjust objects in a sector to approximately place the coreposition
         near 0,0,0.
+      - Defaults False.
       - In testing, this makes debugging harder, and may lead to unwanted
         results.  Pending further testing to improve confidence.
     * randomize_new_zones
-      - Randomizes the positions of new zones each run.
-      - False for testing to ensure zones are constant, but set True
-        to get a fresh universe layout.
+      - Randomizes the positions of new zones each run, instead of using
+        the sector name as a seed.
+      - Defaults False.
+      - Generally should be left false, so that zones don't move around
+        for a save game.
     * num_steps
       - Int, over how many movement steps to perform the scaling.
-      - Higher step counts take longer, but each movement is smaller and
-        will better detect objects getting too close to each other.
+      - Higher step counts take longer to process, but each movement is
+        smaller and will better detect objects getting too close to each other.
       - Recommend lower step counts when testing, high step count for
         a final map.
       - Defaults to 10.
+    * remove_ring_highways
+      - Bool, set True to remove the ring highways.
+    * remove_nonring_highways
+      - Bool, set True to remove non-ring highways.
+    * extra_scaling_for_removed_highways
+      - Float, extra scaling factor to apply to sectors that had highways
+        removed.
+      - Defaults to 0.7.
+    * scale_regions
+      - Bool, if resource and debris regions should be scaled as well.
+      - May be slightly off from sector scalings, since many regions are
+        shared between sectors.
+      - Defaults True.
+    * move_free_ships
+      - Bool, if ownerless ships spawned at game start should be moved
+        along with the other sector contents.
+      - May impact difficulty of finding these ships.
+      - Defaults True.
     * debug
       - Bool, if True then write runtime state to the plugin log.
     '''
@@ -165,6 +209,7 @@ def Scale_Sector_Size(
         'region_defs'   : [(x, x.Get_Root()) for x in [Load_File('libraries/region_definitions.xml')]],
         'md_hq'         : [(x, x.Get_Root()) for x in [Load_File('md/X4Ep1_Mentor_Subscription.xml')]],
         'md_stations'   : [(x, x.Get_Root()) for x in [Load_File('md/FactionLogic_Stations.xml')]],
+        'md_objects'    : [(x, x.Get_Root()) for x in [Load_File('md/PlacedObjects.xml')]],
         'god'           : [(x, x.Get_Root()) for x in [Load_File('libraries/god.xml')]],
         }
     else:
@@ -177,6 +222,7 @@ def Scale_Sector_Size(
         'region_defs'   : [(x, x.Get_Root()) for x in [Load_File('libraries/region_definitions.xml')]],
         'md_hq'         : [(x, x.Get_Root()) for x in [Load_File('md/X4Ep1_Mentor_Subscription.xml')]],
         'md_stations'   : [(x, x.Get_Root()) for x in [Load_File('md/FactionLogic_Stations.xml')]],
+        'md_objects'    : [(x, x.Get_Root()) for x in [Load_File('md/PlacedObjects.xml')]],
         'god'           : [(x, x.Get_Root()) for x in [Load_File('libraries/god.xml')]],
         }
         
@@ -226,20 +272,60 @@ def Scale_Sector_Size(
         str(int(400 * scaling_factor) ))
 
 
-
-
     # Load in data of interest, to the local data structure.
     galaxy = Galaxy(
         gamefile_roots, 
         randomize_new_zones = randomize_new_zones,
-        recenter_sectors = recenter_sectors)
+        recenter_sectors = recenter_sectors,
+        move_free_ships = move_free_ships)
+
+    # TODO: record starting sector size for debug.
+
+    # Set scaling factor per sector based on size.
+    sector_scaling_factors = {}
+    for sector in galaxy.class_macros['sectors'].values():
+        # Get raw size, with no minimum.
+        size = sector.Get_Size(apply_minimum = False)
+        if scaling_factor_2 == None or size < transition_size_start:
+            sector_scaling_factors[sector] = scaling_factor
+        elif size > transition_size_end:
+            sector_scaling_factors[sector] = scaling_factor_2
+        else:
+            # Linear interpolate.
+            ratio = (size - transition_size_start) / (transition_size_end - transition_size_start)
+            scaling = scaling_factor_2 * ratio + scaling_factor * (1 - ratio)
+            sector_scaling_factors[sector] = scaling
+
+
+    # Handle highway removal.
+    for sector in galaxy.class_macros['sectors'].values():
+        # Two types of removal, but one flag to indicate removal happened.
+        highways_removed = False
+
+        if remove_ring_highways and sector.Has_Ring_Highway():
+            sector.Remove_Ring_Highways()
+            highways_removed = True
+
+        if remove_nonring_highways and sector.Has_Nonring_Highway():
+            sector.Remove_Nonring_Highways()
+            highways_removed = True
+
+        # Adjust the scaling.
+        if highways_removed:
+            sector_scaling_factors[sector] *= extra_scaling_for_removed_highways
+        
+
 
     # Run the repositioning routines.
-    Scale_Regions(galaxy, scaling_factor, debug)
-    Scale_Sectors(galaxy, scaling_factor, debug, precision_steps = precision_steps)
+    # TODO: region scaling factor?
+    if scale_regions:
+        Scale_Regions(galaxy, sector_scaling_factors, debug)
+    Scale_Sectors(galaxy, sector_scaling_factors, debug, precision_steps = precision_steps)
 
     # Update the xml nodes.
     galaxy.Update_XML()
+
+    # TODO: print sector size change summary.
 
     
     # If here, everything worked, so commit the updates.

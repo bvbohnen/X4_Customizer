@@ -130,7 +130,7 @@ class Script_Window(Tab_Page_Widget, generated_class):
 
             # Need to check the return code against button codes.
             if selection_code == QMessageBox.Save:
-                self.Save_Script_As()
+                self.Save_Script()
             elif selection_code == QMessageBox.Cancel:
                 # On cancellation, let the caller know so they can
                 # stop whatever action prompted this check.

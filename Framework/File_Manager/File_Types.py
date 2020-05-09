@@ -335,6 +335,9 @@ class XML_File(Game_File):
       - Often or always holds a single name that matches the last component
         of the virtual_path, without suffix.
       - TODO: maybe move this to an xml file subclass.
+    * forced_xpath_attributes
+      - String, similar to the option in Settings, these attributes or child
+        xpath checks are added to any taken from Settings.
     '''
     # For assets, the names of the asset group, and asset node tag.
     # Tag is generally or always the singular of a plural asset group.
@@ -347,6 +350,7 @@ class XML_File(Game_File):
             **kwargs):
         super().__init__(**kwargs)
         self.asset_class_name_dict = None
+        self.forced_xpath_attributes = ''
 
         # Should receive either the binary or the xml itself.
         assert binary != None or xml_root != None
@@ -452,6 +456,19 @@ class XML_File(Game_File):
             self.asset_class_name_dict[asset_class_name].append(asset_name)
         return
 
+    def Add_Forced_Xpath_Attributes(self, forced_xpath_attributes):
+        '''
+        Add a string of additional forced xpath attributes to any already
+        present for this file.
+        '''
+        # Combine forced attributes with a comma.
+        new_forced_attributes = self.forced_xpath_attributes
+        if new_forced_attributes and forced_xpath_attributes:
+            new_forced_attributes += ','
+        new_forced_attributes += forced_xpath_attributes
+
+        self.forced_xpath_attributes = new_forced_attributes
+        return
 
     def Get_Asset_Xpath(self, name):
         '''
@@ -564,8 +581,6 @@ class XML_File(Game_File):
     #  and isn't new.
     # TODO: set up a flag for new, non-diff xml files. For now, all need
     #  a diff.
-    # TODO: allow forced_xpath_attributes as an override arg for
-    #  selective files.
     def Get_Diff(self):
         '''
         Generates an xml tree holding a diff patch, will convert from
@@ -574,10 +589,16 @@ class XML_File(Game_File):
         if Settings.profile:
             start = time.time()
 
+        # Combine forced attributes with a comma.
+        forced_attributes = Settings.forced_xpath_attributes
+        if forced_attributes and self.forced_xpath_attributes:
+            forced_attributes += ','
+        forced_attributes += self.forced_xpath_attributes
+
         patch_node = XML_Diff.Make_Patch(
             original_node = self.patched_root, 
             modified_node = self.Get_Root_Readonly(),
-            forced_attributes = Settings.forced_xpath_attributes,
+            forced_attributes = forced_attributes,
             maximal = Settings.make_maximal_diffs,
             verify = True)
 

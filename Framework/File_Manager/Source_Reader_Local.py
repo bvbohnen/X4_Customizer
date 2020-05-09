@@ -129,6 +129,18 @@ class Location_Source_Reader:
         simplify Location_Source_Reader setup so that it doesn't
         need to be told if it is pointed at an extension, all
         prefixes could be searched here.
+
+        Note: names can also be specific to a given game version.
+        Eg. "ext_v310.cat".
+        In this case, only one version-specific cat/dat is checked for
+        each prefix of ext_ or subst_, and it will be loaded alongside
+        but just after the normal ext/subst files.
+        This means that if custom version-specific edits are needed,
+        their diff patches need to be relative to the primary files.
+        (Honest, would be a mess to maintain.)
+        Version number can potentially be pulled from the exe file details.
+
+        TODO: maybe support version files. Ignore for now.
         '''
         
         # For convenience, the first pass will fill in a list with low

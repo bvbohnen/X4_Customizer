@@ -192,10 +192,25 @@ def Find_Extensions():
             # Note if this is the customizer output extension.
             # In case there is a symlink involved, also check these paths
             # with resolution.
+            content_xml_path_resolved    = content_xml_path.resolve()
+            output_content_path_resolved = output_content_path.resolve()
+
             ext_summary.is_current_output = False
-            if (content_xml_path == output_content_path 
-            or content_xml_path.resolve() == output_content_path.resolve()):
+            if (content_xml_path         == output_content_path 
+            or content_xml_path_resolved == output_content_path_resolved):
                 ext_summary.is_current_output = True
+
+            # Warn if there is a folder name match, but not a full
+            # path match (eg. was working with symlinks, but swapped over
+            # to a downloaded version for testing and left it in place).
+            elif output_content_path_resolved.parent.name == content_xml_path_resolved.parent.name:
+                Print(( 'Warning: extension folder name matches the output'
+                        ' folder name, but paths do not match: folder {},'
+                        ' output path {}, extension path {}.'.format(
+                            output_content_path_resolved.parent.name,
+                            output_content_path_resolved.as_posix(),
+                            content_xml_path_resolved.as_posix(),
+                            )))
 
             #print('content: {}\n output: {}\n is_current_output: {}\n'.format(
             #    content_xml_path, output_content_path, ext_summary.is_current_output))

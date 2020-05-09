@@ -352,17 +352,15 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
             # Note: the xpath search can continue past the ref,
             #  eg. "@ref[.='scenario_combat_arg_destroyer']" in split dlc,
             #  so for replacements the full path needs to be kept.
-            if '/@' in xpath:
-                type = 'attrib'
-                if xpath.count('/@') != 1:
-                    Print_Error('multiple "/@"')
-                    continue
-
-            # Check for attribute additions.
-            # These have a normal xpath, with a 'type' member holding
-            #  the attribute name prefixed with @, eg. type="@id".
-            elif op_node.get('type'):
-                type = 'attrib'
+            # Note: the additional conditions in the [] could also have
+            #  an attribute check; those should be ignored, since are not
+            #  part of an attribute changing op.
+            # -Removed check; look for a non-node being returned later.
+            #if '/@' in xpath:
+            #    type = 'attrib'
+            #    if xpath.count('/@') != 1:
+            #        Print_Error('multiple "/@"')
+            #        continue
 
             # The remaining xpath should hopefully work.
             # Note: when switching from findall to xpath(), a
@@ -390,8 +388,15 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
             # If a string attribute was returned (which happens for
             # attribute replacement paths), get the parent node.
             matched_node = matched_nodes[0]
-            if isinstance(matched_node, ET._ElementUnicodeResult):
+            if isinstance(matched_node, (str, ET._ElementUnicodeResult)):
                 matched_node = matched_node.getparent()
+                type = 'attrib'
+                
+            # Check for attribute additions.
+            # These have a normal xpath, with a 'type' member holding
+            #  the attribute name prefixed with @, eg. type="@id".
+            if op_node.get('type'):
+                type = 'attrib'
 
             # Apply the patch op.
             error_message = _Apply_Patch_Op(op_node, matched_node, type)
@@ -526,9 +531,6 @@ def _Apply_Patch_Op(op_node, target_node, type):
 
     return
 
-# Global holding the list of forced attributes.
-# Put here to avoid passing in function calls, due to so many calls.
-forced_attributes = None
 
 def Make_Patch(
     original_node,
@@ -1003,15 +1005,53 @@ def _Get_Xpath_Recursive(node, cfg):
         # Add forced attributes.
         forced_attr_added = False
         for key in cfg['forced_attributes']:
-            value = node.get(key)
-            # Often nodes will not have the attribute; skip those cases.
-            if value == None:
-                continue
-            # Skip anything with quotes (see comments below on why).
-            if '"' in value or "'" in value:
-                continue
-            xpath += '''[@{}='{}']'''.format(key, value)
-            forced_attr_added = True
+            # This could be a direct attribute of this node, or a relative
+            # path to a possible child node (and attribute).
+            # Check for the child case based on a / in the attr.
+            if '/' in key:
+                # Check if this is an attribute name, with no specified value.
+                if '@' in key and '=' not in key:
+                    child_path, attr_name = key.split('@')
+
+                    # Find the children.
+                    # Non-unique is okay; just pick the first arbitrarily.
+                    matches = node.xpath(child_path.rstrip('/'))
+                    for match in matches:
+
+                        # Check if it has the attribute.
+                        value = match.get(attr_name)
+                        if value == None:
+                            continue
+
+                        # Skip anything with quotes (see comments below on why).
+                        if '"' in value or "'" in value:
+                            continue
+                        xpath += '''[{}='{}']'''.format(key, value)
+                        forced_attr_added = True
+
+                        # Stop after first match.
+                        break
+
+                # Otherwise can use the given path as-is.
+                else:
+                    # Note: apparently if the key is a value specified
+                    # attribute ("/.../@attr='value'"), and this finds
+                    # a match, it just returns True. Why?
+                    matches = node.xpath(key)
+                    if matches:
+                        xpath += f'[{key}]'
+                        forced_attr_added = True
+
+            else:
+                value = node.get(key)
+                # Often nodes will not have the attribute; skip those cases.
+                if value == None:
+                    continue
+                # Skip anything with quotes (see comments below on why).
+                if '"' in value or "'" in value:
+                    continue
+                xpath += '''[@{}='{}']'''.format(key, value)
+                forced_attr_added = True
 
         # If the parent has a large number of children, eg. for
         # the top level of the wares file or similar cases, then the xpath
@@ -1069,6 +1109,9 @@ def _Get_Xpath_Recursive(node, cfg):
 
     # Flesh out the xpath with the parent prefix.
     xpath = _Get_Xpath_Recursive(parent, cfg) + '/' + xpath
+
+    # Error check: this node should be part of the match.
+    assert node in similar_elements
 
     # If there are still multiple element matches, add a suffix.
     # Note: the xpath index is relative to other nodes matched with

@@ -73,11 +73,11 @@ class Script_Syntax_Highlighter(QSyntaxHighlighter):
 
     # Python keywords.
     keywords = (
-        'False'   ,  'class'    ,  'finally' ,  'is'       , 'return'
-        'None'    ,  'continue' ,  'for'     ,  'lambda'   , 'try'
-        'True'    ,  'def'      ,  'from'    ,  'nonlocal' , 'while'
-        'and'     ,  'del'      ,  'global'  ,  'not'      , 'with'
-        'as'      ,  'elif'     ,  'if'      ,  'or'       , 'yield'
+        'False'   ,  'class'    ,  'finally' ,  'is'       , 'return',
+        'None'    ,  'continue' ,  'for'     ,  'lambda'   , 'try',
+        'True'    ,  'def'      ,  'from'    ,  'nonlocal' , 'while',
+        'and'     ,  'del'      ,  'global'  ,  'not'      , 'with',
+        'as'      ,  'elif'     ,  'if'      ,  'or'       , 'yield',
         'assert'  ,  'else'     ,  'import'  ,  'pass'     ,
         'break'   ,  'except'   ,  'in'      ,  'raise'    ,
         )

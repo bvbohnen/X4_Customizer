@@ -35,6 +35,9 @@ class Database:
 
     * gamefile_roots
       - Dict matching Game_Files to their xml root nodes (to be edited).
+    * writable_gamefiles
+      - List of Game_Files that have been set as writable, and have a
+        non-readonly root stored in gamefile_roots.
     * class_macros
       - Dict, keyed by macro class (eg. 'engine'), holding a subdict of
         macros keyed by name.
@@ -45,13 +48,22 @@ class Database:
         components keyed by name.
     * components
       - Dict of all components, keyed by lowercase name, collected from the above.
+    * object_gamefile_dict
+      - Dict, keyed by macro or component, linking to the game file it 
+        came from.
+      - Used to control which game files will have their xml updated.
+    * gamefile_objects_dict
+      - Dict pairing Game_File keys to lists of objects sourced from them.
     '''
     def __init__(self):
         self.gamefile_roots = {}
+        self.writable_gamefiles = []
         self.macros = {}
         self.class_macros = defaultdict(dict)
         self.components = {}
         self.class_components = defaultdict(dict)
+        self.object_gamefile_dict = {}
+        self.gamefile_objects_dict = defaultdict(list)
 
         self._get_macros_cache = set()
         self._get_components_cache = set()
@@ -83,7 +95,8 @@ class Database:
         if game_file in self.gamefile_roots:
             return
 
-        xml_root = game_file.Get_Root()
+        # Start with readonly.
+        xml_root = game_file.Get_Root_Readonly()
         # Record the root.
         self.gamefile_roots[game_file] = xml_root
 
@@ -94,6 +107,8 @@ class Database:
 
             self.class_macros[class_name][object.name] = object
             self.macros[object.name.lower()] = object
+            self.object_gamefile_dict[object] = game_file
+            self.gamefile_objects_dict[game_file].append(object)
 
         for component in xml_root.xpath("./component"):
             class_name = component.get('class')
@@ -101,7 +116,38 @@ class Database:
                 
             self.class_components[class_name][object.name] = object
             self.components[object.name.lower()] = object
+            self.object_gamefile_dict[object] = game_file
+            self.gamefile_objects_dict[game_file].append(object)
 
+        return
+
+
+    def Set_Object_Writable(self, object):
+        '''
+        Sets a macro or component's game_file xml as writable.
+        '''
+        game_file = self.object_gamefile_dict[object]
+
+        # Skip if already writable.
+        if game_file in self.writable_gamefiles:
+            return
+        self.writable_gamefiles.append(game_file)
+
+        # Get a new xml root for this game file.
+        orig_root = self.gamefile_roots[game_file]
+        new_root = game_file.Get_Root()
+        self.gamefile_roots[game_file] = new_root
+
+        # Need to swap all referenced to the readonly xml to the writable
+        # xml, for macros, components, and nested connections.
+
+        # Start by maching original nodes to writable nodes.
+        replacements = {x:y for x,y in zip(orig_root.iter(), new_root.iter())}
+
+        # Update all macros and components (since the given object may
+        # just be one of several sourced from the file).
+        for other_object in self.gamefile_objects_dict[game_file]:
+            object.Replace_XML(replacements)
         return
 
 
@@ -169,14 +215,19 @@ class Database:
 
     def Update_XML(self):
         '''
-        Update changed xml nodes, and write modified roots back to
-        their game files.
+        Write modified roots back to their game files if the respective
+        xml objects were modified.
         '''
-        for macro in self.macros.values():
-            macro.Update_XML()
-        for comp in self.components.values():
-            comp.Update_XML()
-        # TODO: automate gamefile writebacks or not? How to know which changed?
-        #for game_file, new_root in self.gamefile_roots.items():
-        #    game_file.Update_Root(new_root)
+        # Find objects that were modified.
+        # TODO: connection edits here, or burden the macros/components?
+        modded_files = []
+        for object, game_file in self.object_gamefile_dict.items():
+            if object.modified:
+                modded_files.append(game_file)
+
+        # Remove duplicates, and loop.
+        for game_file in set(modded_files):
+            # Verify this was set as writable.
+            assert game_file in self.writable_gamefiles
+            game_file.Update_Root(self.gamefile_roots[game_file])
         return

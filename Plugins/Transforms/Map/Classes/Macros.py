@@ -2,17 +2,63 @@
 from copy import copy
 from itertools import combinations
 
-from ...Classes import *
+from ....Classes import *
 from .Region import Region
 from ...Support import XML_Modify_Float_Attribute
 
 __all__ = [
+    'Map_Connection',
     'Map_Macro',
     'Region_Macro',
     'Zone',
     'Cluster',
     'Sector',
     ]
+
+class Map_Connection(Connection):
+    '''
+    Connection subtype for map connections.
+    
+    * position
+      - Current Position for this connection.
+    * orig_position
+      - Original Position when this connection was parsed.
+    '''
+    def __init__(self, parent, xml_node):
+        super().__init__(parent, xml_node)
+
+        # TODO: maybe move position stuff to a map-specific subclass.
+        pos_node        = xml_node.find('./offset/position')
+        if pos_node != None:
+            self.position = Position(pos_node)
+        else:
+            # When position is not specified, it seems to often default to 0,
+            # so 0-fill here.
+            # (Eg. happens regularly with one sector per cluster.)
+            # TODO: is this always accurate? Maybe sometimes there is no
+            # associated position.
+            self.position = Position()
+
+        # Make a safe copy as the original.
+        self.orig_position = copy(self.position)
+        return
+
+    def Get_Offset(self):
+        '''
+        Returns a Position offset between the current position and
+        original xml position.
+        '''
+        return self.position - self.orig_position
+
+    # TODO: detect if the position actually changed; normally it won't have.
+    def Update_XML(self):
+        '''
+        Update the xml node position, if an xml_node attached.
+        '''
+        if self.position:
+            self.position.Update_XML()
+        return
+
 
 
 class Map_Macro(Macro):
@@ -31,6 +77,16 @@ class Map_Macro(Macro):
         self.radius = 6000
         self.inner_radius = None
         
+        # Redo the connections using map connections
+        self.conns = {}
+        for conn_node in xml_node.xpath("./connections/connection"):
+            conn = Map_Connection(self, conn_node)
+            # Verify the name/ref combo hasn't been seen.
+            key = (conn.name, conn.ref)
+            assert key not in self.conns
+            self.conns[key] = conn
+        return
+        
     def Contains_Gate(self):
         'Dummy function returns False, for easy of use with zones.'
         return False
@@ -38,6 +94,16 @@ class Map_Macro(Macro):
     def Is_Damage_Region(self):
         'Convenience function to match up with Region verion; normally False.'
         return False
+    
+    def Update_XML(self):
+        '''
+        Update the xml node positions of all connections.
+        May be wrapped by subclasses to fill in extra changes.
+        '''
+        for connection in self.conns.values():
+            connection.Update_XML()
+        return
+
 
 
 class Region_Macro(Map_Macro):
@@ -233,19 +299,74 @@ class Sector(Map_Macro):
         '''
         self.scaling_factor = scaling_factor
 
-    def Remove_Highways(self):
-        '''
-        Removes all zone highways from this sector.
-        Immediately edits the xml.
-        '''
+    def Has_Ring_Highway(self):
+        'Returns True if this sector has a ring highway.'
+        from .Highways import Zone_Highway
+        for conn in self.conns.values():
+            if not isinstance(conn.macro, Zone_Highway):
+                continue
+            if conn.macro.is_ring_piece:
+                return True
+        return False
+    
+    def Has_Nonring_Highway(self):
+        'Returns True if this sector has a non-ring highway.'
+        from .Highways import Zone_Highway
+        for conn in self.conns.values():
+            if not isinstance(conn.macro, Zone_Highway):
+                continue
+            if not conn.macro.is_ring_piece:
+                return True
+        return False
+
+    def Remove_Ring_Highways(self):
+        'Remove ring highway connections.'
+        from .Highways import Zone_Highway
         to_remove = []
         for key, conn in self.conns.items():
-            if conn.xml_node.get('ref') == 'zonehighways':
-                conn.getparent().remove(conn)
-                to_remove.append(key)
+            if not isinstance(conn.macro, Zone_Highway):
+                continue
+            if not conn.macro.is_ring_piece:
+                continue
+            # Edit the xml directly.
+            conn.xml_node.getparent().remove(conn.xml_node)
+            to_remove.append(key)
         for key in to_remove:
+            # Remove the connection.
             del(self.conns[key])
         return
+    
+    def Remove_Nonring_Highways(self):
+        'Remove non-ring highway connections.'
+        from .Highways import Zone_Highway
+        to_remove = []
+        for key, conn in self.conns.items():
+            if not isinstance(conn.macro, Zone_Highway):
+                continue
+            if conn.macro.is_ring_piece:
+                continue
+            # Edit the xml directly.
+            conn.xml_node.getparent().remove(conn.xml_node)
+            to_remove.append(key)
+        for key in to_remove:
+            # Remove the connection.
+            del(self.conns[key])
+        return
+
+
+    #def Remove_Highways(self):
+    #    '''
+    #    Removes all zone highways from this sector.
+    #    Immediately edits the xml.
+    #    '''
+    #    to_remove = []
+    #    for key, conn in self.conns.items():
+    #        if conn.xml_node.get('ref') == 'zonehighways':
+    #            conn.xml_node.getparent().remove(conn.xml_node)
+    #            to_remove.append(key)
+    #    for key in to_remove:
+    #        del(self.conns[key])
+    #    return
     
 
     def Get_Gate_Distance(self):
@@ -268,11 +389,14 @@ class Sector(Map_Macro):
         return max_dist
 
 
-    def Get_Size(self):
+    def Get_Size(self, apply_minimum = True):
         '''
         Returns approximate sector size, as a diamater, based on distances
         between zones in the sector, prioritizing gates and highways.
         Size will have a minimum based on the scaling factor.
+
+        * apply_minimum
+          - Bool, set False to skip the minimum sector size.
         '''
         # Similar to sector.size property in game.
         # Presumably this is based on the gate distances.
@@ -291,7 +415,10 @@ class Sector(Map_Macro):
         # Initialize this to the minimum.
         # Vanilla coresize has a min of ~425 km; that might be overkill,
         # but can go with half of that, scaled.
-        max_dist = 425000 / 2 * self.scaling_factor
+        if apply_minimum:
+            max_dist = 425000 / 2 * self.scaling_factor
+        else:
+            max_dist = 0
 
         # Find the highest inter-object distance.
         for conn_0, conn_1 in combinations(conns, 2):

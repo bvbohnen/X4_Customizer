@@ -21,6 +21,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Analyses\Print_Misc.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Analyses\Shared.py">
       <SubType>Code</SubType>
     </Compile>
@@ -125,25 +128,25 @@
     <Compile Include="GUI\VFS_Window\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Transforms\Classes\Component.py">
+    <Compile Include="Classes\Component.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Transforms\Classes\Connection.py">
+    <Compile Include="Classes\Connection.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Transforms\Classes\Database.py">
+    <Compile Include="Classes\Database.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Transforms\Classes\Engine.py">
+    <Compile Include="Classes\Engine.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Transforms\Classes\Macro.py">
+    <Compile Include="Classes\Macro.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Transforms\Classes\Ship.py">
+    <Compile Include="Classes\Ship.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Transforms\Classes\__init__.py">
+    <Compile Include="Classes\__init__.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Transforms\Exe.py">
@@ -158,7 +161,7 @@
     <Compile Include="Transforms\Map\Classes\Misc.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Transforms\Classes\Position.py">
+    <Compile Include="Classes\Position.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Transforms\Map\Classes\Region.py">
@@ -224,10 +227,22 @@
     <Compile Include="Transforms\Scripts.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Transforms\Ships.py">
+    <Compile Include="Transforms\Ships\Rescale.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Ships\Adjust.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Ships\Shared.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Ships\__init__.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Transforms\Support.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Transforms\Surface_Elements.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Transforms\Text.py">
@@ -278,7 +293,8 @@
     <Folder Include="GUI\" />
     <Folder Include="Transforms\Map\" />
     <Folder Include="Transforms\Map\Classes\" />
-    <Folder Include="Transforms\Classes\" />
+    <Folder Include="Classes\" />
+    <Folder Include="Transforms\Ships\" />
     <Folder Include="Utilities\" />
     <Folder Include="Transforms\" />
   </ItemGroup>

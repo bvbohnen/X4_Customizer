@@ -1,12 +1,4 @@
 
-from fnmatch import fnmatch
-from Framework import Transform_Wrapper, Load_File, File_System, Plugin_Log
-from .Support import Standardize_Match_Rules
-from .Support import XML_Multiply_Int_Attribute
-from .Support import XML_Multiply_Float_Attribute
-from ..Analyses.Shared import Get_Ship_Macro_Files
-from .Classes import *
-
 __all__ = [
     'Adjust_Ship_Speed',
     'Adjust_Ship_Turning',
@@ -14,55 +6,19 @@ __all__ = [
     'Adjust_Ship_Crew_Capacity',
     'Adjust_Ship_Drone_Storage',
     'Adjust_Ship_Missile_Storage',
-    'Rescale_Ship_Speeds',
+    'Set_Default_Radar_Ranges',
+    'Set_Ship_Radar_Ranges',
     ]
 
-doc_matching_rules = '''
-    Ship transforms will commonly use a group of matching rules
-    to determine which ships get modified, and by how much.   
-
-    * Matching rules:
-      - These are tuples pairing a matching rule (string) with transform
-        defined args, eg. ("key  value", arg0, arg1, ...).
-      - The "key" specifies the xml field to look up, which will
-        be checked for a match with "value".
-      - If a target object matches multiple rules, the first match is used.
-      - Supported keys for ships:
-        - 'name'    : Internal name of the ship macro; supports wildcards.
-        - 'purpose' : The general role of the ship. List of purposes:
-          - mine
-          - trade
-          - build
-          - fight
-        - 'type'    : The ship type. List of types:
-          - courier, resupplier, transporter, freighter, miner,
-            largeminer, builder
-          - scout, interceptor, fighter, heavyfighter
-          - gunboat, corvette, frigate, scavenger
-          - destroyer, carrier, battleship
-          - xsdrone, smalldrone, police, personalvehicle,
-            escapepod, lasertower
-        - 'class'   : The class of ship. List of classes:
-          - 'ship_xs'
-          - 'ship_s'
-          - 'ship_m'
-          - 'ship_l'
-          - 'ship_xl'
-          - 'spacesuit'
-        - '*'       : Matches all ships; takes no value term.
-
-    Examples:
-    <code>
-        Adjust_Ship_Speed(1.5)
-        Adjust_Ship_Speed(
-            ('name ship_xen_xl_carrier_01_a*', 1.2),
-            ('class ship_s'                  , 2.0),
-            ('type corvette'                 , 1.5),
-            ('purpose fight'                 , 1.2),
-            ('*'                             , 1.1) )
-    </code>
-    '''
-
+from fnmatch import fnmatch
+from lxml.etree import Element
+from Framework import Transform_Wrapper, Load_File, File_System, Plugin_Log
+from ..Support import Standardize_Match_Rules
+from ..Support import XML_Multiply_Int_Attribute
+from ..Support import XML_Multiply_Float_Attribute
+from ...Analyses.Shared import Get_Ship_Macro_Files
+from ...Classes import *
+from .Shared import *
 
 # TODO:
 '''
@@ -246,58 +202,154 @@ def Adjust_Ship_Crew_Capacity(
     return
 
 
-##############################################################################
-# Newer style: pack ships into class objects for the edits.
-
 @Transform_Wrapper(shared_docs = doc_matching_rules)
-def Rescale_Ship_Speeds(
-        *match_rule_averages,
-        use_arg_engine = False,
+def Set_Default_Radar_Ranges(
+        **class_distances
     ):
     '''
-    Rescales the speeds of different ship classes, centering on the give
-    target average speeds. Ships are assumed to be using their fastest race
-    mk2 engines. Averaged across all ships of the rule match.
-
-    In development.
-
-    * match_rule_averages
-      - Series of matching rules paired with the target average speed
-        to rescale toward.
-      - Ships within a match will maintain their relative speed differences.
-    * use_arg_engine
-      - Bool, if True then Argon engines will be assumed for all ships
-        instead of their race engines.
+    Sets default radar ranges.  Granularity is station, type of satellite,
+    or per ship size.  Ranges are in km, eg. 40 for vanilla game
+    defaults of non-satellites.
+        
+    Supported arguments:
+    * ship_s
+    * ship_m
+    * ship_l
+    * ship_xl
+    * spacesuit
+    * station
+    * satellite
+    * adv_satellite
+    ''' 
     '''
-    # Put matching rules in standard form.
-    rules = Standardize_Match_Rules(match_rule_averages)
+    Test on 20k ships save above trinity sanctum, multiplying radar ranges:
+    5/4    : 35 fps   (50km)
+    1/1    : 37 fps   (40km, vanilla, fresh retest)
+    3/4    : 39 fps   (30km, same as x3 triplex)
+    1/2    : 42 fps   (20km, same as x3 duplex)
+    1/4    : 46 fps   (10km, probably too short)
+
+    Satellites:
+        eq_arg_satellite_01_macro - 30k
+        eq_arg_satellite_02_macro - 75k
+
+    Ships:
+        Defined in libraries/defaults.xml per ship class.
+        Note: there is a basic radar node, and a max/radar node, which
+        presumably is related to ship mods.
+        Radars are normally 40k, maxing at 48k.
+    '''
+    # Start with defaults.
+    defaults_file = Load_File('libraries/defaults.xml')
+    defaults_root = defaults_file.Get_Root()
     
-    database = Database()
-    ship_macros = database.Get_Macros('ship_*') + database.Get_Macros('units_*')
-    engine_macros = database.Get_Macros('engine_*')
+    # Scale ranges to meters.
+    for class_name, new_range in class_distances.items():
+        class_distances[class_name] = new_range * 1000
+
+    # Look for each specified class. This will skip satellites.
+    for class_name, new_range in class_distances.items():
+        dataset = defaults_root.find(f"./dataset[@class='{class_name}']")
+        if dataset == None:
+            continue
+
+        # Update range directly.
+        radar_node = dataset.find('./properties/radar')
+        if radar_node == None:
+            continue
+        radar_node.set('range', str(new_range))
+
+        # Check if there is a max range.
+        max_radar_node = dataset.find('./properties/statistics/max/radar')
+        if max_radar_node == None:
+            continue
+        # Set this at +20%, similar to vanilla.
+        new_max = new_range * 1.2
+        max_radar_node.set('range', str(f'{new_max:.0f}'))
+
+    defaults_file.Update_Root(defaults_root)
 
 
-    # Select an engine for every ship.
-    for ship in ship_macros:
-        ship.Select_Engine(
-            engine_macros = engine_macros,
-            mk = '2',
-            makerrace = 'argon' if use_arg_engine else ship.Get_Race(),
-            )
+    # Now look for satellites.
+    for class_name, new_range in class_distances.items():
 
-    class_ship_dict = {}
-    for ship_class in ['ship_xs','ship_s','ship_m','ship_l','ship_xl']:
-        this_dict = {}
-        class_ship_dict[ship_class] = this_dict
+        if class_name == 'satellite':
+            macro_name = 'eq_arg_satellite_01_macro'
+        elif class_name == 'adv_satellite':
+            macro_name = 'eq_arg_satellite_02_macro'
+        else:
+            continue
 
-        for macro in ship_macros:
-            if macro.class_name == ship_class:
-                this_dict[macro.Get_Game_Name()] = macro.Get_Speed()
-
-        lines = [f'{k} : {v}' for k,v in sorted(this_dict.items())]
-        Plugin_Log.Print('\n'.join(lines))
+        # Load the game file and xml.
+        sat_file = Load_File(f'assets/props/equipment/satelite/macros/{macro_name}.xml')
+        sat_root = sat_file.Get_Root()
+        radar_node = sat_root.find(f'./macro[@name="{macro_name}"]/properties/radar')
+        radar_node.set('range', str(new_range))        
+        sat_file.Update_Root(sat_root)
 
     return
+
+
+
+@Transform_Wrapper(shared_docs = doc_matching_rules)
+def Set_Ship_Radar_Ranges(
+        *ship_match_rule_ranges,
+    ):
+    '''
+    Sets radar ranges. Defaults are changed per object class.
+        
+    * ship_match_rule_ranges:
+      - Series of matching rules paired with the new ranges to apply for
+        individual ships.
+      - Ranges are in km.
+    '''
+    def Node_Update(ship_macro, new_range):
+
+        # Scale range to meters.
+        new_range = new_range * 1000
+
+
+        # Unclear on how this works.
+        # Assuming the ship macro format should match the defaults format,
+        # then can try to lay out nodes in the same structure.
+        # For safety, add to existing nodes if found.
+        prop_node = ship_macro.find('./properties')
+        
+        range_str = str(new_range)
+        radar_node = prop_node.find('./radar')
+        if radar_node == None:
+            radar_node = Element('radar', range = range_str)
+            prop_node.append(radar_node)
+            assert radar_node.tail == None
+        else:
+            radar_node.set('range', range_str)
+
+        # Also set up the max radar.
+        new_max = new_range * 1.2
+        new_max_str = f'{new_max:.0f}'
+
+        stats_node = prop_node.find('./statistics')
+        if stats_node == None:
+            stats_node = Element('statistics')
+            prop_node.append(stats_node)
+            
+        max_node = stats_node.find('./max')
+        if max_node == None:
+            max_node = Element('max')
+            stats_node.append(max_node)
+
+        max_radar_node = max_node.find('./radar')
+        if max_radar_node == None:
+            max_radar_node = Element('radar', range = new_max_str)
+            max_node.append(max_radar_node)
+        else:
+            max_radar_node.set('range', new_max_str)
+        return True
+
+    # Hand off to shared code to run updates.
+    Update_Nodes_By_Rules(ship_match_rule_ranges, Node_Update)
+    return
+
 
 
 ##############################################################################
@@ -344,48 +396,6 @@ def Update_Nodes_By_Rules(
             game_file.Update_Root(xml_root)
     return
     
-
-def Get_Match_Rule_Args(ship_macro_xml, rules):
-    '''
-    Checks a ship macro against the given rules, and returns args from
-    the first matched rule (as a tuple of there is more than 1 arg).
-    On no match, returns None.
-
-    * ship_macro_xml
-      - The xml node with the specific ship macro.
-    '''
-    assert ship_macro_xml.tag == 'macro'
-
-    # Look up properties of interest.
-    name = ship_macro_xml.get('name')
-    class_name = ship_macro_xml.get('class')
-
-    # Not all ships have a type or purpose (mainly just spacesuits don't).
-    try:
-        type = ship_macro_xml.find('./properties/ship').get('type')
-    except Exception:
-        type = None
-    try:
-        purpose = ship_macro_xml.find('./properties/purpose').get('primary')
-    except Exception:
-        purpose = None
-
-    # Check the matching rules.
-    for key, value, *args in rules:
-        if((key == '*')
-        or (key == 'name'    and fnmatch(name, value))
-        or (key == 'class'   and class_name == value)
-        or (key == 'type'    and type == value)
-        or (key == 'purpose' and purpose == value)
-        ):
-            # Want to return 1 item is there are 1 arg, else a tuple
-            # or list of them. Python has no clean syntax for this
-            # that is obvious.
-            if len(args) == 1:
-                return args[0]
-            return args
-    return None
-
 
 def Get_Match_Rule_Args(ship_macro_xml, rules):
     '''

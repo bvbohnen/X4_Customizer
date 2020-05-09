@@ -1,5 +1,5 @@
 
-from ...Classes import *
+from ....Classes import *
 from ...Support import XML_Modify_Float_Attribute
 
 __all__ = [
@@ -103,14 +103,22 @@ class Region:
     def Scale(self, scaling_factor):
         '''
         Scale the size of this region by the scaling factor.
+        Very small regions are unmodified.
         Since regions may have issues when shrinking, any reductions
         will be limited in some way.
-        Regions with splines will ignore this, in favor of spline movements.
+        Regions with splines will not move the splines, just adjust thickness.
         Should be called before adjusting sector sizing, so it can
         reflect the new size.
         Changes the xml directly.
         '''
-        if self.spline_positions:
+        # -Removed; allow snakey sectors to get thinner/fatter.
+        # Actual length is handled by moving splines.
+        #if self.spline_positions:
+        #    return
+
+        # Very small regions are special, and will not rescale.
+        # Eg. ~2km radius region of super high yield rocks.
+        if self.radius < 10000:
             return
 
         # Resource regions are ~25km radius.

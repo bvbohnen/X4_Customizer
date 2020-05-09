@@ -23,9 +23,21 @@ test_all = 0
 if 0:
     GUI.Start_GUI()
 
+
 # Test sector resizing.
 if 0 or test_all:
-    Scale_Sector_Size(0.4, _test = False)
+    Scale_Sector_Size(
+        scaling_factor                     = 0.4, 
+        scaling_factor_2                   = 0.3,        
+        #transition_size_start              = 200000,
+        #transition_size_end                = 400000,
+        recenter_sectors                   = False,
+        randomize_new_zones                = False,
+        precision_steps                    = 10,
+        remove_ring_highways               = True,
+        remove_nonring_highways            = True,
+        extra_scaling_for_removed_highways = 0.7,
+        _test = True)
     
 # Test exe edits.
 if 0:
@@ -37,8 +49,18 @@ if 0:
 if 0:
     Remove_Workshop_Tool_Dependency_Check()
    
-if 0:
-    Increase_AI_Script_Waits()
+if 1:
+    Increase_AI_Script_Waits(
+        oov_multiplier = 2,
+        oov_seta_multiplier = 4,
+        oov_max_wait = 15,
+        iv_multiplier = 1,
+        iv_seta_multiplier = 2,
+        iv_max_wait = 5,
+        filter = '*',
+        include_extensions = False,
+        skip_combat_scripts = False,
+        )
 
 if 0:
     Adjust_OOV_Damage(0.5)
@@ -119,10 +141,50 @@ if 0 or test_all:
     
     Print_Ship_Stats('ship_stats_postmod')
 
-if 1:
+if 0:
     Adjust_Ship_Hull(
         ('class ship_l' , 1.5), 
         ('class ship_xl', 1.5))
+    
+if 0:
+    Set_Default_Radar_Ranges(
+        ship_xl       = 50,
+        ship_l        = 40,
+        ship_m        = 30,
+        ship_s        = 20,
+        ship_xs       = 20,
+        spacesuit     = 20,
+        station       = 40,
+        satellite     = 30,
+        adv_satellite = 50,
+        )
+    Set_Ship_Radar_Ranges(
+        ('type scout', 40),
+        )
+
+if 0:
+    Remove_Travel_Drive()
+
+if 0:
+    Rebalance_Engines(purpose_speed_mults = None)
+    Rebalance_Engines(race_speed_mults = None)
+
+if 0:
+    # Adjust speeds per ship class.
+    # Note: vanilla averages and ranges are:    
+    # xs: 130 (58 to 152)
+    # s : 328 (71 to 612)
+    # m : 319 (75 to 998)
+    # l : 146 (46 to 417)
+    # xl: 102 (55 to 164)
+    # Try clamping variation to within 0.5x (mostly affects medium).
+    Rescale_Ship_Speeds(match_all = ['type  scout' ],  average = 500, variation = 0.2)
+    Rescale_Ship_Speeds(match_all = ['class ship_s'],  average = 400, variation = 0.5, match_none=['type  scout'])
+    Rescale_Ship_Speeds(match_all = ['class ship_m'],  average = 300, variation = 0.5)
+    Rescale_Ship_Speeds(match_all = ['class ship_l'],  average = 200, variation = 0.5)
+    # Ignore the python (unfinished).
+    Rescale_Ship_Speeds(match_all = ['class ship_xl'], average = 150, variation = 0.5,
+                        match_none = ['name ship_spl_xl_battleship_01_a_macro'])
 
 
 # Test the gui live editor, doing a transform before and after

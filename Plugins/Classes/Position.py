@@ -25,9 +25,21 @@ class Position:
         if xml_node != None:
             # Sometimes a dim is forgotten; treat as 0.
             for attr in ['x','y','z']:
+
                 val_str = xml_node.get(attr)
                 if val_str:
+
+                    # If there is a 'km' suffix, adjust for it.
+                    in_km = False
+                    if val_str.endswith('km'):
+                        val_str = val_str.replace('km','')
+                        in_km = True
+                    elif val_str.endswith('m'):
+                        val_str = val_str.replace('m','')
+
                     value = float(val_str)
+                    if in_km:
+                        value *= 1000
                 else:
                     value = 0.0
                 setattr(self, attr, value)

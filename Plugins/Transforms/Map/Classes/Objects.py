@@ -2,7 +2,7 @@
 from itertools import combinations
 from copy import copy
 
-from ...Classes import *
+from ....Classes import *
 from .Macros import *
 from .Highways import *
 from .Misc import *

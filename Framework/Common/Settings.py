@@ -137,6 +137,11 @@ class Settings_class:
         included in the xpath regardless of if they are needed.
       - Example: "id,name" will always include "id" and "name" attributes
         of elements in the xpath.
+      - Also supports child node or attributes referenced using a relative
+        xpath. Example: "parts/part/uv_animations/uv_animation" to require
+        a uv_animation great-great-grandchild element, or
+        "component/@ref" to include the "ref" attribute of a "component"
+        child.
       - Can be used to make xpaths more specific, and more likely to break
         if an unknown extension is applied before the output extension
         (eg. when the customizer output is distributed to other users).

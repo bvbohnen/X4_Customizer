@@ -12,6 +12,8 @@ class Component:
       - Database recording this macro.
     * xml_node
       - Component xml node.
+    * modified
+      - Bool, True if this macro's xml is modified.
     * name
       - String, name.
     * conns
@@ -21,6 +23,7 @@ class Component:
     def __init__(self, xml_node, database = None):
         self.xml_node = xml_node
         self.database = database
+        self.modified = False
         self.name = xml_node.get('name')
 
         self.conns = {}
@@ -38,6 +41,15 @@ class Component:
         self._connection_tags = None
         return
     
+    def Replace_XML(self, replacements):
+        '''
+        Swap xml element references out for their replacements. 
+        Called when switching to writable xml.
+        '''
+        self.xml_node = replacements[self.xml_node]
+        for conn in self.conns.values():
+            conn.Replace_XML(replacements)
+        return
 
     def Get_Connection_Tags(self):
         '''

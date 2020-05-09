@@ -22,6 +22,7 @@ from .Misc import Apply_Live_Editor_Patches
 
 from .Scripts import *
 from .Ships import *
+from .Surface_Elements import *
 from .Text import Color_Text
 
 from .Wares import Adjust_Ware_Price_Spread

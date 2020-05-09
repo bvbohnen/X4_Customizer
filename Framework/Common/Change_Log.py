@@ -197,6 +197,14 @@ Change Log:
    - Tweaked Generate_Diffs script mixed file/folder error check.
  * 1.18.5
    - Teaked Cat_Pack to include "extensions" subfolder files.
+ * 1.19
+   - Added forced xpath attribute support for matching child nodes and
+     attributes.
+   - New parameters for Scale_Sector_Size.
+   - Changed parameters for Increase_AI_Script_Waits to support also scaling
+     in-vision waits.
+   - Added transforms: Rescale_Ship_Speeds, Remove_Engine_Travel_Bonus,
+     Rebalance_Engines.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.
