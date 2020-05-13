@@ -94,7 +94,13 @@ def Make(*args):
         'Cat_Unpack.py',
         'Check_Extensions.py',
         'Generate_Diffs.py',
-        'Example_Transforms.py',
+
+        'Ex_Cat_Unpack.py',
+        'Ex_Custom_Transforms.py',
+        'Ex_Generate_Diffs.py',
+        'Ex_Modify_Exe.py',
+        'Ex_Using_Transforms.py',
+
         'Default_Script_template.py',
         )
     for file_name in os.listdir(Top_dir):

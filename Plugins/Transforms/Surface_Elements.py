@@ -1,6 +1,8 @@
 
 __all__ = [
     'Remove_Engine_Travel_Bonus',
+    'Adjust_Engine_Boost_Duration',
+    'Adjust_Engine_Boost_Speed',
     'Rebalance_Engines',
     ]
 
@@ -10,7 +12,7 @@ from Framework import Transform_Wrapper, Plugin_Log
 from ..Classes import *
 
 
-
+# TODO: change ship engine mods to swap travel bonuses to something else.
 @Transform_Wrapper()
 def Remove_Engine_Travel_Bonus():
     '''
@@ -26,6 +28,39 @@ def Remove_Engine_Travel_Bonus():
         macro.Set_Travel_Charge(0)
     database.Update_XML()
     return
+
+
+def Adjust_Engine_Boost_Duration(multiplier):
+    '''
+    Adjust the boost time (eg. inverse of shield % drain rate) for all engines.
+    '''
+    database = Database()
+    engine_macros = database.Get_Macros('engine_*') + database.Get_Macros('generic_engine_*')
+    for macro in engine_macros:
+        value = macro.Get_Boost_Time()
+        # Skip if undefined.
+        if not value:
+            continue
+        macro.Set_Boost_Time( value * multiplier)
+    database.Update_XML()
+    return
+
+
+def Adjust_Engine_Boost_Speed(multiplier):
+    '''
+    Adjust the boost speed for all engines.
+    '''
+    database = Database()
+    engine_macros = database.Get_Macros('engine_*') + database.Get_Macros('generic_engine_*')
+    for macro in engine_macros:
+        value = macro.Get_Boost_Thrust()
+        # Skip if undefined.
+        if not value:
+            continue
+        macro.Set_Boost_Thrust( value * multiplier)
+    database.Update_XML()
+    return
+
 
 
 # TODO: version of this that also rebalances combat vs travel vs allround.

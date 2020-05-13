@@ -5,7 +5,7 @@
     <ProjectGuid>58b46218-4d3c-4dd2-9710-e5f2a717ea2d</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>Generate_Diffs.py</StartupFile>
+    <StartupFile>Command_Line\Generate_Diffs.py</StartupFile>
     <SearchPath>..\Framework;..\Plugins;..\..\X4_Customizer</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -24,33 +24,48 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Authors_Transforms.py">
+    <Compile Include="Developer\Authors_Transforms.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Cat_Pack.py">
+    <Compile Include="Command_Line\Cat_Pack.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Cat_Unpack.py">
+    <Compile Include="Command_Line\Cat_Unpack.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Check_Extensions.py">
+    <Compile Include="Command_Line\Check_Extensions.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Generate_Diffs.py">
+    <Compile Include="Developer\Exe_Gen.py" />
+    <Compile Include="Examples\Ex_Cat_Unpack.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Example_Transforms.py">
+    <Compile Include="Examples\Ex_Custom_Transforms.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Make_Documentation.py">
+    <Compile Include="Examples\Ex_Generate_Diffs.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Test.py">
+    <Compile Include="Examples\Ex_Modify_Exe.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Command_Line\Generate_Diffs.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Examples\Ex_Using_Transforms.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Developer\Test.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Default_Script_template.py">
       <SubType>Code</SubType>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Command_Line\" />
+    <Folder Include="Examples\" />
+    <Folder Include="Developer\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

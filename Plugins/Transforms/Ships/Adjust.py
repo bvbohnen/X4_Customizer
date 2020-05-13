@@ -202,6 +202,7 @@ def Adjust_Ship_Crew_Capacity(
     return
 
 
+
 @Transform_Wrapper(shared_docs = doc_matching_rules)
 def Set_Default_Radar_Ranges(
         **class_distances
@@ -209,7 +210,9 @@ def Set_Default_Radar_Ranges(
     '''
     Sets default radar ranges.  Granularity is station, type of satellite,
     or per ship size.  Ranges are in km, eg. 40 for vanilla game
-    defaults of non-satellites.
+    defaults of non-satellites. Note: ranges below 40km will affect
+    when an unidentified object becomes identified, but objects
+    will still show up out to 40km.
         
     Supported arguments:
     * ship_s
@@ -296,7 +299,9 @@ def Set_Ship_Radar_Ranges(
         *ship_match_rule_ranges,
     ):
     '''
-    Sets radar ranges. Defaults are changed per object class.
+    Sets radar ranges. Defaults are changed per object class. Note: ranges
+    below 40km will affect when an unidentified object becomes identified,
+    but objects will still show up out to 40km.
         
     * ship_match_rule_ranges:
       - Series of matching rules paired with the new ranges to apply for
@@ -349,7 +354,6 @@ def Set_Ship_Radar_Ranges(
     # Hand off to shared code to run updates.
     Update_Nodes_By_Rules(ship_match_rule_ranges, Node_Update)
     return
-
 
 
 ##############################################################################

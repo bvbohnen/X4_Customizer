@@ -1,6 +1,7 @@
 
 __all__ = [
     'Rescale_Ship_Speeds',
+    'Adjust_Ship_Cargo_Capacity',
     ]
 
 from fnmatch import fnmatch
@@ -38,12 +39,14 @@ def Rescale_Ship_Speeds(
         this band.
       - Eg. 0.5 means 90% of ships will be within +/- 50% of
         their group average speed.
-    * stddev
-      - Float, the new standard deviation to adjust to.
-    * match_rule_averages
-      - Series of matching rules paired with the target average speed
-        to rescale toward.
-      - Ships within a match will maintain their relative speed differences.
+    * match_any
+      - List of matching rules. Any ship matching any of these is included,
+        if not part of match_none.
+    * match_all
+      - List of matching rules. Any ship matching all of these is included,
+        if not part of match_none.
+    * match_none
+      - List of matching rules. Any ship matching any of these is excluded.
     * use_arg_engine
       - Bool, if True then Argon engines will be assumed for all ships
         instead of their faction engines.
@@ -196,6 +199,71 @@ def Rescale_Ship_Speeds(
 
     return
 
+
+# TODO: not a rescaling, just adjustment, but this uses database stuff; think
+# renaming modules based on database/not-database.
+@Transform_Wrapper(shared_docs = doc_matching_rules)
+def Adjust_Ship_Cargo_Capacity(
+        multiplier,
+        match_all = None,
+        match_any = None,
+        match_none = None,
+        cargo_tag = None,
+    ):
+    '''
+    Adjusts the cargo capacities of matching ships.
+    
+    * multiplier
+      - Float, how much to multiply current cargo capacity by.
+    * match_any
+      - List of matching rules. Any ship matching any of these is included,
+        if not part of match_none.
+    * match_all
+      - List of matching rules. Any ship matching all of these is included,
+        if not part of match_none.
+    * match_none
+      - List of matching rules. Any ship matching any of these is excluded.
+    * cargo_tag
+      - Optional, tag name of cargo types to modify.
+      - Expected to be one of: 'solid', 'liquid', 'container'.
+      - If not given, all cargo types are modified.
+    '''
+    '''
+    This one is tricky, since cargo is part of a separate storage macro.
+    This macro needs to be looked up for each ship, along with the
+    wanted multiplier.
+
+    Since ships can share a storage macro, first pass will find multipliers 
+    associated with each macro, second pass will resolve conflicts and make 
+    changes.
+    '''
+    database = Database()
+    ship_macros = database.Get_Macros('ship_*') + database.Get_Macros('units_*')
+    #storage_macros = database.Get_Macros('storage_*')
+
+    # Pick ships that are being modified.
+    ship_macros = [x for x in ship_macros if Is_Match(x, match_all, match_any, match_none)]
+
+    # Pass over them, collecting storage units.
+    storage_macros = []
+    for ship in ship_macros:
+        for storage in ship.Get_Storage_Macros():
+            # Skip if not of the right type.
+            if cargo_tag and cargo_tag not in storage.Get_Tags():
+                continue
+            # Record it.
+            storage_macros.append(storage)
+
+    # Toss duplicates.
+    storage_macros = set(storage_macros)
+    # Rescale them all.
+    for storage in storage_macros:
+        volume = storage.Get_Volume()
+        storage.Set_Volume(volume * multiplier)
+        
+    # Apply the xml changes.
+    database.Update_XML()
+    return
 
 
 

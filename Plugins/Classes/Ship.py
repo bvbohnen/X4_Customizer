@@ -2,6 +2,7 @@
 from .Macro import Macro
 from .Connection import Connection
 from .Component  import Component
+from .Storage import Storage
 from Framework import File_System
 
 __all__ = [
@@ -57,6 +58,26 @@ class Ship(Macro):
     #                race = group.replace('ships_', '')
     #        self._race = race
     #    return self._race
+
+    def Get_Storage_Macros(self):
+        '''
+        Returns a list of cargo storage macros for this ship. Such macro names
+        are assumed to start with "storage_". Typical ship will have only
+        one macro.
+        '''
+        ret_list = []
+        # Look through connections; they aren't specific on what class each
+        # links to (unless macros were already filled in).
+        for conn in self.conns.values():
+            # If the conn has no macro, and the ref starts with storage,
+            # load the macro.
+            if conn.macro == None and conn.macro_ref.startswith('storage_'):
+                conn.Get_Macro()
+
+            # If it has a macro, check its type.
+            if conn.macro and isinstance(conn.macro, Storage):
+                ret_list.append(conn.Get_Macro())
+        return ret_list
 
 
     def Load_Engine_Data(self):

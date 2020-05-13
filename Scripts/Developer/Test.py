@@ -49,11 +49,11 @@ if 0:
 if 0:
     Remove_Workshop_Tool_Dependency_Check()
    
-if 1:
+if 0:
     Increase_AI_Script_Waits(
-        oov_multiplier = 2,
-        oov_seta_multiplier = 4,
-        oov_max_wait = 15,
+        oos_multiplier = 2,
+        oos_seta_multiplier = 4,
+        oos_max_wait = 15,
         iv_multiplier = 1,
         iv_seta_multiplier = 2,
         iv_max_wait = 5,
@@ -63,7 +63,7 @@ if 1:
         )
 
 if 0:
-    Adjust_OOV_Damage(0.5)
+    Adjust_OOS_Damage(0.5)
 
 # Diff generator test.
 if 0 or test_all:
@@ -186,6 +186,14 @@ if 0:
     Rescale_Ship_Speeds(match_all = ['class ship_xl'], average = 150, variation = 0.5,
                         match_none = ['name ship_spl_xl_battleship_01_a_macro'])
 
+if 0:
+    Adjust_Ship_Cargo_Capacity(
+        multiplier = 2,
+        match_all = ['purpose mine'],
+        )
+    
+if 1:
+    Adjust_Engine_Boost_Duration(0.2)
 
 # Test the gui live editor, doing a transform before and after
 # the patch application. Transform before should show up in the

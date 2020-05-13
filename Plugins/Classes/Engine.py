@@ -10,16 +10,11 @@ class Engine(Macro):
     '''
     Engine macro. This will be filled in as needed; many basic ship edits
     are done directly on the xml.
-    TODO: move more ship stuff over to here.
 
     * component_name
       - Name of the base component.
     * component
       - Component, filled in by Get_Component.
-    * engine_count
-      - Number of engines.
-    * engine_tags
-      - Tags related to engine connections.
     '''
 
     def __init__(self, xml_node, *args, **kwargs):
@@ -58,17 +53,29 @@ class Engine(Macro):
         return float(self.Get('./properties/thrust', 'forward'))
     
     def Get_Boost_Thrust(self):
+        'Returns boost thrust strength, or None if boost undefined.'
         forward_thrust = self.Get_Forward_Thrust()
-        mult = float(self.Get('./properties/boost', 'thrust'))
+        mult_str = self.Get('./properties/boost', 'thrust')
+        if not mult_str:
+            return
+        mult = float(mult_str)
         return forward_thrust * mult
     
     def Get_Travel_Thrust(self):
+        'Returns boost travel strength, or None if boost undefined.'
         forward_thrust = self.Get_Forward_Thrust()
-        mult = float(self.Get('./properties/travel', 'thrust'))
+        mult_str = self.Get('./properties/travel', 'thrust')
+        if not mult_str:
+            return
+        mult = float(mult_str)
         return forward_thrust * mult
 
     def Get_Boost_Time(self):
-        return float(self.Get('./properties/boost', 'duration'))
+        'Returns boost time, or None if boost undefined.'
+        time_str = self.Get('./properties/boost', 'duration')
+        if not time_str:
+            return
+        return float(time_str)
         
     def Set_Boost_Time(self, new_time):
         self.Set('./properties/boost', 'duration', f'{new_time:.2f}')

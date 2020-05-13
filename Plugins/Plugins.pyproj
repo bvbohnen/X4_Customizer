@@ -48,6 +48,9 @@
     <Compile Include="Analyses\Live_Editor_Builders\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Classes\Storage.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="GUI\Edit_View_Window\Edit_Table_Model.py">
       <SubType>Code</SubType>
     </Compile>
@@ -263,7 +266,7 @@
     <Compile Include="Utilities\Generate_Diffs.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Utilities\Write_To_Extension.py">
+    <Compile Include="Utilities\Write_Mod_Files.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Utilities\__init__.py">

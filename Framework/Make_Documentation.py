@@ -202,8 +202,8 @@ def Make(*args):
     # Need a newline before the code, otherwise the code block
     #  isn't made right away (the file header gets lumped with the above).
     Add_Line('')
-    with open(os.path.join(this_dir,'..','Scripts',
-                           'Example_Transforms.py'), 'r') as file:
+    with open(os.path.join(this_dir,'..','Scripts','Examples',
+                           'Ex_Using_Transforms.py'), 'r') as file:
         # Put in 4 indents to make a code block.
         Add_Lines(file.read(), indent_level = 2)
 

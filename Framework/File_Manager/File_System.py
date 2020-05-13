@@ -499,7 +499,52 @@ class File_System_class:
             self.game_file_dict[virtual_path].modified = True
         return
 
+    
+    @_Verify_Init
+    def Write_Non_Ext_Files(self):
+        '''
+        Write out only binary/exe edited files, that are not part of an
+        extension. Does not generate a log file. Overwrites anything
+        with a name conflict.
+        '''
+        Print('Writing output non-extension files')
+
+        # Loop over the files that were loaded.
+        for file_name, file_object in self.game_file_dict.items():
+            # Only care about machine code for now.
+            if not isinstance(file_object, Machine_Code_File):
+                continue
+            
+            # Skip if not modified and not a sig.
+            if not file_object.modified:
+                continue
+
+            # Skip if already written. (Used for exe files handled by
+            # Write_Files already.)
+            if file_object.written:
+                continue
+
+            # Set the written tag.
+            file_object.written = True
+
+            # Actually write.
+            # Look up the output path.
+            file_path = file_object.Get_Output_Path()
+        
+            # Generate the folder if needed.
+            folder_path = file_path.parent
+            if not folder_path.exists():
+                folder_path.mkdir(parents = True)
+
+            # Write out the file, using the object's individual method.
+            file_object.Write_File(file_path)
+
+        return
+
                 
+
+    # TODO: split this off to Write_Ext_Files, and have Write_Files call
+    # both, instead of having code to prevent double writes of exes.
     @_Verify_Init
     def Write_Files(self):
         '''
@@ -551,6 +596,15 @@ class File_System_class:
             # Skip if not modified and not a sig.
             if not file_object.modified:
                 continue
+
+            # Skip if already written. (Used for exe files handled by
+            # Write_Non_Ext_Files already.)
+            if file_object.written:
+                continue
+
+            # Set the written tag. Only for machine code files for now.
+            if isinstance(file_object, Machine_Code_File):
+                file_object.written = True
 
             # In case the target directory doesn't exist, such as on a
             #  first run, make it, but only when not sending to a catalog.

@@ -10,10 +10,13 @@ from Plugins import *
 Settings(
     # Set the path to the X4 installation folder.
     path_to_x4_folder   = r'C:\Steam\SteamApps\common\X4 Foundations',
-    # Set the path to the user documents folder.
+
+    # Set the path to the user documents folder, if the auto-find
+    # doesn't work. Commented out here.
     #path_to_user_folder = r'C:\Users\charname\Documents\Egosoft\X4\12345678',
-    # Switch output to be in the user documents folder if needed.
-    output_to_user_extensions = False,
+
+    # Optionally change the output extension name. Default is "x4_customizer".
+    extension_name = 'x4_customizer'
     )
 
 # Reduce mass traffic and increase military jobs.

@@ -1,4 +1,4 @@
-X4 Customizer 1.18.5
+X4 Customizer 1.19
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -109,10 +109,13 @@ Example input file:
     Settings(
         # Set the path to the X4 installation folder.
         path_to_x4_folder   = r'C:\Steam\SteamApps\common\X4 Foundations',
-        # Set the path to the user documents folder.
+    
+        # Set the path to the user documents folder, if the auto-find
+        # doesn't work. Commented out here.
         #path_to_user_folder = r'C:\Users\charname\Documents\Egosoft\X4\12345678',
-        # Switch output to be in the user documents folder if needed.
-        output_to_user_extensions = False,
+    
+        # Optionally change the output extension name. Default is "x4_customizer".
+        extension_name = 'x4_customizer'
         )
     
     # Reduce mass traffic and increase military jobs.
@@ -146,6 +149,10 @@ Analyses:
 
     Print out statistics for objects of a given category. This output will be similar to that viewable in the gui live editor pages, except formed into one or more tables. Produces csv and html output. Will include changes from enabled extensions.
 
+  * Print_Ship_Speeds
+
+    Prints out speeds of various ships, under given engine assumptions, to the plugin log.
+
   * Print_Ship_Stats
 
     Gather up all ship statistics, and print them out. This is a convenience wrapper around Print_Object_Stats, filling in the category and a default file name.
@@ -157,6 +164,44 @@ Analyses:
   * Print_Weapon_Stats
 
     Gather up all weapon statistics, and print them out. This is a convenience wrapper around Print_Object_Stats, filling in the category and a default file name.
+
+
+***
+
+Adjust Transforms:
+
+
+  * Adjust_Ship_Crew_Capacity
+
+    Adjusts the crew capacities of ships. Note: crewmen contributions to ship combined skill appears to adjust downward based on max capacity, so increasing capacity can lead to a ship performing worse (unverified).
+
+  * Adjust_Ship_Drone_Storage
+
+    Adjusts the drone ("unit") storage of ships.
+
+  * Adjust_Ship_Hull
+
+    Adjusts the hull values of ships.
+
+  * Adjust_Ship_Missile_Storage
+
+    Adjusts the missile storage of ships.
+
+  * Adjust_Ship_Speed
+
+    Adjusts the speed and acceleration of ships, in each direction.
+
+  * Adjust_Ship_Turning
+
+    Adjusts the turning rate of ships, in each direction.
+
+  * Set_Default_Radar_Ranges
+
+    Sets default radar ranges.  Granularity is station, type of satellite, or per ship size.  Ranges are in km, eg. 40 for vanilla game defaults of non-satellites. Note: ranges below 40km will affect when an unidentified object becomes identified, but objects will still show up out to 40km.
+
+  * Set_Ship_Radar_Ranges
+
+    Sets radar ranges. Defaults are changed per object class. Note: ranges below 40km will affect when an unidentified object becomes identified, but objects will still show up out to 40km.
 
 
 ***
@@ -213,6 +258,20 @@ Live_Editor Transforms:
 
 ***
 
+Rescale Transforms:
+
+
+  * Adjust_Ship_Cargo_Capacity
+
+    Adjusts the cargo capacities of matching ships.
+
+  * Rescale_Ship_Speeds
+
+    Rescales the speeds of different ship classes, centering on the give target average speeds. Ships are assumed to be using their fastest race engines. Averaged across all ships of the rule match.
+
+
+***
+
 Scale_Sector_Size Transforms:
 
   * Scale_Sector_Size
@@ -224,9 +283,9 @@ Scale_Sector_Size Transforms:
 
 Scripts Transforms:
 
-  * Adjust_OOV_Damage
+  * Adjust_OOS_Damage
 
-    Adjusts all out-of-vision damage-per-second by a multiplier. For instance, if OOV combat seems to run too fast, it can be multiplied by 0.5 to slow it down by half.
+    Adjusts all out-of-vision damage-per-second by a multiplier. For instance, if OOS combat seems to run too fast, it can be multiplied by 0.5 to slow it down by half.
 
   * Disable_AI_Travel_Drive
 
@@ -234,41 +293,20 @@ Scripts Transforms:
 
   * Increase_AI_Script_Waits
 
-    Increases wait times in ai scripts, to reduce their background load and improve performance.  Waits under "visible" attention will not be modified. Expected to have high impact on fps, at some cost of ai efficiency.
+    Increases wait times in ai scripts, to reduce their background load and improve performance.  Separate modifiers are applied to "in-vision" and "out-of-vision" parts of scripts. Expected to have high impact on fps, at some cost of ai efficiency.
 
 
 ***
 
-Ships Transforms:
+Surface_Elements Transforms:
 
+  * Rebalance_Engines
 
-  * Adjust_Ship_Crew_Capacity
+    Rebalances engine speed related properties across purposes and maker races. Race balance set relative to argon engines of a corresponding size, purpose, mark 1. Higher marks receive the same scaling as their mark 1 counterpart. Purpose balance set relative to allround engines of a corresponding size and mark.
 
-    Adjusts the crew capacities of ships. Note: crewmen contributions to ship combined skill appears to adjust downward based on max capacity, so increasing capacity can lead to a ship performing worse (unverified).
+  * Remove_Engine_Travel_Bonus
 
-  * Adjust_Ship_Drone_Storage
-
-    Adjusts the drone ("unit") storage of ships.
-
-  * Adjust_Ship_Hull
-
-    Adjusts the hull values of ships.
-
-  * Adjust_Ship_Missile_Storage
-
-    Adjusts the missile storage of ships.
-
-  * Adjust_Ship_Speed
-
-    Adjusts the speed and acceleration of ships, in each direction.
-
-  * Adjust_Ship_Turning
-
-    Adjusts the turning rate of ships, in each direction.
-
-  * Rescale_Ship_Speeds
-
-    Rescales the speeds of different ship classes, centering on the give target average speeds. Ships are assumed to be using their fastest race mk2 engines. Averaged across all ships of the rule match.
+    Removes travel mode bonus from all engines by setting the speed multiplier to 1 and engage time to 0.
 
 
 ***
@@ -343,6 +381,10 @@ Utilities:
   * Generate_Diffs
 
     Generate diffs for changes between two xml containing folders, creating diff patches.
+
+  * Write_Modified_Binaries
+
+    Write out any modified binaries.  These are placed in the main x4 folder, not in an extension.
 
   * Write_To_Extension
 

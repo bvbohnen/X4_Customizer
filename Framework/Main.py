@@ -170,12 +170,18 @@ def Run(*args):
     if args.control_script.suffix != '.py':
         args.control_script = args.control_script.with_suffix('.py')
 
-    # If the given script isn't found, try finding it in the scripts folder.
+    # If the given script isn't found, try finding it in the scripts folder
+    # or its subdirectories.
     # Only support this switch for relative paths.
     if not args.control_script.exists() and not args.control_script.is_absolute():
-        alt_path = scripts_dir / args.control_script
-        if alt_path.exists():
-            args.control_script = alt_path
+        # Recursive search for a matching script name.
+        for path in scripts_dir.glob(f'**/{args.control_script.name}'):
+            # Use the first one found.
+            args.control_script = path
+            break
+        #alt_path = scripts_dir / args.control_script
+        #if alt_path.exists():
+        #    args.control_script = alt_path
 
 
     # Handle if the script isn't found.

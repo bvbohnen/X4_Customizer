@@ -4,6 +4,29 @@ from lxml import etree as ET
 import Framework
 from Framework import File_System, Settings, Print
 
+__all__ = [
+    'Write_To_Extension',
+    'Write_Modified_Binaries',
+    ]
+
+
+@Framework.Utility_Wrapper()
+def Write_Modified_Binaries():
+    '''
+    Write out any modified binaries.  These are placed in the main x4
+    folder, not in an extension.
+    '''    
+    # Return early if settings have writeback disabled.
+    if Settings.disable_cleanup_and_writeback:
+        Print('Skipping Write_Extension; writeback disabled in Settings.')
+        return
+    
+    # Trigger writeback.
+    # Don't clear old stuff; this has no associated log, and just overwrites.
+    File_System.Write_Non_Ext_Files()
+    return
+
+
 @Framework.Utility_Wrapper()
 def Write_To_Extension(skip_content = False):
     '''

@@ -23,6 +23,8 @@ if 0:
 
 # Prune some mass traffic.
 # (There may also be a way to adjust this in-game now.)
+# Update: "trafficdensity" option added to extra game options mod to help out.
+# This might still help with many stations near each other.
 Adjust_Job_Count(('id masstraffic*', 0.5))
 
 # Testing adjusting jobs globally.
@@ -84,17 +86,17 @@ if 1:
     #  2x/4x: 41 fps (default args)
     #  4x/8x: 46 fps
     Increase_AI_Script_Waits(
-        oov_multiplier = 2,
-        oov_seta_multiplier = 4,
-        oov_max_wait = 15,
+        oos_multiplier = 2,
+        oos_seta_multiplier = 4,
+        oos_max_wait = 15,
         iv_multiplier = 1,
+        # TODO: is iv wait modification safe?
         iv_seta_multiplier = 2,
         iv_max_wait = 5,
         include_extensions = False,
         skip_combat_scripts = False,
         )
-
-
+    
     # Disable travel drives for ai.
     Disable_AI_Travel_Drive()
 
@@ -146,6 +148,25 @@ if 1:
             },
         )
     
+    # Note: with speed rescale, boost ends up being a bit crazy good, with
+    # ship overall travel distance coming largely from boosting regularly.
+    # Example:
+    # - ship speed of 300
+    # - vanilla boost mult of 8x, duration of 10s.
+    # - boosting moves +21km (24km total vs 3km without boost)
+    # - small shield with 10s recharge delay, 9s recharge time.
+    # - can boost every 29s.
+    # - in 29s: 8.7km from base speed, 21km from boost.
+    # AI doesn't use boost for general travel, which breaks immersion when
+    # it would be so beneficial.
+    # Ideally, boosting would benefit travel less than +20% or so.
+    # Cannot change shield recharge delay/rate without other effects.
+    # In above example: change boost to only add +2km or so per 29s.
+    # - boost mult of 2x, duration of 5s = 2.7km.
+    Adjust_Engine_Boost_Duration(1/2)
+    Adjust_Engine_Boost_Speed   (1/4)
+
+
     # Adjust speeds per ship class.
     # Note: vanilla averages and ranges are:    
     # xs: 130 (58 to 152)
@@ -177,6 +198,13 @@ if 1:
         extra_scaling_for_removed_highways = 0.7,
         )
     
+    # Miners can struggle to keep up. Increase efficiency somewhat by
+    # letting them haul more cargo.
+    Adjust_Ship_Cargo_Capacity(
+        multiplier = 2,
+        match_all = ['purpose mine'],
+        )
+
 
 
 # Write modified files.

@@ -140,6 +140,9 @@ class Game_File:
         to this file's contents, either directly or through patching.
       - Will always include extension_name if given.
       - Empty if this is just a vanilla file.
+    * written
+      - Bool, if this file has had its changes written back out.
+      - Used selectively by the file writeback system.
     '''
     def __init__(
             self,
@@ -154,6 +157,7 @@ class Game_File:
         self.name = virtual_path.split('/')[-1]
         self.virtual_path = virtual_path
         self.file_source_path = file_source_path
+        self.written = False
 
         # Can determine substitution status based on the source
         # catalog name.

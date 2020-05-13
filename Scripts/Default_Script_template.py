@@ -29,7 +29,7 @@ d)  Manually delete the generated extension.
 from Plugins import *
 
 # Apply paths and other settings.
-# This could also be done in settings.json.
+# This could also be done in settings.json or in the gui settings tab.
 Settings(
     # Set the path to the X4 installation folder.
     path_to_x4_folder   = r'C:\Steam\SteamApps\common\X4 Foundations',

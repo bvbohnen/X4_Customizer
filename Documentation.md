@@ -1,4 +1,4 @@
-X4 Customizer 1.18.5
+X4 Customizer 1.19
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -107,10 +107,13 @@ Example input file:
     Settings(
         # Set the path to the X4 installation folder.
         path_to_x4_folder   = r'C:\Steam\SteamApps\common\X4 Foundations',
-        # Set the path to the user documents folder.
+    
+        # Set the path to the user documents folder, if the auto-find
+        # doesn't work. Commented out here.
         #path_to_user_folder = r'C:\Users\charname\Documents\Egosoft\X4\12345678',
-        # Switch output to be in the user documents folder if needed.
-        output_to_user_extensions = False,
+    
+        # Optionally change the output extension name. Default is "x4_customizer".
+        extension_name = 'x4_customizer'
         )
     
     # Reduce mass traffic and increase military jobs.
@@ -205,7 +208,7 @@ Example input file:
       - String, name of the extension being generated.
       - Spaces will be replaced with underscores for the extension id.
       - A lowercase version of this will be used for the output folder name.
-      - Defaults to 'X4_Customizer'
+      - Defaults to 'x4_customizer'
     * output_to_user_extensions
       - Bool, if True then the generated extension holding output files will be under <path_to_user_folder/extensions>.
       - Warning: any prior output on the original path will still exist, and is not cleaned out automatically at the time of this note.
@@ -226,6 +229,7 @@ Example input file:
     * forced_xpath_attributes
       - String, optional comma separate list of XML node attributes which, if found when constructing xpaths for output diffs, will be included in the xpath regardless of if they are needed.
       - Example: "id,name" will always include "id" and "name" attributes of elements in the xpath.
+      - Also supports child node or attributes referenced using a relative xpath. Example: "parts/part/uv_animations/uv_animation" to require a uv_animation great-great-grandchild element, or "component/@ref" to include the "ref" attribute of a "component" child.
       - Can be used to make xpaths more specific, and more likely to break if an unknown extension is applied before the output extension (eg. when the customizer output is distributed to other users).
     
     Logging:
@@ -299,6 +303,17 @@ Analyses:
       - Defaults to 'current'.
         
 
+  * Print_Ship_Speeds
+
+    Prints out speeds of various ships, under given engine assumptions, to the plugin log.
+    
+    * use_arg_engine
+      - Bool, if True then Argon engines will be assumed for all ships instead of their faction engines.
+    * use_split_engine
+      - Bool, if True then Split engines will be assumed.
+      - This will tend to give high estimates for ship speeds, eg. mk4 engines.
+        
+
   * Print_Ship_Stats
 
     Gather up all ship statistics, and print them out. This is a convenience wrapper around Print_Object_Stats, filling in the category and a default file name.
@@ -330,6 +345,125 @@ Analyses:
       - Defaults to "weapon_stats".
     * version
       - Optional string, version of the objects to use.
+        
+
+
+***
+
+Adjust Transforms:
+
+  * Common documentation
+
+    Ship transforms will commonly use a group of matching rules to determine which ships get modified, and by how much.   
+    
+    * Matching rules:
+      - These are tuples pairing a matching rule (string) with transform defined args, eg. ("key  value", arg0, arg1, ...).
+      - The "key" specifies the xml field to look up, which will be checked for a match with "value".
+      - If a target object matches multiple rules, the first match is used.
+      - Supported keys for ships:
+        - 'name'    : Internal name of the ship macro; supports wildcards.
+        - 'purpose' : The primary role of the ship. List of purposes:
+          - mine
+          - trade
+          - build
+          - fight
+        - 'type'    : The ship type. List of types:
+          - courier, resupplier, transporter, freighter, miner, largeminer, builder
+          - scout, interceptor, fighter, heavyfighter
+          - gunboat, corvette, frigate, scavenger
+          - destroyer, carrier, battleship
+          - xsdrone, smalldrone, police, personalvehicle, escapepod, lasertower
+        - 'class'   : The class of ship. List of classes:
+          - 'ship_xs'
+          - 'ship_s'
+          - 'ship_m'
+          - 'ship_l'
+          - 'ship_xl'
+          - 'spacesuit'
+        - '*'       : Matches all ships; takes no value term.
+    
+    Examples:
+    
+        Adjust_Ship_Speed(1.5)
+        Adjust_Ship_Speed(
+            ('name ship_xen_xl_carrier_01_a*', 1.2),
+            ('class ship_s'                  , 2.0),
+            ('type corvette'                 , 1.5),
+            ('purpose fight'                 , 1.2),
+            ('*'                             , 1.1) )
+    
+        
+
+  * Adjust_Ship_Crew_Capacity
+
+    Adjusts the crew capacities of ships. Note: crewmen contributions to ship combined skill appears to adjust downward based on max capacity, so increasing capacity can lead to a ship performing worse (unverified).
+    
+    * match_rule_multipliers:
+      - Series of matching rules paired with the multipliers to use.
+        
+
+  * Adjust_Ship_Drone_Storage
+
+    Adjusts the drone ("unit") storage of ships.
+    
+    * match_rule_multipliers:
+      - Series of matching rules paired with the multipliers to use.
+        
+
+  * Adjust_Ship_Hull
+
+    Adjusts the hull values of ships.
+    
+    * match_rule_multipliers:
+      - Series of matching rules paired with the multipliers to use.
+        
+
+  * Adjust_Ship_Missile_Storage
+
+    Adjusts the missile storage of ships.
+    
+    * match_rule_multipliers:
+      - Series of matching rules paired with the multipliers to use.
+        
+
+  * Adjust_Ship_Speed
+
+    Adjusts the speed and acceleration of ships, in each direction.
+    
+    * match_rule_multipliers:
+      - Series of matching rules paired with the multipliers to use.
+        
+
+  * Adjust_Ship_Turning
+
+    Adjusts the turning rate of ships, in each direction.
+    
+    * match_rule_multipliers:
+      - Series of matching rules paired with the multipliers to use.
+        
+
+  * Set_Default_Radar_Ranges
+
+    Sets default radar ranges.  Granularity is station, type of satellite, or per ship size.  Ranges are in km, eg. 40 for vanilla game defaults of non-satellites. Note: ranges below 40km will affect when an unidentified object becomes identified, but objects will still show up out to 40km.
+            
+    Supported arguments:
+    * ship_s
+    * ship_m
+    * ship_l
+    * ship_xl
+    * spacesuit
+    * station
+    * satellite
+    * adv_satellite
+        
+
+  * Set_Ship_Radar_Ranges
+
+    Sets radar ranges. Defaults are changed per object class. Note: ranges below 40km will affect when an unidentified object becomes identified, but objects will still show up out to 40km.
+            
+    * ship_match_rule_ranges:
+      - Series of matching rules paired with the new ranges to apply for individual ships.
+      - Ranges are in km.
         
 
 
@@ -448,75 +582,7 @@ Live_Editor Transforms:
 
 ***
 
-Scale_Sector_Size Transforms:
-
-  * Scale_Sector_Size
-
-    Change the size of the maps by moving contents (zones, etc.) closer together or further apart. Note: this will require a new game to take effect, as positions become part of a save file.
-    
-    * scaling_factor
-      - Float, how much to adjust distances by.
-    * recenter_sectors
-      - Adjust objects in a sector to approximately place the coreposition near 0,0,0.
-      - In testing, this makes debugging harder, and may lead to unwanted results.  Pending further testing to improve confidence.
-    * randomize_new_zones
-      - Randomizes the positions of new zones each run.
-      - False for testing to ensure zones are constant, but set True to get a fresh universe layout.
-    * num_steps
-      - Int, over how many movement steps to perform the scaling.
-      - Higher step counts take longer, but each movement is smaller and will better detect objects getting too close to each other.
-      - Recommend lower step counts when testing, high step count for a final map.
-      - Defaults to 10.
-    * debug
-      - Bool, if True then write runtime state to the plugin log.
-        
-
-
-***
-
-Scripts Transforms:
-
-  * Adjust_OOV_Damage
-
-    Adjusts all out-of-vision damage-per-second by a multiplier. For instance, if OOV combat seems to run too fast, it can be multiplied by 0.5 to slow it down by half.
-        
-    * multiplier
-      - Float, how much to multiply damage by.
-        
-
-  * Disable_AI_Travel_Drive
-
-    Disables usage of travel drives for all ai scripts. When applied to a save, existing move orders may continue to use travel drive until they complete.
-        
-
-  * Increase_AI_Script_Waits
-
-    Increases wait times in ai scripts, to reduce their background load and improve performance.  Waits under "visible" attention will not be modified. Expected to have high impact on fps, at some cost of ai efficiency.
-    
-    * multiplier
-      - Float, how much to multiply wait times by. Default is 2.
-    * seta_multiplier
-      - Float, alternate multiplier to apply if the player is in SETA mode. Default is 4.
-      - Eg. if multiplier is 2 and seta_multiplier is 4, then waits will be 2x longer when not in SETA, 4x longer when in SETA.
-    * max_wait
-      - Float, optional, the longest wait that this multiplier can achieve, in seconds.
-      - Defaults to 15.
-      - If the original wait is longer than this, it will be unaffected.
-    * filter
-      - String, possibly with wildcards, matching names of ai scripts to modify; default is plain '*' to match all aiscripts.
-      - Example: "*trade.*" to modify only trade scripts.
-    * include_extensions
-      - Bool, if True then aiscripts added by extensions are also modified.
-      - Defaults False.
-    * skip_combat_scripts
-      - Bool, if True then scripts which control OOS damage application will not be modified. Otherwise, they are modified and their attack strength per round is increased to match the longer wait times.
-      - Defaults False.
-        
-
-
-***
-
-Ships Transforms:
+Rescale Transforms:
 
   * Common documentation
 
@@ -528,7 +594,7 @@ Ships Transforms:
       - If a target object matches multiple rules, the first match is used.
       - Supported keys for ships:
         - 'name'    : Internal name of the ship macro; supports wildcards.
-        - 'purpose' : The general role of the ship. List of purposes:
+        - 'purpose' : The primary role of the ship. List of purposes:
           - mine
           - trade
           - build
@@ -560,65 +626,200 @@ Ships Transforms:
     
         
 
-  * Adjust_Ship_Crew_Capacity
+  * Adjust_Ship_Cargo_Capacity
 
-    Adjusts the crew capacities of ships. Note: crewmen contributions to ship combined skill appears to adjust downward based on max capacity, so increasing capacity can lead to a ship performing worse (unverified).
-    
-    * match_rule_multipliers:
-      - Series of matching rules paired with the multipliers to use.
+    Adjusts the cargo capacities of matching ships.
         
-
-  * Adjust_Ship_Drone_Storage
-
-    Adjusts the drone ("unit") storage of ships.
-    
-    * match_rule_multipliers:
-      - Series of matching rules paired with the multipliers to use.
-        
-
-  * Adjust_Ship_Hull
-
-    Adjusts the hull values of ships.
-    
-    * match_rule_multipliers:
-      - Series of matching rules paired with the multipliers to use.
-        
-
-  * Adjust_Ship_Missile_Storage
-
-    Adjusts the missile storage of ships.
-    
-    * match_rule_multipliers:
-      - Series of matching rules paired with the multipliers to use.
-        
-
-  * Adjust_Ship_Speed
-
-    Adjusts the speed and acceleration of ships, in each direction.
-    
-    * match_rule_multipliers:
-      - Series of matching rules paired with the multipliers to use.
-        
-
-  * Adjust_Ship_Turning
-
-    Adjusts the turning rate of ships, in each direction.
-    
-    * match_rule_multipliers:
-      - Series of matching rules paired with the multipliers to use.
+    * multiplier
+      - Float, how much to multiply current cargo capacity by.
+    * match_any
+      - List of matching rules. Any ship matching any of these is included, if not part of match_none.
+    * match_all
+      - List of matching rules. Any ship matching all of these is included, if not part of match_none.
+    * match_none
+      - List of matching rules. Any ship matching any of these is excluded.
+    * cargo_tag
+      - Optional, tag name of cargo types to modify.
+      - Expected to be one of: 'solid', 'liquid', 'container'.
+      - If not given, all cargo types are modified.
         
 
   * Rescale_Ship_Speeds
 
-    Rescales the speeds of different ship classes, centering on the give target average speeds. Ships are assumed to be using their fastest race mk2 engines. Averaged across all ships of the rule match.
+    Rescales the speeds of different ship classes, centering on the give target average speeds. Ships are assumed to be using their fastest race engines. Averaged across all ships of the rule match.
     
-    In development.
-    
-    * match_rule_averages
-      - Series of matching rules paired with the target average speed to rescale toward.
-      - Ships within a match will maintain their relative speed differences.
+    * average
+      - Float, the new average speed to adjust to.
+      - If None, keeps the original average.
+    * variation
+      - Float, less than 1, how much ship speeds are allowed to differ from the average relative to the average.
+      - If None, keeps the original variation.
+      - If original variation is less than this, it will not be changed.
+      - Only applies strictly to 90% of ships; 10% are treated as outliers, and will have their speed scaled similarly but will be outside this band.
+      - Eg. 0.5 means 90% of ships will be within +/- 50% of their group average speed.
+    * match_any
+      - List of matching rules. Any ship matching any of these is included, if not part of match_none.
+    * match_all
+      - List of matching rules. Any ship matching all of these is included, if not part of match_none.
+    * match_none
+      - List of matching rules. Any ship matching any of these is excluded.
     * use_arg_engine
-      - Bool, if True then Argon engines will be assumed for all ships instead of their race engines.
+      - Bool, if True then Argon engines will be assumed for all ships instead of their faction engines.
+    * use_split_engine
+      - Bool, if True then Split engines will be assumed.
+      - This will tend to give high estimates for ship speeds, eg. mk4 engines.
+        
+
+
+***
+
+Scale_Sector_Size Transforms:
+
+  * Scale_Sector_Size
+
+    Change the size of the maps by moving contents (zones, etc.) closer together or further apart. Note: this will require a new game to take effect, as positions become part of a save file.
+    
+    * scaling_factor
+      - Float, how much to adjust distances by.
+      - Eg. 0.5 to cut sector size roughly in half.
+    * scaling_factor_2
+      - Float, optional, secondary scaling factor to apply to large sectors.
+      - If not given, scaling_factor is used for all sectors.
+    * transition_size_start
+      - Int, sector size at which to start transitioning from scaling_factor to scaling_factor_2.
+      - Defaults to 200000.
+      - Sectors smaller than this will use scaling_factor.
+    * transition_size_end
+      - Int, optional, sector size at which to finish transitioning to scaling_factor_2.
+      - Defaults to 400000 (400 km).
+      - Sectors larger than this will use scaling_factor_2.
+      - Sectors of intermediate size have their scaling factor interpolated.
+    * recenter_sectors
+      - Adjust objects in a sector to approximately place the coreposition near 0,0,0.
+      - Defaults False.
+      - In testing, this makes debugging harder, and may lead to unwanted results.  Pending further testing to improve confidence.
+    * randomize_new_zones
+      - Randomizes the positions of new zones each run, instead of using the sector name as a seed.
+      - Defaults False.
+      - Generally should be left false, so that zones don't move around for a save game.
+    * num_steps
+      - Int, over how many movement steps to perform the scaling.
+      - Higher step counts take longer to process, but each movement is smaller and will better detect objects getting too close to each other.
+      - Recommend lower step counts when testing, high step count for a final map.
+      - Defaults to 10.
+    * remove_ring_highways
+      - Bool, set True to remove the ring highways.
+    * remove_nonring_highways
+      - Bool, set True to remove non-ring highways.
+    * extra_scaling_for_removed_highways
+      - Float, extra scaling factor to apply to sectors that had highways removed.
+      - Defaults to 0.7.
+    * scale_regions
+      - Bool, if resource and debris regions should be scaled as well.
+      - May be slightly off from sector scalings, since many regions are shared between sectors.
+      - Defaults True.
+    * move_free_ships
+      - Bool, if ownerless ships spawned at game start should be moved along with the other sector contents.
+      - May impact difficulty of finding these ships.
+      - Defaults True.
+    * debug
+      - Bool, if True then write runtime state to the plugin log.
+        
+
+
+***
+
+Scripts Transforms:
+
+  * Adjust_OOS_Damage
+
+    Adjusts all out-of-vision damage-per-second by a multiplier. For instance, if OOS combat seems to run too fast, it can be multiplied by 0.5 to slow it down by half.
+        
+    * multiplier
+      - Float, how much to multiply damage by.
+        
+
+  * Disable_AI_Travel_Drive
+
+    Disables usage of travel drives for all ai scripts. When applied to a save, existing move orders may continue to use travel drive until they complete.
+        
+
+  * Increase_AI_Script_Waits
+
+    Increases wait times in ai scripts, to reduce their background load and improve performance.  Separate modifiers are applied to "in-vision" and "out-of-vision" parts of scripts. Expected to have high impact on fps, at some cost of ai efficiency.
+    
+    * oos_multiplier
+      - Float, how much to multiply OOS wait times by. Default is 2.
+    * oos_seta_multiplier
+      - Float, alternate OOS multiplier to apply if the player is in SETA mode. Default is 4.
+      - Eg. if multiplier is 2 and seta_multiplier is 4, then waits will be 2x longer when not in SETA, 4x longer when in SETA.
+    * oos_max_wait
+      - Float, optional, the longest OOS wait that this multiplier can achieve, in seconds.
+      - Defaults to 15.
+      - If the original wait is longer than this, it will be unaffected.
+    * iv_multiplier
+      - As above, but for in-vision.
+      - Defaults to 1x, eg. no change.
+    * iv_seta_multiplier
+      - As above, but for in-vision.
+      - Defaults to 1x, eg. no change.
+    * iv_max_wait
+      - As above, but for in-vision.
+      - Defaults to 5.
+    * filter
+      - String, possibly with wildcards, matching names of ai scripts to modify; default is plain '*' to match all aiscripts.
+      - Example: "*trade.*" to modify only trade scripts.
+    * include_extensions
+      - Bool, if True then aiscripts added by extensions are also modified.
+      - Defaults False.
+    * skip_combat_scripts
+      - Bool, if True then scripts which control OOS damage application will not be modified. Otherwise, they are modified and their attack strength per round is increased to match the longer wait times.
+      - Defaults False.
+    * skip_mining_scripts
+      - Bool, if True then scripts which control OOS mining rates will not be modified. Currently has no extra code to adjust mining rates when scaled.
+      - Defaults True.
+      - Note currently expected to signicantly matter with max_wait of 15s, since OOS mining waits at least 16s between gathers.
+        
+
+
+***
+
+Surface_Elements Transforms:
+
+  * Rebalance_Engines
+
+    Rebalances engine speed related properties across purposes and maker races. Race balance set relative to argon engines of a corresponding size, purpose, mark 1. Higher marks receive the same scaling as their mark 1 counterpart. Purpose balance set relative to allround engines of a corresponding size and mark.
+    
+    * race_speed_mults
+      - Dict, keyed by race name, with relative  multipliers for engine speed properties: 'thrust', 'boost', 'travel'.
+      - Relative to corresponding argon engines.
+      - Set to None to disable race rebalancing.
+      - Defaults tuned to vanilla medium mark 1 combat engines, and will nearly reproduce the vanilla medium engine values (with discrepencies for other sizes):
+        ```
+        race_speed_mults = {
+            'argon'   : {'thrust' : 1,    'boost'  : 1,    'boost_time' : 1,   'travel' : 1    },
+            'paranid' : {'thrust' : 1.03, 'boost'  : 1.03, 'boost_time' : 1.2, 'travel' : 0.90 },
+            'split'   : {'thrust' : 1.35, 'boost'  : 1.08, 'boost_time' : 1.2, 'travel' : 0.843},
+            'teladi'  : {'thrust' : 0.97, 'boost'  : 0.97, 'boost_time' : 1,   'travel' : 0.97 },
+            }
+        ```
+    * purpose_speed_mults
+      - Dict, keyed by engine purpose name, with relative  multipliers for engine speed properties: 'thrust', 'boost', 'travel'.
+      - Purposes are 'combat', 'allround', and 'travel'.
+      - Set to None to disable purpose rebalancing.
+      - Defaults tuned to vanilla medium mark 1 argon engines, and will nearly reproduce the vanilla medium engine values (with discrepencies for other sizes):
+        ```
+        purpose_speed_mults = {
+            'allround' : {'thrust' : 1,    'boost'  : 1,    'boost_time' : 1,    'travel' : 1    },
+            'combat'   : {'thrust' : 1.05, 'boost'  : 1,    'boost_time' : 0.89, 'travel' : 1.43 },
+            'travel'   : {'thrust' : 1,    'boost'  : 0.75, 'boost_time' : 1.33, 'travel' : 0.57 },
+            }
+        ```
+        
+
+  * Remove_Engine_Travel_Bonus
+
+    Removes travel mode bonus from all engines by setting the speed multiplier to 1 and engage time to 0.
         
 
 
@@ -868,6 +1069,11 @@ Utilities:
       - Bool, print the path of the outputs on succesful writes.
         
 
+  * Write_Modified_Binaries
+
+    Write out any modified binaries.  These are placed in the main x4 folder, not in an extension.
+        
+
   * Write_To_Extension
 
     Write all currently modified game files to the extension folder. Existing files at the location written on a prior call will be cleared out. Content.xml will have dependencies added for files modified from existing extensions.
@@ -1028,7 +1234,7 @@ Change Log:
    - Improved quality of generate_diff output patches.
  * 1.18
    - Added support for forcing xpath attributes in generated diff patches.
-   - Added transforms: Increase_AI_Script_Waits, Adjust_OOV_Damage, Adjust_Ship_Turning, Adjust_Ship_Hull, Adjust_Ship_Crew_Capacity, Adjust_Ship_Drone_Storage, Adjust_Ship_Missile_Storage.
+   - Added transforms: Increase_AI_Script_Waits, Adjust_OOS_Damage, Adjust_Ship_Turning, Adjust_Ship_Hull, Adjust_Ship_Crew_Capacity, Adjust_Ship_Drone_Storage, Adjust_Ship_Missile_Storage.
  * 1.18.1
    - Bug fix when forced xpath attributes not specified.
    - Bug fixed when copying files at the path_to_source_folder.
@@ -1044,3 +1250,9 @@ Change Log:
    - Tweaked Generate_Diffs script mixed file/folder error check.
  * 1.18.5
    - Teaked Cat_Pack to include "extensions" subfolder files.
+ * 1.19
+   - Added forced xpath attribute support for matching child nodes and attributes.
+   - New parameters for Scale_Sector_Size.
+   - Changed parameters for Increase_AI_Script_Waits to support also scaling in-vision waits.
+   - Added transforms: Rescale_Ship_Speeds, Remove_Engine_Travel_Bonus, Rebalance_Engines, Adjust_Engine_Boost_Duration, Adjust_Engine_Boost_Speed.
+   - Added several example scripts.

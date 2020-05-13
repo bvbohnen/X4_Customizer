@@ -15,7 +15,7 @@ doc_matching_rules = '''
       - If a target object matches multiple rules, the first match is used.
       - Supported keys for ships:
         - 'name'    : Internal name of the ship macro; supports wildcards.
-        - 'purpose' : The general role of the ship. List of purposes:
+        - 'purpose' : The primary role of the ship. List of purposes:
           - mine
           - trade
           - build

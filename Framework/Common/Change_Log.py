@@ -178,7 +178,7 @@ Change Log:
    - Improved quality of generate_diff output patches.
  * 1.18
    - Added support for forcing xpath attributes in generated diff patches.
-   - Added transforms: Increase_AI_Script_Waits, Adjust_OOV_Damage, 
+   - Added transforms: Increase_AI_Script_Waits, Adjust_OOS_Damage, 
      Adjust_Ship_Turning, Adjust_Ship_Hull, Adjust_Ship_Crew_Capacity,
      Adjust_Ship_Drone_Storage, Adjust_Ship_Missile_Storage.
  * 1.18.1
@@ -204,7 +204,8 @@ Change Log:
    - Changed parameters for Increase_AI_Script_Waits to support also scaling
      in-vision waits.
    - Added transforms: Rescale_Ship_Speeds, Remove_Engine_Travel_Bonus,
-     Rebalance_Engines.
+     Rebalance_Engines, Adjust_Engine_Boost_Duration, Adjust_Engine_Boost_Speed.
+   - Added several example scripts.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

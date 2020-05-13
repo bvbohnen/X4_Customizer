@@ -12,10 +12,12 @@ from .Component import *
 
 from .Ship import *
 from .Engine import *
+from .Storage import *
 
 __all__ = ['Database']
 
-# TODO: better way to match x4 classes to local classes.
+# TODO: better way to match x4 classes to local classes, and better automation
+# of filling this dict.
 class_name_to_macro = {
     'spacesuit': Ship,
     'ship_xs' : Ship,
@@ -24,8 +26,10 @@ class_name_to_macro = {
     'ship_l'  : Ship,
     'ship_xl' : Ship,
     'engine'  : Engine,
+    'storage' : Storage,
     }
 
+# TODO: directly track connections.
 class Database:
     '''
     Container for various loaded macros and components, handling cross
@@ -121,7 +125,7 @@ class Database:
 
         return
 
-
+    # TODO: add support for connections.
     def Set_Object_Writable(self, object):
         '''
         Sets a macro or component's game_file xml as writable.

@@ -6,6 +6,7 @@ from .Position import Position
 
 __all__ = ['Connection']
 
+# TODO: directly link/register connections with the database.
 class Connection:
     '''
     Generic connection, used by zones, sectors, etc.
@@ -52,6 +53,16 @@ class Connection:
         '''
         self.xml_node = replacements[self.xml_node]
         return
+
+    def Get_Macro(self):
+        '''
+        Returns the connected Macro object, if a ref. If the macro isn't
+        loaded yet, it will be loaded from the parent database. If this
+        isn't a ref, returns None.
+        '''
+        if not self.macro and self.macro_ref:
+            self.Set_Macro(self.parent.database.Get_Macro(self.macro_ref))
+        return self.macro
 
     def Set_Macro(self, macro):
         '''

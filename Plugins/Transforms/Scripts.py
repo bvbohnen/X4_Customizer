@@ -8,7 +8,7 @@ from .Support import XML_Multiply_Float_Attribute
 
 __all__ = [
     'Increase_AI_Script_Waits',
-    'Adjust_OOV_Damage',
+    'Adjust_OOS_Damage',
     'Disable_AI_Travel_Drive',
     ]
 
@@ -16,15 +16,16 @@ __all__ = [
 
 @Transform_Wrapper()
 def Increase_AI_Script_Waits(
-        oov_multiplier = 2,
-        oov_seta_multiplier = 4,
-        oov_max_wait = 15,
+        oos_multiplier = 2,
+        oos_seta_multiplier = 4,
+        oos_max_wait = 15,
         iv_multiplier = 1,
         iv_seta_multiplier = 1,
         iv_max_wait = 5,
         filter = '*',
         include_extensions = False,
         skip_combat_scripts = False,
+        skip_mining_scripts = True,
         ):
     '''
     Increases wait times in ai scripts, to reduce their background load
@@ -32,15 +33,15 @@ def Increase_AI_Script_Waits(
     and "out-of-vision" parts of scripts. Expected to have high impact on fps,
     at some cost of ai efficiency.
 
-    * oov_multiplier
-      - Float, how much to multiply OOV wait times by. Default is 2.
-    * oov_seta_multiplier
-      - Float, alternate OOV multiplier to apply if the player
+    * oos_multiplier
+      - Float, how much to multiply OOS wait times by. Default is 2.
+    * oos_seta_multiplier
+      - Float, alternate OOS multiplier to apply if the player
         is in SETA mode. Default is 4.
       - Eg. if multiplier is 2 and seta_multiplier is 4, then waits will
         be 2x longer when not in SETA, 4x longer when in SETA.
-    * oov_max_wait
-      - Float, optional, the longest OOV wait that this multiplier can achieve,
+    * oos_max_wait
+      - Float, optional, the longest OOS wait that this multiplier can achieve,
         in seconds.
       - Defaults to 15.
       - If the original wait is longer than this, it will be unaffected.
@@ -65,22 +66,29 @@ def Increase_AI_Script_Waits(
         will not be modified. Otherwise, they are modified and their
         attack strength per round is increased to match the longer wait times.
       - Defaults False.
+    * skip_mining_scripts
+      - Bool, if True then scripts which control OOS mining rates will not
+        be modified. Currently has no extra code to adjust mining rates
+        when scaled.
+      - Defaults True.
+      - Note currently expected to signicantly matter with max_wait of 15s,
+        since OOS mining waits at least 16s between gathers.
     '''
     
     # Just ai scripts; md has no load.
     aiscript_files = Load_Files(f"{'*' if include_extensions else ''}aiscripts/{filter}.xml")
 
-    # Combine oov/iv stuff into a dict for convenience.
+    # Combine oos/iv stuff into a dict for convenience.
     vis_params = {
         'iv': {
             'multiplier'      : iv_multiplier,
             'seta_multiplier' : iv_seta_multiplier,
             'max_wait'        : iv_max_wait,
             },
-        'oov': {
-            'multiplier'      : oov_multiplier,
-            'seta_multiplier' : oov_seta_multiplier,
-            'max_wait'        : oov_max_wait,
+        'oos': {
+            'multiplier'      : oos_multiplier,
+            'seta_multiplier' : oos_seta_multiplier,
+            'max_wait'        : oos_max_wait,
             },
         }
 
@@ -100,6 +108,12 @@ def Increase_AI_Script_Waits(
         if attack_strength_nodes and skip_combat_scripts:
             continue
 
+        # Find any get_resource_gatherrate nodes, used in OOS mining.
+        gatherrate_nodes = xml_root.xpath(".//get_resource_gatherrate")
+        # If there are any, and not modifying mining scripts, skip.
+        if gatherrate_nodes and skip_mining_scripts:
+            continue
+
         # Find all waits.
         nodes = xml_root.xpath(".//wait")
         if not nodes:
@@ -109,7 +123,7 @@ def Increase_AI_Script_Waits(
         visible_waits = xml_root.xpath('.//attention[@min="visible"]//wait')
 
 
-        # Loop over iv, oov.
+        # Loop over iv, oos.
         for mode, params in vis_params.items():
             # Unpack for convenience.
             multiplier      = params['multiplier']
@@ -122,8 +136,8 @@ def Increase_AI_Script_Waits(
                 continue
 
             for node in nodes:
-                # Skip if visible in oov, or if not visible in iv.
-                if mode == 'oov' and node in visible_waits:
+                # Skip if visible in oos, or if not visible in iv.
+                if mode == 'oos' and node in visible_waits:
                     continue
                 if mode == 'iv' and node not in visible_waits:
                     continue
@@ -143,7 +157,7 @@ def Increase_AI_Script_Waits(
                     new = f'[{orig}, [{max_wait}s, ({orig})*{mult_str}].min].max'
                     node.set(attr, new)
 
-            # If this is in-vision mode, skip the oov attack_strength stuff.
+            # If this is in-vision mode, skip the oos attack_strength stuff.
             if mode == 'iv':
                 continue
 
@@ -190,10 +204,10 @@ def Increase_AI_Script_Waits(
 
 
 @Transform_Wrapper()
-def Adjust_OOV_Damage(multiplier):
+def Adjust_OOS_Damage(multiplier):
     '''
     Adjusts all out-of-vision damage-per-second by a multiplier. For instance,
-    if OOV combat seems to run too fast, it can be multiplied by 0.5 to
+    if OOS combat seems to run too fast, it can be multiplied by 0.5 to
     slow it down by half.
     
     * multiplier

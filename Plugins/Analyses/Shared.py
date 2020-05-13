@@ -10,7 +10,7 @@ def Get_Ship_Macro_Files():
     '''
     # Note: normally ship macros start with "ship_".
     # However, this doesn't find the XR shippack, since they all start
-    # with "units_" instead; also breaks on XR shippack since it calls
+    # with "units_" instead; also over-includes on XR shippack since it calls
     # some docking bay macros "ship_storage_".
     File_System.Get_All_Indexed_Files('macros','ship_*')
     File_System.Get_All_Indexed_Files('macros','units_*')

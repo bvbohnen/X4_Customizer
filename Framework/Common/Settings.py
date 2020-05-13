@@ -107,7 +107,7 @@ class Settings_class:
       - Spaces will be replaced with underscores for the extension id.
       - A lowercase version of this will be used for the output folder
         name.
-      - Defaults to 'X4_Customizer'
+      - Defaults to 'x4_customizer'
     * output_to_user_extensions
       - Bool, if True then the generated extension holding output files
         will be under <path_to_user_folder/extensions>.
@@ -352,7 +352,7 @@ class Settings_class:
                     defaults['path_to_user_folder'] = dir
                     break
 
-        defaults['extension_name'] = 'X4_Customizer'
+        defaults['extension_name'] = 'x4_customizer'
         defaults['output_to_user_extensions'] = False
         defaults['path_to_output_folder'] = None        
         defaults['path_to_source_folder'] = None
