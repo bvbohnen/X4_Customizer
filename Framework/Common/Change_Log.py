@@ -206,6 +206,14 @@ Change Log:
    - Added transforms: Rescale_Ship_Speeds, Remove_Engine_Travel_Bonus,
      Rebalance_Engines, Adjust_Engine_Boost_Duration, Adjust_Engine_Boost_Speed.
    - Added several example scripts.
+ * 1.20
+   - Added automatic packing of replacement files into subst cat/dats.
+   - Scale_Sector_Size includes split start locations.
+   - Switched Rescale_Ship_Speeds to handle multiple groups in one call.
+   - Added Adjust_Ship_Cargo_Capacity.
+   - Switched weapon transforms to new style match rule args.
+   - Changed engine scaline transforms to adjust additional boost/thrust
+     speed over normal speed, instead of total boost/thrust speed.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

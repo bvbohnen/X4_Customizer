@@ -32,12 +32,12 @@ if 0 or test_all:
         #transition_size_start              = 200000,
         #transition_size_end                = 400000,
         recenter_sectors                   = False,
-        randomize_new_zones                = False,
         precision_steps                    = 10,
         remove_ring_highways               = True,
-        remove_nonring_highways            = True,
+        remove_nonring_highways            = False,
         extra_scaling_for_removed_highways = 0.7,
-        _test = True)
+        _test = False
+        )
     
 # Test exe edits.
 if 0:
@@ -170,6 +170,10 @@ if 0:
     Rebalance_Engines(race_speed_mults = None)
 
 if 0:
+    Adjust_Engine_Boost_Duration(0.2)
+    Adjust_Engine_Boost_Speed(0.25)
+
+if 0:
     # Adjust speeds per ship class.
     # Note: vanilla averages and ranges are:    
     # xs: 130 (58 to 152)
@@ -178,23 +182,21 @@ if 0:
     # l : 146 (46 to 417)
     # xl: 102 (55 to 164)
     # Try clamping variation to within 0.5x (mostly affects medium).
-    Rescale_Ship_Speeds(match_all = ['type  scout' ],  average = 500, variation = 0.2)
-    Rescale_Ship_Speeds(match_all = ['class ship_s'],  average = 400, variation = 0.5, match_none=['type  scout'])
-    Rescale_Ship_Speeds(match_all = ['class ship_m'],  average = 300, variation = 0.5)
-    Rescale_Ship_Speeds(match_all = ['class ship_l'],  average = 200, variation = 0.5)
-    # Ignore the python (unfinished).
-    Rescale_Ship_Speeds(match_all = ['class ship_xl'], average = 150, variation = 0.5,
-                        match_none = ['name ship_spl_xl_battleship_01_a_macro'])
+    Rescale_Ship_Speeds(
+        # Ignore the python (unfinished).
+        {'match_any' : ['name ship_spl_xl_battleship_01_a_macro'], 'skip' : True},
+        {'match_all' : ['type  scout' ],  'average' : 500, 'variation' : 0.2},
+        {'match_all' : ['class ship_s'],  'average' : 400, 'variation' : 0.5},
+        {'match_all' : ['class ship_m'],  'average' : 300, 'variation' : 0.5},
+        {'match_all' : ['class ship_l'],  'average' : 200, 'variation' : 0.5},
+        {'match_all' : ['class ship_xl'], 'average' : 150, 'variation' : 0.5})
 
 if 0:
     Adjust_Ship_Cargo_Capacity(
-        multiplier = 2,
-        match_all = ['purpose mine'],
+        {'match_all' : ['purpose mine'],  'multiplier' : 2,},
+        {'match_all' : ['purpose trade'], 'multiplier' : 1.5},
         )
     
-if 1:
-    Adjust_Engine_Boost_Duration(0.2)
-
 # Test the gui live editor, doing a transform before and after
 # the patch application. Transform before should show up in the
 # gui edit tables; transform after should show up in the final
@@ -225,9 +227,9 @@ if 0 or test_all:
     #Print_Ware_Stats('ware_stats_postmod')
 
 
-# Weapon transforms and printout.
+# Old style weapon edits.
 if 0 or test_all:
-    #Print_Weapon_Stats('weapon_stats_premod')    
+    Adjust_Weapon_Damage(1.5)
     Adjust_Weapon_Damage(
         ('tags small standard weapon'   , 2),
         ('*'                            , 1.2),
@@ -243,6 +245,31 @@ if 0 or test_all:
     Adjust_Weapon_Fire_Rate(
         ('tags small standard weapon'   , 2),
         ('tags missile'                 , 2),
+        )
+
+# Weapon transforms and printout.
+if 0 or test_all:
+    #Print_Weapon_Stats('weapon_stats_premod')
+    Adjust_Weapon_Damage(1.5)
+    Adjust_Weapon_Damage(
+        {'match_all' : ['tags small standard weapon'], 'multiplier' : 2},
+        {'match_all' : ['*'],                          'multiplier' : 1.2},
+        )
+    Adjust_Weapon_Range(
+        {'match_all' : ['tags small standard weapon'],  'multiplier' : 2},
+        {'match_all' : ['tags missile'],                'multiplier' : 2},
+        )
+    Adjust_Weapon_Shot_Speed(
+        {'match_all' : ['tags small standard weapon'],  'multiplier' : 2},
+        {'match_all' : ['tags missile'],                'multiplier' : 2},
+        )
+    Adjust_Weapon_Fire_Rate(
+        {'match_all' : ['tags small standard weapon'],  'multiplier' : 2},
+        {'match_all' : ['tags missile'],                'multiplier' : 2},
+        )
+    Adjust_Weapon_Fire_Rate(
+        {'match_all' : ['tags small standard weapon'],  'multiplier' : 2, 'min' : 0.5},
+        {'match_all' : ['tags missile'],                'multiplier' : 1.5},
         )
     #Print_Weapon_Stats('weapon_stats_postmod')
     

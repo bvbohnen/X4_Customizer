@@ -10,9 +10,10 @@ from .Scaling import Scale_Regions, Scale_Sectors
 '''
 TODO:
 - Adjust misc md scripts
-  - PlacedObjects maybe.
-    - Data vaults are close to center anyway (generally within 50km any dim).
-    - Abandoned ships can be far, up to 1000km+ per dim.
+  - GM_Find_Object (lockbox distance)
+  - GM_Rescue_Ship (distance to ship)
+  - RML_Patrol (max range is 500km; shrink)
+  - story_dipolomacy_intro (scaleplate station out at 20000km; does this matter?)
 - Change mass traffic draw distance in parameters.xml.
   - Generally want to reduce this due to performance.
   - Maybe optional, or separate transform.
@@ -121,7 +122,6 @@ def Scale_Sector_Size(
         # TODO: make a decision on if this is good or not.
         # Maybe helps with hatikvahs highway/asteroid overlap?
         recenter_sectors = False,
-        randomize_new_zones = False,
         precision_steps = 10,
         remove_ring_highways = False,
         remove_nonring_highways = False,
@@ -159,12 +159,6 @@ def Scale_Sector_Size(
       - Defaults False.
       - In testing, this makes debugging harder, and may lead to unwanted
         results.  Pending further testing to improve confidence.
-    * randomize_new_zones
-      - Randomizes the positions of new zones each run, instead of using
-        the sector name as a seed.
-      - Defaults False.
-      - Generally should be left false, so that zones don't move around
-        for a save game.
     * num_steps
       - Int, over how many movement steps to perform the scaling.
       - Higher step counts take longer to process, but each movement is
@@ -206,11 +200,6 @@ def Scale_Sector_Size(
         'zone_highways' : [(x, x.Get_Root()) for x in [Load_File('maps/xu_ep2_universe/zonehighways.xml')]],
         'clusters'      : [(x, x.Get_Root()) for x in [Load_File('maps/xu_ep2_universe/clusters.xml')]],
         'sec_highways'  : [(x, x.Get_Root()) for x in [Load_File('maps/xu_ep2_universe/sechighways.xml')]],
-        'region_defs'   : [(x, x.Get_Root()) for x in [Load_File('libraries/region_definitions.xml')]],
-        'md_hq'         : [(x, x.Get_Root()) for x in [Load_File('md/X4Ep1_Mentor_Subscription.xml')]],
-        'md_stations'   : [(x, x.Get_Root()) for x in [Load_File('md/FactionLogic_Stations.xml')]],
-        'md_objects'    : [(x, x.Get_Root()) for x in [Load_File('md/PlacedObjects.xml')]],
-        'god'           : [(x, x.Get_Root()) for x in [Load_File('libraries/god.xml')]],
         }
     else:
         gamefile_roots = {
@@ -219,12 +208,16 @@ def Scale_Sector_Size(
         'zone_highways' : [(x, x.Get_Root()) for x in Load_Files('*maps/xu_ep2_universe/*zonehighways.xml')],
         'clusters'      : [(x, x.Get_Root()) for x in Load_Files('*maps/xu_ep2_universe/*clusters.xml')],
         'sec_highways'  : [(x, x.Get_Root()) for x in Load_Files('*maps/xu_ep2_universe/*sechighways.xml')],
+        }
+    gamefile_roots.update({
         'region_defs'   : [(x, x.Get_Root()) for x in [Load_File('libraries/region_definitions.xml')]],
         'md_hq'         : [(x, x.Get_Root()) for x in [Load_File('md/X4Ep1_Mentor_Subscription.xml')]],
         'md_stations'   : [(x, x.Get_Root()) for x in [Load_File('md/FactionLogic_Stations.xml')]],
         'md_objects'    : [(x, x.Get_Root()) for x in [Load_File('md/PlacedObjects.xml')]],
+        'md_gs_split1'  : [(x, x.Get_Root()) for x in [Load_File('extensions/ego_dlc_split/md/gs_split1.xml')]],
         'god'           : [(x, x.Get_Root()) for x in [Load_File('libraries/god.xml')]],
-        }
+        'gamestarts'    : [(x, x.Get_Root()) for x in [Load_File('libraries/gamestarts.xml')]],
+        })
         
 
     def Safe_Update_MD(xml_root, xpath, attr, old_text, new_text):
@@ -272,10 +265,45 @@ def Scale_Sector_Size(
         str(int(400 * scaling_factor) ))
 
 
+    # Adjust the deepspace search lib to have a shorter distance.
+    lib_deepspace_file = Load_File('aiscripts/lib.find.point.indeepspace.xml')
+    lib_deepspace_root = lib_deepspace_file.Get_Root()
+    # The logic here checks for the furthest station position, then adds
+    # a random 50-150km to it when picking a point.
+    # All calls to this use the default params (50,150).
+    # Can reduce the defaults.
+    for name in ['mindistance','maxdistance']:
+        param_node = lib_deepspace_root.find(f'./params/param[@name="{name}"]')
+        # These should be 50km and 150km, but dynamically scale to be safe.
+        value = param_node.get('default')
+        if 'km' in value:
+            value = float(value.replace('km','')) * 1000
+        else:
+            value = float(value)
+        new_value = value * scaling_factor
+        param_node.set('default', f'{new_value:.0f}')
+
+
+    # Build station missions can select points pretty far out. Scale.
+    # Of interest are a couple attributes of 300km.
+    # (Be lazy here and assume unchanged.)
+    gm_build_stations_file = Load_File('md/gm_buildstation.xml')
+    gm_build_stations_root = gm_build_stations_file.Get_Root()
+    for node in gm_build_stations_root.xpath('//create_position[@max="300km"]'):
+        node.set('max', '{:.0f}'.format(300000 * scaling_factor))
+
+    # The defeated split start has a tight oxygen timer (3.5 minutes);
+    # boost it up for more slack in the rescaled time for the rescue
+    # ship to arrive.
+    md_gs_split1_root = gamefile_roots['md_gs_split1'][0][1]
+    oxygen_node = md_gs_split1_root.find('.//set_spacesuit_oxygen')
+    # Was 12%. Bump to 30 (~10 minutes).
+    oxygen_node.set('percent', '30')
+
+
     # Load in data of interest, to the local data structure.
     galaxy = Galaxy(
         gamefile_roots, 
-        randomize_new_zones = randomize_new_zones,
         recenter_sectors = recenter_sectors,
         move_free_ships = move_free_ships)
 
@@ -336,7 +364,10 @@ def Scale_Sector_Size(
 
     faction_stations_file.Update_Root(faction_stations_root)
     faction_logic_file.Update_Root(faction_logic_root)
-
+    lib_deepspace_file.Update_Root(lib_deepspace_root)
+    gm_build_stations_file.Update_Root(gm_build_stations_root)
+            
+        
     return
 
 

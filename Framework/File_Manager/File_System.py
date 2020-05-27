@@ -250,7 +250,7 @@ class File_System_class:
         index matching the given pattern.
         Loads the files as needed. Broken links are skipped.
         Duplicate links are ignored.
-        Can be followed by Get_Assets_By_Class if extra class checking
+        Can be followed by Get_Asset_Files_By_Class if extra class checking
         safety is wanted.
 
         * index
@@ -571,15 +571,14 @@ class File_System_class:
 
         # Pick the path to the catalog folder and file.
         cat_path = Settings.Get_Output_Folder() / 'ext_01.cat'
-
-        # TODO: second cat for subst files, with some way to flag
-        # which game_files are substitutions (eg. anything not xml
-        # that path matches some vanilla or other extension file).
+        # Second cat for subst files.
+        subst_cat_path = Settings.Get_Output_Folder() / 'subst_01.cat'
 
         # Note: this path may be the same as used in a prior run, but
         #  the prior cat file should have been removed by cleanup.
         assert not cat_path.exists()
         cat_writer = Cat_Writer(cat_path)
+        subst_cat_writer = Cat_Writer(subst_cat_path)
 
         # Set up the content.xml file. -Moved to plugin.
         #self.Make_Extension_Content_XML()
@@ -605,11 +604,18 @@ class File_System_class:
             # Set the written tag. Only for machine code files for now.
             if isinstance(file_object, Machine_Code_File):
                 file_object.written = True
+                
+            # Note if this is a file needing to go in a subst cat.
+            # This will override the output_to_catalog setting.
+            # Subst files are those that modify some original base file,
+            # and are not xml (no diff support).
+            needs_subst = file_object.Needs_Subst()
+            #print(f'{file_name} needs_subst: {needs_subst}')
 
-            # In case the target directory doesn't exist, such as on a
-            #  first run, make it, but only when not sending to a catalog.
+            # Handle loose files.
             # Machine_Code_File files will never go in a catalog.
             if (not Settings.output_to_catalog 
+            and not needs_subst
             or isinstance(file_object, Machine_Code_File)):
 
                 # Look up the output path.
@@ -640,20 +646,24 @@ class File_System_class:
                 log.Store()
 
             else:
-                # Add to the catalog writer.
-                cat_writer.Add_File(file_object)
+                # Add to a catalog writer.
+                if needs_subst:
+                    subst_cat_writer.Add_File(file_object)
+                else:
+                    cat_writer.Add_File(file_object)
 
 
-        # If anything was added to the cat_writer, do its write.
-        if cat_writer.game_files:
-            cat_writer.Write()
+        # If anything was added to the cat_writers, do their writes.
+        for writer in [cat_writer, subst_cat_writer]:
+            if writer.game_files:
+                writer.Write()
 
-            # Log both the cat and dat files as written.
-            log.Record_File_Path_Written(cat_writer.cat_path)
-            log.Record_File_Path_Written(cat_writer.dat_path)
+                # Log both the cat and dat files as written.
+                log.Record_File_Path_Written(writer.cat_path)
+                log.Record_File_Path_Written(writer.dat_path)
 
-            # Refresh the log file.
-            log.Store()
+                # Refresh the log file.
+                log.Store()
 
         return
 

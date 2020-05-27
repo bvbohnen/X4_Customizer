@@ -2,6 +2,12 @@
 
 from Framework import Transform_Wrapper, Settings, Load_File, File_System
 
+'''
+Note: color codes may be given as \033#RRGGBB# where the rgb values are
+given as 16-bit hex characters, eg. \033#7F7F7F# for grey.
+TODO: verify this before adding to function doc.
+'''
+
 @Transform_Wrapper(category = 'Text')
 def Color_Text(
         *page_t_colors

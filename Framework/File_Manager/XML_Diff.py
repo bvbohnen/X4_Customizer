@@ -5,9 +5,12 @@ https://tools.ietf.org/html/rfc5261
 '''
 '''
 Side note: Python xml libraries (lxml and ElementTree) xpath operations
-are always with reference to the proper root node.
-X4 xpath appears to have a virtual node above root.
-Eg. in Python, to select root, use '/', but in X4, use '/[0]' or similar.
+are always with reference to the file root node, eg. "macros", which
+is returned when loading or parsing an xml file.
+X4 xpaths appears to have a virtual node above root; this is similar to
+notepad++ xml plugin, where '/' selects a "doc" node above the file root.
+Eg. in Python, to select "macros" style root, use '/', but in X4, 
+use '/*[1]' or similar.
 
 Inputs to these functions will use Python roots, and internally do
 temporary super-root addition to handle operations in the X4 style.
@@ -307,7 +310,7 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
         # For patching purposes, to enable root replacement, nest
         # the original_node under a temporary parent, and then form
         # that into a tree (since '/...' style xpaths are absolute
-        # paths, and only supported on a tree.
+        # paths, and only supported on a tree).
         temp_root = ET.Element('root')
         temp_root.append(original_node)
         temp_tree = ET.ElementTree(temp_root)
@@ -890,6 +893,9 @@ def _Get_Patch_Ops_Recursive(original_node, modified_node, cfg):
                 patch_nodes.append(_Patch_Node_Constructor(
                     op     = 'add', type = 'node',
                     # Insert before the original.
+                    # TODO: if this is a comment, try an alt option to
+                    # place the mod_child after a prior child (or at the
+                    # start of the children if no priors).
                     target = orig_child,
                     pos = 'before',
                     value  = deepcopy(mod_child),
@@ -1102,6 +1108,12 @@ def _Get_Xpath_Recursive(node, cfg):
                 # If just one match, done.
                 if len(similar_elements) == 1:
                     break
+
+        # If the None,None case is still present from above, it indicates
+        # all attributes had quotes and were skipped.
+        # In this case, get the proper xpath match before continuing.
+        if similar_elements[0] == None:
+            similar_elements = parent.xpath(xpath)
 
         # Verify this node was matched with the current xpath.
         assert len(similar_elements) >= 1

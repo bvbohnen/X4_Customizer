@@ -28,7 +28,7 @@ if 0:
 Adjust_Job_Count(('id masstraffic*', 0.5))
 
 # Testing adjusting jobs globally.
-#Adjust_Job_Count(('*', .0001))
+Adjust_Job_Count(('*', .0001))
 
 # Toy around with coloring.
 # This is Pious Mists.
@@ -87,8 +87,8 @@ if 1:
     #  4x/8x: 46 fps
     Increase_AI_Script_Waits(
         oos_multiplier = 2,
-        oos_seta_multiplier = 4,
-        oos_max_wait = 15,
+        oos_seta_multiplier = 6,
+        oos_max_wait = 20,
         iv_multiplier = 1,
         # TODO: is iv wait modification safe?
         iv_seta_multiplier = 2,
@@ -105,6 +105,13 @@ if 1:
 
     # Enable seta when not piloting.
     # TODO: couldn't find a way to do this.
+
+    # Reduce weapon rofs; seta impact is a bit much on the faster stuff (6 rps).
+    # Prevent dropping below 1 rps.
+    Adjust_Weapon_Fire_Rate(
+        {'match_any' : ['tags standard weapon','tags standard turret'],  
+         'multiplier' : 0.5, 'min' : 1},
+        )
 
     # Retune radars to shorter range, for fps and for smaller sectors.
     Set_Default_Radar_Ranges(
@@ -135,16 +142,16 @@ if 1:
             # Slightly better base speed, worse boost.
             'paranid' : {'thrust' : 1.05, 'boost'  : 0.80, 'boost_time' : 0.8 },
             # Fast speeds, short boost.
-            'split'   : {'thrust' : 1.10, 'boost'  : 1.20, 'boost_time' : 0.6 },
+            'split'   : {'thrust' : 1.10, 'boost'  : 1.20, 'boost_time' : 0.7 },
             # Slower teladi speeds, but balance with long boosts.
-            'teladi'  : {'thrust' : 0.95, 'boost'  : 0.90, 'boost_time' : 1.5 },
+            'teladi'  : {'thrust' : 0.95, 'boost'  : 0.90, 'boost_time' : 1.3 },
             },
         purpose_speed_mults = {
             'allround' : {'thrust' : 1,    'boost' : 1,    'boost_time' : 1,    },
             # Combat will be slowest but best boost.
-            'combat'   : {'thrust' : 0.9,  'boost' : 1.5,  'boost_time' : 1.5,  },
+            'combat'   : {'thrust' : 0.9,  'boost' : 1.2,  'boost_time' : 1.5,  },
             # Travel is fastest, worst boost.
-            'travel'   : {'thrust' : 1.1,  'boost' : 0.5,  'boost_time' : 0.5,  },
+            'travel'   : {'thrust' : 1.1,  'boost' : 0.8,  'boost_time' : 0.8,  },
             },
         )
     
@@ -175,15 +182,15 @@ if 1:
     # l : 146 (46 to 417)
     # xl: 102 (55 to 164)
     # Try clamping variation to within 0.5x (mostly affects medium).
-    # TODO: more fine-grain, by purpose (corvette vs frigate, etc.).
-    Rescale_Ship_Speeds(match_all = ['type  scout' ],  average = 500, variation = 0.2)
-    Rescale_Ship_Speeds(match_all = ['class ship_s'],  average = 400, variation = 0.25, 
-                        match_none= ['type  scout'])
-    Rescale_Ship_Speeds(match_all = ['class ship_m'],  average = 300, variation = 0.3)
-    Rescale_Ship_Speeds(match_all = ['class ship_l'],  average = 200, variation = 0.4)
-    # Ignore the python (unfinished).
-    Rescale_Ship_Speeds(match_all = ['class ship_xl'], average = 150, variation = 0.4,
-                        match_none= ['name ship_spl_xl_battleship_01_a_macro'])
+    # TODO: more fine-grain, by purpose (corvette vs frigate, etc.).    
+    Rescale_Ship_Speeds(
+        # Ignore the python (unfinished).
+        {'match_any' : ['name ship_spl_xl_battleship_01_a_macro'], 'skip' : True},
+        {'match_all' : ['type  scout' ],  'average' : 500, 'variation' : 0.2},
+        {'match_all' : ['class ship_s'],  'average' : 400, 'variation' : 0.25},
+        {'match_all' : ['class ship_m'],  'average' : 300, 'variation' : 0.3},
+        {'match_all' : ['class ship_l'],  'average' : 200, 'variation' : 0.4},
+        {'match_all' : ['class ship_xl'], 'average' : 150, 'variation' : 0.4})
     
     # Rescale the sectors.
     Scale_Sector_Size(
@@ -200,11 +207,11 @@ if 1:
     
     # Miners can struggle to keep up. Increase efficiency somewhat by
     # letting them haul more cargo.
+    # Traders could also use a little bump, though not as much as miners
+    # since stations are closer than regions.
     Adjust_Ship_Cargo_Capacity(
-        multiplier = 2,
-        match_all = ['purpose mine'],
-        )
-
+        {'match_all' : ['purpose  mine' ],  'multiplier' : 2},
+        {'match_all' : ['purpose  trade' ], 'multiplier' : 1.5})
 
 
 # Write modified files.

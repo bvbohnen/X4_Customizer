@@ -18,6 +18,9 @@ if str(parent_dir) not in sys.path:
     sys.path.append(str(parent_dir))
 import Framework
 
+# TODO: replace with Path stuff.
+# Note: powershell messes up these paths (relative instead of full), and
+# leads to problems further below.
 This_dir = os.path.join(os.path.dirname(__file__))
 Top_dir = os.path.normpath(os.path.join(This_dir, '..'))
 
@@ -170,6 +173,7 @@ def Make(*args):
     # Add all files to the zip, with an extra nesting folder to
     # that the files don't sprawl out when unpacked.
     for path in file_paths:
+        #print (version_name + '\\' + os.path.relpath(path, Top_dir))
         zip_file.write(
             # Give a full path.
             path,

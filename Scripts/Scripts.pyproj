@@ -14,6 +14,7 @@
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <CommandLineArguments>"C:\Steam\steamapps\common\X4 Foundations\extensions\MapMarker\unpacked" "C:\Steam\steamapps\common\X4 Foundations\extensions\MapMarker\repack.cat"</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+    <SuppressConfigureTestFrameworkPrompt>true</SuppressConfigureTestFrameworkPrompt>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>

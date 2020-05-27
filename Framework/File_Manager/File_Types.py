@@ -24,43 +24,54 @@ def New_Game_File(binary, **kwargs):
     All inputs should be given as keyword args.
     '''
     virtual_path = kwargs['virtual_path']
+    split = virtual_path.rsplit('.',1)
 
-    # Check for xml files.
-    if virtual_path.endswith('.xml'):
-
-        # Default generic xml.
-        class_type = XML_File
-
-        # Check for special file types.
-        if virtual_path.startswith('t/'):
-            class_type = XML_Text_File
-
-        elif virtual_path == 'libraries/wares.xml':
-            class_type = XML_Wares_File
-
-        # Macros and components are in index/, but mousecursors is in
-        # libraries and doesn't have full paths.
-        # TODO: maybe drop support for mousecursors.
-        elif (virtual_path.startswith('index/') 
-        or virtual_path == 'libraries/mousecursors.xml'):
-            class_type = XML_Index_File
-
-    elif virtual_path.endswith('.xsd'):
-        # These are xml style documentation of xml syntax.
-        # May be compatible with xml, so try that.
-        class_type = XML_File
-
-    elif virtual_path.endswith('.exe') or virtual_path.endswith('dll'):
-        # Raw x86 code files.
-        class_type = Machine_Code_File
-
-    elif virtual_path.endswith('.sig'):
-        # Generic signature.
-        class_type = Signature_File
+    # If no suffix, just consider misc.
+    if len(split) == 1:
+        class_type = Misc_File
 
     else:
-        # Generic binary file.
-        class_type = Misc_File
+        suffix = split[1]
+
+        # Check for xml files (ogl is an xml shader spec).
+        if suffix in ['xml','ogl']:
+
+            # Default generic xml.
+            class_type = XML_File
+
+            # Check for special file types.
+            if virtual_path.startswith('t/'):
+                class_type = XML_Text_File
+
+            elif virtual_path == 'libraries/wares.xml':
+                class_type = XML_Wares_File
+
+            # Macros and components are in index/, but mousecursors is in
+            # libraries and doesn't have full paths.
+            # TODO: maybe drop support for mousecursors.
+            elif (virtual_path.startswith('index/') 
+            or virtual_path == 'libraries/mousecursors.xml'):
+                class_type = XML_Index_File
+
+        elif suffix == 'xsd':
+            # These are xml style documentation of xml syntax.
+            # May be compatible with xml, so try that.
+            class_type = XML_File
+
+        elif suffix in ['exe','dll']:
+            # Raw x86 code files.
+            class_type = Machine_Code_File
+        
+        elif suffix == 'sig':
+            # Generic signature.
+            class_type = Signature_File
+        
+        elif suffix in ['f','v','vh','tcs','tes']:
+            class_type = Text_File
+
+        else:
+            # Generic binary file.
+            class_type = Misc_File
 
     # Build and return the game file.
     return class_type(binary = binary, **kwargs)
@@ -143,6 +154,10 @@ class Game_File:
     * written
       - Bool, if this file has had its changes written back out.
       - Used selectively by the file writeback system.
+    * load_error
+      - Bool, True if this file experienced a load error.
+      - Generally, error files should be skipped.
+      - Primarily used for empty xml files.
     '''
     def __init__(
             self,
@@ -158,6 +173,7 @@ class Game_File:
         self.virtual_path = virtual_path
         self.file_source_path = file_source_path
         self.written = False
+        self.load_error = False
 
         # Can determine substitution status based on the source
         # catalog name.
@@ -215,6 +231,17 @@ class Game_File:
         after any modifications, including file name.
         '''
         return Settings.Get_Output_Folder() / self.virtual_path
+
+    def Needs_Subst(self):
+        '''
+        Returns True if this file needs to be placed in a subst catalog
+        due to replacing some original file.
+        '''
+        # If there was a source this read from, then assume a subst is
+        # needed. XML type will override this.
+        if self.file_source_path:
+            return True
+        return False
 
 
     #def Is_Patch(self):
@@ -360,32 +387,43 @@ class XML_File(Game_File):
         assert binary != None or xml_root != None
 
         if binary != None:
-            # Process into an xml tree.
-            # Strip out blank text here, so that prettyprint works later.
-            # Note: this could throw xml parsing errors if there are problems
-            # with the file. Let the higher level catch such problems.
+            # Dummy files may have empty binary; handle specially.
+            if len(binary) == 0:
+                Plugin_Log.Print(f'Error: empty xml format file: {self.virtual_path}')
+                self.original_root = None
+            else:
+                # Process into an xml tree.
+                # Strip out blank text here, so that prettyprint works later.
+                # Note: this could throw xml parsing errors if there are problems
+                # with the file. Let the higher level catch such problems.
 
-            # Note: in testing, if the xml file starts with a comment block,
-            # and that block has a blank line, this XML function will double
-            # count that line, causing the sourceline attributes on nodes
-            # to be off. (This doesn't happen when using parse() on file
-            # objects.) No clear fix at this time.
-            self.original_root = ET.XML(
-            binary,
-            parser = ET.XMLParser(remove_blank_text=True))
+                # Note: in testing, if the xml file starts with a comment block,
+                # and that block has a blank line, this XML function will double
+                # count that line, causing the sourceline attributes on nodes
+                # to be off. (This doesn't happen when using parse() on file
+                # objects.) No clear fix at this time.
+                self.original_root = ET.XML(
+                binary,
+                parser = ET.XMLParser(remove_blank_text=True))
 
         elif xml_root != None:
             assert isinstance(xml_root, ET._Element)
             self.original_root = xml_root
             
-        # Init the patched version to the original.
-        # Deepcopy this, since patching will edit it in place.
-        self.patched_root = deepcopy(self.original_root)
-        self.modified_root = None
+        if self.original_root != None:
+            # Init the patched version to the original.
+            # Deepcopy this, since patching will edit it in place.
+            self.patched_root = deepcopy(self.original_root)
+            self.modified_root = None
 
-        # The root tag should never be changed by mods, so can
-        #  record it here pre-patching.
-        self.root_tag = self.original_root.tag
+            # The root tag should never be changed by mods, so can
+            #  record it here pre-patching.
+            self.root_tag = self.original_root.tag
+        else:
+            self.patched_root = None
+            self.modified_root = None
+            self.root_tag = None
+            self.load_error = True
         return
     
     
@@ -395,6 +433,9 @@ class XML_File(Game_File):
         setup that needs to account for diff patches.
         This should be called once after all patching is finished.
         '''
+        if self.load_error:
+            return
+
         # Annotate the patched_root with node ids.
         XML_Diff.Fill_Node_IDs(self.patched_root)
         
@@ -630,7 +671,11 @@ class XML_File(Game_File):
         # Pack into an ElementTree, to get full header.
         # Modified source files will form a diff patch, others
         # just record full xml.
-        if self.from_source and not no_diff and version == 'current':
+        # Non-xml will not support diffs.
+        if (self.from_source 
+        and not no_diff 
+        and version == 'current' 
+        and self.virtual_path.endswith('.xml')):
             tree = ET.ElementTree(self.Get_Diff())
         else:
             tree = ET.ElementTree(self.Get_Root_Readonly(version))
@@ -665,7 +710,16 @@ class XML_File(Game_File):
         with open(file_path, 'wb') as file:
             file.write(binary)
         return
-
+    
+    def Needs_Subst(self):
+        '''
+        Returns False for xml files, True for other extensions.
+        '''
+        # Note: in a quick test of ogl it did not seem diff patching worked
+        # for non-xml.
+        if not self.virtual_path.endswith('.xml'):
+            return True
+        return False
     
     def Substitute(self, other_file):
         '''
@@ -1102,14 +1156,18 @@ class Misc_File(Game_File):
 
     Attributes:
     * text
-      - String, raw text for the file. Optional if binary is present.
+      - String, raw text for the file. 
+      - Optional if binary is present.
     * binary
-      - Bytes object, binary for this file. Optional if text is present.
+      - Bytearray object holding the binary (may be given as bytes).
+      - Optional if text is present.
     '''
     def __init__(self, text = None, binary = None, **kwargs):
         super().__init__(**kwargs)
         self.text = text
         self.binary = binary
+        if binary != None:
+            self.binary = bytearray(binary)
         
 
     def Get_Text(self):
@@ -1118,6 +1176,12 @@ class Misc_File(Game_File):
         '''
         return self.text
 
+    def Set_Text(self, text):
+        '''
+        Overwrites the text for this file.
+        '''
+        self.modified = True
+        self.text = text
     
     def Get_Binary(self, for_cat = False, **kwargs):
         '''
@@ -1167,7 +1231,21 @@ class Misc_File(Game_File):
         with open(file_path, 'wb') as file:
             file.write(self.binary)
         return
+    
 
+class Text_File(Misc_File):
+    '''
+    File holding text.  Eg. shader c-style code.
+    Mostly a dummy class.
+    '''
+    def __init__(self, text = None, binary = None, **kwargs):
+        super().__init__(**kwargs)
+        if text != None:
+            self.text = text
+        else:
+            assert binary != None
+            # Manually standardize newlines.
+            self.text = binary.decode().replace('\r\n','\n').replace('\r','\n')
     
 
 class Machine_Code_File(Game_File):
@@ -1211,7 +1289,10 @@ class Machine_Code_File(Game_File):
         with open(file_path, 'wb') as file:
             file.write(self.binary)
         return
-
+    
+    def Needs_Subst(self):
+        'Machine code never goes in catalogs, so does not need subst.'
+        return False
     
 
 class Signature_File(Misc_File):

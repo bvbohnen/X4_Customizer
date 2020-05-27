@@ -13,20 +13,34 @@ from .Component import *
 from .Ship import *
 from .Engine import *
 from .Storage import *
+from .Weapons import *
 
 __all__ = ['Database']
 
 # TODO: better way to match x4 classes to local classes, and better automation
 # of filling this dict.
 class_name_to_macro = {
+
     'spacesuit': Ship,
     'ship_xs' : Ship,
     'ship_s'  : Ship,
     'ship_m'  : Ship,
     'ship_l'  : Ship,
     'ship_xl' : Ship,
+
     'engine'  : Engine,
     'storage' : Storage,
+
+    'bomblauncher'   : Weapon_System,
+    'missilelauncher': Weapon_System,
+    'missileturret'  : Weapon_System,
+    'turret'         : Weapon_System,
+    'weapon'         : Weapon_System,
+
+    'bullet'  : Bullet,
+    'missile' : Missile,
+    'bomb'    : Bomb,
+    'mine'    : Mine,
     }
 
 # TODO: directly track connections.
@@ -163,9 +177,17 @@ class Database:
         macros = self.Get_Macros(macro_name)
         return macros[0]
 
-    def Get_Macros(self, pattern):
+
+    def Get_Macros(self, pattern, classes = None, class_names = None):
         '''
         Returns a list of Macros with names matching the given pattern.
+
+        * pattern
+          - Wildcard virtual_path matching pattern.
+        * classes
+          - Optional list of macro classes to include.
+        * class_names
+          - Optional list of class names to include.
         '''
         # Cache patterns seen, to skip index lookup.
         if pattern not in self._get_macros_cache:
@@ -182,7 +204,10 @@ class Database:
 
         # Now pick out the actual macros.
         macro_names = fnmatch.filter(self.macros.keys(), pattern.lower())
-        return [self.macros[x] for x in macro_names]
+        # Filter for wanted classes, if a list was given.
+        return [self.macros[x] for x in macro_names 
+                if ((not class_names or self.macros[x].class_name in class_names) 
+                and (not classes or isinstance(self.macros[x], tuple(classes)))) ]
 
     
     def Get_Component(self, component_name):

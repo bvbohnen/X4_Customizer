@@ -378,6 +378,8 @@ def Scale_Sector(galaxy, sector, scaling_factor, debug, precision_steps):
                 # since only highway splines need to be kept together.
 
                 # Are they close enough that they should merge?
+                # TODO: force merging of region and object on first pass
+                # if they are at the same position.
                 if this_group.Should_Merge_With(other_group, target_sector_size, step_scaling):
                     
                     # Prune both original groups out.
@@ -477,11 +479,13 @@ def Scale_Sector(galaxy, sector, scaling_factor, debug, precision_steps):
 
         # Record md object movements.
         elif object.md_object:
-            md_object.position = object.sector_pos
+            if object.md_object.position is not object.sector_pos:
+                object.md_object.position.Update(object.sector_pos)
             
         # Record god object movements.
         elif object.god_object:
-            god_object.position = object.sector_pos
+            if object.god_object.position is not object.sector_pos:
+                object.god_object.position.Update(object.sector_pos)
 
             
         # Everything else should be sector-level connections.
@@ -525,8 +529,7 @@ def Create_Zones(galaxy, sector, objects, scaling_factor):
     # For consistency across runs, seed the rng.
     # Use the sum of the sector name characters for this, so each
     # sector is a bit different, but still consistent.
-    if not galaxy.randomize_new_zones:
-        random.seed(sector.name)
+    random.seed(sector.name)
 
     # The needed zone count is a little unclear, as it depends on the
     # number of god stations (which could be affected by mods).
@@ -609,6 +612,13 @@ def Place_Object(
             # trying to stay relatively close to them, since they can
             # indicate the shape of the region. Though god zones seem to
             # be pretty random, so this is fine for now.
+
+            # TODO: change this algorithm to be less random, picking somewhat
+            # fixed positions in the sector, and adjusting them to move away
+            # from nearby objects (but not re-randomizing), so have more
+            # stability between runs.
+            # (Right now, if this code is changed, it will muck with an
+            # existing save, moving its zones around).
 
             while 1:
                 pos = Position(

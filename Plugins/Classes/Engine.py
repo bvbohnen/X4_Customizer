@@ -8,23 +8,10 @@ __all__ = ['Engine']
 
 class Engine(Macro):
     '''
-    Engine macro. This will be filled in as needed; many basic ship edits
-    are done directly on the xml.
-
-    * component_name
-      - Name of the base component.
-    * component
-      - Component, filled in by Get_Component.
+    Engine macro.
     '''
-
     def __init__(self, xml_node, *args, **kwargs):
         super().__init__(xml_node, *args, **kwargs)
-
-        # Of notable interest is the main component
-        self.component_name = xml_node.find('./component').get('ref')
-        self.component = None
-
-        # Read out info of interest, as it comes up.
         return
 
     def Get_mk(self):
@@ -53,21 +40,23 @@ class Engine(Macro):
         return float(self.Get('./properties/thrust', 'forward'))
     
     def Get_Boost_Thrust(self):
-        'Returns boost thrust strength, or None if boost undefined.'
+        'Returns boost bonus thrust strength, or None if boost undefined.'
         forward_thrust = self.Get_Forward_Thrust()
         mult_str = self.Get('./properties/boost', 'thrust')
         if not mult_str:
             return
-        mult = float(mult_str)
+        # Subtract the 1 from base thrust.
+        mult = float(mult_str) - 1
         return forward_thrust * mult
     
     def Get_Travel_Thrust(self):
-        'Returns boost travel strength, or None if boost undefined.'
+        'Returns travel bonus thrust strength, or None if boost undefined.'
         forward_thrust = self.Get_Forward_Thrust()
         mult_str = self.Get('./properties/travel', 'thrust')
         if not mult_str:
             return
-        mult = float(mult_str)
+        # Subtract the 1 from base thrust.
+        mult = float(mult_str) - 1
         return forward_thrust * mult
 
     def Get_Boost_Time(self):
@@ -104,12 +93,16 @@ class Engine(Macro):
         # Backcompute the multiplier needed.
         forward_thrust = self.Get_Forward_Thrust()
         mult = new_thrust / forward_thrust
+        # Add 1 for base thrust.
+        mult += 1
         self.Set('./properties/boost', 'thrust', f'{mult:.3f}')
     
     def Set_Travel_Thrust(self, new_thrust):
         # Backcompute the multiplier needed.
         forward_thrust = self.Get_Forward_Thrust()
         mult = new_thrust / forward_thrust
+        # Add 1 for base thrust.
+        mult += 1
         self.Set('./properties/travel', 'thrust', f'{mult:.3f}')
     
     def Set_Travel_Mult(self, new_mult):

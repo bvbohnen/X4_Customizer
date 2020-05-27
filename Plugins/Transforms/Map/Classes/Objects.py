@@ -273,10 +273,14 @@ class Object_Group:
         # restrictive.  (Eg. zones can go inside asteroid fields.)
         # However, if the region does damage, allow merging, so try to keep
         # zones from being moved inside the damage.
-        if not self.has_damage_regions and not other.has_damage_regions:
-            if((self.has_regions and not other.has_regions)
-            or (not self.has_regions and other.has_regions)):
-                return False        
+        # Update: allow merging, since other rules allow objects to move
+        # around inside regions, and this merge would help support some
+        # cases where a zone/object/etc should stay aligned with
+        # a nearby over overlapping region.
+        #if not self.has_damage_regions and not other.has_damage_regions:
+        #    if((self.has_regions and not other.has_regions)
+        #    or (not self.has_regions and other.has_regions)):
+        #        return False        
 
         # Check all object combos between groups.
         for object_1 in self.objects:

@@ -61,14 +61,14 @@ class Macro:
             conn.Replace_XML(replacements)
         return
 
-    def Get(self, xpath, attr):
+    def Get(self, xpath, attr, default = None):
         '''
         Return an attribute or element matching the given xpath and attribute.
         '''
         node = self.xml_node.find(xpath)
         if node != None:
             return node.get(attr)
-        return
+        return default
     
     def Set(self, xpath, attr, value):
         '''

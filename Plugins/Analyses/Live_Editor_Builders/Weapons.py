@@ -65,9 +65,17 @@ def Display_Update_RoF(
     if ammunition_rounds == '1' and not reload_rate:
         reload_rate = '1'
 
+    # Weapon may have reload_time instead of reload_rate; swap to
+    # rate to standardize.
+    reload_rate_fl = None
+    if reload_time and not reload_rate:
+        reload_rate_fl = 1 / float(reload_time)
+    elif reload_rate:
+        reload_rate_fl = float(reload_rate)
+
     # If reload_rate and ammunition_reload_time available, mix them
     # for a burst weapon.
-    if (reload_rate and not reload_time 
+    if (reload_rate_fl 
         and ammunition_reload_time and ammunition_rounds):
         # Note: game calculates this wrongly as of ~1.5, multiplying
         # the ammunition_rounds-1 by reload_rate instead of 1/reload_rate.
@@ -77,7 +85,7 @@ def Display_Update_RoF(
         # Test: 1 round burst, 1 reload_rate, 1 reload_time => 1 round/sec, enc says 1.
         # Test: 2 round burst, 1 reload_rate, 2 reload_time => 2 round/3 sec, enc says 0.5
         # So, this calc is correct, enc is wrong (in latter case).
-        burst_time = 1/float(reload_rate) * (float(ammunition_rounds)-1)
+        burst_time = 1/reload_rate_fl * (float(ammunition_rounds)-1)
         time = float(ammunition_reload_time) + burst_time
         return Float_to_String(float(ammunition_rounds)/time)
 

@@ -48,7 +48,13 @@
     <Compile Include="Analyses\Live_Editor_Builders\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Classes\Shared.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Classes\Storage.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Weapons.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GUI\Edit_View_Window\Edit_Table_Model.py">

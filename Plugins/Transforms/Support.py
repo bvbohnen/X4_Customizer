@@ -158,8 +158,88 @@ def XML_Multiply_Float_Attribute(node, attr, multiplier, precision = 4):
     '''
     XML_Modify_Float_Attribute(node, attr, multiplier, '*', precision)
 
+    
+###############################################################################
+# Newer match rule style.
+
+def Convert_Old_Match_To_New(old_match_list, *arg_names):
+    '''
+    Convert old style match rules to the new style.
+    Old style: [(rule_str, arg0, ...), ...]
+    New style: [{'match_any':[rule_str], arg_names[0]:arg0, ...}]
+
+    * old_match_list
+      - List of old match rules and linked arguments (often just one arg).
+    * *arg_names
+      - Names of the arguments, in order, to use in the return dicts.
+
+    Returns a list of dicts.
+    '''
+    ret_list = []
+    for old_match_rule in old_match_list:
+
+        # If just a const was given, apply it to all.
+        if isinstance(old_match_rule, (int, float)):
+            this_dict = {'match_any':['*']}
+            args = [old_match_rule]
+        else:
+            # Otherwise it is a single match rule.
+            rule = old_match_rule[0]
+            this_dict = {'match_any':[rule]}
+            args = old_match_rule[1:]
+
+        for field, value in zip(arg_names, args):
+            this_dict[field] = value
+        ret_list.append(this_dict)
+    return ret_list
+
+    
+def Fill_Defaults(dict_list, defaults):
+    '''
+    Fill all dicts in a list with default field values from a dict of
+    defaults. Returns nothing; edits dicts directly. Some fields are
+    filled automatically: 'match_any', 'match_all', 'match_none' are None,
+    'skip' is False.
+    '''
+    defaults['skip'] = False
+    for field in ['match_any','match_all','match_none']:
+        defaults[field] = None
+    for field, default in defaults.items():
+        for dict in dict_list:
+            if not field in dict:
+                dict[field] = default
+    return
 
 
+def Group_Objects_To_Rules(objects, rules, match_func):
+    '''
+    Matches objects against rules, and attaches matches to a rule['matches']
+    sublist.  Each rule should be a dict with 'match_any', 'match_all',
+    'match_none' subrules, and may have other fields (except 'matches').
+    
+    Returns nothing. Rules are annotated in-place.
+
+    * objects
+      - List of Macros or Componenets.
+    * rules
+      - List of dicts, containing lists of match rules: 'match_any',
+       'match_all', 'match_none'.
+      - Each rule gets annotated with a list of 'matches'.
+    * match_func
+      - Function for checking a match. Should take an object, and each
+        of the match rule lists named above, as well as **kwargs to
+        be ignored.
+    '''
+    # Group the ships according to rules.
+    for rule in rules:
+        rule['matches'] = []
+    for object in objects:
+        for rule in rules:
+            if match_func(object, **rule):
+                rule['matches'].append(object)
+                # Stop after first match.
+                break
+    return
 
 ###############################################################################
 # Binary patching support, brought over from X3 Customizer.
@@ -193,7 +273,10 @@ class Binary_Patch:
         two bytes of values '0607'. The number of '-' and '+' must
         always match.
     * expected_matches
-      - Int, number of places in code a match should be found.
+      - List of ints, number of places in code a match should be found.
+      - May give multiple values that are considered a success, eg.
+        [0,1,2] for 0, 1, or 2 matches.
+      - May be initialized from an int.
       - Normally 1, but may be more in some cases of repeated code that
         should all be patched the same way.
     '''
@@ -202,7 +285,11 @@ class Binary_Patch:
         # Prune off spacing, newlines.
         self.ref_code = ref_code.replace(' ','').replace('\n','')
         self.new_code = new_code.replace(' ','').replace('\n','')
-        self.expected_matches = expected_matches
+        # Pack the matches to a tuple/list.
+        if isinstance(expected_matches, int):
+            self.expected_matches = (expected_matches,)
+        else:
+            self.expected_matches = expected_matches
 
 
 def _String_To_Bytes(string, add_escapes = False):
@@ -292,6 +379,17 @@ def Int_To_Hex_String(value, byte_count, byteorder = 'big'):
     return bin2hex(value.to_bytes(byte_count, byteorder = byteorder)).decode()
     
 
+def String_To_Hex_String(string):
+    '''
+    Converts a normal string to a hex representation, with 2 hex characters
+    per string character.
+    '''
+    chars = [f'{ord(c):x}' for c in string]
+    chars = ''.join(chars)
+    assert len(chars) == 2 *  len(string)
+    return chars
+
+
 def _Get_Matches(patch):
     '''
     Find locations in the binary code where a patch can be applied.
@@ -331,7 +429,7 @@ def _Get_Matches(patch):
         caller_name = '?'
 
     # Do the error check if a non-expected number of matches found.
-    if len(matches) != patch.expected_matches:
+    if len(matches) not in patch.expected_matches:
         # Can raise a hard or soft error depending on mode.
         # Message will be customized based on error type.
         if Settings.developer:
@@ -384,14 +482,18 @@ def _Get_Matches(patch):
 
 
 def Apply_Binary_Patch(patch):
-    'Applies a single patch. Redirects to Apply_Binary_Patch_Group.'
-    Apply_Binary_Patch_Group([patch])
+    '''
+    Applies a single patch. Redirects to Apply_Binary_Patch_Group.
+    Returns True on success, False on failure.
+    '''
+    return Apply_Binary_Patch_Group([patch])
 
 
 def Apply_Binary_Patch_Group(patch_list):
     '''
     Applies a group of patches as a single unit.
     If any patch runs into an error, no patch in the group will be applied.
+    Returns True on success, False on failure.
     '''
     # Start with a search for matches.
     # These calls may raise an exception on error, or could return None
@@ -400,7 +502,7 @@ def Apply_Binary_Patch_Group(patch_list):
     for patch in patch_list:
         matches_list.append(_Get_Matches(patch))
 
-    # Return early on a None was returned.
+    # Return early if a None was returned.
     if None in matches_list:
 
         # Get the indices of the patches that had errors or no errors.
@@ -418,14 +520,16 @@ def Apply_Binary_Patch_Group(patch_list):
                      correct_patches ))
             Print('Failed patches  : {}.'.format(
                      failed_patches ))
-        return
+        return False
 
 
     # It should now be safe to apply all patches in the group.
     file_contents = File_Manager.Load_File(patch.file)
-    file_contents.Set_Modified()
 
     for patch, matches in zip(patch_list, matches_list):
+        # With at least one match, set as modified.
+        # (If the patch defined 0 matches as okay, this may be skipped.)
+        file_contents.Set_Modified()
 
         # Loop over the matches to apply each of them.
         for match in matches:
@@ -498,4 +602,4 @@ def Apply_Binary_Patch_Group(patch_list):
 
             # Error check.
             assert len(file_contents.binary) == start_length
-    return
+    return True

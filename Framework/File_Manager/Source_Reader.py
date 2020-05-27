@@ -207,6 +207,12 @@ class Source_Reader_class:
         TODO: split out the error checks/messages to another function.
         TODO: move some of this id/dependency setup code into the
         extension_finder.
+        TODO: maybe try to match better to the game; eg. does the game
+        go through all extensions in alphabetical order and load those
+        with satisfied dependencies, looping, or does it restart the order
+        whenever an extension is loaded, or does it split out extensions
+        based on dependency depth (depth of highest dependendee +1) and
+        load in depth order, or what?
 
         * priorities
           - Dict, keyed by extension name, holding an integer priority.
@@ -530,6 +536,7 @@ class Source_Reader_class:
                 # The reader only give its local path.
                 if game_file != None:
                     game_file.virtual_path = virtual_path
+
         else:
             # Read from the source and base x4 locations.
             if self.loose_source_reader != None:
@@ -553,6 +560,16 @@ class Source_Reader_class:
                     'Could not find a match for file {}'.format(virtual_path))
             return None
         
+        # Check for load errors, eg. an empty xml file that has no root.
+        # Can continue past this point, but needs some care to disable
+        # diff patching (subst is fine).
+        if game_file.load_error:            
+            message = ('Warning: File experienced a loading error, on path "{}".'
+                       ).format(virtual_path)
+            # TODO: maybe an option to throw an exception.
+            # In the motivating case, empty shader ogl (xml format) files,
+            # no exception was wanted.
+            Plugin_Log.Print(message)
 
         # This could go awry if the first extension file is a diff
         #  patch, which has nothing to patch.
@@ -562,6 +579,7 @@ class Source_Reader_class:
         #  and keep going with best effort, similar to x4 (though there
         #  they give no warning).
         if (isinstance(game_file, File_Types.XML_File)
+        and not game_file.load_error
         and game_file.Get_Root_Readonly().tag == 'diff'):
             message = ('Error: File found is a diff patch with nothing'
                               ' to patch, on path "{}".').format(virtual_path)
@@ -578,6 +596,9 @@ class Source_Reader_class:
         #  patches; an extension can apply both, and substitutions
         #  from all extensions should preceed patches from all.
         for mode in ['substitution','patch']:
+            # Skip patches if there was a loading error.
+            if game_file.load_error and mode == 'patch':
+                continue
 
             for ext_reader in self.extension_source_readers.values():
 

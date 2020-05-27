@@ -57,7 +57,7 @@ def Adjust_Engine_Boost_Speed(multiplier):
         # Skip if undefined.
         if not value:
             continue
-        macro.Set_Boost_Thrust( value * multiplier)
+        macro.Set_Boost_Thrust(value * multiplier)
     database.Update_XML()
     return
 

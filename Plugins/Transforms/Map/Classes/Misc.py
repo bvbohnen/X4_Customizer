@@ -8,6 +8,9 @@ __all__ = [
     'MD_Placed_Object',
     'MD_Headquarters',
     'God_Object',
+    'MD_gs_split1_battlefield',
+    'MD_gs_split1_pickupship',
+    'MD_Gamestart',
     ]
 
 class MD_Object:
@@ -137,6 +140,126 @@ class MD_Headquarters(MD_Object):
         self.hq_pos_node.set('exact', pos_string)
         return
 
+    
+class MD_gs_split1_battlefield(MD_Object):
+    '''
+    Split start battlefield location, used to spawn defense fleet, player,
+    ref position for rescue ship (which should also be moved closer).
+    
+    * battlefield_pos_node
+    '''
+    def __init__(self, xml_node):
+        super().__init__(xml_node)
+        self.name = 'MD_gs_split1_battlefield'
+
+        # Bump up the radius a bunch.
+        # 40k should be good enough, maybe.
+        self.radius = 40000
+    
+        # Sector name is set earlier in the file.
+        # <find_sector name="$FiresOfSector" macro="macro.cluster_421_sector001_macro"/>
+        self.sector_name = xml_node.find('.//find_sector[@name="$FiresOfSector"]').get('macro').replace('macro.','')
+
+        # Get the position node.
+        # <create_position name="$Battlefield" object="$FiresOfSector" x="42000" y="-5000" z="120000" ...
+        self.battlefield_pos_node = xml_node.find('.//create_position[@name="$Battlefield"]')
+        self.position = Position(self.battlefield_pos_node)
+        return
+    
+    def Update_XML(self):
+        # Can update the position normally.
+        self.position.Update_XML()
+        return
+    
+
+class MD_gs_split1_pickupship(MD_Object):
+    '''
+    Split start rescue ship location.
+
+    * rescue_ship_pos_node
+    '''
+    def __init__(self, xml_node):
+        super().__init__(xml_node)
+        self.name = 'MD_gs_split1_pickupship'
+
+        # Radius is small for the actual ship, but want it to still spawn
+        # some distance away, so bump this up a little bit.
+        self.radius = 20000
+    
+        # Sector name is set earlier in the file.
+        # <find_sector name="$FiresOfSector" macro="macro.cluster_421_sector001_macro"/>
+        self.sector_name = xml_node.find('.//find_sector[@name="$FiresOfSector"]').get('macro').replace('macro.','')
+
+        # Get the battlefield position node.
+        # <create_position name="$Battlefield" object="$FiresOfSector" x="42000" y="-5000" z="120000" ...
+        battlefield_pos_node = xml_node.find('.//create_position[@name="$Battlefield"]')
+
+        # Get the rescue ship offset node.
+        # <position x="$Battlefield.x - 22237" y="$Battlefield.y + 5000" z="$Battlefield.z - 155308"/>
+        # Note: this is relative to the battlefield x/y/z, but for
+        # convenience, could be converted to raw x/y/z for object movement,
+        # the goal being to move the ship closer to the player if the
+        # sector is being shrunk (assuming ships will also be slower, hence
+        # the ship might otherwise not arrive before oxygen runs out).
+        self.rescue_ship_offset_node = xml_node.find('.//create_ship[@name="$PickupShip"]/position')
+        
+        # Absolute position of rescue ship.
+        dims = {}
+        for attr in ['x','y','z']:
+            # Get a string with the $Battlefield.* replaced.
+            battle_pos = battlefield_pos_node.get(attr)
+            pos_str = self.rescue_ship_offset_node.get(attr)
+            pos_str = pos_str.replace(f'$Battlefield.{attr}', battle_pos)
+            # Evaluate the expression. Do this manually for safety.
+            left, op, right = pos_str.split()
+            if op == '-':
+                pos = float(left) - float(right)
+            elif op == '+':
+                pos = float(left) + float(right)
+            dims[attr] = pos
+
+        # Set up a fixed position, but link to the original xml node.
+        # On update, this will overwrite the x/y/z with absolute values.
+        self.position = Position(**dims)
+        self.position.xml_node = self.rescue_ship_offset_node
+
+        return
+    
+    def Update_XML(self):
+        # Can update the position normally.
+        self.position.Update_XML()
+        return
+    
+
+class MD_Gamestart(MD_Object):
+    '''
+    Gamestart position, expected to line up with md script and region pos,
+    so rescaled.
+
+    * xml_node
+      - Gamestart node.
+    '''
+    def __init__(self, xml_node):
+        super().__init__(xml_node)
+
+        # Try to glue position to generally nearby objects in radar range.
+        self.radius = 40000
+
+        self.name = xml_node.get('id')
+        location = xml_node.find('./location')
+        position = location.find('./position')
+
+        # Get the sector from the location.
+        self.sector_name = location.get('sector')
+        # Package the position node.
+        self.position = Position(position)
+        return
+    
+    def Update_XML(self):
+        # Can update the position normally.
+        self.position.Update_XML()
+        return
+
 
 class God_Object:
     '''
@@ -168,6 +291,24 @@ class God_Object:
       - Float, stored scaling factor for this object, to be applied
         to the xml during Update_XML.
     '''
+    obj_macro_sizes = {
+        # Unclear what this one is.
+        'landmarks_par_monument_01_macro'     : 20000,
+        # Big broken headquarters in a region field.
+        # Give a large size so it glues to the region earlier.
+        # (The region has an inner radius of 95k, outer of 130k, and this is
+        # supposed to be in the center, so make it super huge.)
+        'landmarks_gen_old_ringstation_macro' : 100000,
+        # Unclear on size of each piece.
+        'landmarks_xen_aqueduct_01_macro'     : 10000,
+        'landmarks_xen_aqueduct_02_macro'     : 10000,
+        'landmarks_xen_aqueduct_03_macro'     : 10000,
+        'landmarks_xen_aqueduct_04_macro'     : 10000,
+        'landmarks_xen_aqueduct_05_macro'     : 10000,
+        'landmarks_xen_aqueduct_06_macro'     : 10000,
+        'landmarks_xen_aqueduct_07_macro'     : 10000,
+        }
+
     def __init__(
             self, 
             xml_node
@@ -199,6 +340,13 @@ class God_Object:
         # Radius is unclear; can vary by object.
         # For now, give a decent padding, but many of these are stations.
         self.radius = 5000
+
+        # Selective upsizing based on the object.
+        obj_node = xml_node.find('./object')
+        if obj_node != None:
+            object_macro = xml_node.find('./object').get('macro')
+            if object_macro in self.obj_macro_sizes:
+                self.radius = self.obj_macro_sizes[object_macro]
         return
 
     def Set_Macro(self, macro):

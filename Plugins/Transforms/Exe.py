@@ -5,7 +5,7 @@ __all__ = [
     'Remove_Modified',
     'Remove_Sig_Errors',
     'High_Precision_Systemtime',
-    'Remove_Workshop_Tool_Dependency_Check',
+    #'Remove_Workshop_Tool_Dependency_Check',
     ]
 
 from datetime import datetime
@@ -215,7 +215,7 @@ def Remove_Modified():
     `           ec 28
     ` 140182ec4 e8 a7      CALL    FUN_140739170
     `           62 5b 00
-    ` 140182ec9 83 f8 07   CMP     EAX,0x7
+    ` 140182ec9 83 f8 07   CMP     EAX,0x7     ; 0x9 in 3.2b2
     ` 140182ecc 77 11      JA      LAB_140182edf
     ` 140182ece b9 a1      MOV     ECX,0xa1
     `           00 00 00
@@ -230,12 +230,22 @@ def Remove_Modified():
     ` 140182ee1 48 83      ADD     RSP,0x28
     `           c4 28
     ` 140182ee5 c3         RET
-
+    
     Can change the latter b0 01 to b0 00.
     Test result: success, modified menu tag is gone.
 
+    Update: in 3.2b2, a couple insts changed:
+        `  83 f8 07   CMP     EAX,0x7
+        `  77 11      JA      LAB_140182edf
+        `  b9 a1      MOV     ECX,0xa1
+        `  00 00 00
+    to    
+        `  83 f8 09   CMP     EAX,0x9
+        `  77 11      JA      LAB_140182edf
+        `  b9 a1      MOV     ECX,0x2a1
+        `  02 00 00
+    Assuming these values are volatile, can wildcard them.
     '''
-
     
     patches = [
     
@@ -273,10 +283,10 @@ def Remove_Modified():
         Binary_Patch(
         file = Settings.X4_exe_name,
         ref_code = '''
-        83 f8 07
+        83 f8 ..
         77 11   
         b9 a1   
-        00 00 00
+        .. 00 00
         0f a3 c1
         73 07   
         32 c0   
@@ -289,11 +299,12 @@ def Remove_Modified():
         c4 28
         c3      
         ''',
+        
         new_code = ''' 
-        83 f8 07
+        83 f8 ..
         77 11   
         b9 a1   
-        00 00 00
+        .. 00 00
         0f a3 c1
         73 07   
         32 c0   
@@ -559,67 +570,67 @@ def High_Precision_Systemtime(
     return
 
 
-
-@Transform_Wrapper()
-def Remove_Workshop_Tool_Dependency_Check():
-    '''
-    From the steam workshop upload tool, remove the dependency check that
-    requires dependencies start with "ws_" and be present on the workshop.
-    Experimental; developed to allow dependnencies on egosoft dlc.
-
-    Put WorkshopTool.exe in the main x4 folder, so the customizer
-    can find it, then copy the modified version back to the x tools dir.
-    '''
-    '''
-    Can just skip over the error handler for this case:
-
-    uVar17 = FUN_1400e7c50((longlong)local_5c98);
-    if ((char)uVar17 == '\0') {
-      pwVar51 = L"ERROR: There are dependencies on non-Workshop extensions\n";
-      goto LAB_1400e779f;
-    }
-
-    ` 1400e5715 48 8d      LEA     param_1=>local_5c98,[RBP + 0x80]
-    `           8d 80 
-    `           00 00 00
-    ` 1400e571c e8 2f      CALL    FUN_1400e7c50                     ulonglong FUN_1400e7c5
-    `           25 00 00
-    ` 1400e5721 84 c0      TEST    AL,AL
-    ` 1400e5723 75 0c      JNZ     LAB_1400e5731
-    ` 1400e5725 48 8d      LEA     param_2,[u_ERROR:_There_are_depe  = u"ERROR: There are d
-    `           15 c4 
-    `           92 03 00
-    ` 1400e572c e9 6e      JMP     LAB_1400e779f
-    `           20 00 00
-
-
-    Convert it to nops.
-    '''
-    patch = Binary_Patch(
-        file = 'WorkshopTool.exe',
-        ref_code = '''
-        48 8d   
-        8d .. 
-        .. .. ..
-        e8 ..   
-        .. .. ..
-        84 c0   
-        75 0c   
-        48 8d   
-        .. .. 
-        .. .. ..
-        e9 ..   
-        .. .. ..
-        ''',
-        # Keep the lea and call, nop the rest.
-        new_code = '''
-        48 8d   
-        8d .. 
-        .. .. ..
-        e8 ..   
-        .. .. ..
-        ''' + NOP * 16,
-        )
-    
-    Apply_Binary_Patch(patch)
-    return
+# -Removed; no longer needed after tool update.
+#@Transform_Wrapper()
+#def Remove_Workshop_Tool_Dependency_Check():
+#    '''
+#    From the steam workshop upload tool, remove the dependency check that
+#    requires dependencies start with "ws_" and be present on the workshop.
+#    Experimental; developed to allow dependnencies on egosoft dlc.
+#
+#    Put WorkshopTool.exe in the main x4 folder, so the customizer
+#    can find it, then copy the modified version back to the x tools dir.
+#    '''
+#    '''
+#    Can just skip over the error handler for this case:
+#
+#    uVar17 = FUN_1400e7c50((longlong)local_5c98);
+#    if ((char)uVar17 == '\0') {
+#      pwVar51 = L"ERROR: There are dependencies on non-Workshop extensions\n";
+#      goto LAB_1400e779f;
+#    }
+#
+#    ` 1400e5715 48 8d      LEA     param_1=>local_5c98,[RBP + 0x80]
+#    `           8d 80 
+#    `           00 00 00
+#    ` 1400e571c e8 2f      CALL    FUN_1400e7c50                     ulonglong FUN_1400e7c5
+#    `           25 00 00
+#    ` 1400e5721 84 c0      TEST    AL,AL
+#    ` 1400e5723 75 0c      JNZ     LAB_1400e5731
+#    ` 1400e5725 48 8d      LEA     param_2,[u_ERROR:_There_are_depe  = u"ERROR: There are d
+#    `           15 c4 
+#    `           92 03 00
+#    ` 1400e572c e9 6e      JMP     LAB_1400e779f
+#    `           20 00 00
+#
+#
+#    Convert it to nops.
+#    '''
+#    patch = Binary_Patch(
+#        file = 'WorkshopTool.exe',
+#        ref_code = '''
+#        48 8d   
+#        8d .. 
+#        .. .. ..
+#        e8 ..   
+#        .. .. ..
+#        84 c0   
+#        75 0c   
+#        48 8d   
+#        .. .. 
+#        .. .. ..
+#        e9 ..   
+#        .. .. ..
+#        ''',
+#        # Keep the lea and call, nop the rest.
+#        new_code = '''
+#        48 8d   
+#        8d .. 
+#        .. .. ..
+#        e8 ..   
+#        .. .. ..
+#        ''' + NOP * 16,
+#        )
+#    
+#    Apply_Binary_Patch(patch)
+#    return

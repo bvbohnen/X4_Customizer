@@ -29,7 +29,4 @@ from .Wares import Adjust_Ware_Price_Spread
 from .Wares import Adjust_Ware_Prices
 
 
-from .Weapons import Adjust_Weapon_Damage
-from .Weapons import Adjust_Weapon_Fire_Rate
-from .Weapons import Adjust_Weapon_Range
-from .Weapons import Adjust_Weapon_Shot_Speed
+from .Weapons import *

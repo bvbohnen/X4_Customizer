@@ -121,7 +121,7 @@ class Region:
         if self.radius < 10000:
             return
 
-        # Resource regions are ~25km radius.
+        # Small resource regions are ~25km radius.
         # Big shield damage region in xenon sector is 250 km.
         # Want to scale the latter down, not the former down.
         if scaling_factor < 1:

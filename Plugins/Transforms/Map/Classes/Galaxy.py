@@ -35,9 +35,6 @@ class Galaxy:
       - God object that represents station defaults, and is not fully detailed.
     * recenter_sectors
       - Bool, True if edits to sectors should recenter their objects.
-    * randomize_new_zones
-      - Bool, True if new zone placements should be fully randomized, eg.
-        not seeded with the sector name.
     * move_free_ships
       - Bool, if True then freebie ships from PlacedObjects are moved.
     * new_zones
@@ -49,7 +46,6 @@ class Galaxy:
             self, 
             gamefile_roots, 
             recenter_sectors = False, 
-            randomize_new_zones = False, 
             move_free_ships = True,
             ):
         self.gamefile_roots = gamefile_roots
@@ -60,7 +56,6 @@ class Galaxy:
         self.god_objects = []
         self.new_zones = []
         self.recenter_sectors = recenter_sectors
-        self.randomize_new_zones = randomize_new_zones
         self.move_free_ships = move_free_ships
 
         # Read the various macros from the xml files.
@@ -208,6 +203,27 @@ class Galaxy:
         # object.
         self.md_objects.append(MD_Headquarters(gamefile_roots['md_hq'][0][1]))
 
+        # Special md script positions to move.
+        self.md_objects.append(MD_gs_split1_battlefield(gamefile_roots['md_gs_split1'][0][1]))
+        self.md_objects.append(MD_gs_split1_pickupship(gamefile_roots['md_gs_split1'][0][1]))
+
+        # Gamestart positions.
+        # Note: original starts are all zone based (or tutorial), but split
+        # are sector based and need adjustment to match their region
+        # and plot.
+        for location in gamefile_roots['gamestarts'][0][1].xpath('.//location[@galaxy="xu_ep2_universe_macro"][@sector]'):
+            # Skip if it has a zone, station, or similar.
+            if any(x in location.attrib for x in ['zone','room','station']):
+                continue
+            # Check if gamestart or position not found in expected spots.
+            gamestart = location.getparent()
+            if gamestart.tag != 'gamestart':
+                continue
+            if location.find('./position') == None:
+                continue
+            self.md_objects.append(MD_Gamestart(gamestart))
+
+        
         # Also gather all freebie ships and data vaults.
         '''        
         Syntax on ships is:

@@ -1,4 +1,4 @@
-X4 Customizer 1.19
+X4 Customizer 1.20
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -522,13 +522,6 @@ Exe Transforms:
     Suppresses file sigature errors from printing to the debug log, along with file-not-found errors. Written for Windows v3.10 exe.
         
 
-  * Remove_Workshop_Tool_Dependency_Check
-
-    From the steam workshop upload tool, remove the dependency check that requires dependencies start with "ws_" and be present on the workshop. Experimental; developed to allow dependnencies on egosoft dlc.
-    
-    Put WorkshopTool.exe in the main x4 folder, so the customizer can find it, then copy the modified version back to the x tools dir.
-        
-
 
 ***
 
@@ -630,6 +623,8 @@ Rescale Transforms:
 
     Adjusts the cargo capacities of matching ships.
         
+    Args are one or more dictionaries with these fields, where matching rules are applied in order, with a ship being grouped by the first rule it matches:
+    
     * multiplier
       - Float, how much to multiply current cargo capacity by.
     * match_any
@@ -642,11 +637,24 @@ Rescale Transforms:
       - Optional, tag name of cargo types to modify.
       - Expected to be one of: 'solid', 'liquid', 'container'.
       - If not given, all cargo types are modified.
+    * skip
+      - Optional, bool, if True then this group is not edited.
+      - Can be used in early matching rules to remove ships from all later matching rules.
+            
+    Example:
+    ```
+    Adjust_Ship_Cargo_Capacity(
+        {'match_all' : ['purpose mine'],  'multiplier' : 2,},
+        {'match_all' : ['purpose trade'], 'multiplier' : 1.5},
+        )
+    ```
         
 
   * Rescale_Ship_Speeds
 
     Rescales the speeds of different ship classes, centering on the give target average speeds. Ships are assumed to be using their fastest race engines. Averaged across all ships of the rule match.
+        
+    Args are one or more dictionaries with these fields, where matching rules are applied in order, with a ship being grouped by the first rule it matches:
     
     * average
       - Float, the new average speed to adjust to.
@@ -668,6 +676,20 @@ Rescale Transforms:
     * use_split_engine
       - Bool, if True then Split engines will be assumed.
       - This will tend to give high estimates for ship speeds, eg. mk4 engines.
+    * skip
+      - Optional, bool, if True then this group is not edited.
+      - Can be used in early matching rules to remove ships from all later matching rules.
+            
+    Example:
+    ```
+    Rescale_Ship_Speeds(
+        {'match_any' : ['name ship_spl_xl_battleship_01_a_macro'], 'skip' : True},
+        {'match_all' : ['type  scout' ],  'average' : 500, 'variation' : 0.2},
+        {'match_all' : ['class ship_s'],  'average' : 400, 'variation' : 0.5},
+        {'match_all' : ['class ship_m'],  'average' : 300, 'variation' : 0.5},
+        {'match_all' : ['class ship_l'],  'average' : 200, 'variation' : 0.5},
+        {'match_all' : ['class ship_xl'], 'average' : 150, 'variation' : 0.5})
+    ```
         
 
 
@@ -698,10 +720,6 @@ Scale_Sector_Size Transforms:
       - Adjust objects in a sector to approximately place the coreposition near 0,0,0.
       - Defaults False.
       - In testing, this makes debugging harder, and may lead to unwanted results.  Pending further testing to improve confidence.
-    * randomize_new_zones
-      - Randomizes the positions of new zones each run, instead of using the sector name as a seed.
-      - Defaults False.
-      - Generally should be left false, so that zones don't move around for a save game.
     * num_steps
       - Int, over how many movement steps to perform the scaling.
       - Higher step counts take longer to process, but each movement is smaller and will better detect objects getting too close to each other.
@@ -900,66 +918,91 @@ Weapons Transforms:
 
   * Common documentation
 
-    Weapon transforms will commonly use a group of matching rules to determine which weapons get modified, and by how much.   
+    Weapon transforms will commonly use a group of matching rules to determine which weapons get modified, and by how much.
     
-    * Matching rules:
-      - These are tuples pairing a matching rule (string) with transform defined args, eg. ("key  value", arg0, arg1, ...).
-      - The "key" specifies the xml field to look up, which will be checked for a match with "value".
-      - If a target object matches multiple rules, the first match is used.
-      - If a bullet or missile is shared across multiple weapons, only the first matched weapon will modify it.
-      - Supported keys for weapons:
-        - 'name'  : Internal name of the weapon component; supports wildcards.
-        - 'class' : The component class.
-          - One of: weapon, missilelauncher, turret, missileturret, bomblauncher
-          - These are often redundant with tag options.
-        - 'tags'  : One or more tags for this weapon, space separated.
-          - See Print_Weapon_Stats output for tag listings.
-        - '*'     : Matches all wares; takes no value term.
+    Args are one or more dictionaries with these fields, where matching rules are applied in order, with a weapon being grouped by the first rule it matches. If a bullet or missile is used by multiple weapons in different match groups, their adjustments will be averaged.
     
-    Examples:
+    A dictionary has the following shared fields:
     
-        Adjust_Weapon_Range(1.5)
-        Adjust_Weapon_Fire_Rate(
-            ('name *_mk1', 1.1) )
-        Adjust_Weapon_Damage(
-            ('name weapon_tel_l_beam_01_mk1', 1.2),
-            ('tags large standard turret'   , 1.5),
-            ('tags medium missile weapon'   , 1.4),
-            ('class bomblauncher'           , 4),
-            ('*'                            , 1.1) )
+    * match_any, match_all, match_none
+      - Lists of matching rules. Weapon is selected if matching nothing from match_none, and anything from match_any or everything from match_all.
+    * skip
+      - Optional, bool, if True then this group is not edited.
+      - Can be used as a way to blacklist weapons.
+          
+    Matching rules are strings with the following format:
+    * The "key" specifies the xml field to look up, which will be checked for a match with "value".
+    * Supported keys for weapons:
+      - 'name'  : Internal name of the weapon component; supports wildcards.
+      - 'class' : The component class.
+        - One of: weapon, missilelauncher, turret, missileturret, bomblauncher
+        - These are often redundant with tag options.
+      - 'tags'  : One or more tags for this weapon, space separated.
+        - See Print_Weapon_Stats output for tag listings.
+      - '*'     : Matches all wares; takes no value term.
+    
+    As a special case, a single multiplier may be given, to be applied to all weapons (lasers,  missiles, etc.)
     
         
 
   * Adjust_Weapon_Damage
 
-    Adjusts damage done by weapons.  If multiple weapons use the same bullet or missile, it will be modified for only the first weapon matched.
+    Adjusts damage done by weapons.  If multiple weapons use the same bullet or missile, it will be modified by an average of the users.
+        
+    Args are one or more dictionaries with these fields, where matching rules are applied in order, with a ship being grouped by the first rule it matches:
     
-    * match_rule_multipliers:
-      - Series of matching rules paired with the damage multipliers to use.
+    * multiplier
+      - Float, amount to multiply damage by.
+    * match_any, match_all, match_none
+      - Lists of matching rules. Weapon is selected if matching nothing from match_none, and anything from match_any or everything from match_all.        
+    * skip
+      - Optional, bool, if True then this group is not edited.
         
 
   * Adjust_Weapon_Fire_Rate
 
-    Adjusts weapon rate of fire. DPS and heat/sec remain constant.
+    Adjusts weapon rate of fire. DPS and heat/sec remain constant. Time between shots in a burst and time between bursts are affected equally for burst weapons.  If multiple matched weapons use the same bullet or missile, the modifier will be averaged between them.
+            
+    Args are one or more dictionaries with these fields, where matching rules are applied in order, with a ship being grouped by the first rule it matches:
     
-    * match_rule_multipliers:
-      - Series of matching rules paired with the RoF multipliers to use.
+    * multiplier
+      - Float, amount to multiply fire rate by.
+      - If 1, the weapon is not modified.
+    * min
+      - Float, optional, minimum fire rate allowed by an adjustment, in shots/second.
+      - Default is None, no minimum is applied.
+    * match_any, match_all, match_none
+      - Lists of matching rules. Weapon is selected if matching nothing from match_none, and anything from match_any or everything from match_all.        
+    * skip
+      - Optional, bool, if True then this group is not edited.
         
 
   * Adjust_Weapon_Range
 
     Adjusts weapon range. Shot speed is unchanged.
+        
+    Args are one or more dictionaries with these fields, where matching rules are applied in order, with a ship being grouped by the first rule it matches:
     
-    * match_rule_multipliers:
-      - Series of matching rules paired with the range multipliers to use.
+    * multiplier
+      - Float, amount to multiply damage by.
+    * match_any, match_all, match_none
+      - Lists of matching rules. Weapon is selected if matching nothing from match_none, and anything from match_any or everything from match_all.        
+    * skip
+      - Optional, bool, if True then this group is not edited.
         
 
   * Adjust_Weapon_Shot_Speed
 
     Adjusts weapon projectile speed. Range is unchanged.
+        
+    Args are one or more dictionaries with these fields, where matching rules are applied in order, with a ship being grouped by the first rule it matches:
     
-    * match_rule_multipliers:
-      - Series of matching rules paired with the speed multipliers to use.
+    * multiplier
+      - Float, amount to multiply damage by.
+    * match_any, match_all, match_none
+      - Lists of matching rules. Weapon is selected if matching nothing from match_none, and anything from match_any or everything from match_all.        
+    * skip
+      - Optional, bool, if True then this group is not edited.
         
 
 
@@ -1256,3 +1299,5 @@ Change Log:
    - Changed parameters for Increase_AI_Script_Waits to support also scaling in-vision waits.
    - Added transforms: Rescale_Ship_Speeds, Remove_Engine_Travel_Bonus, Rebalance_Engines, Adjust_Engine_Boost_Duration, Adjust_Engine_Boost_Speed.
    - Added several example scripts.
+ * 1.20
+   - Added automatic packing of replacement files into subst cat/dats.

@@ -1,4 +1,4 @@
-X4 Customizer 1.19
+X4 Customizer 1.20
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -233,10 +233,6 @@ Exe Transforms:
 
     Suppresses file sigature errors from printing to the debug log, along with file-not-found errors. Written for Windows v3.10 exe.
 
-  * Remove_Workshop_Tool_Dependency_Check
-
-    From the steam workshop upload tool, remove the dependency check that requires dependencies start with "ws_" and be present on the workshop. Experimental; developed to allow dependnencies on egosoft dlc.
-
 
 ***
 
@@ -339,11 +335,11 @@ Weapons Transforms:
 
   * Adjust_Weapon_Damage
 
-    Adjusts damage done by weapons.  If multiple weapons use the same bullet or missile, it will be modified for only the first weapon matched.
+    Adjusts damage done by weapons.  If multiple weapons use the same bullet or missile, it will be modified by an average of the users.
 
   * Adjust_Weapon_Fire_Rate
 
-    Adjusts weapon rate of fire. DPS and heat/sec remain constant.
+    Adjusts weapon rate of fire. DPS and heat/sec remain constant. Time between shots in a burst and time between bursts are affected equally for burst weapons.  If multiple matched weapons use the same bullet or missile, the modifier will be averaged between them.
 
   * Adjust_Weapon_Range
 

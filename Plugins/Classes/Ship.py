@@ -4,13 +4,13 @@ from .Connection import Connection
 from .Component  import Component
 from .Storage import Storage
 from Framework import File_System
+from .Shared import Physics_Properties
 
 __all__ = [
     'Ship',
     ]
 
-
-class Ship(Macro):
+class Ship(Macro, Physics_Properties):
     '''
     Ship macro. This will be filled in as needed; many basic ship edits
     are done directly on the xml.
@@ -23,7 +23,7 @@ class Ship(Macro):
     '''
 
     def __init__(self, xml_node, *args, **kwargs):
-        super().__init__(xml_node, *args, **kwargs)
+        Macro.__init__(self, xml_node, *args, **kwargs)
         
         self.engine_count = None
         self.engine_tags = None
@@ -195,49 +195,10 @@ class Ship(Macro):
         if not self.engine_macro:
             return 0
         thrust = float(self.engine_macro.Get_Forward_Thrust()) * self.Get_Engine_Count()
-        drag = float(self.Get('./properties/physics/drag', 'forward'))
+        drag = self.Get_Forward_Drag()
         speed = thrust / drag
         return speed
 
-
-    def Adjust_Speed(self, multiplier):
-        '''
-        Adjust the speed and acceleration of this ship based on the
-        given multiplier.
-        This applies the inverse multiplier to the ship's drag and mass.
-        '''
-        # The fields to change are scattered under the physics node.        
-        path_attrs = [
-            ('./properties/physics', 'mass'),
-            ('./properties/physics/drag', 'forward'),
-            ('./properties/physics/drag', 'reverse'),
-            ('./properties/physics/drag', 'horizontal'),
-            ('./properties/physics/drag', 'vertical'),
-            ]
-
-        for path, attr in path_attrs:
-            value = float(self.Get(path, attr))
-            new_value = value / multiplier
-            self.Set(path, attr, f'{new_value:0.4f}')
-        return
-
-    
-    def Adjust_Turning(self, multiplier):
-        '''
-        Adjust the turning rate of this ship based on the given multiplier.
-        This applies the inverse multiplier to the ship's inertia.
-        '''
-        path_attrs = [
-            ('./properties/physics/inertia', 'pitch'),
-            ('./properties/physics/inertia', 'yaw'),
-            ('./properties/physics/inertia', 'roll'),
-            ]
-        
-        for path, attr in path_attrs:
-            value = float(self.Get(path, attr))
-            new_value = value / multiplier
-            self.Set(path, attr, f'{new_value:0.4f}')
-        return
 
 '''
     For reference, paths/attributes of interest.

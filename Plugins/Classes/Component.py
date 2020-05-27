@@ -12,6 +12,8 @@ class Component:
       - Database recording this macro.
     * xml_node
       - Component xml node.
+    * class_name
+      - String, class name.
     * modified
       - Bool, True if this macro's xml is modified.
     * name
@@ -25,6 +27,7 @@ class Component:
         self.database = database
         self.modified = False
         self.name = xml_node.get('name')
+        self.class_name = xml_node.get('class')
 
         self.conns = {}
         for conn_node in xml_node.xpath("./connections/connection"):
