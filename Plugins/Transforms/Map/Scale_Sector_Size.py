@@ -21,18 +21,9 @@ TODO:
   - Possibly a small y offset in the highway, spline, or gate?
   - Could just scrap y changes, probably.
 - Per-sector scaling factors, adjust more if highway is removed.
-- Dynamic scaling based on initial sector size; smaller sectors scale less.
-  - Maybe use four data points: scaling vs gate distance, two points, and
-    extrapolate linearly with saturation at endpoints.
-  - Or something more automated.
-
-- Sacred Relic spaced out; 250 km to furthest station.
-- Hatikvah station 308km from gate (cluster_29).
-  - Not due to god, when checking godlog.
-  - Standard zones have up to a ~415 km distance (one or two outliers).
-  - Should have been scaled to 166 km?
-- debuglog complaint about superhighway002_cluster_29_macro (Hatikvah) splines?
-
+- Look into The Void hazard field on left side. Kinda near the gate, kinda
+  problematic without travel drive since it does constant hull damage.
+  
 
 Note on regions:
     These are referenced in cluster.xml, but are defined over in

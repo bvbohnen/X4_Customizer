@@ -283,6 +283,11 @@ class Widget_Settings(QtWidgets.QGroupBox):
                 setattr(Settings, field, value)
             else:
                 setattr(Settings, field, widget.default)
+
+        # Special cases.
+        # TODO: move to Load_Settings and call that.
+        if field == 'show_tab_close_button':
+            self.window.Show_Tab_Close_Button(getattr(Settings, field))
         return
 
 

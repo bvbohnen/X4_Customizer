@@ -1,6 +1,19 @@
 '''
 Classes to represent game files.
 '''
+__all__ = [
+    'New_Game_File',
+    'Generate_Signatures',
+    'Misc_File',
+    'XML_File',
+    'XML_Text_File',
+    'XML_Wares_File',
+    'XML_Index_File',
+    'Machine_Code_File',
+    'Signature_File',
+    'Text_File',
+    ]
+
 import os
 #import xml.etree.ElementTree as ET
 #from xml.dom import minidom
@@ -414,7 +427,7 @@ class XML_File(Game_File):
             # Init the patched version to the original.
             # Deepcopy this, since patching will edit it in place.
             self.patched_root = deepcopy(self.original_root)
-            self.modified_root = None
+            self.modified_root = self.patched_root
 
             # The root tag should never be changed by mods, so can
             #  record it here pre-patching.
@@ -716,7 +729,8 @@ class XML_File(Game_File):
         Returns False for xml files, True for other extensions.
         '''
         # Note: in a quick test of ogl it did not seem diff patching worked
-        # for non-xml.
+        # for non-xml. Further, ogl files have to be in subst else they
+        # are not found.
         if not self.virtual_path.endswith('.xml'):
             return True
         return False
@@ -1229,7 +1243,7 @@ class Misc_File(Game_File):
 
         # Do a binary write.
         with open(file_path, 'wb') as file:
-            file.write(self.binary)
+            file.write(binary)
         return
     
 
@@ -1247,6 +1261,12 @@ class Text_File(Misc_File):
             # Manually standardize newlines.
             self.text = binary.decode().replace('\r\n','\n').replace('\r','\n')
     
+    def Needs_Subst(self):
+        # Shader files may need to be packed, else they are not found
+        # and crash the game right away (if referenced by ogl specs).
+        # Since text_files are only used for shaders right now, always pack.
+        return True
+
 
 class Machine_Code_File(Game_File):
     '''

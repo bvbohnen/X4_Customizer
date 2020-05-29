@@ -209,8 +209,7 @@ from .Common import XML_Misc
 from .Common.Exceptions import *
 
 from . import File_Manager
-# TODO: switch to * import, define these in __all__.
-from .File_Manager import Load_File, Load_Files, File_System, XML_Diff, Get_Indexed_File, Get_All_Indexed_Files, Get_Asset_Files_By_Class
+from .File_Manager import *
 
 from . import Live_Editor_Components
 from .Live_Editor_Components import Live_Editor

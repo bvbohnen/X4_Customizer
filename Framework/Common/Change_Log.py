@@ -214,6 +214,9 @@ Change Log:
    - Switched weapon transforms to new style match rule args.
    - Changed engine scaline transforms to adjust additional boost/thrust
      speed over normal speed, instead of total boost/thrust speed.
+ * 1.21
+   - Added gui tab close button. Can be disabled in settings.
+   - Set shader files to go into a subst catalog.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

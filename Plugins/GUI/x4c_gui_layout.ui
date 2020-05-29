@@ -47,6 +47,9 @@
       <property name="currentIndex">
        <number>-1</number>
       </property>
+      <property name="tabsClosable">
+       <bool>false</bool>
+      </property>
      </widget>
     </item>
    </layout>

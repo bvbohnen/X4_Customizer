@@ -103,6 +103,7 @@ def Make(*args):
         'Ex_Generate_Diffs.py',
         'Ex_Modify_Exe.py',
         'Ex_Using_Transforms.py',
+        'Ex_Save_Patched_Files',
 
         'Default_Script_template.py',
         )

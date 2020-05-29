@@ -10,11 +10,16 @@ from Framework import Load_Files
 folder = Settings.Get_X4_Folder() / 'extracted_patched'
 
 game_files = []
+
+# Pick a set of file name patterns.
+# This example includes all library xml files.
 for pattern in [
-    'libraries/mapdefaults.xml',
+    'libraries/*.xml',
     ]:
     game_files += Load_Files(pattern)
 
+# This code pulls the file binary data (not diff encoded), and writes to
+# the target directory.
 for game_file in game_files:
     binary = game_file.Get_Binary(no_diff = True)
     file_path = folder / game_file.virtual_path

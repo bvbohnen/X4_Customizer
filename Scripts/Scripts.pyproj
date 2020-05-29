@@ -53,6 +53,7 @@
     <Compile Include="Command_Line\Generate_Diffs.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Examples\Ex_Save_Patched_Files.py" />
     <Compile Include="Examples\Ex_Using_Transforms.py">
       <SubType>Code</SubType>
     </Compile>

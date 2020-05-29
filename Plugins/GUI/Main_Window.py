@@ -373,6 +373,11 @@ class GUI_Main_Window(qt_base_class, generated_class):
         # The custom bar overwrites some settings from qt designer,
         # so fix them here for now.
         self.widget_tab_container.setMovable(True)
+
+        # A lot of people don't know about middle-click-close tab behavior
+        # in many programs, so add a close button for them.
+        if Settings.show_tab_close_button:
+            self.widget_tab_container.setTabsClosable(True)
         
         # Set up a QSettings object, giving it the path to where
         # the settings are stored. Set it as an ini file, since otherwise
@@ -952,6 +957,13 @@ class GUI_Main_Window(qt_base_class, generated_class):
         self.application.setStyle(style)
         # Save the name.
         self.current_style = style_name
+        return
+
+    def Show_Tab_Close_Button(self, state):
+        '''
+        Show or hide the tab close button.
+        '''
+        self.widget_tab_container.setTabsClosable(state)
         return
         
     ##########################################################################

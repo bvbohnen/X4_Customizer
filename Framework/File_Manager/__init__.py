@@ -1,7 +1,7 @@
 '''
 Holds modules with most of the file handling framework.
 '''
-from .File_Types import XML_File, Misc_File
+from .File_Types import *
 from .File_System import File_System
 from . import XML_Diff
 from . import Extension_Finder

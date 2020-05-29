@@ -9,7 +9,7 @@ from pathlib import Path
 import Framework
 from Plugins import *
 
-this_dir = Path(__file__).resolve().parent
+this_dir = Path(__file__).resolve().parents[1]
 
 Settings(
     path_to_x4_folder = r'C:\Steam\SteamApps\common\X4 Foundations',
@@ -85,6 +85,13 @@ if 0 or test_all:
         original_dir_path = this_dir / '../private/test/deadair/orig',
         modified_dir_path = this_dir / '../private/test/deadair/mod',
         output_dir_path   = this_dir / '../private/test/deadair/diff',
+        )
+    
+if 1 or test_all:
+    Generate_Diff(
+        original_file_path = this_dir / '../private/test/god_orig.xml',
+        modified_file_path = this_dir / '../private/test/god_edit.xml',
+        output_file_path   = this_dir / '../private/test/god_diff.xml',
         )
 
 # Test the extension checker.

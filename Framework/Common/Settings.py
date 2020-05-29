@@ -174,6 +174,8 @@ class Settings_class:
       - Defaults to True
 
     Behavior:
+    * show_tab_close_button
+      - Bool, if True then a gui tab close button will be shown.
     * disable_cleanup_and_writeback
       - Bool, if True then cleanup from a prior run and any final
         writes will be skipped.
@@ -365,7 +367,8 @@ class Settings_class:
         defaults['forced_xpath_attributes'] = ''
         defaults['plugin_log_file_name'] = 'plugin_log.txt'
         defaults['live_editor_log_file_name'] = 'live_editor_log.json'        
-        defaults['customizer_log_file_name'] = 'customizer_log.json'
+        defaults['customizer_log_file_name'] = 'customizer_log.json'        
+        defaults['show_tab_close_button'] = True
         defaults['disable_cleanup_and_writeback'] = False
         defaults['log_source_paths'] = False
         defaults['skip_all_plugins'] = False
