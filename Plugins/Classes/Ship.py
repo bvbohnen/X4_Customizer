@@ -118,6 +118,7 @@ class Ship(Macro, Physics_Properties):
             ):
         '''
         From the given engine macros, select a matching engine.
+        Returns the engine selected.
         '''
         # There might be a specified loadout in the ship macro.
         loadouts = self.xml_node.xpath('.//loadout')
@@ -184,7 +185,8 @@ class Ship(Macro, Physics_Properties):
                 self.engine_macro = macro
                 this_thrust = self.engine_macro.Get_Forward_Thrust()
 
-        return
+        return self.engine_macro
+
 
     def Get_Engine_Macro(self):
         'Return the currently selected engine macro.'

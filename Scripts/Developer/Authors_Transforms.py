@@ -100,9 +100,6 @@ if 1:
     # Disable travel drives for ai.
     Disable_AI_Travel_Drive()
 
-    # Nerf travel speed for player.
-    Remove_Engine_Travel_Bonus()
-
     # Enable seta when not piloting.
     # TODO: couldn't find a way to do this.
 
@@ -136,24 +133,37 @@ if 1:
     # the travel drive bonus over to base stats.
     # TODO: think about how race/purpose adjustments multiply; do any engines
     # end up being strictly superior to another?
+    # All of these will force travel drives to the same amount, and adjust
+    # cargo accordingly, ahead of removing travel drives.
+    common = {'travel' : 1, 'adjust_cargo' : True}
     Rebalance_Engines(        
         race_speed_mults = {
-            'argon'   : {'thrust' : 1,    'boost'  : 1,    'boost_time' : 1   },
+            'argon'   : {'thrust' : 1,    'boost'  : 1,    'boost_time' : 1,   **common },
             # Slightly better base speed, worse boost.
-            'paranid' : {'thrust' : 1.05, 'boost'  : 0.80, 'boost_time' : 0.8 },
+            'paranid' : {'thrust' : 1.05, 'boost'  : 0.80, 'boost_time' : 0.8, **common },
             # Fast speeds, short boost.
-            'split'   : {'thrust' : 1.10, 'boost'  : 1.20, 'boost_time' : 0.7 },
+            'split'   : {'thrust' : 1.10, 'boost'  : 1.20, 'boost_time' : 0.7, **common },
             # Slower teladi speeds, but balance with long boosts.
-            'teladi'  : {'thrust' : 0.95, 'boost'  : 0.90, 'boost_time' : 1.3 },
+            'teladi'  : {'thrust' : 0.95, 'boost'  : 0.90, 'boost_time' : 1.3, **common },
             },
         purpose_speed_mults = {
-            'allround' : {'thrust' : 1,    'boost' : 1,    'boost_time' : 1,    },
+            'allround' : {'thrust' : 1,    'boost' : 1,    'boost_time' : 1,   **common  },
             # Combat will be slowest but best boost.
-            'combat'   : {'thrust' : 0.9,  'boost' : 1.2,  'boost_time' : 1.5,  },
+            'combat'   : {'thrust' : 0.9,  'boost' : 1.2,  'boost_time' : 1.5, **common  },
             # Travel is fastest, worst boost.
-            'travel'   : {'thrust' : 1.1,  'boost' : 0.8,  'boost_time' : 0.8,  },
+            'travel'   : {'thrust' : 1.1,  'boost' : 0.8,  'boost_time' : 0.8, **common  },
             },
         )
+    
+    # Adjust ship cargo capacity to reflect non-uniform engine changes.
+    # Eg. teladi lose a lot more travel drive speed than split, and so
+    # should get a bigger cargo hold boost.
+
+    # Disable travel drives for ai.
+    Disable_AI_Travel_Drive()
+
+    # Remove travel speed for player.
+    Remove_Engine_Travel_Bonus()
     
     # Note: with speed rescale, boost ends up being a bit crazy good, with
     # ship overall travel distance coming largely from boosting regularly.
@@ -173,8 +183,8 @@ if 1:
     Adjust_Engine_Boost_Duration(1/2)
     Adjust_Engine_Boost_Speed   (1/4)
 
-
-    # Adjust speeds per ship class.
+    # Rebalance speeds per ship class.
+    # Do this after the engine rebalance.
     # Note: vanilla averages and ranges are:    
     # xs: 130 (58 to 152)
     # s : 328 (71 to 612)
@@ -182,7 +192,7 @@ if 1:
     # l : 146 (46 to 417)
     # xl: 102 (55 to 164)
     # Try clamping variation to within 0.5x (mostly affects medium).
-    # TODO: more fine-grain, by purpose (corvette vs frigate, etc.).    
+    # TODO: more fine-grain, by purpose (corvette vs frigate vs trade, etc.).    
     Rescale_Ship_Speeds(
         # Ignore the python (unfinished).
         {'match_any' : ['name ship_spl_xl_battleship_01_a_macro'], 'skip' : True},
@@ -191,6 +201,14 @@ if 1:
         {'match_all' : ['class ship_m'],  'average' : 300, 'variation' : 0.3},
         {'match_all' : ['class ship_l'],  'average' : 200, 'variation' : 0.4},
         {'match_all' : ['class ship_xl'], 'average' : 150, 'variation' : 0.4})
+    
+    # Miners can struggle to keep up. Increase efficiency somewhat by
+    # letting them haul more cargo.
+    # Traders could also use a little bump, though not as much as miners
+    # since stations are closer than regions.
+    Adjust_Ship_Cargo_Capacity(
+        {'match_all' : ['purpose  mine' ],  'multiplier' : 2},
+        {'match_all' : ['purpose  trade' ], 'multiplier' : 2})
     
     # Rescale the sectors.
     Scale_Sector_Size(
@@ -205,13 +223,11 @@ if 1:
         extra_scaling_for_removed_highways = 0.7,
         )
     
-    # Miners can struggle to keep up. Increase efficiency somewhat by
-    # letting them haul more cargo.
-    # Traders could also use a little bump, though not as much as miners
-    # since stations are closer than regions.
-    Adjust_Ship_Cargo_Capacity(
-        {'match_all' : ['purpose  mine' ],  'multiplier' : 2},
-        {'match_all' : ['purpose  trade' ], 'multiplier' : 1.5})
+
+# Asteroid fade-in testing stuff.
+if 1:
+    Set_Ship_Radar_Ranges(('name ship_par_s_fighter_01_a_macro', 50))
+    Adjust_Ship_Speed(('name ship_par_s_fighter_01_a_macro'    , 10))
 
 
 # Write modified files.

@@ -87,7 +87,7 @@ if 0 or test_all:
         output_dir_path   = this_dir / '../private/test/deadair/diff',
         )
     
-if 1 or test_all:
+if 0 or test_all:
     Generate_Diff(
         original_file_path = this_dir / '../private/test/god_orig.xml',
         modified_file_path = this_dir / '../private/test/god_edit.xml',
@@ -172,9 +172,9 @@ if 0:
 if 0:
     Remove_Travel_Drive()
 
-if 0:
-    Rebalance_Engines(purpose_speed_mults = None)
-    Rebalance_Engines(race_speed_mults = None)
+if 1:
+    Rebalance_Engines(purpose_speed_mults = None, adjust_cargo = True)
+    Rebalance_Engines(race_speed_mults = None, adjust_cargo = True)
 
 if 0:
     Adjust_Engine_Boost_Duration(0.2)
@@ -191,12 +191,12 @@ if 0:
     # Try clamping variation to within 0.5x (mostly affects medium).
     Rescale_Ship_Speeds(
         # Ignore the python (unfinished).
-        {'match_any' : ['name ship_spl_xl_battleship_01_a_macro'], 'skip' : True},
-        {'match_all' : ['type  scout' ],  'average' : 500, 'variation' : 0.2},
-        {'match_all' : ['class ship_s'],  'average' : 400, 'variation' : 0.5},
-        {'match_all' : ['class ship_m'],  'average' : 300, 'variation' : 0.5},
-        {'match_all' : ['class ship_l'],  'average' : 200, 'variation' : 0.5},
-        {'match_all' : ['class ship_xl'], 'average' : 150, 'variation' : 0.5})
+        {'match_any' : ['name ship_spl_xl_battleship_01_a_macro'], 'skip' : True, 'use_arg_engine' : True},
+        {'match_all' : ['type  scout' ],  'average' : 500, 'variation' : 0.2, 'use_arg_engine' : True},
+        {'match_all' : ['class ship_s'],  'average' : 400, 'variation' : 0.5, 'use_arg_engine' : True},
+        {'match_all' : ['class ship_m'],  'average' : 300, 'variation' : 0.5, 'use_arg_engine' : True},
+        {'match_all' : ['class ship_l'],  'average' : 200, 'variation' : 0.5, 'use_arg_engine' : True},
+        {'match_all' : ['class ship_xl'], 'average' : 150, 'variation' : 0.5, 'use_arg_engine' : True})
 
 if 0:
     Adjust_Ship_Cargo_Capacity(

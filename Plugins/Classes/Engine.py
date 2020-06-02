@@ -15,6 +15,7 @@ class Engine(Macro):
         return
 
     def Get_mk(self):
+        'Get engine mark, as string, or None if not specified.'
         return self.Get('./properties/identification', 'mk')
     
     def Get_makerrace(self):

@@ -130,13 +130,14 @@ class Game_File:
 
     Attributes:
     * name
-      - String, name of the file, without pathing, and uncompressed.
+      - String, name of the file, without pathing.
       - Automatically parsed from virtual_path.
     * virtual_path
       - String, the path to the file in the game's virtual file system,
-        using forward slash separators, including name, uncompressed.
-      - Does not include the 'addon' folder.
+        using forward slash separators, including name.
       - This is the same as used in transform requirements and loads.
+    * suffix
+      - The name suffix, with dot, eg. ".xml", or None if no suffix found.
     * file_source_path
       - String, sys path where the file's original contents were read from,
         either a loose file or a cat file.
@@ -184,6 +185,12 @@ class Game_File:
         # Pick out the name from the end of the virtual path.
         self.name = virtual_path.split('/')[-1]
         self.virtual_path = virtual_path
+        
+        split = self.name.rsplit('.',1)
+        self.suffix = None
+        if len(split) > 1:
+            self.suffix = '.' + split[1]
+
         self.file_source_path = file_source_path
         self.written = False
         self.load_error = False
@@ -203,6 +210,16 @@ class Game_File:
             self.source_extension_names.append(extension_name)
         return
 
+    def Get_Index_Path(self):
+        '''
+        Returns a path string matching the form used in index files, using
+        backward slashes and no extension.
+        TODO: somehow automate an extension prefix?
+        '''
+        path = self.virtual_path
+        if self.suffix:
+            path.replace(self.suffix,'')
+        return path.replace('/', '\\')
 
     def Is_Patched(self):
         '''
@@ -256,6 +273,13 @@ class Game_File:
             return True
         return False
 
+    def Copy(self, new_path):
+        '''
+        Make a copy of this game file, with the new virtual path.
+        Does not automatically add to the file system; use Add_File.
+        Does not update the index component or macro file with a reference.
+        '''
+        raise NotImplementedError()
 
     #def Is_Patch(self):
     #    '''
@@ -513,6 +537,17 @@ class XML_File(Game_File):
 
             self.asset_class_name_dict[asset_class_name].append(asset_name)
         return
+    
+    def Copy(self, new_path):
+        '''
+        Make a copy of this game file, with the new virtual path.
+        Does not automatically add to the file system; use Add_File.
+        '''
+        assert new_path != self.virtual_path
+        return self.__class__(
+            virtual_path = new_path,
+            xml_root = self.Get_Root(),
+            )
 
     def Add_Forced_Xpath_Attributes(self, forced_xpath_attributes):
         '''
@@ -773,10 +808,11 @@ class XML_File(Game_File):
         Changes the patched_root, and does not flag this file as modified.
         '''        
         # Add a nice printout.
-        Plugin_Log.Print('XML patching {}: to {}, from {}'.format(
-                self.virtual_path,
-                self.file_source_path,
-                other_xml_file.file_source_path))
+        # -Removed; kinda spammy.  TODO: add back in in a verbose mode.
+        #Plugin_Log.Print('XML patching {}: to {}, from {}'.format(
+        #        self.virtual_path,
+        #        self.file_source_path,
+        #        other_xml_file.file_source_path))
 
         # Diff patches have a series of add, remove, replace nodes.
         # Operated on the patched_root, leaving the original_root untouched.

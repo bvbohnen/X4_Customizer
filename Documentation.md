@@ -1,4 +1,4 @@
-X4 Customizer 1.20
+X4 Customizer 1.21
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -254,6 +254,8 @@ Example input file:
       - Defaults to True
     
     Behavior:
+    * show_tab_close_button
+      - Bool, if True then a gui tab close button will be shown.
     * disable_cleanup_and_writeback
       - Bool, if True then cleanup from a prior run and any final writes will be skipped.
       - For use when testing plugins without modifying files.
@@ -621,7 +623,7 @@ Rescale Transforms:
 
   * Adjust_Ship_Cargo_Capacity
 
-    Adjusts the cargo capacities of matching ships.
+    Adjusts the cargo capacities of matching ships.  If multiple ships use the same storage macro, it is modified by an average of the ship multipliers.
         
     Args are one or more dictionaries with these fields, where matching rules are applied in order, with a ship being grouped by the first rule it matches:
     
@@ -653,6 +655,8 @@ Rescale Transforms:
   * Rescale_Ship_Speeds
 
     Rescales the speeds of different ship classes, centering on the give target average speeds. Ships are assumed to be using their fastest race engines. Averaged across all ships of the rule match.
+    
+    Cargo capacity of traders and miners is adjusted to compensate for speed changes, so they move a similar amount of wares. If multiple ships use the same cargo macro, it is adjusted by an average of their speed adjustments.
         
     Args are one or more dictionaries with these fields, where matching rules are applied in order, with a ship being grouped by the first rule it matches:
     
@@ -833,6 +837,10 @@ Surface_Elements Transforms:
             'travel'   : {'thrust' : 1,    'boost'  : 0.75, 'boost_time' : 1.33, 'travel' : 0.57 },
             }
         ```
+    * adjust_cargo
+      - Bool, if True then trader and miner ship cargo bays will be adjusted in inverse of the ship's travel thrust change, to maintain roughly the same transport of cargo/time. Assumes trade ships spend 50% of their time in travel mode, and mining ships spend 10%.
+      - Defaults False.
+      - May cause oddities when applied to an existing save.
         
 
   * Remove_Engine_Travel_Bonus
@@ -1301,3 +1309,11 @@ Change Log:
    - Added several example scripts.
  * 1.20
    - Added automatic packing of replacement files into subst cat/dats.
+   - Scale_Sector_Size includes split start locations.
+   - Switched Rescale_Ship_Speeds to handle multiple groups in one call.
+   - Added Adjust_Ship_Cargo_Capacity.
+   - Switched weapon transforms to new style match rule args.
+   - Changed engine scaline transforms to adjust additional boost/thrust speed over normal speed, instead of total boost/thrust speed.
+ * 1.21
+   - Added gui tab close button. Can be disabled in settings.
+   - Set shader files to go into a subst catalog.

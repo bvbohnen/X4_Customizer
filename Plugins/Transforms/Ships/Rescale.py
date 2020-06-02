@@ -6,6 +6,7 @@ __all__ = [
 
 from fnmatch import fnmatch
 import math
+from collections import defaultdict
 from Framework import Transform_Wrapper, Plugin_Log
 from ...Classes import *
 from ..Support import Fill_Defaults, Group_Objects_To_Rules
@@ -22,6 +23,11 @@ def Rescale_Ship_Speeds(
     Rescales the speeds of different ship classes, centering on the give
     target average speeds. Ships are assumed to be using their fastest race
     engines. Averaged across all ships of the rule match.
+
+    Cargo capacity of traders and miners is adjusted to compensate for
+    speed changes, so they move a similar amount of wares. If multiple
+    ships use the same cargo macro, it is adjusted by an average of
+    their speed adjustments.
     
     Args are one or more dictionaries with these fields, where matching
     rules are applied in order, with a ship being grouped by the first
@@ -97,9 +103,14 @@ def Rescale_Ship_Speeds(
     database = Database()
     ship_macros = database.Get_Macros('ship_*') + database.Get_Macros('units_*')
     engine_macros = database.Get_Macros('engine_*') + database.Get_Macros('generic_engine_*')
+    # Remove mk4 engines, since they throw things off a bit.
+    engine_macros = [x for x in engine_macros if x.Get_mk() != '4']
     
     # Group the ships according to rules.
     Group_Objects_To_Rules(ship_macros, scaling_rules, Is_Match)
+
+    # Gather speed mult factors for all ships, to be used later to adjust cargo.
+    ship_mults = {}
     
     # Loop over the rule/groups.
     for rule in scaling_rules:
@@ -199,8 +210,9 @@ def Rescale_Ship_Speeds(
                             raise Exception('Variation set too large; ship speed went negative')
 
                     # Apply back this speed.
-                    ship.Adjust_Speed(new_speed / orig_speed)
-
+                    speed_ratio = new_speed / orig_speed
+                    ship.Adjust_Speed(speed_ratio)
+                    
 
         # Report changes.
         # List pairing ship macro to display name.
@@ -217,6 +229,14 @@ def Rescale_Ship_Speeds(
             if new_speed > 0:
                 new_speeds.append(new_speed)
 
+            # Record the multiplier.
+            # If a ship is in multiple groups, multipliers will stack.
+            # (Note: currently don't expect ships to be in multiple groups.)
+            if orig_speed > 0:
+                if ship not in ship_mults:
+                    ship_mults[ship] = 1
+                ship_mults[ship] *= new_speed / orig_speed
+
             lines.append('  {:<65}: {:>3.0f} -> {:>3.0f} ( {:>2.1f}% ) (using {})'.format(
                 f'{game_name} ({ship.name})',
                 orig_speed,
@@ -229,10 +249,63 @@ def Rescale_Ship_Speeds(
         new_average = sum(new_speeds) / len(new_speeds)
         lines.append(f' Orig average: {orig_avg:.0f} ({min(orig_speeds):.0f} to {max(orig_speeds):.0f})')
         lines.append(f' New  average: {new_average:.0f} ({min(new_speeds):.0f} to {max(new_speeds):.0f})')
-
-
         Plugin_Log.Print('\n'.join(lines) + '\n')
 
+
+    # Adjust ship storage as well.
+    storage_macro_mults = defaultdict(list)
+
+    for ship, speed_mult in ship_mults.items():
+        # If a trade or mining ship, adjust cargo.
+        purpose = ship.Get_Primary_Purpose()
+        if purpose in ['mine', 'trade']:
+
+            # Full adjustment to traders.
+            if purpose == 'trade':
+                cargo_mult = (1 / speed_mult)
+                tags = ['container']
+
+            # Reduced adjustment to miners, since they spend more time
+            # collecting rocks or waiting on drones.
+            # TODO: maybe just full adjustment as well.
+            if purpose == 'mine':
+                cargo_mult = (1 / speed_mult)
+                cargo_mult = 1 + (cargo_mult - 1) * 0.75
+                tags = ['solid', 'liquid']
+
+            for storage in ship.Get_Storage_Macros():
+                # Filter unwanted storage types (not expected to catch anything
+                # in vanilla).
+                storage_tags = storage.Get_Tags()
+                if not any(x in storage_tags for x in tags):
+                    continue
+                # Record the multiplier.
+                storage_macro_mults[storage].append(cargo_mult)
+
+
+    # Adjust cargo bays by average mult.
+    # Report adjustments.
+    # TODO: reuse Adjust_Ship_Cargo_Capacity somehow.
+    # TODO: maybe scrap this in favor of a ship transport rate balancer
+    # that can run after this and similar transforms.
+    lines = ['Storage adjustments:']
+    for storage, mults in storage_macro_mults.items():
+
+        multiplier = sum(mults) / len(mults)
+        volume = storage.Get_Volume()
+        new_volume = int(volume * multiplier)
+
+        # Round a bit to look nicer in game.
+        if new_volume > 10000:
+            new_volume = round(new_volume / 100) * 100
+        else:
+            new_volume = round(new_volume / 10) * 10
+
+        storage.Set_Volume(new_volume)
+        lines.append(f'  {storage.name:<45} : {volume:<6} -> {new_volume:<6}')
+            
+    if len(lines) > 1:
+        Plugin_Log.Print('\n'.join(lines[0:1] + sorted(lines[1:])) + '\n')
 
     # Apply the xml changes.
     database.Update_XML()
@@ -247,7 +320,9 @@ def Adjust_Ship_Cargo_Capacity(
         *scaling_rules
     ):
     '''
-    Adjusts the cargo capacities of matching ships.
+    Adjusts the cargo capacities of matching ships.  If multiple ships
+    use the same storage macro, it is modified by an average of the
+    ship multipliers.
     
     Args are one or more dictionaries with these fields, where matching
     rules are applied in order, with a ship being grouped by the first
@@ -301,6 +376,11 @@ def Adjust_Ship_Cargo_Capacity(
 
     # Group the ships according to rules.
     Group_Objects_To_Rules(ship_macros, scaling_rules, Is_Match)
+    
+
+    # Ships in different rules might use the same storage; average
+    # then together.
+    storage_macro_mults = defaultdict(list)
 
     # Loop over the rule/groups.
     for rule in scaling_rules:
@@ -311,21 +391,34 @@ def Adjust_Ship_Cargo_Capacity(
         cargo_tag   = rule['cargo_tag']
 
         # Pass over them, collecting storage units.
-        storage_macros = []
         for ship in ship_macros:
             for storage in ship.Get_Storage_Macros():
                 # Skip if not of the right type.
                 if cargo_tag and cargo_tag not in storage.Get_Tags():
                     continue
-                # Record it.
-                storage_macros.append(storage)
+                # Record the multiplier.
+                storage_macro_mults[storage].append(multiplier)
 
-        # Toss duplicates.
-        storage_macros = set(storage_macros)
-        # Rescale them all.
-        for storage in storage_macros:
-            volume = storage.Get_Volume()
-            storage.Set_Volume(volume * multiplier)
+
+    lines = ['Storage adjustments:']
+    # Rescale them all.
+    for storage, mults in storage_macro_mults.items():
+
+        multiplier = sum(mults) / len(mults)
+        volume = storage.Get_Volume()
+        new_volume = int(volume * multiplier)
+                    
+        # Round a bit to look nicer in game.
+        if new_volume > 10000:
+            new_volume = round(new_volume / 100) * 100
+        else:
+            new_volume = round(new_volume / 10) * 10
+
+        storage.Set_Volume(new_volume)
+        lines.append(f'  {storage.name:<45} : {volume:<6} -> {new_volume:<6}')
+            
+    if len(lines) > 1:
+        Plugin_Log.Print('\n'.join(lines[0:1] + sorted(lines[1:])) + '\n')
         
     # Apply the xml changes.
     database.Update_XML()

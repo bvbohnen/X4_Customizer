@@ -1,4 +1,4 @@
-X4 Customizer 1.20
+X4 Customizer 1.21
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -259,7 +259,7 @@ Rescale Transforms:
 
   * Adjust_Ship_Cargo_Capacity
 
-    Adjusts the cargo capacities of matching ships.
+    Adjusts the cargo capacities of matching ships.  If multiple ships use the same storage macro, it is modified by an average of the ship multipliers.
 
   * Rescale_Ship_Speeds
 

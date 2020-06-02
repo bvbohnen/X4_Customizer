@@ -20,3 +20,5 @@ if 0:
     Remove_Workshop_Tool_Dependency_Check()
     
 Write_Modified_Binaries()
+
+# TODO: rename the modded exe to x4.exe for steam.

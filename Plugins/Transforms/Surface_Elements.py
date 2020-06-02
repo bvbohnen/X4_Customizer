@@ -10,7 +10,7 @@ from fnmatch import fnmatch
 from collections import defaultdict
 from Framework import Transform_Wrapper, Plugin_Log
 from ..Classes import *
-
+from .Ships import Adjust_Ship_Cargo_Capacity
 
 # TODO: change ship engine mods to swap travel bonuses to something else.
 @Transform_Wrapper()
@@ -63,8 +63,8 @@ def Adjust_Engine_Boost_Speed(multiplier):
 
 
 
-# TODO: version of this that also rebalances combat vs travel vs allround.
-# Much of the logic would be similar in structure, though details would differ.
+# TODO: ratios per engine size, as the split M travel ratios are wildly
+# different than the split L/XL ratios.
 @Transform_Wrapper()
 def Rebalance_Engines(
         race_speed_mults = {
@@ -78,6 +78,7 @@ def Rebalance_Engines(
             'combat'   : {'thrust' : 1.05, 'boost' : 1.05, 'boost_time' : 1.43, 'travel' : 0.933},
             'travel'   : {'thrust' : 1,    'boost' : 0.75, 'boost_time' : 0.57, 'travel' : 1.33 },
             },
+        adjust_cargo = False,
     ):
     '''
     Rebalances engine speed related properties across purposes and maker races.
@@ -117,8 +118,16 @@ def Rebalance_Engines(
             'travel'   : {'thrust' : 1,    'boost'  : 0.75, 'boost_time' : 1.33, 'travel' : 0.57 },
             }
         ```
+    * adjust_cargo
+      - Bool, if True then trader and miner ship cargo bays will be adjusted in
+        inverse of the ship's travel thrust change, to maintain roughly the
+        same transport of cargo/time. Assumes trade ships spend 50% of their
+        time in travel mode, and mining ships spend 10%.
+      - Defaults False.
+      - May cause oddities when applied to an existing save.
     '''
     '''
+
     Notes:
     mk2 engines cost 5x more than mk1, with 21% more speed.
     mk3 engines cost 5x more than mk2, with 11% more speed.
@@ -308,6 +317,52 @@ def Rebalance_Engines(
                     lines.append(line)
 
     Plugin_Log.Print('\n'.join(lines) + '\n')
+
+
+    # Load all ships, categorize by race and size, check the engine
+    # travel speed change (original to new), and rescale the ship cargo
+    # for mine/trade to balance it somewhat.
+    # TODO: maybe scrap this in favor of a ship transport rate balancer
+    # that can run after this and similar transforms.
+    if adjust_cargo:
+        ship_macros = database.Get_Macros('ship_*') + database.Get_Macros('units_*')
+
+        # Ships don't spend all of their time in travel mode.
+        # As a quick estimate, assume traders spend 50%, miners 10%.
+        purpose_travel_ratio_dict = {'mine' : 0.1, 'trade' : 0.5}
+        # Prep rules to send to Adjust_Ship_Cargo_Capacity.
+        cargo_scaling_rules = []
+
+        for ship in ship_macros:
+            purpose = ship.Get_Primary_Purpose()
+            if purpose not in purpose_travel_ratio_dict:
+                continue
+
+            # Look up the engine speeds.
+            engine = ship.Select_Engine(engine_macros = engine_macros)
+            # If no engine was found skip; something weird happened.
+            if not engine:
+                continue
+            # If this engine wasn't modified, skip.
+            if engine not in orig_engine_speeds:
+                continue
+
+            # Add the base and bonus thrusts.
+            orig = orig_engine_speeds[engine]['thrust'] + orig_engine_speeds[engine]['travel']
+            new = engine.Get_Forward_Thrust() + engine.Get_Travel_Thrust()
+            speed_ratio = new / orig
+
+            # Calc the esimated overall trip time ratio.
+            # <1 means the ship takes less time, and should hold less cargo.
+            ratio = purpose_travel_ratio_dict[purpose]
+            trip_time_ratio = (1 - ratio) + ratio * orig / new
+
+            cargo_scaling_rules.append({
+                'match_all' : [f'name {ship.name}'],
+                'multiplier': trip_time_ratio,
+                })
+
+        Adjust_Ship_Cargo_Capacity(*cargo_scaling_rules)
 
     database.Update_XML()
     return
