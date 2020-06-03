@@ -217,6 +217,8 @@ Change Log:
  * 1.21
    - Added gui tab close button. Can be disabled in settings.
    - Set shader files to go into a subst catalog.
+   - Added automatic ship storage capacity adjustment to Rescale_Ship_Speeds
+     and Rebalance_Engines for traders and miners.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.
