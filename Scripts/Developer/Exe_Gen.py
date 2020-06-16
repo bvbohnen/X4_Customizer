@@ -4,8 +4,8 @@ Run the exe modifications.
 from Plugins import *
 
 Settings(
-    #X4_exe_name = 'X4_nonsteam.exe',
-    X4_exe_name = 'X4.vanilla.exe',
+    X4_exe_name = 'X4_nonsteam.exe',
+    #X4_exe_name = 'X4.vanilla.exe',
     )
 
 if 1:

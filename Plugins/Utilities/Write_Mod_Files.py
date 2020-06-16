@@ -2,11 +2,13 @@
 from pathlib import Path
 from lxml import etree as ET
 import Framework
-from Framework import File_System, Settings, Print
+from Framework import File_System, Settings, Print, Load_File, XML_File
 
 __all__ = [
     'Write_To_Extension',
     'Write_Modified_Binaries',
+    'Make_Extension_Content_XML',
+    'Update_Content_XML_Dependencies',
     ]
 
 
@@ -37,6 +39,8 @@ def Write_To_Extension(skip_content = False):
 
     * skip_content
       - Bool, if True then the content.xml file will not be written.
+      - Content is automatically skipped if Make_Extension_Content_XML
+        was already called.
       - Defaults to False.
     '''
     # TODO: maybe make path and extension name into arguments,
@@ -63,26 +67,60 @@ def Write_To_Extension(skip_content = False):
     File_System.Write_Files()
     return
 
-    
-def Make_Extension_Content_XML():
+
+def Make_Extension_Content_XML(
+        name        = None,
+        author      = None,
+        version     = None,
+        save        = False,
+        sync        = False,
+        enabled     = True,
+        description = None,
+    ):
     '''
     Adds an xml file object defining the content.xml for the top
-    of the extension.
+    of the extension.  Common fields can be specified, or left as defaults.
+
+    * name
+      - String, display name; defaults to extension folder name.
+    * author
+      - String, author name; defaults to X4 Customizer.
+    * version
+      - String, version code; defaults to customizer version.
+    * save
+      - Bool, True if saves made with the extension require it be enabled.
+    * sync
+      - Bool.
+    * enabled
+      - Bool, True to default to enabled, False disabled.
+    * description
+      - String, extended description to use, for all languages.
+      - Newlines are automatically converted to "&#10;" for display in-game.
     '''
-    # Content version needs to have 3+ digits, with the last
-    #  two being sub version. This doesn't mesh will with
-    #  the version in the Change_Log, but can do a simple conversion of
-    #  the top two version numbers.
-    version_split = Framework.Change_Log.Get_Version().split('.')
-    # Should have at least 2 version numbers, sometimes a third.
-    assert len(version_split) >= 2
-    # This could go awry on weird version strings, but for now just assume
-    # they are always nice integers, and the second is 1-2 digits.
-    version_major = version_split[0]
-    version_minor = version_split[1].zfill(2)
-    assert len(version_minor) == 2
-    # Combine together.
-    version = version_major + version_minor
+    # If the content exists already, return early.
+    if Load_File('content.xml', error_if_not_found = False) == None:
+        return
+    
+    if not version:
+        # Content version needs to have 3+ digits, with the last
+        #  two being sub version. This doesn't mesh will with
+        #  the version in the Change_Log, but can do a simple conversion of
+        #  the top two version numbers.
+        version_split = Framework.Change_Log.Get_Version().split('.')
+        # Should have at least 2 version numbers, sometimes a third.
+        assert len(version_split) >= 2
+        # This could go awry on weird version strings, but for now just assume
+        # they are always nice integers, and the second is 1-2 digits.
+        version_major = version_split[0]
+        version_minor = version_split[1].zfill(2)
+        assert len(version_minor) == 2
+        # Combine together.
+        version = version_major + version_minor
+
+    # If a description given, format slightly.
+    if description:
+        # Need to use "&#10;" for newlines in-game.
+        description = description.replace('\n', '&#10;')
 
     # Set the ID based on replacing spaces.
     this_id = Settings.extension_name.replace(' ','_')
@@ -93,18 +131,18 @@ def Make_Extension_Content_XML():
         attrib = {
             # Swap spaces to _; unclear on if x4 accepts spaces.
             'id'         : this_id,
-            'name'       : Settings.extension_name,
-            'author'     : 'X4_Customizer',
+            'name'       : name if name else Settings.extension_name,
+            'author'     : author if author else 'X4_Customizer',
             'version'    : version,
             'date'       : File_System.Get_Date(),
             # TODO: maybe track when changes are save breaking, eg. if
             #  adding in new ships or similar. Though in practice, it
             #  may be best to always keep this false, and offer transforms
             #  that can undo breaking changes safely before uninstall.
-            'save'       : 'false',
-            'sync'       : 'false',
-            'enabled'    : 'true',
-            'description': ' ',
+            'save'       : 'true' if save else 'false',
+            'sync'       : 'true' if sync else 'false',
+            'enabled'    : 'true' if enabled else 'false',
+            'description': description if description else ' ',
             })
 
     
@@ -112,17 +150,70 @@ def Make_Extension_Content_XML():
     # This loops over all language ids noticed in the cat/dat t files.
     for lang_id in ['7','33','37','39','44','49','55','81','82','86','88']:
         # Set up a new text node.
-        text_node = ET.Element('language', language = lang_id, description = '')
-
-        # Fill in description for 44, english, if no other.
-        if lang_id == '44':
-            # Note: need to use "&#10;" for newlines in-game.
-            # TODO: maybe list some transforms run, or similar.
-            text_node.set('description', 'Generated by X4_Customizer')
+        # TODO: per-language descriptions.
+        text_node = ET.Element('language', language = lang_id, description = description)
 
         # Add to the content node.
         content_node.append(text_node)
 
+    # Record it.
+    File_System.Add_File( XML_File(
+        xml_root = content_node,
+        virtual_path = 'content.xml',
+        modified = True))
+    
+    # Use shared code to fill in dependencies.
+    Update_Content_XML_Dependencies()
+    return
+
+
+def Update_Content_XML_Dependencies():
+    '''
+    Update the dependencies in the content xml file, based on which other
+    extensions touched files modified by the current script.
+    If applied to an existing content.xml (not one created here), existing
+    dependencies are kept, and only customizer dependencies are updated.
+
+    Note: an existing xml file may loose custom formatting.
+    '''
+    # TODO: framework needs more development to handle cases with an
+    # existing content.xml cleanly, since currently the output extension is
+    # always ignored, and there is no particular method of dealing with
+    # output-ext new files not having an extensions/... path.
+
+    # Try to load a locally created content.xml.
+    content_file = Load_File('content.xml', error_if_not_found = False)
+
+    # If not found, then search for an existing content.xml on disk.
+    if not content_file:
+        # Manually load it.
+        content_path = Settings.Get_Output_Folder() / 'content.xml'
+        # Verify the file exists.
+        if not content_path.exists():
+            Print('Error in Update_Content_XML_Dependencies: could not find an existing content.xml file')
+            return
+
+        content_file = File_System.Add_File( XML_File(
+            # Plain file name as path, since this will write back to the
+            # extension folder.
+            virtual_path = 'content.xml',
+            binary = content_path.read_bytes(),
+            # Edit the existing file.
+            edit_in_place = True,
+            ))
+
+    root = content_file.Get_Root()
+    
+    # Set the ID based on replacing spaces.
+    this_id = Settings.extension_name.replace(' ','_')
+    
+    # Remove old dependencies from the customizer, and record others.
+    existing_deps = []
+    for dep in root.xpath('./dependency'):
+        if dep.get('from_customizer'):
+            dep.getparent().remove(dep)
+        else:
+            existing_deps.append(dep.get('id'))
 
     # Add in dependencies to existing extensions.
     # These should be limited to only those extensions which sourced
@@ -147,17 +238,20 @@ def Make_Extension_Content_XML():
 
     # Add the elements; keep alphabetical for easy reading.
     for ext_id in sorted(source_extension_ids):
-        # Omit self, just in case... shouldn't come up, but might.
+
+        # Omit self, just in case; shouldn't come up, but might.
         if ext_id == this_id:
             Print('Error: output extension appears in its own dependencies,'
                   ' indicating it transformed its own prior output.')
-        else:
-            content_node.append( ET.Element('dependency', id = ext_id ))
+            continue
 
-    # Record it.
-    File_System.Add_File( Framework.File_Manager.XML_File(
-        xml_root = content_node,
-        virtual_path = 'content.xml',
-        modified = True))
+        # Skip if already defined.
+        if ext_id in existing_deps:
+            continue
+        
+        # Add it, with a tag to indicate it came from the customizer.
+        # TODO: optional dependencies?
+        root.append( ET.Element('dependency', id = ext_id, from_customizer = 'true' ))
 
+    content_file.Update_Root(root)
     return

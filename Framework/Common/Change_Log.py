@@ -219,6 +219,12 @@ Change Log:
    - Set shader files to go into a subst catalog.
    - Added automatic ship storage capacity adjustment to Rescale_Ship_Speeds
      and Rebalance_Engines for traders and miners.
+ * 1.22
+   - Added Settings.root_file_tag.
+   - Adjusted cat unpacker to no longer treat egosoft's bad empty file hashes
+     as changed files.
+   - Updates to content.xml generation, and support for updating an existing
+     content file with new dependencies.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

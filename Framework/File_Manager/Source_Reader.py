@@ -171,6 +171,9 @@ class Source_Reader_class:
                 #  are the ones being updated this run.
                 # Sometimes this will be included based on settings, eg. when
                 #  only creating documentation.
+                # TODO: think about always making a reader, and omitting it
+                # elsewhere (eg. from file lookups), such that existing
+                # files can be edited, eg. the content.xml.
                 if (ext_summary.is_current_output 
                 and Settings.ignore_output_extension):
                     continue

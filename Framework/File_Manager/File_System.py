@@ -149,6 +149,7 @@ class File_System_class:
     def Add_File(self, game_file):
         '''
         Record a new a Game_File object, keyed by its virtual path.
+        Returns the game_file, for convenience.
         '''
         self.game_file_dict[game_file.virtual_path] = game_file
         
@@ -163,7 +164,7 @@ class File_System_class:
                     # Record the file two ways.
                     self.asset_class_dict[tag][class_name].append(game_file)
                     self.asset_name_dict[name] = game_file
-        return
+        return game_file
 
 
     def Reset_File(self, virtual_path):
@@ -630,7 +631,10 @@ class File_System_class:
                 # throw an error. (It should have been deleted already
                 # if from last run.) Skip this check for exe files, which
                 # use custom naming to get around overwrite dangers.
-                if file_path.exists() and not isinstance(file_object, Machine_Code_File):
+                # Files being edited in place are okay to overwrite.
+                if (file_path.exists() 
+                and not file_object.edit_in_place
+                and not isinstance(file_object, Machine_Code_File)):
                     Print(('Error: skipping write due to file existing on path: {}'
                            ).format(file_path))
                     continue
@@ -639,11 +643,14 @@ class File_System_class:
                 file_object.Write_File(file_path)
 
                 # Add this to the log, post-write for correct hash.
-                log.Record_File_Path_Written(file_path)
+                # Only do this if not being edited in place, to avoid
+                # accidental deletion of the file on the next run.
+                if not file_object.edit_in_place:
+                    log.Record_File_Path_Written(file_path)
 
-                # Refresh the log file, in case a crash happens during file
-                #  writes, so this last write was captured.
-                log.Store()
+                    # Refresh the log file, in case a crash happens during file
+                    #  writes, so this last write was captured.
+                    log.Store()
 
             else:
                 # Add to a catalog writer.

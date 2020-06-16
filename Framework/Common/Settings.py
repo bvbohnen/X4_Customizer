@@ -145,6 +145,11 @@ class Settings_class:
       - Can be used to make xpaths more specific, and more likely to break
         if an unknown extension is applied before the output extension
         (eg. when the customizer output is distributed to other users).
+    * root_file_tag
+      - String, extra tag added to names of modified files in the root folder
+        and not placed in an extension, eg. X4.exe, to avoid overwriting the 
+        originals.
+      - Defaults to ".mod", eg. "X4.mod.exe".
 
     Logging:
     * live_editor_log_file_name
@@ -362,7 +367,8 @@ class Settings_class:
         defaults['ignore_extensions'] = False
         defaults['allow_cat_md5_errors'] = False
         defaults['ignore_output_extension'] = True
-        defaults['X4_exe_name'] = 'X4.exe'        
+        defaults['X4_exe_name'] = 'X4.exe'
+        defaults['root_file_tag'] = '.mod'
         defaults['make_maximal_diffs'] = False
         defaults['forced_xpath_attributes'] = ''
         defaults['plugin_log_file_name'] = 'plugin_log.txt'
@@ -560,6 +566,10 @@ class Settings_class:
             else:
                 # Hard error.
                 raise AssertionError(message + '\nEnable "allow_path_error" to bypass this check.')
+            
+        # Check that root_file_tag is not empty, to avoid overwrites.
+        if not self.root_file_tag:
+            raise AssertionError('Empty Settings.root_file_tag disallowed')
 
         # Check that file names are given, and not blank.
         # TODO

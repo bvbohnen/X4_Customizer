@@ -101,6 +101,10 @@ def Cat_Unpack(
     
 
     # TODO:
+    # Record a json record of already extracted file hashes, for fast
+    # checking them instead of re-hashing every time.
+
+    # TODO:
     # Switch to pulling out all virtual_paths first, then use fnmatch.filter
     # on them for each pattern, then use some set operations to merge the
     # results down to the desired set of paths.
@@ -127,7 +131,10 @@ def Cat_Unpack(
             existing_binary = dest_path.read_bytes()
             dest_hash = File_Manager.Cat_Reader.Get_Hash_String(existing_binary)
             # If hashes match, skip.
-            if dest_hash == cat_entry.hash_str:
+            # Ego uses 0's instead of a proper hash for empty files, so also
+            # check that case.
+            if (dest_hash == cat_entry.hash_str 
+            or (not existing_binary and cat_entry.hash_str == '00000000000000000000000000000000')):
                 num_hash_skips += 1
                 continue
 

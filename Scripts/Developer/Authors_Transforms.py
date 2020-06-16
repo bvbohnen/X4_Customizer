@@ -6,20 +6,9 @@ actual good ideas for game modifications.
 # Import all transform functions.
 from Plugins import *
 
-# Adjust the exe to point at a saved copy, since X4.exe will be symlinked
-# to the customized version.
-Settings(X4_exe_name = 'X4_nonsteam.exe')
-#Settings(X4_exe_name = 'X4.vanilla.exe')
-
+# Not using live edits currently, but merge in any from tests.
 Apply_Live_Editor_Patches()
 
-
-# Exe edits.
-# Disabled when not refreshing; the prior produced exe will not
-# be deleted by the customizer.
-if 0:
-    Remove_Sig_Errors()
-    Remove_Modified()
 
 # Prune some mass traffic.
 # (There may also be a way to adjust this in-game now.)
@@ -27,59 +16,7 @@ if 0:
 # This might still help with many stations near each other.
 Adjust_Job_Count(('id masstraffic*', 0.5))
 
-# Testing adjusting jobs globally.
-Adjust_Job_Count(('*', .0001))
-
-# Toy around with coloring.
-# This is Pious Mists.
-# Color_Text((20005,3021,'C'))
-
-# Speed up all smaller ships by a bit.
-'''
-Adjust_Ship_Speed(
-    ('class ship_s' , 1.3),
-    ('class ship_m' , 1.1),
-    )
-'''
-
-# Toy around with small weapons.
-'''
-Adjust_Weapon_Damage(
-    ('tags small standard weapon'   , 2),
-    ('*'                            , 1.2),
-    )
-Adjust_Weapon_Range(
-    ('tags small standard weapon'   , 2),
-    ('tags missile'                 , 2),
-    )
-Adjust_Weapon_Shot_Speed(
-    ('tags small standard weapon'   , 2),
-    ('tags missile'                 , 2),
-    )
-Adjust_Weapon_Fire_Rate(
-    ('tags small standard weapon'   , 4),
-    #('tags missile'                 , 2),
-    )
-Print_Weapon_Stats()
-'''
-
-
-# Reduce general price spread on wares, to reduce trade profit.
-# (Remove for now, until getting a better feel for the game.)
-#Adjust_Ware_Price_Spread(0.5)
-
-# Reduce the prices on inventory items, since they are often
-# obtained for free.
-#Adjust_Ware_Prices(('container inventory', 0.5) ) 
-#Print_Ware_Stats()
-
-# Reduce generic mission rewards somewhat heavily.
-#Adjust_Mission_Rewards(0.3)
-# Make mods more likely from missions.
-#Adjust_Mission_Reward_Mod_Chance(3)
-
-# Sector/speed rescaling stuff. Requires new game to work well.
-if 1:
+if 0:
     # Slow down ai scripts a bit for better fps.
     # Note on 20k ships save 300km out of vision:
     #  1x/1x: 37 fps (vanilla)
@@ -96,6 +33,11 @@ if 1:
         include_extensions = False,
         skip_combat_scripts = False,
         )
+
+
+# Sector/speed rescaling stuff. Requires new game to work well.
+# TODO: split off into its own extension.
+if 0:
     
     # Disable travel drives for ai.
     Disable_AI_Travel_Drive()
@@ -202,6 +144,8 @@ if 1:
         {'match_all' : ['class ship_l'],  'average' : 200, 'variation' : 0.4},
         {'match_all' : ['class ship_xl'], 'average' : 150, 'variation' : 0.4})
     
+    # TODO: reduce highway speeds similarly (eg. 2000 instead of 20000).
+
     # Miners can struggle to keep up. Increase efficiency somewhat by
     # letting them haul more cargo.
     # Traders could also use a little bump, though not as much as miners
@@ -224,8 +168,12 @@ if 1:
         )
     
 
-# Asteroid fade-in testing stuff.
-if 1:
+# Lighter job file for quicker testing.
+if 0:
+    Adjust_Job_Count(('*', .0001))
+
+# Speed up paranid warrior start ship for tests.
+if 0:
     Set_Ship_Radar_Ranges(('name ship_par_s_fighter_01_a_macro', 50))
     Adjust_Ship_Speed(('name ship_par_s_fighter_01_a_macro'    , 10))
 
