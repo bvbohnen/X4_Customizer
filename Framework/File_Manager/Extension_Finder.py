@@ -43,6 +43,9 @@ class Extension_Summary:
       - Bool, True if this extensions is enabled, else False.
     * default_enabled
       - Bool, if the extension is enabled by default.
+    * ignore
+      - Bool, if the extension should be ignored due to Settings whitelist
+        or blacklist settings.
     * is_current_output
       - Bool, True if this extension is the customizer output.
     * soft_dependencies
@@ -76,6 +79,7 @@ class Extension_Summary:
         # TODO: move this into the ext_summary constructor.
         self.default_enabled =  self.content_xml.get('enabled', 'true').lower() in ['true','1']
         self.enabled = self.default_enabled
+        self.ignore = False
                 
         # Collect all the names of dependencies.
         # Lowercase these to standardize name checks.
@@ -155,6 +159,10 @@ def Find_Extensions():
     # Note the path to the target output extension content.xml.
     output_content_path = Settings.Get_Output_Folder() / 'content.xml'
 
+    # Expand out the whitelist and blacklist folder names.
+    whitelist = Settings.extension_whitelist.split(';') if Settings.extension_whitelist else []
+    blacklist = Settings.extension_blacklist.split(';') if Settings.extension_blacklist else []
+
     # Note extension ids found, to detect non-unique cases that
     # can cause problems.
     ext_ids_found = set()
@@ -211,9 +219,25 @@ def Find_Extensions():
                             output_content_path_resolved.as_posix(),
                             content_xml_path_resolved.as_posix(),
                             )))
+                
 
-            #print('content: {}\n output: {}\n is_current_output: {}\n'.format(
-            #    content_xml_path, output_content_path, ext_summary.is_current_output))
+            # Fill in the ignore flag.
+            if Settings.ignore_extensions:
+                ext_summary.ignore = True
+
+            # Check if this should be ignored based on whitelist or blacklist.
+            # If blacklist, always ignore.
+            elif ext_summary.extension_name in blacklist:
+                ext_summary.ignore = True
+            # If there is a whitelist, ignore if not on it.
+            elif whitelist and ext_summary.extension_name not in whitelist:
+                ext_summary.ignore = True
+
+            # Also ignore if this is the current output target.            
+            elif ext_summary.is_current_output and Settings.ignore_output_extension:
+                ext_summary.ignore = True
+
+
                         
     return ext_summary_list
                 

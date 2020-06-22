@@ -156,36 +156,30 @@ class Source_Reader_class:
             self.loose_source_reader = Location_Source_Reader(
                 location = source_folder)
 
+        # Loop over Extension_Summary objects.
+        for ext_summary in Find_Extensions():            
 
-        # Skip if ignoring extensions.
-        # (Can also take care of this elsewhere, but this spot is easy.)
-        if not Settings.ignore_extensions:
-            # Loop over Extension_Summary objects.
-            for ext_summary in Find_Extensions():            
+            # Skip those disabled.
+            if not ext_summary.enabled:
+                continue
 
-                # Skip those disabled.
-                if not ext_summary.enabled:
-                    continue
+            # Skip ignored extensions.
+            # TODO: think about always making a reader, and omitting it
+            # elsewhere (eg. from file lookups), such that existing
+            # files can be edited, eg. the content.xml.
+            if ext_summary.ignore:
+                if Settings.verbose:
+                    Plugin_Log.Print(f'Ignoring extension folder: {ext_summary.extension_name}')
+                continue
 
-                # Skip the current output extension target, since its contents
-                #  are the ones being updated this run.
-                # Sometimes this will be included based on settings, eg. when
-                #  only creating documentation.
-                # TODO: think about always making a reader, and omitting it
-                # elsewhere (eg. from file lookups), such that existing
-                # files can be edited, eg. the content.xml.
-                if (ext_summary.is_current_output 
-                and Settings.ignore_output_extension):
-                    continue
+            # Create the reader object.
+            # Don't worry about ordering just yet.
+            reader = Location_Source_Reader(
+                location          = ext_summary.content_xml_path.parent,
+                extension_summary = ext_summary )
 
-                # Create the reader object.
-                # Don't worry about ordering just yet.
-                reader = Location_Source_Reader(
-                    location          = ext_summary.content_xml_path.parent,
-                    extension_summary = ext_summary )
-
-                # Record using the extension name (its folder).
-                self.extension_source_readers[reader.extension_name] = reader
+            # Record using the extension name (its folder).
+            self.extension_source_readers[reader.extension_name] = reader
                 
         # Now sort the extension order to satisfy dependencies.
         self.Sort_Extensions()

@@ -1,4 +1,4 @@
-X4 Customizer 1.22
+X4 Customizer 1.23
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -190,8 +190,13 @@ Example input file:
       - Only applies within a single search location, eg. within an extension, within the source folder, or within the base X4 folder; a loose file in the source folder will still be used over those in the X4 folder regardless of setting.
       - Defaults to False
     * ignore_extensions
-      - Bool, if True then extensions will be ignored, and files are only sourced from the source_folder or x4_folder.
+      - Bool, if True then all extensions will be ignored, and files are only sourced from the source_folder or x4_folder.
       - Defaults to False
+    * extension_whitelist
+      - String, optional, semicolon separated list of lowercase extension folder names to consider loading (if found and enabled).
+      - If not given, all extension folders are checked, except those in the blacklist.
+    * extension_blacklist
+      - String, optional, semicolon separated list of lowercase extension folder names to always ignore.
     * allow_cat_md5_errors
       - Bool, if True then when files extracted from cat/dat fail to verify their md5 hash, no exception will be thrown.
       - Defaults to False; consider setting True if needing to unpack incorrectly assembled catalogs.
@@ -1326,3 +1331,6 @@ Change Log:
    - Added Settings.root_file_tag.
    - Adjusted cat unpacker to no longer treat egosoft's bad empty file hashes as changed files.
    - Updates to content.xml generation, and support for updating an existing content file with new dependencies.
+ * 1.23
+   - Added extension_whitelist and extension_blacklist settings to control which extensions are loaded by the customizer.
+   - Fixed content.xml not being generated, introduced by 1.22.

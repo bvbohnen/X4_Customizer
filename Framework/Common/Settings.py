@@ -75,9 +75,17 @@ class Settings_class:
         in the X4 folder regardless of setting.
       - Defaults to False
     * ignore_extensions
-      - Bool, if True then extensions will be ignored, and files are
+      - Bool, if True then all extensions will be ignored, and files are
         only sourced from the source_folder or x4_folder.
       - Defaults to False
+    * extension_whitelist
+      - String, optional, semicolon separated list of lowercase extension
+        folder names to consider loading (if found and enabled).
+      - If not given, all extension folders are checked, except those in
+        the blacklist.
+    * extension_blacklist
+      - String, optional, semicolon separated list of lowercase extension
+        folder names to always ignore.
     * allow_cat_md5_errors
       - Bool, if True then when files extracted from cat/dat fail
         to verify their md5 hash, no exception will be thrown.
@@ -365,6 +373,8 @@ class Settings_class:
         defaults['path_to_source_folder'] = None
         defaults['prefer_single_files'] = False
         defaults['ignore_extensions'] = False
+        defaults['extension_whitelist'] = ''
+        defaults['extension_blacklist'] = ''
         defaults['allow_cat_md5_errors'] = False
         defaults['ignore_output_extension'] = True
         defaults['X4_exe_name'] = 'X4.exe'

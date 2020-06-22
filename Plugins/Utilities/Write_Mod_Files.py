@@ -98,7 +98,7 @@ def Make_Extension_Content_XML(
       - Newlines are automatically converted to "&#10;" for display in-game.
     '''
     # If the content exists already, return early.
-    if Load_File('content.xml', error_if_not_found = False) == None:
+    if Load_File('content.xml', error_if_not_found = False) != None:
         return
     
     if not version:
@@ -121,6 +121,8 @@ def Make_Extension_Content_XML(
     if description:
         # Need to use "&#10;" for newlines in-game.
         description = description.replace('\n', '&#10;')
+    else:
+        description = ' '
 
     # Set the ID based on replacing spaces.
     this_id = Settings.extension_name.replace(' ','_')
@@ -142,7 +144,7 @@ def Make_Extension_Content_XML(
             'save'       : 'true' if save else 'false',
             'sync'       : 'true' if sync else 'false',
             'enabled'    : 'true' if enabled else 'false',
-            'description': description if description else ' ',
+            'description': description,
             })
 
     

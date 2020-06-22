@@ -225,6 +225,10 @@ Change Log:
      as changed files.
    - Updates to content.xml generation, and support for updating an existing
      content file with new dependencies.
+ * 1.23
+   - Added extension_whitelist and extension_blacklist settings to control
+     which extensions are loaded by the customizer.
+   - Fixed content.xml not being generated, introduced by 1.22.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.
