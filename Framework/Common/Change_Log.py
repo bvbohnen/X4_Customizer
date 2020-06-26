@@ -231,6 +231,10 @@ Change Log:
    - Fixed content.xml not being generated, introduced by 1.22.
  * 1.23.1
    - Added python configparser module to the packaged customizer.
+ * 1.24
+   - Added Enable_Windows_File_Cache exe transform (experimental).
+   - Refinements to Check_Extensions and extension error handling.
+   - Added basic diff patch support for xpaths in parentheses.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

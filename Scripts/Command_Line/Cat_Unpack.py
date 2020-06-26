@@ -16,7 +16,7 @@ def Run():
     # Test if the gui window is open; error message if so.
     from Plugins.GUI import Main_Window
     if Main_Window.qt_application != None:
-        Print('Error: Generate_Diffs standalone script is only supported by'
+        Print('Error: Cat_Unpack standalone script is only supported by'
               ' command line calls, not from the GUI.')
         return
 

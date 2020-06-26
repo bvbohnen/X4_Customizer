@@ -5,6 +5,7 @@ __all__ = [
     'Remove_Modified',
     'Remove_Sig_Errors',
     'High_Precision_Systemtime',
+    'Enable_Windows_File_Cache',
     #'Remove_Workshop_Tool_Dependency_Check',
     ]
 
@@ -569,6 +570,265 @@ def High_Precision_Systemtime(
     Apply_Binary_Patch_Group(patches)
     return
 
+
+
+
+@Transform_Wrapper()
+def Enable_Windows_File_Cache():
+    '''
+    Edits the exe to enable windows file caching, which x4 normally disables.
+    Note: may require large amounts of unused memory to be useful.
+
+    Experimental; not yet verified to have benefit (untested on systems with
+    more than 16 GB of memory).
+    '''
+
+    '''
+    Files are opened through the windows CreateFile function.
+    https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea
+    In this, the call can set dwFlagsAndAttributes to include flag
+    FILE_FLAG_NO_BUFFERING (0x20000000).
+
+    There are 3 locations in the exe that CreateFile with this flag set.
+    It is unclear which file types are controlled by each flag, but can try
+    to clear the flag at all call points.
+
+    TODO: a couple other CreateFile calls are done with less clear flags,
+    and may also be disabling caching.
+
+    '''
+    
+    patches = []
+
+
+    '''
+    ` 140f14673 48 89      MOV     qword ptr [RSP + local_148],RSI
+    `           74 24 30
+    ` 140f14678 c7 44      MOV     dword ptr [RSP + local_150],0x60...
+    `           24 28 
+    `           00 00 
+    `           00 60
+    ` 140f14680 c7 44      MOV     dword ptr [RSP + local_158],0x2
+    `           24 20 
+    `           02 00 
+    `           00 00
+    ` 140f14688 45 33 c9   XOR     R9D,R9D
+    ` 140f1468b ba 00      MOV     EDX,0x40000000
+    `           00 00 40
+    ` 140f14690 45 8d      LEA     R8D,[R9 + 0x1]
+    `           41 01
+    ` 140f14694 48 8b c8   MOV     RCX,RAX
+    ` 140f14697 ff 15      CALL    qword ptr [->KERNEL32.DLL::Creat...
+    `           93 ad 
+    `           48 00
+
+    Edit the move of 60000000 to 40000000
+    '''
+    
+    patches.append(Binary_Patch(
+        file = Settings.X4_exe_name,
+        ref_code = '''
+        48 89   
+        74 24 30
+        c7 44   
+        24 28 
+        00 00 
+        00 60
+        c7 44   
+        24 20 
+        02 00 
+        00 00
+        45 33 c9
+        ba 00   
+        00 00 40
+        45 8d   
+        41 01
+        48 8b c8
+        ff 15   
+        ''',
+        
+        new_code = ''' 
+        48 89   
+        74 24 30
+        c7 44   
+        24 28 
+        00 00 
+        00 40
+        c7 44   
+        24 20 
+        02 00 
+        00 00
+        45 33 c9
+        ba 00   
+        00 00 40
+        45 8d   
+        41 01
+        48 8b c8
+        ff 15   
+        ''',
+        ))
+
+    
+    '''
+    ` 140f14897 b8 00      MOV     EAX,0x60000000
+    `           00 00 60
+    ` 140f1489c 84 d2      TEST    DL,DL
+    ` 140f1489e ba 00      MOV     EDX,0x40000000
+    `           00 00 40
+    ` 140f148a3 0f 45 c2   CMOVNZ  EAX,EDX
+    ` 140f148a6 48 c7      MOV     qword ptr [RSP + local_148],0x0
+    `           44 24 
+    `           30 00 
+    `           00 00 00
+    ` 140f148af 89 44      MOV     dword ptr [RSP + local_150],EAX
+    `           24 28
+    ` 140f148b3 c7 44      MOV     dword ptr [RSP + local_158],0x3
+    `           24 20 
+    `           03 00 
+    `           00 00
+    ` 140f148bb 45 33 c9   XOR     R9D,R9D
+    ` 140f148be ba 00      MOV     EDX,0x80000000
+    `           00 00 80
+    ` 140f148c3 45 8d      LEA     R8D,[R9 + 0x1]
+    `           41 01
+    ` 140f148c7 ff 15      CALL    qword ptr [->KERNEL32.DLL::Creat
+    `           63 ab 
+    `           48 00
+
+    Here, either 0x60000000 or 0x40000000 is conditionally selected and
+    sent to CreateFile. Edit the 60000000 entry.
+    '''
+    
+    patches.append(Binary_Patch(
+        file = Settings.X4_exe_name,
+        ref_code = '''
+        b8 00   
+        00 00 60
+        84 d2   
+        ba 00   
+        00 00 40
+        0f 45 c2
+        48 c7   
+        44 24 
+        30 00 
+        00 00 00
+        89 44   
+        24 28
+        c7 44   
+        24 20 
+        03 00 
+        00 00
+        45 33 c9
+        ba 00   
+        00 00 80
+        45 8d   
+        41 01
+        ff 15   
+        ''',
+        
+        new_code = ''' 
+        b8 00   
+        00 00 40
+        84 d2   
+        ba 00   
+        00 00 40
+        0f 45 c2
+        48 c7   
+        44 24 
+        30 00 
+        00 00 00
+        89 44   
+        24 28
+        c7 44   
+        24 20 
+        03 00 
+        00 00
+        45 33 c9
+        ba 00   
+        00 00 80
+        45 8d   
+        41 01
+        ff 15   
+        ''',
+        ))
+
+
+    '''
+    ` 140f14945 48 c7      MOV     qword ptr [RSP + local_148],0x0
+    `           44 24 
+    `           30 00 
+    `           00 00 00
+    ` 140f1494e c7 44      MOV     dword ptr [RSP + local_150],0x60...
+    `           24 28 
+    `           00 00 
+    `           00 60
+    ` 140f14956 c7 44      MOV     dword ptr [RSP + local_158],0x3
+    `           24 20 
+    `           03 00 
+    `           00 00
+    ` 140f1495e 45 33 c9   XOR     R9D,R9D
+    ` 140f14961 ba 00      MOV     EDX,0x80000000
+    `           00 00 80
+    ` 140f14966 45 8d      LEA     R8D,[R9 + 0x1]
+    `           41 01
+    ` 140f1496a 48 8b c8   MOV     RCX,RAX
+    ` 140f1496d ff 15      CALL    qword ptr [->KERNEL32.DLL::Creat...
+    `           bd aa 
+    `           48 00
+
+    Very similar to the first patch.
+    '''
+    
+    patches.append(Binary_Patch(
+        file = Settings.X4_exe_name,
+        ref_code = '''
+        48 c7   
+        44 24 
+        30 00 
+        00 00 00
+        c7 44   
+        24 28 
+        00 00 
+        00 60
+        c7 44   
+        24 20 
+        03 00 
+        00 00
+        45 33 c9
+        ba 00   
+        00 00 80
+        45 8d   
+        41 01
+        48 8b c8
+        ff 15   
+        ''',
+        
+        new_code = ''' 
+        48 c7   
+        44 24 
+        30 00 
+        00 00 00
+        c7 44   
+        24 28 
+        00 00 
+        00 40
+        c7 44   
+        24 20 
+        03 00 
+        00 00
+        45 33 c9
+        ba 00   
+        00 00 80
+        45 8d   
+        41 01
+        48 8b c8
+        ff 15   
+        ''',
+        ))
+
+
+    Apply_Binary_Patch_Group(patches)
+    return
 
 # -Removed; no longer needed after tool update.
 #@Transform_Wrapper()

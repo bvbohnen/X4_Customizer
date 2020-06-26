@@ -294,19 +294,25 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
         # or if it should be specialized to macros/components/wares/etc.
 
     else:
+
         # Small convenience function for printing errors in various
         # conditions.
         # TODO: note which extensions the files come from.
         # TODO: maybe respect a "silent" attribute to suppress errors,
         #  or maybe just suppress when checking extensions (done elsewhere).
         def Print_Error(message):
+            # X4 supports a "silent" attribute which suppresses error messages.
+            # Do the same here. TODO: is "true" the only case, or also "1"/etc.?
+            if op_node.get('silent') == "true":
+                return
             Plugin_Log.Print(('{}Error: Problem occured when handling diff '
                 'node "{}" on line {}, xpath "{}"; skipping; error message: {}.'
                 ).format(
                     error_prefix,
                     op_node.tag, op_node.sourceline, 
                     xpath, message))
-            
+            return
+
         # For patching purposes, to enable root replacement, nest
         # the original_node under a temporary parent, and then form
         # that into a tree (since '/...' style xpaths are absolute
@@ -339,14 +345,14 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
             # Do this by picking off of the 'sel' the piece that edits
             #  attributes or text, leaving just node selection.
 
-            # Determine the type of the top, text/attrib/node change.
+            # Determine the type of the op, text/attrib/node change.
             # Can do this while isolating the xpath.
-            type = 'node'
+            optype = 'node'
 
             # Check for text edits.
             for suffix in ['/text()[1]', '/text()']:
                 if xpath.endswith(suffix):
-                    type = 'text'
+                    optype = 'text'
                     xpath = xpath.replace(suffix, '')
 
             # Check for attribute edits.
@@ -360,7 +366,7 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
             #  part of an attribute changing op.
             # -Removed check; look for a non-node being returned later.
             #if '/@' in xpath:
-            #    type = 'attrib'
+            #    optype = 'attrib'
             #    if xpath.count('/@') != 1:
             #        Print_Error('multiple "/@"')
             #        continue
@@ -371,8 +377,14 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
             # Note: if the xpath is malformed, this will throw an exception.
             # Note: this will support namespacing the xpath to some extent,
             # just to enable modifying the schema path.
+            # Note: if the expression is in parentheses, put the '.' inside
+            # the first parenthesis.
             try:
-                matched_nodes = NS_xpath(temp_tree, '.' + xpath)
+                if xpath[0] == '(':
+                    rel_xpath = xpath.replace('(','(.',1)
+                else:
+                    rel_xpath = '.' + xpath
+                matched_nodes = NS_xpath(temp_tree, rel_xpath)
             except Exception as ex:
                 Print_Error('xpath exception: {}'.format(ex))
                 continue
@@ -393,16 +405,21 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
             matched_node = matched_nodes[0]
             if isinstance(matched_node, (str, ET._ElementUnicodeResult)):
                 matched_node = matched_node.getparent()
-                type = 'attrib'
+                optype = 'attrib'
                 
             # Check for attribute additions.
             # These have a normal xpath, with a 'type' member holding
             #  the attribute name prefixed with @, eg. type="@id".
             if op_node.get('type'):
-                type = 'attrib'
+                optype = 'attrib'
 
             # Apply the patch op.
-            error_message = _Apply_Patch_Op(op_node, matched_node, type)
+            error_message = None
+            try:
+                _Apply_Patch_Op(op_node, matched_node, optype)
+            except Exception as ex:
+                error_message = f'{type(ex).__name__}: {ex}'
+
             # Print an error if it occurred.
             if error_message:
                 Print_Error(error_message)
@@ -410,7 +427,11 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
 
         # Done with applying the patch.
         # Unpack the changed node from the temp root.
-        replacement_node = temp_tree.getroot().getchildren()[0]
+        # Note: one questionable mod completely deleted the base xml node.
+        children = temp_tree.getroot().getchildren()
+        if not children:
+            raise Exception('XML base node was deleted')
+        replacement_node = children[0]
         # Quick verification tag is the same.
         assert replacement_node.tag == original_node.tag
         # Can now overwrite the original_node.
@@ -420,15 +441,15 @@ def Apply_Patch(original_node, patch_node, error_prefix = None):
 
 
 
-def _Apply_Patch_Op(op_node, target_node, type):
+def _Apply_Patch_Op(op_node, target_node, optype):
     '''
     Apply a diff patch operation (add/remove/replace) on the target node.
-    Returns any error message, else None on success.
+    Raises an Exception on any error.
     '''
-    if type == 'text':
+    if optype == 'text':
         if op_node.tag == 'add':
             # This should never happen.
-            return 'no handler for adding text'
+            raise Exception('no handler for adding text')
 
         if op_node.tag == 'remove':
             # Unclear on how to handle this with lxml, but
@@ -438,10 +459,11 @@ def _Apply_Patch_Op(op_node, target_node, type):
         if op_node.tag == 'replace':
             target_node.text = op_node.text
 
-    elif type == 'attrib':
+    elif optype == 'attrib':
         # Grab the attribute name out of the xpath for remove/replace,
         # or out the 'type' property for add.
         if op_node.tag == 'add':
+            # TODO: The patch may be malformed and have no type attribute.
             attrib_name = op_node.get('type').replace('@','')
         else:
             xpath = op_node.get('sel')
@@ -511,7 +533,7 @@ def _Apply_Patch_Op(op_node, target_node, type):
                     target_node.tail = target_tail
                     child.tail = child_tail
             else:
-                return 'pos {} not understood'.format(pos)
+                raise Exception(f'pos {pos} not understood')
 
         if op_node.tag == 'remove':
             # Remove from the parent.

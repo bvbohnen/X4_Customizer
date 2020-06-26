@@ -173,20 +173,37 @@ def Check_Extension(
             # The path could be to an original file, or to a patch on an
             # existing file.  Without knowing, need to try out both cases
             # and see if either works.
+            # Start by assuming this is an original file.
             try:
-                Load_File(virtual_path, test_load = True, 
-                          error_if_unmatched_diff = True)
+                Load_File(
+                    virtual_path, 
+                    test_load = True, 
+                    error_if_unmatched_diff = True)
 
-            # If it was a diff, catch the error.
+            # If it was a diff with no base file, catch the error.
             except Unmatched_Diff_Exception:
 
                 # Pop off the extensions/mod_name part of the path.
                 _, _, test_path = virtual_path.split('/', 2)
+                
+                # Note: some mods may try to patch files from other mods that
+                # aren't enabled. This could be an error or intentional.
+                # Here, only consider it a warning; explicit dependencies
+                # should be caught in the content.xml dependency check.
+                # Check if this path is to another extension.
+                error_if_not_found = True
+                if test_path.startswith('extensions/'):
+                    error_if_not_found = False
 
                 # Do a test load; this preserves any prior loads that
                 # may have occurred before this plugin was called.
                 try:
-                    Load_File(test_path, test_load = True)
+                    game_file = Load_File(
+                        test_path, 
+                        test_load = True, 
+                        error_if_not_found = error_if_not_found)
+                    if game_file == None:
+                        Print('  Warning: could not find file "{test_path}"; skipping diff')
 
                 # Some loading problems will be printed to the log and then
                 # ignored, but others can be passed through as an exception;

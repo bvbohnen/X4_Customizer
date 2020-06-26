@@ -4,8 +4,8 @@ Run the exe modifications.
 from Plugins import *
 
 Settings(
-    X4_exe_name = 'X4_nonsteam.exe',
-    #X4_exe_name = 'X4.vanilla.exe',
+    #X4_exe_name = 'X4_nonsteam.exe',
+    X4_exe_name = 'X4.vanilla.exe',
     )
 
 if 1:
@@ -18,6 +18,9 @@ if 1:
 
 if 0:
     Remove_Workshop_Tool_Dependency_Check()
+
+if 1:
+    Enable_Windows_File_Cache()
     
 Write_Modified_Binaries()
 

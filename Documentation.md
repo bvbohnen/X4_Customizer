@@ -1,4 +1,4 @@
-X4 Customizer 1.23.1
+X4 Customizer 1.24
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -508,6 +508,13 @@ Director Transforms:
 ***
 
 Exe Transforms:
+
+  * Enable_Windows_File_Cache
+
+    Edits the exe to enable windows file caching, which x4 normally disables. Note: may require large amounts of unused memory to be useful.
+    
+    Experimental; not yet verified to have benefit (untested on systems with more than 16 GB of memory).
+        
 
   * High_Precision_Systemtime
 
@@ -1336,3 +1343,7 @@ Change Log:
    - Fixed content.xml not being generated, introduced by 1.22.
  * 1.23.1
    - Added python configparser module to the packaged customizer.
+ * 1.24
+   - Added Enable_Windows_File_Cache exe transform (experimental).
+   - Refinements to Check_Extensions and extension error handling.
+   - Added basic diff patch support for xpaths in parentheses.
