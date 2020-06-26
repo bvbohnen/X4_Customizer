@@ -1,4 +1,4 @@
-X4 Customizer 1.23
+X4 Customizer 1.23.1
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -1334,3 +1334,5 @@ Change Log:
  * 1.23
    - Added extension_whitelist and extension_blacklist settings to control which extensions are loaded by the customizer.
    - Fixed content.xml not being generated, introduced by 1.22.
+ * 1.23.1
+   - Added python configparser module to the packaged customizer.

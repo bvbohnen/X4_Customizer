@@ -291,6 +291,8 @@ def Make(*args):
             '        r"PyQt5.QtCore",'   ,#if mode == 'gui' else '',
             '        r"PyQt5.QtGui",'    ,#if mode == 'gui' else '',
             '        r"PyQt5.uic",'      ,#if mode == 'gui' else '',
+            # Not needed directly: profiling script uses configparser.
+            '        r"configparser",',
             '    ],',
 
             '    hookspath = [],',
