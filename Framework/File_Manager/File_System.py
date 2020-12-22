@@ -258,11 +258,16 @@ class File_System_class:
           - String, one of 'macros','components'.
         * pattern
           - Name pattern to look up, with wildcards, without path
-            or extension.
+            or extension; lowercased internally.
         '''
         assert index in ['macros','components']#,'mousecursors']
         # Start by loading the libraries/macros.xml index.
         index_xml = self.Load_File('index/{}.xml'.format(index))
+        
+        # Force paths to lowercase, since the lower level virtual paths
+        # are all lower. Note: likely redundant with lowercasing in
+        # the index_xml Findall method.
+        pattern = pattern.lower()
 
         # Use its convenient Get function.
         virtual_paths = index_xml.Findall(pattern)
@@ -304,7 +309,7 @@ class File_System_class:
         '''
         Returns a list of Game_File objects that are currently loaded.
         Optionally, loads only files with virtual_paths matching
-        the given pattern.
+        the given pattern (lowercased internally).
         '''
         if not pattern:
             return list(self.game_file_dict.values())
@@ -315,7 +320,7 @@ class File_System_class:
         #    if pattern == None or fnmatch(path, pattern):
         #        ret_list.append(game_file)
         # Speed up with filter().
-        paths = fnmatch.filter(self.game_file_dict.keys(), pattern)
+        paths = fnmatch.filter(self.game_file_dict.keys(), pattern.lower())
         return [self.game_file_dict[x] for x in paths]
     
 
@@ -390,13 +395,18 @@ class File_System_class:
     def Load_Files(self, pattern):
         '''
         Searches for and loads in xml files following the given
-        virtual_path wildcard pattern.
+        virtual_path wildcard pattern (lowercased internally).
         Returns a list of files loaded.
         '''
         # -Removed; skipping like this fails to fill the return list.
         ## Limit each pattern to running once.
         #if pattern in self._patterns_loaded:
         #    return
+
+        # Force paths to lowercase, since the lower level virtual paths
+        # are all lower.
+        pattern = pattern.lower()
+
         self._patterns_loaded.add(pattern)
 
         # Load all files matching the pattern.
@@ -727,7 +737,13 @@ class File_System_class:
 
         * pattern
           - String, optional, wildcard pattern to use for matching names.
+          - Lowercased internally.
         '''
+        # Force paths to lowercase, since the lower level virtual paths
+        # are all lower.
+        if pattern:
+            pattern = pattern.lower()
+
         # Pass the call to the source reader.
         # TODO: swap this around to gathering a set of paths here,
         #  and adding to them new files that get added during runtime.

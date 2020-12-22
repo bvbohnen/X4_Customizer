@@ -400,7 +400,11 @@ class Source_Reader_class:
 
         * pattern
           - String, optional, wildcard pattern to use for matching names.
+          - Pattern is lowercased internally.
         '''
+        # Ensure a lowercase pattern.
+        if pattern:
+            pattern = pattern.lower()
 
         # Results will be cached for quick lookups.
         # TODO: maybe move this into a normal attribute for use by

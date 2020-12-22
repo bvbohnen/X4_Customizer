@@ -148,6 +148,9 @@ class Cat_Reader:
           - Bool, if True then the md5 check will be suppressed and
             errors allowed. May still print a warning message.
         '''
+        # Ensure lower case path.
+        virtual_path = virtual_path.lower()
+
         # Check for the file being missing.
         if virtual_path not in self.cat_entries:
             if error_if_not_found:

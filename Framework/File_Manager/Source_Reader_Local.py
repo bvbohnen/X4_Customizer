@@ -337,7 +337,8 @@ class Location_Source_Reader:
         Returns a tuple of (file_path, file_binary) for a loose file
         matching the given virtual_path.
         If no file found, returns (None, None).
-        Note: pathing is case sensitive.
+        Note: returned file_path includes original case.
+        Input virtual_path should be lowercase.
         '''
         if virtual_path not in self.source_file_path_dict:
             return (None, None)
@@ -355,6 +356,7 @@ class Location_Source_Reader:
         Returns a tuple of (cat_path, file_binary) for a cat/dat entry
         matching the given virtual_path.
         If no file found, returns (attempted_cat_path, None).
+        Input virtual_path should be lowercase.
 
         * cat_prefix
           - Optional string, prefix of catalog files to search.
@@ -414,6 +416,9 @@ class Location_Source_Reader:
           - Bool, if True then the md5 check will be suppressed and
             errors allowed. May still print a warning message.
         '''
+        # Ensure the virtual_path is lowercase.
+        virtual_path = virtual_path.lower()
+
         # Can pick from either loose files or cat/dat files.
         # Preference is taken from Settings.
         if Settings.prefer_single_files:

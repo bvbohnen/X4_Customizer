@@ -995,6 +995,7 @@ class XML_Index_File(XML_File):
     * name_path_dict
       - Dict, keyed by entry name, with the virtual_path to an
         xml source file.
+      - Paths will be lower cased; name is kept in original case.
     * requests_until_refresh
       - Int, how many text lookup requests may occurred since the
         last page_text_dict reset (due to modification) before
@@ -1030,7 +1031,7 @@ class XML_Index_File(XML_File):
             #  https://forum.egosoft.com/viewtopic.php?t=347831 .
             # No warning will be printed here, as such cases are assumed
             #  to be intentional.
-            self.name_path_dict[entry_node.get('name')] = entry_node.get('value') + '.xml'
+            self.name_path_dict[entry_node.get('name')] = entry_node.get('value').lower() + '.xml'
         return
 
 
@@ -1048,7 +1049,7 @@ class XML_Index_File(XML_File):
     def Find(self, name):
         '''
         Returns the indexed path matching the given name, or None
-        if the name is not found.
+        if the name is not found. Name is case sensitive.
         '''
         # Maybe do a refresh of the name_path_dict.
         if self.requests_until_refresh > 0:
@@ -1057,6 +1058,7 @@ class XML_Index_File(XML_File):
                 self.Refresh_Cache()
 
         # Do a normal or xpath lookup, depending on cache status.
+        # Name is not lowercased, to preserve it for the xpath.
         if self.name_path_dict:
             return self.name_path_dict.get(name, None)
         else:
@@ -1065,7 +1067,7 @@ class XML_Index_File(XML_File):
             if not nodes:
                 value = nodes[0].get('value', None)
                 if value != None:
-                    return value + '.xml'
+                    return value.lower() + '.xml'
         return None
 
 
@@ -1085,7 +1087,7 @@ class XML_Index_File(XML_File):
         #    if fnmatch(key, pattern):
         #        ret_list.add(value)
         # Switch to filter() for speed.
-        keys = fnmatch.filter(self.name_path_dict.keys(), pattern)
+        keys = fnmatch.filter(self.name_path_dict.keys(), pattern.lower())
         # TODO: is the set cast needed?
         return set([self.name_path_dict[x] for x in keys])
 
