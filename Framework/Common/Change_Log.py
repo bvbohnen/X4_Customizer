@@ -237,6 +237,9 @@ Change Log:
    - Added basic diff patch support for xpaths in parentheses.
  * 1.24.1
    - More consistent lowercasing of file paths for better linux support.
+ * 1.24.2
+   - Stopped content.xml being packed in a catalog when output_to_catalog
+     is enabled.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

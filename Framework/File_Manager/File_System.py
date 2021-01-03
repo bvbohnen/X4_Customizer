@@ -627,7 +627,8 @@ class File_System_class:
             # Machine_Code_File files will never go in a catalog.
             if (not Settings.output_to_catalog 
             and not needs_subst
-            or isinstance(file_object, Machine_Code_File)):
+            or isinstance(file_object, Machine_Code_File)
+            or file_object.name == 'content.xml'):
 
                 # Look up the output path.
                 file_path = file_object.Get_Output_Path()

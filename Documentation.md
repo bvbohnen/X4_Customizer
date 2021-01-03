@@ -1,4 +1,4 @@
-X4 Customizer 1.24.1
+X4 Customizer 1.24.2
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -1349,3 +1349,5 @@ Change Log:
    - Added basic diff patch support for xpaths in parentheses.
  * 1.24.1
    - More consistent lowercasing of file paths for better linux support.
+ * 1.24.2
+   - Stopped content.xml being packed in a catalog when output_to_catalog is enabled.
