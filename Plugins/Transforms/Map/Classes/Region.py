@@ -17,6 +17,7 @@ class Region:
     * radius
       - Float, radius of this region, large enough to encompass it
         and all splines/etc.
+      - This is None if there is no defined radius.
     * inner_radius
       - Float, the inner radius of the region in which objects can move
         if inside.
@@ -46,6 +47,9 @@ class Region:
             self.spline_positions = Spline_Position_List(spline_nodes)
                  
         # Radius is updated with shared code.
+        self.radius = None
+        self.inner_radius = None
+        self.does_damage = None
         self.Update_Radius()
         return
 
@@ -69,13 +73,25 @@ class Region:
         '''
         # Get an estimate of the radius from the size node.
         boundary_node = self.xml_node.find('./boundary')
+        # Note: "testregion" doesn't have a boundary, so this may return none.
+        if boundary_node == None:
+            return
         size_node     = boundary_node.find('./size')
+        
+        # Terran dlc torrus has some fixed-size small boxes that don't
+        # have a radius, but instead specify x/y/z. 
+        if size_node.get('r'):
+            # Can come in different shapes, but big ones have an 'r' radius.
+            # Ignore the 'l' of cylinders for now; it is shorter than 'r'
+            # in spot checked cases, and may be used just for the vertical (y)
+            # which doesn't have notable conflicts.
+            self.radius = float(size_node.get('r'))
+        else:
+            max_dim = 0
+            for dim in ['x','y','z']:
+                max_dim = max(float(size_node.get(dim)), max_dim)
+            self.radius = max_dim / 2
 
-        # Can come in different shapes, but all have an 'r' radius.
-        # Ignore the 'l' of cylinders for now; it is shorter than 'r'
-        # in spot checked cases, and may be used just for the vertical (y)
-        # which doesn't have notable conflicts.
-        self.radius = float(size_node.get('r'))
 
         # Set the inner portion as some fraction of the whole.
         # For large regions, use a flat subtraction; for small regions,

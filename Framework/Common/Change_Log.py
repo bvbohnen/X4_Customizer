@@ -240,6 +240,13 @@ Change Log:
  * 1.24.2
    - Stopped content.xml being packed in a catalog when output_to_catalog
      is enabled.
+ * 1.24.3
+   - Suppressed error check on SV/CoH dlcs for duplicate background jpgs.
+   - Added shader files to default Cat_Unpack.
+ * 1.24.4
+   - Updated Remove_Sig_Errors for x4 4.0.
+   - Removed Enable_Windows_File_Cache, no longer applies to x4 4.0.
+   - Various minor fixes for CoH.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

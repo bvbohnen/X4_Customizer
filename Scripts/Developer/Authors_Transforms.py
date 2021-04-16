@@ -36,7 +36,7 @@ if 0:
 
 
 # Sector/speed rescaling stuff. Requires new game to work well.
-# TODO: split off into its own extension.
+# TODO: delete; this has split off into X4_Projects as its own extension.
 if 0:
     
     # Disable travel drives for ai.
@@ -167,6 +167,31 @@ if 0:
         extra_scaling_for_removed_highways = 0.7,
         )
     
+if 0:
+    # Use rescaler just to remove highways.
+    Scale_Sector_Size(
+        scaling_factor                     = 1,
+        scaling_factor_2                   = 1,
+        transition_size_start              = 200000,
+        transition_size_end                = 400000,
+        precision_steps                    = 20,
+        remove_ring_highways               = True,
+        remove_nonring_highways            = True,
+        extra_scaling_for_removed_highways = 1,
+        )
+if 0:
+    Scale_Sector_Size(
+        scaling_factor                     = 0.3,
+        scaling_factor_2                   = 0.25,
+        transition_size_start              = 200000,
+        transition_size_end                = 400000,
+        precision_steps                    = 20,
+        remove_ring_highways               = True,
+        remove_nonring_highways            = True,
+        extra_scaling_for_removed_highways = 0.7,
+        move_free_ships = True,
+        debug = True
+        )
 
 # Lighter job file for quicker testing.
 if 0:

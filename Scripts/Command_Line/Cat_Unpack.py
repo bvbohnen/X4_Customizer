@@ -62,7 +62,9 @@ def Run():
         '-include',
         # Common use will likely just want xml and a couple other file types;
         # make that the default, and require explicit * to get everything.
-        default = ['*.xml','*.xsd','*.lua','*.html','*.css','*.js','*.xsl'],
+        # Also toss in shaders, since they are plain text.
+        default = ['*.xml','*.xsd','*.lua','*.html','*.css','*.js','*.xsl',
+                   '*.ogl','*.h','*.f','*.fh','*.v','*.vh','*.tcs','*.tes'],
         # Consume all following plain args.
         nargs = '*',
         help =  'Wildcard patterns for files to be included, space separated.'

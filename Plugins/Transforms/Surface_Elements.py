@@ -325,7 +325,7 @@ def Rebalance_Engines(
     # TODO: maybe scrap this in favor of a ship transport rate balancer
     # that can run after this and similar transforms.
     if adjust_cargo:
-        ship_macros = database.Get_Macros('ship_*') + database.Get_Macros('units_*')
+        ship_macros = database.Get_Ship_Macros()
 
         # Ships don't spend all of their time in travel mode.
         # As a quick estimate, assume traders spend 50%, miners 10%.

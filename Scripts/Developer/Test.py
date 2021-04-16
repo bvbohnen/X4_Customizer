@@ -12,7 +12,7 @@ from Plugins import *
 this_dir = Path(__file__).resolve().parents[1]
 
 Settings(
-    path_to_x4_folder = r'C:\Steam\SteamApps\common\X4 Foundations',
+    path_to_x4_folder = r'D:\Games\Steam\SteamApps\common\X4 Foundations',
     developer = 1,
     )
 
@@ -29,8 +29,8 @@ if 0 or test_all:
     Scale_Sector_Size(
         scaling_factor                     = 0.4, 
         scaling_factor_2                   = 0.3,        
-        #transition_size_start              = 200000,
-        #transition_size_end                = 400000,
+        transition_size_start              = 200000,
+        transition_size_end                = 400000,
         recenter_sectors                   = False,
         precision_steps                    = 10,
         remove_ring_highways               = True,
@@ -46,10 +46,8 @@ if 0:
     Remove_Modified()
 if 0:
     High_Precision_Systemtime()
-if 0:
-    Remove_Workshop_Tool_Dependency_Check()
    
-if 0:
+if 0 or test_all:
     Increase_AI_Script_Waits(
         oos_multiplier = 2,
         oos_seta_multiplier = 4,
@@ -62,7 +60,7 @@ if 0:
         skip_combat_scripts = False,
         )
 
-if 0:
+if 0 or test_all:
     Adjust_OOS_Damage(0.5)
 
 # Diff generator test.
@@ -86,18 +84,19 @@ if 0 or test_all:
         modified_dir_path = this_dir / '../private/test/deadair/mod',
         output_dir_path   = this_dir / '../private/test/deadair/diff',
         )
-    
-if 0 or test_all:
-    Generate_Diff(
-        original_file_path = this_dir / '../private/test/god_orig.xml',
-        modified_file_path = this_dir / '../private/test/god_edit.xml',
-        output_file_path   = this_dir / '../private/test/god_diff.xml',
-        )
+ 
+# TODO: delete this, or fix god_edit error (bad xml, <object> closed by </stations>).
+#if 0 or test_all:
+#    Generate_Diff(
+#        original_file_path = this_dir / '../private/test/god_orig.xml',
+#        modified_file_path = this_dir / '../private/test/god_edit.xml',
+#        output_file_path   = this_dir / '../private/test/god_diff.xml',
+#        )
 
 # Test the extension checker.
+#if 0 or test_all:
+#    Check_Extension('test_mod')
 if 0 or test_all:
-    Check_Extension('test_mod')
-if 0:
     # Alternatively, check everything (may take longer).
     Check_All_Extensions()
 
@@ -153,7 +152,7 @@ if 0:
         ('class ship_l' , 1.5), 
         ('class ship_xl', 1.5))
     
-if 0:
+if 0 or test_all:
     Set_Default_Radar_Ranges(
         ship_xl       = 50,
         ship_l        = 40,
@@ -169,18 +168,19 @@ if 0:
         ('type scout', 40),
         )
 
-if 0:
-    Remove_Travel_Drive()
+if 0 or test_all:
+    Disable_AI_Travel_Drive()
+    Remove_Engine_Travel_Bonus()
 
-if 1:
+if 0 or test_all:
     Rebalance_Engines(purpose_speed_mults = None, adjust_cargo = True)
     Rebalance_Engines(race_speed_mults = None, adjust_cargo = True)
 
-if 0:
+if 0 or test_all:
     Adjust_Engine_Boost_Duration(0.2)
     Adjust_Engine_Boost_Speed(0.25)
 
-if 0:
+if 0 or test_all:
     # Adjust speeds per ship class.
     # Note: vanilla averages and ranges are:    
     # xs: 130 (58 to 152)
@@ -198,7 +198,7 @@ if 0:
         {'match_all' : ['class ship_l'],  'average' : 200, 'variation' : 0.5, 'use_arg_engine' : True},
         {'match_all' : ['class ship_xl'], 'average' : 150, 'variation' : 0.5, 'use_arg_engine' : True})
 
-if 0:
+if 0 or test_all:
     Adjust_Ship_Cargo_Capacity(
         {'match_all' : ['purpose mine'],  'multiplier' : 2,},
         {'match_all' : ['purpose trade'], 'multiplier' : 1.5},

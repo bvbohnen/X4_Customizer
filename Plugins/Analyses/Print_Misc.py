@@ -36,7 +36,7 @@ def Print_Ship_Speeds(
     The xs includes boarding pods (29 speed), drones, mass traffic.
     '''    
     database = Database(read_only = True)
-    ship_macros = database.Get_Macros('ship_*') + database.Get_Macros('units_*')
+    ship_macros = database.Get_Ship_Macros()
     engine_macros = database.Get_Macros('engine_*') + database.Get_Macros('generic_engine_*')
 
     # Select an engine for every ship, to use in speed estimation.

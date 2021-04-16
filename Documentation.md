@@ -1,4 +1,4 @@
-X4 Customizer 1.24.2
+X4 Customizer 1.24.4
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -509,13 +509,6 @@ Director Transforms:
 
 Exe Transforms:
 
-  * Enable_Windows_File_Cache
-
-    Edits the exe to enable windows file caching, which x4 normally disables. Note: may require large amounts of unused memory to be useful.
-    
-    Experimental; not yet verified to have benefit (untested on systems with more than 16 GB of memory).
-        
-
   * High_Precision_Systemtime
 
     Changes the player.systemtime property to use a higher precision underlying timer, where a printed "second" will actually have a stepping of 100 ns. Useful for performance profiling of code blocks.
@@ -537,6 +530,8 @@ Exe Transforms:
   * Remove_Sig_Errors
 
     Suppresses file sigature errors from printing to the debug log, along with file-not-found errors. Written for Windows v3.10 exe.
+        
+    TODO: pending x4 4.0 update.
         
 
 
@@ -1351,3 +1346,10 @@ Change Log:
    - More consistent lowercasing of file paths for better linux support.
  * 1.24.2
    - Stopped content.xml being packed in a catalog when output_to_catalog is enabled.
+ * 1.24.3
+   - Suppressed error check on SV/CoH dlcs for duplicate background jpgs.
+   - Added shader files to default Cat_Unpack.
+ * 1.24.4
+   - Updated Remove_Sig_Errors for x4 4.0.
+   - Removed Enable_Windows_File_Cache, no longer applies to x4 4.0.
+   - Various minor fixes for CoH.

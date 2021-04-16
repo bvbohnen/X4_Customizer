@@ -106,6 +106,7 @@ class Database:
         Loads a game file into this database, generating an xml_root copy
         and recording macros and components.
         Skips if not an xml file.
+        Note: will skip the macro/component entry for unrecognized classes.
         '''
         if not isinstance(game_file, File_Manager.XML_File):
             return
@@ -121,6 +122,9 @@ class Database:
         # Search it.
         for macro in xml_root.xpath("./macro"):
             class_name = macro.get('class')
+            # Skip unsupported classes for now. TODO: maybe print a warning.
+            if class_name not in class_name_to_macro:
+                continue
             object = class_name_to_macro[class_name](macro, self)
 
             self.class_macros[class_name][object.name] = object
@@ -209,6 +213,17 @@ class Database:
                 if ((not class_names or self.macros[x].class_name in class_names) 
                 and (not classes or isinstance(self.macros[x], tuple(classes)))) ]
 
+    def Get_Ship_Macros(self):
+        '''
+        Returns a list of Ship macros.
+        '''
+        ship_macros = []
+        # Most names start with "ship_", drones start with "units_".
+        # Note: CoH dlc addes a "ship_" landmark object, which will be skipped
+        # due to being "object" class.
+        for pattern in ['ship_*', 'units_*']:
+            ship_macros = self.Get_Macros(pattern, classes=[Ship])
+        return ship_macros
     
     def Get_Component(self, component_name):
         '''

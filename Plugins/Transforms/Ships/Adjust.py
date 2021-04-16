@@ -69,7 +69,10 @@ def Adjust_Ship_Speed(
 
         XML_Multiply_Float_Attribute(physics_node, 'mass', inv_mult)
         for drag_field in ['forward', 'reverse', 'horizontal', 'vertical']:
-            XML_Multiply_Float_Attribute(drag_node, drag_field, inv_mult)
+            # Note: some CoH xs ships don't have every field.
+            # Skip if field is missing.
+            if drag_node.get(drag_field) != None:
+                XML_Multiply_Float_Attribute(drag_node, drag_field, inv_mult)
         return True
 
     # Hand off to shared code to run updates.
@@ -99,10 +102,13 @@ def Adjust_Ship_Turning(
 
         for drag_field in ['pitch', 'yaw', 'roll']:
             # Terms show up under inertia and drag.
-            # Presumably, intertia is roughly equivelent to mass for raw
+            # Presumably, inertia is roughly equivelent to mass for raw
             # speed, determining the acceleration.
-            XML_Multiply_Float_Attribute(drag_node, drag_field, inv_mult)
-            XML_Multiply_Float_Attribute(inertia_node, drag_field, inv_mult)
+            # Note: some CoH xs ships are missing nodes/attributes.
+            if drag_node != None and drag_node.get(drag_field) != None:
+                XML_Multiply_Float_Attribute(drag_node, drag_field, inv_mult)
+            if inertia_node != None and inertia_node.get(drag_field) != None:
+                XML_Multiply_Float_Attribute(inertia_node, drag_field, inv_mult)
         return True
 
     # Hand off to shared code to run updates.
@@ -417,14 +423,10 @@ def Get_Match_Rule_Args(ship_macro_xml, rules):
     class_name = ship_macro_xml.get('class')
 
     # Not all ships have a type or purpose (mainly just spacesuits don't).
-    try:
-        type = ship_macro_xml.find('./properties/ship').get('type')
-    except Exception:
-        type = None
-    try:
-        purpose = ship_macro_xml.find('./properties/purpose').get('primary')
-    except Exception:
-        purpose = None
+    node = ship_macro_xml.find('./properties/ship')
+    type = node.get('type') if node != None else None
+    node = ship_macro_xml.find('./properties/purpose')
+    purpose = node.get('primary') if node != None else None
 
     # Check the matching rules.
     for key, value, *args in rules:

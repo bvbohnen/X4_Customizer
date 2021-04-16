@@ -1,4 +1,4 @@
-X4 Customizer 1.24.2
+X4 Customizer 1.24.4
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -220,10 +220,6 @@ Director Transforms:
 ***
 
 Exe Transforms:
-
-  * Enable_Windows_File_Cache
-
-    Edits the exe to enable windows file caching, which x4 normally disables. Note: may require large amounts of unused memory to be useful.
 
   * High_Precision_Systemtime
 

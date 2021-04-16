@@ -95,7 +95,9 @@ class Galaxy:
         # Note: these aren't macros/connections/etc., just plain region nodes.
         for region_node in gamefile_roots['region_defs'][0][1].xpath('./region'):
             region = Region(region_node)
-            self.regions[region.name] = region
+            # Ignore if it has no radius, eg. the testregion.
+            if region.radius != None:
+                self.regions[region.name] = region
                 
         # For every region macro (defined in clusters), link its region.
         for cluster in self.class_macros['clusters'].values():

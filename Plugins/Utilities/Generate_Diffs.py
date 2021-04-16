@@ -57,8 +57,8 @@ def Generate_Diffs(
     for rel_path, mod_path in modified_paths.items():
 
         orig_path = original_dir_path / rel_path
-        if not orig_path.exists() and orig_path.is_file():
-            Print('No matching original file found for {}'.format(name))
+        if not orig_path.exists():
+            Print('No matching original file found for {}'.format(rel_path.name))
             continue
 
         # Set up the output.

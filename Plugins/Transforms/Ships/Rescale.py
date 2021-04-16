@@ -101,7 +101,7 @@ def Rescale_Ship_Speeds(
         })
 
     database = Database()
-    ship_macros = database.Get_Macros('ship_*') + database.Get_Macros('units_*')
+    ship_macros = database.Get_Ship_Macros()
     engine_macros = database.Get_Macros('engine_*') + database.Get_Macros('generic_engine_*')
     # Remove mk4 engines, since they throw things off a bit.
     engine_macros = [x for x in engine_macros if x.Get_mk() != '4']
@@ -372,7 +372,7 @@ def Adjust_Ship_Cargo_Capacity(
 
     # Load the ships.
     database = Database()
-    ship_macros = database.Get_Macros('ship_*') + database.Get_Macros('units_*')
+    ship_macros = database.Get_Ship_Macros()
 
     # Group the ships according to rules.
     Group_Objects_To_Rules(ship_macros, scaling_rules, Is_Match)

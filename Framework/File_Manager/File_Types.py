@@ -338,7 +338,9 @@ class Game_File:
         #  maybe look into these, though not generally important.
         # Manually suppress warning for gz files for now, so dlc has
         # a clean printout.
-        if not self.virtual_path.endswith('.gz'):
+        # Also suppress for jpg, since SV and COH dlc repeat loading screens
+        # in ext (non-subst) packed files.
+        if not (self.virtual_path.endswith('.gz') or self.virtual_path.endswith('.jpg')):
             Plugin_Log.Print(('Error: Skipping merge for "{}", extension file from "{}", '
                 ).format( self.virtual_path,  other_file.file_source_path))
         return self
