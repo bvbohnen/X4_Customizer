@@ -247,6 +247,8 @@ Change Log:
    - Updated Remove_Sig_Errors for x4 4.0.
    - Removed Enable_Windows_File_Cache, no longer applies to x4 4.0.
    - Various minor fixes for CoH.
+ * 1.24.5
+   - Bug fix for transforms ignoring other extension diff changes.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

@@ -12,6 +12,7 @@ from Plugins import *
 this_dir = Path(__file__).resolve().parents[1]
 
 Settings(
+    extension_name = 'test_customizer',
     path_to_x4_folder = r'D:\Games\Steam\SteamApps\common\X4 Foundations',
     developer = 1,
     )
@@ -393,5 +394,7 @@ if 0 or test_all:
     cat_writer.Add_File(t44_game_file)
     cat_writer.Write()
 
+if 0 or test_all:
+    Write_To_Extension()
 
 print('Test done')

@@ -108,7 +108,7 @@ def _Build_Weapon_Object_Tree_View():
         # Weapon size.
         # Size needs to be found in the tags.
         tags = object.Get_Item_Value('connection_tags').split()
-        for size in ['extrasmall','small','medium','large','spacesuit']:
+        for size in ['extrasmall','small','medium','large','extralarge','spacesuit']:
             if size in tags:
                 break
             size = '?'

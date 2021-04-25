@@ -254,7 +254,14 @@ def Rebalance_Engines(
                                 # Ratio is between actual value, and wanted value.
                                 value  = get(engine)
                                 wanted = base_values[prop] * speed_mults[prop]
-                                group_prop_mults[group][prop] = wanted / value
+                                # Note: value/wanted may be 0, for travel
+                                # drives after the Remove_Engine_Travel_Bonus
+                                # transform. Specially handle that case.
+                                if value == 0:
+                                    mult = 0
+                                else:
+                                    mult = wanted / value
+                                group_prop_mults[group][prop] = mult
                             
 
                 # Apply the multipliers.

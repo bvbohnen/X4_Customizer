@@ -464,16 +464,18 @@ class XML_File(Game_File):
             # Init the patched version to the original.
             # Deepcopy this, since patching will edit it in place.
             self.patched_root = deepcopy(self.original_root)
-            self.modified_root = self.patched_root
 
             # The root tag should never be changed by mods, so can
             #  record it here pre-patching.
             self.root_tag = self.original_root.tag
         else:
             self.patched_root = None
-            self.modified_root = None
             self.root_tag = None
             self.load_error = True
+
+        # Modified root starts as None; gets initialized sometime after
+        # Delayed_Init when Get_Root is called by a transform.
+        self.modified_root = None
         return
     
     

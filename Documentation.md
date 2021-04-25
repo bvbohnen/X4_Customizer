@@ -1,4 +1,4 @@
-X4 Customizer 1.24.4
+X4 Customizer 1.24.5
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -1353,3 +1353,5 @@ Change Log:
    - Updated Remove_Sig_Errors for x4 4.0.
    - Removed Enable_Windows_File_Cache, no longer applies to x4 4.0.
    - Various minor fixes for CoH.
+ * 1.24.5
+   - Bug fix for transforms ignoring other extension diff changes.
