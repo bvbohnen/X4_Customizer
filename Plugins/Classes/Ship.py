@@ -128,7 +128,10 @@ class Ship(Macro, Physics_Properties):
             if engine_node != None and engine_node.get('macro'):
                 engine_macro_name = engine_node.get('macro')
                 # Look up this engine.
-                macro = self.database.Get_Macro(engine_macro_name)
+                # Note: in at least one case, a base game ship references
+                # a dlc macro. Since the dlc may be disabled, as a failsafe
+                # silently ignore those cases here.
+                macro = self.database.Get_Macro(engine_macro_name, error_if_unfound = False)
                 if macro:
                     self.engine_macro = macro
                     return

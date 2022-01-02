@@ -253,6 +253,11 @@ Change Log:
    - Bug fix for Get_Ship_Macros only returning drones.
  * 1.24.7
    - Updated Make_Extension_Content_XML list of language t file ids.
+ * 1.24.8
+   - Ignore error when a ship's loadout engine macro is not found (occurs for
+     base game ships that use dlc engine loadouts).
+   - Fixed error in Rescale_Ship_Speeds when adjusting variation in
+     a ship group with only one ship.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

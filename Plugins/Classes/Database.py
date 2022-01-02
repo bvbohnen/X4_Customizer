@@ -173,13 +173,23 @@ class Database:
         return
 
 
-    def Get_Macro(self, macro_name):
+    def Get_Macro(self, macro_name, error_if_unfound = True):
         '''
-        Returns a Macro object (likely a subclass) with the given name.
+        Returns a Macro object (likely a subclass) with the given name,
+        or None or error if unfound.
+        
+        * macro_name
+          - Name of the macro to look for. If this is a wildcard pattern and
+            multiple macros are matched, the first match is returned.
+        * error_if_unfound
+          - Optional, if True (default) then an exception is thrown if
+            no macro is found, else None is returned.
         '''
         # Reuse the below, and unpack the list.
         macros = self.Get_Macros(macro_name)
-        return macros[0]
+        if not macros and error_if_unfound:
+            raise Exception(f'Macro not found with name {macro_name}')
+        return macros[0] if macros else None
 
 
     def Get_Macros(self, pattern, classes = None, class_names = None):

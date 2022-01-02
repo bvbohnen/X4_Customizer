@@ -41,9 +41,9 @@ def Rescale_Ship_Speeds(
         differ from the average relative to the average.
       - If None, keeps the original variation.
       - If original variation is less than this, it will not be changed.
-      - Only applies strictly to 90% of ships; 10% are treated as outliers,
-        and will have their speed scaled similarly but will be outside
-        this band.
+      - Only applies strictly to 90% of ships; up to 10% are treated as
+        outliers, and will have their speed scaled similarly but will be
+        outside this band.
       - Eg. 0.5 means 90% of ships will be within +/- 50% of
         their group average speed.
     * match_any
@@ -123,7 +123,6 @@ def Rescale_Ship_Speeds(
         use_arg_engine   = rule['use_arg_engine']
         use_split_engine = rule['use_split_engine']
 
-
         # If neither average or variation given, do nothing.
         if average == None and variation == None:
             return
@@ -180,6 +179,7 @@ def Rescale_Ship_Speeds(
             sorted_ships = [k for k,v in sorted(ship_delta_dict.items(), key = lambda x: x[1])]
 
             # Get the ship count that covers 90% of the ships.
+            # Note: this may include all ships for small ship counts.
             ship_count_90p = math.ceil(len(sorted_ships) * 0.9)
         
             # From the above, can pick the ship at the 90% cuttoff.
@@ -187,31 +187,36 @@ def Rescale_Ship_Speeds(
             cuttoff_ship = sorted_ships[ship_count_90p - 1]
             cuttoff_delta = ship_delta_dict[cuttoff_ship]
 
-            # Knowing this original delta, can determine the rescaling of deltas
-            # that is needed to match the wanted variation.
-            ratio = (variation * current_avg) / cuttoff_delta
+            # If delta is 0, this indicates there is just one ship in the
+            # group, or all ships up to 90% have the same speed as the average.
+            # Either way, only continue adjustments if there is a non-0 delta.
+            if cuttoff_delta > 0:
 
-            # Only continue if tightening the range.
-            if ratio < 1:
-                # For each ship, rescale its delta, and translate back into a 
-                # new ship speed.
-                for ship, orig_delta in ship_delta_dict.items():
-                    orig_speed = ship_speed_dict[ship]
-                    new_delta = orig_delta * ratio
+                # Knowing this original delta, can determine the rescaling of deltas
+                # that is needed to match the wanted variation.
+                ratio = (variation * current_avg) / cuttoff_delta
 
-                    # Handle based on if this was faster or slower than average.
-                    if orig_speed > current_avg:
-                        new_speed = current_avg + new_delta
-                    else:
-                        # TODO: safety clamp to something reasonable, if the
-                        # variation was set too high.
-                        new_speed = current_avg - new_delta
-                        if new_speed <= 0:
-                            raise Exception('Variation set too large; ship speed went negative')
+                # Only continue if tightening the range.
+                if ratio < 1:
+                    # For each ship, rescale its delta, and translate back into a 
+                    # new ship speed.
+                    for ship, orig_delta in ship_delta_dict.items():
+                        orig_speed = ship_speed_dict[ship]
+                        new_delta = orig_delta * ratio
 
-                    # Apply back this speed.
-                    speed_ratio = new_speed / orig_speed
-                    ship.Adjust_Speed(speed_ratio)
+                        # Handle based on if this was faster or slower than average.
+                        if orig_speed > current_avg:
+                            new_speed = current_avg + new_delta
+                        else:
+                            # TODO: safety clamp to something reasonable, if the
+                            # variation was set too high.
+                            new_speed = current_avg - new_delta
+                            if new_speed <= 0:
+                                raise Exception('Variation set too large; ship speed went negative')
+
+                        # Apply back this speed.
+                        speed_ratio = new_speed / orig_speed
+                        ship.Adjust_Speed(speed_ratio)
                     
 
         # Report changes.

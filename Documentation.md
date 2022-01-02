@@ -1,4 +1,4 @@
-X4 Customizer 1.24.7
+X4 Customizer 1.24.8
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -677,7 +677,7 @@ Rescale Transforms:
       - Float, less than 1, how much ship speeds are allowed to differ from the average relative to the average.
       - If None, keeps the original variation.
       - If original variation is less than this, it will not be changed.
-      - Only applies strictly to 90% of ships; 10% are treated as outliers, and will have their speed scaled similarly but will be outside this band.
+      - Only applies strictly to 90% of ships; up to 10% are treated as outliers, and will have their speed scaled similarly but will be outside this band.
       - Eg. 0.5 means 90% of ships will be within +/- 50% of their group average speed.
     * match_any
       - List of matching rules. Any ship matching any of these is included, if not part of match_none.
@@ -1359,3 +1359,6 @@ Change Log:
    - Bug fix for Get_Ship_Macros only returning drones.
  * 1.24.7
    - Updated Make_Extension_Content_XML list of language t file ids.
+ * 1.24.8
+   - Ignore error when a ship's loadout engine macro is not found (occurs for base game ships that use dlc engine loadouts).
+   - Fixed error in Rescale_Ship_Speeds when adjusting variation in a ship group with only one ship.
