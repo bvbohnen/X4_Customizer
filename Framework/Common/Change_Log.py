@@ -251,7 +251,7 @@ Change Log:
    - Bug fix for transforms ignoring other extension diff changes.
  * 1.24.6
    - Bug fix for Get_Ship_Macros only returning drones.
- * 1.25.7
+ * 1.24.7
    - Updated Make_Extension_Content_XML list of language t file ids.
 '''
 # Note: changes moved here for organization, and to make them easier to
