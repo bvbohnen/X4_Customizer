@@ -150,7 +150,7 @@ def Make_Extension_Content_XML(
     
     # Fill out language description text.
     # This loops over all language ids noticed in the cat/dat t files.
-    for lang_id in ['7','33','37','39','44','49','55','81','82','86','88']:
+    for lang_id in ['7','33','34','39','44','48','49','55','81','82','86','88']:
         # Set up a new text node.
         # TODO: per-language descriptions.
         text_node = ET.Element('language', language = lang_id, description = description)
