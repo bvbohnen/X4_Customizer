@@ -222,7 +222,7 @@ class Database:
         # Note: CoH dlc addes a "ship_" landmark object, which will be skipped
         # due to being "object" class.
         for pattern in ['ship_*', 'units_*']:
-            ship_macros = self.Get_Macros(pattern, classes=[Ship])
+            ship_macros += self.Get_Macros(pattern, classes=[Ship])
         return ship_macros
     
     def Get_Component(self, component_name):

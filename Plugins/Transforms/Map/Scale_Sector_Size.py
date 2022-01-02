@@ -75,7 +75,7 @@ Notes on sector properties:
 
 
 Note on travel times:
-    X3 seta is up to 10x, X4 seta if 5x.
+    X3 seta is up to 10x, X4 seta is 5x.
     X3 speeds are 125 typically, X4 are ~300 base and ~3k travel drive.
     (Can be lower, eg. 200 and 3k in x4, but depends wildly on engine).
     

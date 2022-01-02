@@ -249,6 +249,8 @@ Change Log:
    - Various minor fixes for CoH.
  * 1.24.5
    - Bug fix for transforms ignoring other extension diff changes.
+ * 1.24.6
+   - Bug fix for Get_Ship_Macros only returning drones.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.
