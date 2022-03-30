@@ -1,4 +1,4 @@
-X4 Customizer 1.24.8
+X4 Customizer 1.24.9
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:

@@ -153,6 +153,16 @@ class Settings_class:
       - Can be used to make xpaths more specific, and more likely to break
         if an unknown extension is applied before the output extension
         (eg. when the customizer output is distributed to other users).
+      - Can also be used in cases where a partial xpath matches multiple
+        nodes, to clarify a child/attribute check instead of falling back
+        on indexing.
+    * shorten_xpaths
+      - Bool, if True then xpaths will be shortened using "//" syntax,
+        at the cost of possibly matching unwanted nodes if the diff
+        patch is applied to a modified source file.
+      - Only attempts to use // for the xpath prefix currently.
+      - May result in measurably longer x4 loading times if used often
+        in large files.
     * root_file_tag
       - String, extra tag added to names of modified files in the root folder
         and not placed in an extension, eg. X4.exe, to avoid overwriting the 
@@ -381,6 +391,7 @@ class Settings_class:
         defaults['root_file_tag'] = '.mod'
         defaults['make_maximal_diffs'] = False
         defaults['forced_xpath_attributes'] = ''
+        defaults['shorten_xpaths'] = False
         defaults['plugin_log_file_name'] = 'plugin_log.txt'
         defaults['live_editor_log_file_name'] = 'live_editor_log.json'        
         defaults['customizer_log_file_name'] = 'customizer_log.json'        

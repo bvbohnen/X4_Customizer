@@ -562,7 +562,8 @@ def Make_Patch(
     modified_node, 
     forced_attributes = None,
     verify = True, 
-    maximal = True
+    maximal = True,
+    shorten_xpaths = False,
    ):
     '''
     Returns an xml diff node, suitable for converting from
@@ -581,6 +582,8 @@ def Make_Patch(
       - Bool, if True then make a maximal diff patch, replacing the original
         root with the modified root.
       - Used for testing of other functions.
+    * shorten_xpaths
+      - Bool, if True (and not maximal) then use // syntax to shorten xpaths.
     '''
     if maximal:
         # Set up a diff node as root.
@@ -599,6 +602,7 @@ def Make_Patch(
         # cleaner way. Short name for easier passing (since passes often).
         cfg = {
             'forced_attributes' : [],
+            'shorten_xpaths' : shorten_xpaths,
             }
 
         # Break up forced attributes strings into a list.
@@ -671,14 +675,15 @@ def _Patch_Node_Constructor(
     # Start with the base xpath.
     xpath = _Get_Xpath_Recursive(target, cfg)
 
-    # Test: trim the xpath down with // syntax as much as can be
-    # done. This code will be a little messy, since throwaway
-    # added to test loading times.
+    # Trim the xpath down with prefix // syntax as much as can be
+    # done.
     # Note on test results: 35s load time with maximal diffs,
     # 36s with full xpaths, 39s with these shortened xpaths,
-    # so never use this in practice. (With test xpaths mostly
+    # so generally don't use this in practice. (With test xpaths mostly
     # coming from adjusting ware price spread.)
-    if 0:
+    # TODO: extend the // search to inner parts of the xpath; for now
+    # just does the prefix.
+    if cfg['shorten_xpaths']:
         top_node = target
         while top_node.getparent() != None:
             top_node = top_node.getparent()
@@ -692,7 +697,7 @@ def _Patch_Node_Constructor(
             throwaway, test_xpath = new_xpath.split('/',1)
             # Test it, with a preceeding //.
             test_nodes = top_node.xpath('//' + test_xpath)
-            # If
+            # If just the target node returned, then succesful truncation.
             if len(test_nodes) == 1 and test_nodes[0] is target:
                 #print('shortened to {}'.format(test_xpath))
                 new_xpath = test_xpath
@@ -703,6 +708,10 @@ def _Patch_Node_Constructor(
         if new_xpath != xpath:
             xpath = '//' + new_xpath
             #print('final path: {}'.format(xpath))
+
+    # TODO: maybe trim unnecessary indices and attributes, that were
+    # added progressively for exact partial xpaths but aren't needed
+    # when the latter parts of the xpath are included.
 
     # Suffix for attrib or text.
     if type == 'text':
@@ -1152,6 +1161,9 @@ def _Get_Xpath_Recursive(node, cfg):
     # the same attributes (which differs from find/findall if there
     # were preceeding attributes).
     # Note: comments in documentation always show up with a bracket as well.
+    # TODO: maybe use deeper xpath to checks to remove the need for indexing,
+    # eg. "a[b/@v=1]/b[@v=1]" instead of "a[2]/b[@b=1]". Can potentially do
+    # this as a fix-it step later.
     if len(similar_elements) > 1 or node.tag is ET.Comment:
         # Note: xpath is 1-based indexing.
         index = similar_elements.index(node) + 1

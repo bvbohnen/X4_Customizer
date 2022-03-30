@@ -708,6 +708,7 @@ class XML_File(Game_File):
             modified_node = self.Get_Root_Readonly(),
             forced_attributes = forced_attributes,
             maximal = Settings.make_maximal_diffs,
+            shorten_xpaths = Settings.shorten_xpaths,
             verify = True)
 
         if Settings.profile:

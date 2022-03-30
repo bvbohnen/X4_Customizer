@@ -1,4 +1,4 @@
-X4 Customizer 1.24.8
+X4 Customizer 1.24.9
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -236,6 +236,11 @@ Example input file:
       - Example: "id,name" will always include "id" and "name" attributes of elements in the xpath.
       - Also supports child node or attributes referenced using a relative xpath. Example: "parts/part/uv_animations/uv_animation" to require a uv_animation great-great-grandchild element, or "component/@ref" to include the "ref" attribute of a "component" child.
       - Can be used to make xpaths more specific, and more likely to break if an unknown extension is applied before the output extension (eg. when the customizer output is distributed to other users).
+      - Can also be used in cases where a partial xpath matches multiple nodes, to clarify a child/attribute check instead of falling back on indexing.
+    * shorten_xpaths
+      - Bool, if True then xpaths will be shortened using "//" syntax, at the cost of possibly matching unwanted nodes if the diff patch is applied to a modified source file.
+      - Only attempts to use // for the xpath prefix currently.
+      - May result in measurably longer x4 loading times if used often in large files.
     * root_file_tag
       - String, extra tag added to names of modified files in the root folder and not placed in an extension, eg. X4.exe, to avoid overwriting the originals.
       - Defaults to ".mod", eg. "X4.mod.exe".
@@ -1362,3 +1367,5 @@ Change Log:
  * 1.24.8
    - Ignore error when a ship's loadout engine macro is not found (occurs for base game ships that use dlc engine loadouts).
    - Fixed error in Rescale_Ship_Speeds when adjusting variation in a ship group with only one ship.
+ * 1.24.9
+   - Added the "shorten_xpaths" setting, allowing generated xpaths to use a // prefix.

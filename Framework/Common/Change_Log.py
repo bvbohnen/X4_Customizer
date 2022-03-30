@@ -258,6 +258,9 @@ Change Log:
      base game ships that use dlc engine loadouts).
    - Fixed error in Rescale_Ship_Speeds when adjusting variation in
      a ship group with only one ship.
+ * 1.24.9
+   - Added the "shorten_xpaths" setting, allowing generated xpaths to use
+     a // prefix.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.
