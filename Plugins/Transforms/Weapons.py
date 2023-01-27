@@ -307,9 +307,13 @@ def Prep_Rules_And_Database(scaling_rules, defaults, old_arg_names):
     # Load the weapons (and turrets).
     # TODO: skip missiles?
     database = Database()
-    weapon_macros = []
-    for pattern in ['weapon_*', 'turret_*']:
-        weapon_macros += database.Get_Macros(pattern, classes = [Weapon_System])
+    #weapon_macros = []
+    # for pattern in ['weapon_*', 'turret_*']:
+    #     weapon_macros += database.Get_Macros(pattern, classes = [Weapon_System])
+
+    #use class names instead of file names to load to catch potential misnamed mod files
+    weapon_macros = database.Get_Macros('*', class_names= ['weapon', 'turret'])
+    
 
     # Group according to rules.
     Group_Objects_To_Rules(weapon_macros, scaling_rules, Is_Match)

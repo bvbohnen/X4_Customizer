@@ -2,7 +2,7 @@
 from .Macro import Macro
 from .Connection import Connection
 from .Component  import Component
-from Framework import File_System
+from Framework import File_System, Print
 
 __all__ = ['Engine']
 
@@ -68,8 +68,7 @@ class Engine(Macro):
         return float(time_str)
         
     def Set_Boost_Time(self, new_time):
-        self.Set('./properties/boost', 'duration', f'{new_time:.2f}')
-
+        self.Set('./properties/boost', 'duration', f'{new_time:.2f}')             
 
     def Set_Forward_Thrust_And_Rescale(self, new_thrust):
         '''
@@ -104,14 +103,7 @@ class Engine(Macro):
         mult = new_thrust / forward_thrust
         # Add 1 for base thrust.
         mult += 1
-        self.Set('./properties/travel', 'thrust', f'{mult:.3f}')
-    
-    def Set_Travel_Mult(self, new_mult):
-        self.Set('./properties/travel', 'thrust', '1')
-        
-    def Set_Travel_Charge(self, new_mult):
-        self.Set('./properties/travel', 'charge', '0')
-
+        self.Set('./properties/travel', 'thrust', f'{mult:.3f}')            
 
     def Remove_Travel(self):
         'Remove the travel subelement from the engine. Untested.'

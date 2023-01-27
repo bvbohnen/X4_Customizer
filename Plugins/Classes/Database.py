@@ -14,6 +14,7 @@ from .Ship import *
 from .Engine import *
 from .Storage import *
 from .Weapons import *
+from .Shield import *
 
 __all__ = ['Database']
 
@@ -41,6 +42,8 @@ class_name_to_macro = {
     'missile' : Missile,
     'bomb'    : Bomb,
     'mine'    : Mine,
+
+    'shieldgenerator' : Shield
     }
 
 # TODO: directly track connections.
@@ -153,18 +156,18 @@ class Database:
         # Skip if already writable.
         if game_file in self.writable_gamefiles:
             return
-        self.writable_gamefiles.append(game_file)
+        self.writable_gamefiles.append(game_file)        
 
         # Get a new xml root for this game file.
         orig_root = self.gamefile_roots[game_file]
         new_root = game_file.Get_Root()
-        self.gamefile_roots[game_file] = new_root
+        self.gamefile_roots[game_file] = new_root        
 
         # Need to swap all referenced to the readonly xml to the writable
         # xml, for macros, components, and nested connections.
 
         # Start by maching original nodes to writable nodes.
-        replacements = {x:y for x,y in zip(orig_root.iter(), new_root.iter())}
+        replacements = {x:y for x,y in zip(orig_root.iter(), new_root.iter())}        
 
         # Update all macros and components (since the given object may
         # just be one of several sourced from the file).
@@ -214,6 +217,9 @@ class Database:
             # Add each file to the database, loading macros, xml, etc, skipping
             # those already loaded.
             for game_file in game_files:
+                #not sure what this file is but it's full of random (test?) macros that break stuff if loaded
+                if game_file.virtual_path == 'libraries/macro.xml':
+                    continue                
                 self.Load_File(game_file)
 
         # Now pick out the actual macros.
@@ -231,8 +237,11 @@ class Database:
         # Most names start with "ship_", drones start with "units_".
         # Note: CoH dlc addes a "ship_" landmark object, which will be skipped
         # due to being "object" class.
-        for pattern in ['ship_*', 'units_*']:
-            ship_macros += self.Get_Macros(pattern, classes=[Ship])
+        #for pattern in ['ship_*', 'units_*']:
+        #    ship_macros += self.Get_Macros(pattern, classes=[Ship])
+
+        #get ships based on macro class name only to get modded ships that might not respect the naming conventions too
+        ship_macros = self.Get_Macros('*', class_names=['spacesuit', 'ship_xs', 'ship_s', 'ship_m', 'ship_l', 'ship_xl'])
         return ship_macros
     
     def Get_Component(self, component_name):
@@ -282,6 +291,6 @@ class Database:
         # Remove duplicates, and loop.
         for game_file in set(modded_files):
             # Verify this was set as writable.
-            assert game_file in self.writable_gamefiles
+            assert game_file in self.writable_gamefiles, "File not writeable"
             game_file.Update_Root(self.gamefile_roots[game_file])
         return

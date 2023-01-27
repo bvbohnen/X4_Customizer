@@ -28,5 +28,7 @@ from .Text import Color_Text
 from .Wares import Adjust_Ware_Price_Spread
 from .Wares import Adjust_Ware_Prices
 
-
 from .Weapons import *
+from .Shields import *
+from .Engines import *
+from .GenericShips import *

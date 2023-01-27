@@ -16,7 +16,7 @@ from Framework import Transform_Wrapper, Load_File, File_System, Plugin_Log
 from ..Support import Standardize_Match_Rules
 from ..Support import XML_Multiply_Int_Attribute
 from ..Support import XML_Multiply_Float_Attribute
-from ...Analyses.Shared import Get_Ship_Macro_Files
+#from ...Analyses.Shared import Get_Ship_Macro_Files
 from ...Classes import *
 from .Shared import *
 
@@ -135,6 +135,26 @@ def Adjust_Ship_Hull(
     # Hand off to shared code to run updates.
     Update_Nodes_By_Rules(match_rule_multipliers, Node_Update)
     return
+	
+@Transform_Wrapper(shared_docs = doc_matching_rules)
+def Adjust_Shields(
+        *match_rule_multipliers
+    ):
+    '''
+    Adjusts the hull values of ships.
+
+    * match_rule_multipliers:
+      - Series of matching rules paired with the multipliers to use.
+    '''
+    def Node_Update(ship_macro, multiplier):
+        # These are in the 'hull' node, 'max' attribute.
+        hull_node = ship_macro.find('./properties/hull')
+        XML_Multiply_Int_Attribute(hull_node, 'max', multiplier)
+        return True
+
+    # Hand off to shared code to run updates.
+    Update_Nodes_By_Rules(match_rule_multipliers, Node_Update)
+    return	
 
 
 @Transform_Wrapper(shared_docs = doc_matching_rules)
@@ -331,7 +351,7 @@ def Set_Ship_Radar_Ranges(
         if radar_node == None:
             radar_node = Element('radar', range = range_str)
             prop_node.append(radar_node)
-            assert radar_node.tail == None
+            assert radar_node.tail == None, "Radar issue"
         else:
             radar_node.set('range', range_str)
 
@@ -383,50 +403,39 @@ def Update_Nodes_By_Rules(
     # Put matching rules in standard form.
     rules = Standardize_Match_Rules(match_rules)
            
-    # Switch to shared function that finds more mod ships.
-    #game_files = File_System.Get_All_Indexed_Files('macros','ship_*')
-    game_files = Get_Ship_Macro_Files()
+    database = Database()
+    ship_macros = database.Get_Ship_Macros()
 
-    for game_file in game_files:
-        xml_root = game_file.Get_Root()
-        # There may be multiple macros in a file (though generally
-        # this isn't expected).
-        ship_macros = xml_root.findall('./macro')
-
+    for ship_macro in ship_macros:
+        args = Get_Match_Rule_Args(ship_macro, rules)
+        if not args:
+            continue    
+        
         change_occurred = False
-        for ship_macro in ship_macros:
-            args = Get_Match_Rule_Args(ship_macro, rules)
-            if not args:
-                continue
+        change_occurred |= update_function(ship_macro.xml_node, args)            
 
-            change_occurred |= update_function(ship_macro, args)
-                
         if change_occurred:
-            # Put the changes back.
-            game_file.Update_Root(xml_root)
-    return
-    
+            ship_macro.modified = True
+            database.Set_Object_Writable(ship_macro)
+            
+    database.Update_XML()
 
-def Get_Match_Rule_Args(ship_macro_xml, rules):
+    return
+
+def Get_Match_Rule_Args(ship_macro, rules):
     '''
     Checks a ship macro against the given rules, and returns args from
     the first matched rule (as a tuple of there is more than 1 arg).
     On no match, returns None.
 
-    * ship_macro_xml
-      - The xml node with the specific ship macro.
+    * ship_macro
+      - The ship macro.
     '''
-    assert ship_macro_xml.tag == 'macro'
-
-    # Look up properties of interest.
-    name = ship_macro_xml.get('name')
-    class_name = ship_macro_xml.get('class')
-
     # Not all ships have a type or purpose (mainly just spacesuits don't).
-    node = ship_macro_xml.find('./properties/ship')
-    type = node.get('type') if node != None else None
-    node = ship_macro_xml.find('./properties/purpose')
-    purpose = node.get('primary') if node != None else None
+    name = ship_macro.name
+    class_name = ship_macro.class_name
+    type = ship_macro.Get('./properties/ship', 'type')
+    purpose = ship_macro.Get('./properties/purpose', 'primary')
 
     # Check the matching rules.
     for key, value, *args in rules:
@@ -442,4 +451,4 @@ def Get_Match_Rule_Args(ship_macro_xml, rules):
             if len(args) == 1:
                 return args[0]
             return args
-    return None
+    return None  

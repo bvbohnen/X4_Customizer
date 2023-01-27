@@ -79,9 +79,10 @@ class Macro:
         if self.xml_node.find(xpath) == None:
             # TODO: maybe warning.
             return
+                
         self.database.Set_Object_Writable(self)
         self.xml_node.find(xpath).set(attr, value)
-        self.modified = True
+        self.modified = True          
         return
 
     def Remove(self, xpath):
@@ -183,3 +184,19 @@ class Macro:
             except Exception as ex:
                 pass
         return self._ware_cost
+
+    def Set_Float_Property(self, prop, attrib, val_change, op):
+        xml_val = self.Get(f'./properties/{prop}', attrib)
+        if not xml_val:
+            return        
+        val = float(xml_val)
+
+        if(op == '+'):
+            val = val + val_change
+        elif(op == '*'):
+            val = val * val_change
+        elif(op=='='):
+            val = val_change
+        
+        self.Set(f'./properties/{prop}', attrib, f'{val:.3f}')        
+        
