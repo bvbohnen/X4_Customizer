@@ -319,7 +319,7 @@ class Game_File:
     def Merge(self, other_file):
         '''
         Merge another file into this file, during loading.
-        Returns the merged file, which may not be this object.
+        Returns the merged file, which may differ from this file.
         Substitutions will overwrite this file, xml files will
         be patched, other files will be ignored.
         '''
@@ -340,9 +340,19 @@ class Game_File:
         # a clean printout.
         # Also suppress for jpg, since SV and COH dlc repeat loading screens
         # in ext (non-subst) packed files.
-        if not (self.virtual_path.endswith('.gz') or self.virtual_path.endswith('.jpg')):
+        # Also, suppress xac files, related to character model components
+        # overwritten by dlcs.
+        # TODO: maybe just ignore without warning.
+        if not (self.virtual_path.endswith('.gz') 
+                or self.virtual_path.endswith('.xac')
+                or self.virtual_path.endswith('.jpg')):
             Plugin_Log.Print(('Error: Skipping merge for "{}", extension file from "{}", '
                 ).format( self.virtual_path,  other_file.file_source_path))
+
+        # TODO: should the default return the old or new file? Some dlc
+        # behaviors suggest the new file overwrites the original, but
+        # ui xml/lua behavior suggests explicit subst packing is sometimes
+        # needed (though that may be a ui specific quirk).
         return self
 
 
@@ -411,6 +421,8 @@ class XML_File(Game_File):
     * asset_class_name_dict
       - Dict, keyed by asset class as defined in the xml, holding a list of
         names of the asset nodes of the class type.
+      - Does not include assets using a 'ref' to another asset instead
+        of defining a class.
       - None if this xml doesn't contain asset nodes.
       - Example keys: 'weapon', 'missile', etc.
       - Often or always holds a single name that matches the last component
@@ -519,17 +531,21 @@ class XML_File(Game_File):
             asset_class_name = node.get('class')
             asset_name       = node.get('name')
 
-            # Note: XR shippack has a garbage dock.xml file which has
-            # no class defined. Skip errors, maybe with warning.
             if asset_class_name == None or asset_name == None:
-                Plugin_Log.Print(('Error: asset file contains oddities;'
-                    'in file {}; sources: {}; asset {} of class {}; skipping.'
-                    ).format(
-                        self.virtual_path, 
-                        self.source_extension_names,
-                        asset_class_name,
-                        asset_name
-                        ))
+
+                # Could print a warning, but many dlc macros lack class
+                # names, either using a ref or just being unclassed, so
+                # assume these cases are intentional.
+                # TODO: maybe record assets without a class, or look up ref
+                # macro classes.
+                #Plugin_Log.Print(('Error: asset file contains oddities;'
+                #    'in file {}; sources: {}; asset {} of class {}; skipping.'
+                #    ).format(
+                #    self.virtual_path, 
+                #    self.source_extension_names,
+                #    asset_class_name,
+                #    asset_name
+                #    ))
                 continue
 
             # -Removed; multiple assets of same class and different name
@@ -939,7 +955,7 @@ class XML_Text_File(XML_File):
             ):
         '''
         Reads and returns the text at the given {page,id}.
-        Returns None if no text found, or an error occurs.
+        Returns None if no text found, or if an error occurs.
 
         * text
           - String, including any internal '{page,id}' terms.

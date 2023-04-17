@@ -6,7 +6,7 @@
     <ProjectHome>
     </ProjectHome>
     <StartupFile>__init__.py</StartupFile>
-    <SearchPath>..\..\X4_Customizer;..\Framework</SearchPath>
+    <SearchPath>..\..\X4_Customizer</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>Plugins</Name>

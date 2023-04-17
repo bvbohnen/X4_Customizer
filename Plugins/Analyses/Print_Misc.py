@@ -35,7 +35,7 @@ def Print_Ship_Speeds(
     Split ships exaggerate the high end, eg. alligator(gas) hitting 998.
     The xs includes boarding pods (29 speed), drones, mass traffic.
     '''    
-    database = Database(read_only = True)
+    database = Database()
     ship_macros = database.Get_Ship_Macros()
     engine_macros = database.Get_Macros('engine_*') + database.Get_Macros('generic_engine_*')
 

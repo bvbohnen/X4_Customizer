@@ -261,6 +261,10 @@ Change Log:
  * 1.24.9
    - Added the "shorten_xpaths" setting, allowing generated xpaths to use
      a // prefix.
+ * 1.24.10
+   - Removed warning for duplicate xac file paths (common in dlcs).
+   - Removed warnings on classless macros (common in dlcs).
+   - Check_Extension will only check xml files.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

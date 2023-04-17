@@ -79,7 +79,7 @@ def Start_GUI():
 class Custom_Settings(QtCore.QSettings):
     '''
     QSettings wrapper which will fix responses, mainly translating
-    types appropriately that others are returned as strings.
+    type that were given as strings.
     '''
     replacements_dict = {
         'true'  : True,
@@ -91,7 +91,7 @@ class Custom_Settings(QtCore.QSettings):
         Look up and return the value.
 
         * default
-          - Value to return if fields isn't found.
+          - Value to return if field isn't found.
         * type
           - String, type to convert the value into.
           - Supports 'bool', 'int', others as needed.
@@ -401,7 +401,7 @@ class GUI_Main_Window(qt_base_class, generated_class):
         
         # Add a threading object.
         self.worker_thread = Worker_Thread_Handler(self)
-        # Sends its emitted messages to Print.
+        # Send its emitted messages to Print.
         self.worker_thread.send_message.connect(self.Print)
         
 

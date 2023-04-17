@@ -207,7 +207,7 @@ def Run(*args):
 
     # Add the script location to the search path, so it can include
     # other scripts at that location.
-    # This will often just by the Scripts folder, which is already in
+    # This will often just be the Scripts folder, which is already in
     # the sys.path, but for cases when it is not, put this path
     # early in the search order.
     # TODO: remove this path when done, for use in gui when it might

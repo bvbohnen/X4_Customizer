@@ -16,11 +16,14 @@ def Get_Macro_Component_File(macro_file, xpath_prefix):
     Returns the component file matched to the given macro file,
     along with an xpath to the component node.
     The component should already have been loaded.
+    Returns (None,None) if the component file not found.
     TODO: maybe support an attempt at autoloading one directory up.
     '''
     root = macro_file.Get_Root_Readonly()
     component_name = root.xpath(xpath_prefix + '/component')[0].get('ref')
     component_file = File_System.Get_Indexed_File('components', component_name)
+    if component_file is None:
+        return (None, None)
     xpath = component_file.Get_Asset_Xpath(component_name)
     return component_file, xpath
 
@@ -68,18 +71,21 @@ def Fill_Macro_Object_Standard_Items(
 
     # Get the component file, and an xpath to the component
     # (in case the file has multiple).
+    # Note: boron dlc has engine macros referencing non-existent
+    # components; skip if None returned to handle that case.
     comp_file, comp_xpath = Get_Macro_Component_File(game_file, xpath_prefix)
-    # Get the xpath for the connection node.
-    # This may end up unfound.
-    conn_xpath = Get_Component_Connection_Xpath(comp_file, comp_xpath)
+    if comp_file is not None:
+        # Get the xpath for the connection node.
+        # This may end up unfound.
+        conn_xpath = Get_Component_Connection_Xpath(comp_file, comp_xpath)
         
-    if conn_xpath != None:
-        # Add extra bits from the components file.
-        # These macros need to fill in the connection node xpath term.
-        edit_object.Make_Items(
-            comp_file,
-            _component_item_macros,
-            xpath_replacements = {'connection_xpath' : conn_xpath})
+        if conn_xpath is not None:
+            # Add extra bits from the components file.
+            # These macros need to fill in the connection node xpath term.
+            edit_object.Make_Items(
+                comp_file,
+                _component_item_macros,
+                xpath_replacements = {'connection_xpath' : conn_xpath})
     return
 
 

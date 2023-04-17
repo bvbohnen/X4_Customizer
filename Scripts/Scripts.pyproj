@@ -6,7 +6,7 @@
     <ProjectHome>
     </ProjectHome>
     <StartupFile>Command_Line\Generate_Diffs.py</StartupFile>
-    <SearchPath>..\Framework;..\Plugins;..\..\X4_Customizer</SearchPath>
+    <SearchPath>..\..\X4_Customizer;..\..\X4_Customizer;..\..\..\Projects</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>Scripts</Name>

@@ -1,4 +1,4 @@
-X4 Customizer 1.24.9
+X4 Customizer 1.24.10
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -1369,3 +1369,7 @@ Change Log:
    - Fixed error in Rescale_Ship_Speeds when adjusting variation in a ship group with only one ship.
  * 1.24.9
    - Added the "shorten_xpaths" setting, allowing generated xpaths to use a // prefix.
+ * 1.24.10
+   - Removed warning for duplicate xac file paths (common in dlcs).
+   - Removed warnings on classless macros (common in dlcs).
+   - Check_Extension will only check xml files.

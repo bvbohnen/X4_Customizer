@@ -14,6 +14,7 @@ this_dir = Path(__file__).resolve().parents[1]
 Settings(
     extension_name = 'test_customizer',
     path_to_x4_folder = r'D:\Games\Steam\SteamApps\common\X4 Foundations',
+    extension_whitelist = 'ego_dlc_split;ego_dlc_terran;ego_dlc_pirate;ego_dlc_boron',
     developer = 1,
     )
 
@@ -23,7 +24,6 @@ test_all = 0
 
 if 0:
     GUI.Start_GUI()
-
 
 # Test sector resizing.
 if 0 or test_all:
@@ -95,8 +95,8 @@ if 0 or test_all:
 #        )
 
 # Test the extension checker.
-#if 0 or test_all:
-#    Check_Extension('test_mod')
+if 0 or test_all:
+    Check_Extension('ego_dlc_split')
 if 0 or test_all:
     # Alternatively, check everything (may take longer).
     Check_All_Extensions()
@@ -111,6 +111,8 @@ if 0 or test_all:
     edit_tree = Framework.Live_Editor.Get_Tree_View('weapons')
 if 0 or test_all:
     edit_tree = Framework.Live_Editor.Get_Tree_View('ships')
+if 0 or test_all:
+    edit_tree = Framework.Live_Editor.Get_Tree_View('engines')
 
 
 if 0 or test_all:
@@ -146,6 +148,7 @@ if 0 or test_all:
         ('*'                             , 1.5)
         )
     
+    Print_Ship_Speeds()
     Print_Ship_Stats('ship_stats_postmod')
 
 if 0:

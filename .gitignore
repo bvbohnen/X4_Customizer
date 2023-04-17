@@ -12,6 +12,8 @@ Default_Script.py
 # Ignore the local settings
 settings.json
 gui_settings.ini
+# Ignore releases.
+Release/
 # Ignore anything private.
 private/
 

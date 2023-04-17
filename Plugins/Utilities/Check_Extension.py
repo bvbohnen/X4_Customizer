@@ -170,6 +170,12 @@ def Check_Extension(
             # Caught exception.
             exception = None
 
+            # Skip non-xml files for now, to avoid checking every binary
+            # file. TODO: maybe a way to still check dependency orders
+            # for substitutions.
+            if not virtual_path.endswith('xml'):
+                continue
+
             # The path could be to an original file, or to a patch on an
             # existing file.  Without knowing, need to try out both cases
             # and see if either works.

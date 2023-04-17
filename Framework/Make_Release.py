@@ -9,20 +9,15 @@ import sys
 import zipfile
 import argparse
 
+# Update the sys path to support framework import.
+parent_dir = Path(__file__).resolve().parents[1]
+if str(parent_dir) not in sys.path:
+    sys.path.append(str(parent_dir))
+
 import Make_Documentation
 import Make_Executable
 #import Make_Patches
-
-parent_dir = Path(__file__).resolve().parent.parent
-if str(parent_dir) not in sys.path:
-    sys.path.append(str(parent_dir))
 import Framework
-
-# TODO: replace with Path stuff.
-# Note: powershell messes up these paths (relative instead of full), and
-# leads to problems further below.
-This_dir = os.path.join(os.path.dirname(__file__))
-Top_dir = os.path.normpath(os.path.join(This_dir, '..'))
 
 def Make(*args):    
     # Set up command line arguments.
@@ -107,51 +102,45 @@ def Make(*args):
 
         'Default_Script_template.py',
         )
-    for file_name in os.listdir(Top_dir):
-        if file_name in wanted_top_names:
-            file_paths.append(os.path.join(Top_dir, file_name))
+    for path in parent_dir.iterdir():
+        if path.name in wanted_top_names:
+            file_paths.append(path)
 
     # Grab everything in bin, game_files, and patches.
     # TODO: look into parsing the git index to know which files are
     #  part of the actual repository, and not leftover work files (like
     #  modified scripts).
     # For now, some hand selected filters will be used.
-    for folder in ['bin', 'Scripts', 'Plugins']: #,'game_files','patches'
-        for dir_path, _, file_names in os.walk(os.path.join(Top_dir, folder)):
-
-            # Skip the pycache folders.
-            if 'pycache' in dir_path:
+    for folder in ['bin', 'Scripts', 'Plugins']:
+        for path in (parent_dir / folder).rglob('*'):
+            # Ignore folders.
+            if not path.is_file():
                 continue
 
-            # Check each file name individually.
-            for file_name in file_names:
+            # Skip the pycache folders.
+            if 'pycache' in path.parts:
+                continue
 
-                ## Skip patches that don't end in .patch.
-                #if folder == 'patches' and not file_name.endswith('.patch'):
-                #    continue
-                #
-                ## Skip game files that end in .bak, leftovers from
-                ##  the script editor.
-                #if folder == 'game_files' and file_name.endswith('.bak'):
-                #    continue
+            # Skip anything in scripts or plugins that isn't .py or .ui.
+            if (('Scripts' in path.parts or 'Plugins' in path.parts)
+            and not path.suffix in ['.py','.ui']):
+                continue
 
-                # Skip anything in scripts or plugins that isn't .py or .ui.
-                if (folder in ['Scripts','Plugins'] 
-                and not file_name.endswith('.py')
-                and not file_name.endswith('.ui')):
-                    continue
+            # Pick scripts to include.
+            if 'Scripts' in path.parts and path.name not in wanted_script_names:
+                continue
 
-                # Pick scripts to include.
-                if folder == 'Scripts' and file_name not in wanted_script_names:
-                    continue
-
-                file_paths.append(os.path.join(folder, dir_path, file_name))
+            file_paths.append(path)
                 
                 
     # Create a new zip file.
-    # Put this in the top level directory.
+    # Put this in a Release directory.
     version_name = 'X4_Customizer_v{}'.format(Framework.Change_Log.Get_Version())
-    zip_path = os.path.normpath(os.path.join(This_dir, '..', version_name + '.zip'))
+    release_dir = parent_dir / 'Release'
+    if not release_dir.exists():
+        release_dir.mkdir()
+    zip_path = release_dir / f'{version_name}.zip'
+
     # Optionally open it with compression.
     if parsed_args.uncompress:
         zip_file = zipfile.ZipFile(zip_path, 'w')
@@ -171,18 +160,18 @@ def Make(*args):
             compresslevel = 9 # 9 is max for deflated
             )
 
-    # Add all files to the zip, with an extra nesting folder to
+    # Add all files to the zip, with an extra nesting folder so
     # that the files don't sprawl out when unpacked.
     for path in file_paths:
-        #print (version_name + '\\' + os.path.relpath(path, Top_dir))
+        print(path)
+        relative_path = path.relative_to(parent_dir)
+        print (f'{version_name}\\{relative_path}')
         zip_file.write(
             # Give a full path.
             path,
             # Give an alternate internal path and name.
             # This will be relative to the top dir.
-            # Note: relpath seems to bugger up if the directories match,
-            #  returning a blank instead of the file name.
-            arcname = os.path.join(version_name, os.path.relpath(path, Top_dir))
+            arcname = Path(version_name) / relative_path
             )
 
     # Close the zip; this needs to be explicit, according to the
