@@ -1,13 +1,13 @@
-'''
+"""
 Transforms to the raw exe binary.
-'''
-__all__ = [    
-    'Remove_Modified',
-    'Remove_Sig_Errors',
-    'High_Precision_Systemtime',
+"""
+__all__ = [
+    "Remove_Modified",
+    "Remove_Sig_Errors",
+    "High_Precision_Systemtime",
     #'Enable_Windows_File_Cache',
     #'Remove_Workshop_Tool_Dependency_Check',
-    ]
+]
 
 from datetime import datetime
 
@@ -17,27 +17,28 @@ from .Support import Int_To_Hex_String
 from .Support import Apply_Binary_Patch
 from .Support import Apply_Binary_Patch_Group
 
-NOP = '90'
+NOP = "90"
+
 
 @Transform_Wrapper()
 def Remove_Sig_Errors():
-    '''
-    Suppresses file sigature errors from printing to the debug log, along
+    """
+    Suppresses file signature errors from printing to the debug log, along
     with file-not-found errors.
     Written for Windows v3.10 exe.
-    
-    TODO: pending x4 4.0 update.
-    '''
 
-    '''
-    Note: function offset names taken from ghidra for the x4 steam
+    TODO: pending x4 4.0 update.
+    """
+
+    """
+    Note: function offset names taken from Ghidra for the x4 steam
     windows exe version 3.10.
         
     FUN_140f15100 has the file not found error message.            
     FUN_140f14db0 has the sig failure message.
 
     There are different tricky ways of trying to suppress errors, but
-    simplest is just to replace the Print call with nops.
+    simplest is just to replace the Print call with NOPs.
     
     (Old 3.3) FUN_140f14db0:
 
@@ -94,121 +95,215 @@ def Remove_Sig_Errors():
         Wildcard this
         ` 140f1517b e8 b0      CALL    FUN_140f0c230                     undefined FUN_140f0c23
         `           70 ff ff
-    '''
-
-    
-    patches = [ 
         
-    # old 3.3
-    #Binary_Patch(
-    #    file = Settings.X4_exe_name,
-    #    # Call is at the end of this block, since after the call is code
-    #    # ghidra didn't understand, and so may be hard to pick out addresses.
-    #    ref_code = '''
-    #        49 83   
-    #        79 18 10
-    #        72 03   
-    #        4d 8b 09 
-    #        89 44   
-    #        24 20
-    #        4c 8d   
-    #        05 .. 
-    #        .. .. ..
-    #        ba 01   
-    #        00 00 00
-    #        33 c9   
-    #
-    #        e8 ..   
-    #        .. .. ..
-    #    ''',
-    #    # Make a few nops.
-    #    new_code = '''
-    #        49 83   
-    #        79 18 10
-    #        72 03   
-    #        4d 8b 09
-    #        89 44   
-    #        24 20
-    #        4c 8d   
-    #        05 .. 
-    #        .. .. ..
-    #        ba 01   
-    #        00 00 00
-    #        33 c9   
-    #    ''' + NOP * 5,
-    #    ),
+    Following two 6.0 HF5 were found using IDA, so it might look different:
+    sub_1412ECBE0: ("File I/O: Failed to verify the file sig" for 6.0 HF5)        
+        .text:00000001412ECD9C                 cmp     qword ptr [rbx+48h], 10h
+        .text:00000001412ECDA1                 lea     r9, [rbx+30h]
+        .text:00000001412ECDA5                 jb      short loc_1412ECDAA
+        .text:00000001412ECDA7                 mov     r9, [r9]
+        .text:00000001412ECDAA
+        .text:00000001412ECDAA loc_1412ECDAA:                          ; CODE XREF: sub_1412ECBE0+1C5↑j
+        .text:00000001412ECDAA                 mov     edx, 1
+        .text:00000001412ECDAF                 mov     [rsp+188h+dwCreationDisposition], r8d
+        .text:00000001412ECDB4                 lea     r8, aFileIOFailedTo ; "File I/O: Failed to verify the file sig"...
+        .text:00000001412ECDBB                 lea     ecx, [rdx+12h]
+        .text:00000001412ECDBE                 call    sub_1412E4D70
+        
+        Corresponding binary data:
+        48 83 7B 48 10          cmp     qword ptr [rbx+48h], 10h
+        4C 8D 4B 30             lea     r9, [rbx+30h]
+        72 03                   jb      short loc_1412ECDAA
+        4D 8B 09                mov     r9, [r9]
+        BA 01 00 00 00          mov     edx, 1
+        44 89 44 24 20          mov     [rsp+188h+dwCreationDisposition], r8d
+        4C 8D 05 D5 C9 BF 00    lea     r8, aFileIOFailedTo ; "File I/O: Failed to verify the file sig"...
+        8D 4A 12                lea     ecx, [rdx+12h]
+        E8 AD 7F FF FF          call    sub_1412E4D70
+        
+    sub_1412ED020 ("File I/O: Could not find file '%s'" for 6.0 HF5)
+        .text:00000001412ED086                 cmp     qword ptr [rdi+48h], 10h ; jumptable 00000001412ED05F cases 2,3
+        .text:00000001412ED08B                 lea     rdx, [rdi+30h]
+        .text:00000001412ED08F                 jb      short loc_1412ED094
+        .text:00000001412ED091                 mov     rdx, [rdx]
+        .text:00000001412ED094
+        .text:00000001412ED094 loc_1412ED094:                          ; CODE XREF: sub_1412ED020+6F↑j
+        .text:00000001412ED094                 lea     rcx, aFileIOCouldNot ; "File I/O: Could not find file '%s'"
+        .text:00000001412ED09B                 call    sub_1412E4D20
+        .text:00000001412ED0A0                 mov     ebx, 4
+        .text:00000001412ED0A5                 jmp     short loc_1412ED123
     
-    Binary_Patch(
-        file = Settings.X4_exe_name,
-        # Call is at the end of this block, since after the call is code
-        # ghidra didn't understand, and so may be hard to pick out addresses.
-        ref_code = '''
-            48  83  7b    
-            48  10
-            4c  8d  4b  30
-            72  03        
-            4d  8b  09    
-            ba  01  00    
-            00  00
-            89  44  24  20
-            4c  8d  05    
-            ..  ..  ..  ..
-            8d  4a  01    
+    Corresponding binary data:
+        48 83 7F 48 10			cmp     qword ptr [rdi+48h], 10h
+        48 8D 57 30				lea     rdx, [rdi+30h]
+        72 03					jb      short loc_1412ED094
+        48 8B 12				mov     rdx, [rdx]
+        48 8D 0D B5 C4 BF 00	lea     rcx, aFileIOCouldNot ; "File I/O: Could not find file '%s'"
+        E8 A4 7C FF FF			call    sub_1412E4D20
+        BB 04 00 00 00          mov     ebx, 4
+        EB 7C                   jmp     short loc_1412ED123
+    """
 
-            e8  ..   
-            .. .. ..
-        ''',
-        # Make a few nops.
-        new_code = '''
-            48  83  7b    
-            48  10
-            4c  8d  4b  30
-            72  03        
-            4d  8b  09    
-            ba  01  00    
-            00  00
-            89  44  24  20
-            4c  8d  05    
-            ..  ..  ..  ..
-            8d  4a  01    
-        ''' + NOP * 5,
+    patches = [
+        # old 3.3
+        # Binary_Patch(
+        #    file = Settings.X4_exe_name,
+        #    # Call is at the end of this block, since after the call is code
+        #    # ghidra didn't understand, and so may be hard to pick out addresses.
+        #    ref_code = '''
+        #        49 83
+        #        79 18 10
+        #        72 03
+        #        4d 8b 09
+        #        89 44
+        #        24 20
+        #        4c 8d
+        #        05 ..
+        #        .. .. ..
+        #        ba 01
+        #        00 00 00
+        #        33 c9
+        #
+        #        e8 ..
+        #        .. .. ..
+        #    ''',
+        #    # Make a few nops.
+        #    new_code = '''
+        #        49 83
+        #        79 18 10
+        #        72 03
+        #        4d 8b 09
+        #        89 44
+        #        24 20
+        #        4c 8d
+        #        05 ..
+        #        .. .. ..
+        #        ba 01
+        #        00 00 00
+        #        33 c9
+        #    ''' + NOP * 5,
+        #    ),
+        # Binary_Patch(
+        #     file=Settings.X4_exe_name,
+        #     # Call is at the end of this block, since after the call is code
+        #     # ghidra didn't understand, and so may be hard to pick out addresses.
+        #     ref_code="""
+        #     48  83  7b
+        #     48  10
+        #     4c  8d  4b  30
+        #     72  03
+        #     4d  8b  09
+        #     ba  01  00
+        #     00  00
+        #     89  44  24  20
+        #     4c  8d  05
+        #     ..  ..  ..  ..
+        #     8d  4a  01
+        #     e8  ..
+        #     .. .. ..
+        # """,
+        #     # Make a few nops.
+        #     new_code="""
+        #     48  83  7b
+        #     48  10
+        #     4c  8d  4b  30
+        #     72  03
+        #     4d  8b  09
+        #     ba  01  00
+        #     00  00
+        #     89  44  24  20
+        #     4c  8d  05
+        #     ..  ..  ..  ..
+        #     8d  4a  01
+        #     """
+        #     + NOP * 5,
+        # ),
+        # Binary_Patch(
+        #     file=Settings.X4_exe_name,
+        #     # Call is at the end of this block, since after the call is code
+        #     # ghidra didn't understand, and so may be hard to pick out addresses.
+        #     ref_code="""
+        #     48 83
+        #     7b 48 10
+        #     48 8d
+        #     53 30
+        #     72 03
+        #     48 8b 12
+        #     48 8d
+        #     0d ..
+        #     .. .. ..
+        #     e8 ..
+        #     .. .. ..
+        #     bf 04
+        #     00 00 00
+        #     e9 89
+        #     00 00 00
+        # """,
+        #     # Make a few nops.
+        #     new_code="""
+        #     48 83
+        #     7b 48 10
+        #     48 8d
+        #     53 30
+        #     72 03
+        #     48 8b 12
+        #     48 8d
+        #     0d ..
+        #     .. .. ..
+        # """
+        #     + NOP * 5,
+        # ),
+        #### 6.0 HF5 Sig file error patch
+        Binary_Patch(
+            file=Settings.X4_exe_name,
+            ref_code="""
+            48 83 7b 48 10
+            4c 8d 4b 30
+            72 03
+            4d 8b 09
+            ba 01 00 00 00
+            44 89 44 24 20
+            4c 8d 05 .. .. .. ..
+            8d 4a 12
+            e8 .. .. .. ..
+            """,
+            # Skip last call by NOPing it.
+            new_code="""
+            48 83 7b 48 10
+            4c 8d 4b 30
+            72 03
+            4d 8b 09
+            ba 01 00 00 00
+            44 89 44 24 20
+            4c 8d 05 .. .. .. ..
+            8d 4a 12
+            """
+            + NOP * 5,
         ),
-    
-    Binary_Patch(
-        file = Settings.X4_exe_name,
-        # Call is at the end of this block, since after the call is code
-        # ghidra didn't understand, and so may be hard to pick out addresses.
-        ref_code = '''
-            48 83   
-            7b 48 10
-            48 8d   
-            53 30
-            72 03   
+        #### 6.0 HF5 File not found patch
+        Binary_Patch(
+            file=Settings.X4_exe_name,
+            ref_code="""
+            48 83 7f 48 10
+            48 8d 57 30
+            72 03
             48 8b 12
-            48 8d   
-            0d .. 
-            .. .. ..
-
-            e8 .. 
-            .. .. ..
-
-            bf 04   
-            00 00 00
-            e9 89   
-            00 00 00
-        ''',
-        # Make a few nops.
-        new_code = ''' 
-            48 83   
-            7b 48 10
-            48 8d   
-            53 30
-            72 03   
+            48 8d 0d .. .. .. ..
+            e8 .. .. .. ..
+            bb 04 00 00 00
+            eb 7c
+            """,
+            # Make a few nops.
+            new_code="""
+            48 83 7f 48 10
+            48 8d 57 30
+            72 03
             48 8b 12
-            48 8d   
-            0d .. 
-            .. .. ..
-        ''' + NOP * 5,
+            48 8d 0d .. .. .. ..
+            90 90 90 90 90
+            bb 04 00 00 00
+            eb 7c
+            """,
         ),
     ]
 
@@ -216,15 +311,14 @@ def Remove_Sig_Errors():
     return
 
 
-
 @Transform_Wrapper()
 def Remove_Modified():
-    '''
+    """
     Partially removes the modified flag, eg. from the top menu.
     Written for Windows v3.10 exe.
-    '''
+    """
 
-    '''
+    """
     Of interest is the GetModified function, and a related FUN_140739170
     that it calls. The latter checks global DAT_1429efd70, returns it
     if 1, else checks a variety of other globals for conditions to
@@ -297,44 +391,42 @@ def Remove_Modified():
         `  b9 a1      MOV     ECX,0x2a1
         `  02 00 00
     Assuming these values are volatile, can wildcard them.
-    '''
-    
+    """
+
     patches = [
-    
         ## FUN_140739170, not much luck.
-        #Binary_Patch(
-        #file = Settings.X4_exe_name,
-        #ref_code = '''
-        #48 83   
-        #ec 28
+        # Binary_Patch(
+        # file = Settings.X4_exe_name,
+        # ref_code = '''
+        # 48 83
+        # ec 28
         #
-        #48 8b   
-        #05 .. 
-        #.. .. ..
+        # 48 8b
+        # 05 ..
+        # .. .. ..
         #
-        #83 f8 01
-        #75 05   
-        #48 83   
-        #c4 28
-        #c3      
-        #48 89 
-        #5c 24 20
+        # 83 f8 01
+        # 75 05
+        # 48 83
+        # c4 28
+        # c3
+        # 48 89
+        # 5c 24 20
         #''',
         ## Replace the middle bit, pad with a couple nops.
-        #new_code = ''' 
-        #48 83   
-        #ec 28
+        # new_code = '''
+        # 48 83
+        # ec 28
         #
-        #b8 00 
-        #00 00 
-        #00 90 90
+        # b8 00
+        # 00 00
+        # 00 90 90
         #''',
-        #),
-    
+        # ),
         # IsGameModified edit
         Binary_Patch(
-        file = Settings.X4_exe_name,
-        ref_code = '''
+            file=Settings.X4_exe_name,
+            ref_code="""
         83 f8 ..
         77 11   
         b9 a1   
@@ -350,9 +442,8 @@ def Remove_Modified():
         48 83   
         c4 28
         c3      
-        ''',
-        
-        new_code = ''' 
+        """,
+            new_code=""" 
         83 f8 ..
         77 11   
         b9 a1   
@@ -368,19 +459,19 @@ def Remove_Modified():
         48 83   
         c4 28
         c3      
-        ''',
+        """,
         ),
     ]
-    
+
     Apply_Binary_Patch_Group(patches)
     return
 
 
 @Transform_Wrapper()
 def High_Precision_Systemtime(
-        scaling_power = 0,
-    ):
-    '''
+    scaling_power=0,
+):
+    """
     Changes the player.systemtime property to use a higher precision
     underlying timer, where a printed "second" will actually have
     a stepping of 100 ns. Useful for performance profiling of code blocks.
@@ -400,9 +491,9 @@ def High_Precision_Systemtime(
     processing outside of the normal script engine, eg. in lua.
     Note: 1972 was a leap year, and every 4 after, which needs to be
     considered for full accuracy.
-    '''
+    """
 
-    '''
+    """
     In quick summary:
     - player.systemtime.{$format} is implemented using a c++ strftime call.
     - The underlying timer digs down to the windows GetSystemTimeAsFiletime
@@ -519,35 +610,33 @@ def High_Precision_Systemtime(
         90         NOP
 
 
-    '''
+    """
 
     # -Removed; with bit growth protection this stuff isn't needed.
     ## Determine the base time, roughly now, in 100 ns units.
-    #since_1601 = -int((datetime.now() - datetime(1601,1,1)).total_seconds() * 10000000)
+    # since_1601 = -int((datetime.now() - datetime(1601,1,1)).total_seconds() * 10000000)
     ## This will pack to an 8 byte value. Reverse it for the assembly.
-    #base_time_8b = Int_To_Hex_String(since_1601, 8, byteorder = 'little')
+    # base_time_8b = Int_To_Hex_String(since_1601, 8, byteorder = 'little')
     #
     ## Encode the shift amount. Sanity check this.
     ## Around 20 is ~1 second; past that is probably a mistake.
-    #if scaling_power > 24 or scaling_power < 0:
+    # if scaling_power > 24 or scaling_power < 0:
     #    raise Exception('Unexpected scaling_power')
-    #shift_amount_1b = Int_To_Hex_String(scaling_power, 1, byteorder = 'little')
+    # shift_amount_1b = Int_To_Hex_String(scaling_power, 1, byteorder = 'little')
     #
     ## Test mode: try making minimal changes, that keep seconds close to 1/sec,
     ## time close to 1970 based.
-    #if 0:
+    # if 0:
     #    # Note: this produces exactly the same hex value as original code.
     #    since_1970 = -int((datetime(1970,1,1) - datetime(1601,1,1)).total_seconds() * 10000000)
     #    base_time_8b = Int_To_Hex_String(since_1970, 8, byteorder = 'little')
     #    # 2^23 = 8.3 million; close to 10 million needed for seconds.
     #    shift_amount_1b = Int_To_Hex_String(23, 1, byteorder = 'little')
 
-    
     patches = [
-    
         Binary_Patch(
-        file = Settings.X4_exe_name,
-        ref_code = '''
+            file=Settings.X4_exe_name,
+            ref_code="""
         48 b9   
         00 80 
         c1 2a 
@@ -579,8 +668,8 @@ def High_Precision_Systemtime(
         40 93 
         07 00 
         00 00
-        ''',
-        new_code = '''
+        """,
+            new_code="""
         48 b9   
         00 80 
         c1 2a 
@@ -614,19 +703,17 @@ def High_Precision_Systemtime(
         40 93 
         07 00 
         00 00
-        ''',
+        """,
         ),
     ]
-    
+
     Apply_Binary_Patch_Group(patches)
     return
 
 
-
-
 # -Removed; x4 4.0 turns on caching already.
-#@Transform_Wrapper()
-#def Enable_Windows_File_Cache():
+# @Transform_Wrapper()
+# def Enable_Windows_File_Cache():
 #    '''
 #    Edits the exe to enable windows file caching, which x4 normally disables.
 #    Note: may require large amounts of unused memory to be useful.
@@ -650,7 +737,7 @@ def High_Precision_Systemtime(
 #    and may also be disabling caching.
 #
 #    '''
-#    
+#
 #    patches = []
 #
 #
@@ -658,12 +745,12 @@ def High_Precision_Systemtime(
 #    ` 140f14673 48 89      MOV     qword ptr [RSP + local_148],RSI
 #    `           74 24 30
 #    ` 140f14678 c7 44      MOV     dword ptr [RSP + local_150],0x60...
-#    `           24 28 
-#    `           00 00 
+#    `           24 28
+#    `           00 00
 #    `           00 60
 #    ` 140f14680 c7 44      MOV     dword ptr [RSP + local_158],0x2
-#    `           24 20 
-#    `           02 00 
+#    `           24 20
+#    `           02 00
 #    `           00 00
 #    ` 140f14688 45 33 c9   XOR     R9D,R9D
 #    ` 140f1468b ba 00      MOV     EDX,0x40000000
@@ -672,56 +759,56 @@ def High_Precision_Systemtime(
 #    `           41 01
 #    ` 140f14694 48 8b c8   MOV     RCX,RAX
 #    ` 140f14697 ff 15      CALL    qword ptr [->KERNEL32.DLL::Creat...
-#    `           93 ad 
+#    `           93 ad
 #    `           48 00
 #
 #    Edit the move of 60000000 to 40000000
 #    '''
-#    
+#
 #    patches.append(Binary_Patch(
 #        file = Settings.X4_exe_name,
 #        ref_code = '''
-#        48 89   
+#        48 89
 #        74 24 30
-#        c7 44   
-#        24 28 
-#        00 00 
+#        c7 44
+#        24 28
+#        00 00
 #        00 60
-#        c7 44   
-#        24 20 
-#        02 00 
+#        c7 44
+#        24 20
+#        02 00
 #        00 00
 #        45 33 c9
-#        ba 00   
+#        ba 00
 #        00 00 40
-#        45 8d   
+#        45 8d
 #        41 01
 #        48 8b c8
-#        ff 15   
+#        ff 15
 #        ''',
-#        
-#        new_code = ''' 
-#        48 89   
+#
+#        new_code = '''
+#        48 89
 #        74 24 30
-#        c7 44   
-#        24 28 
-#        00 00 
+#        c7 44
+#        24 28
+#        00 00
 #        00 40
-#        c7 44   
-#        24 20 
-#        02 00 
+#        c7 44
+#        24 20
+#        02 00
 #        00 00
 #        45 33 c9
-#        ba 00   
+#        ba 00
 #        00 00 40
-#        45 8d   
+#        45 8d
 #        41 01
 #        48 8b c8
-#        ff 15   
+#        ff 15
 #        ''',
 #        ))
 #
-#    
+#
 #    '''
 #    ` 140f14897 b8 00      MOV     EAX,0x60000000
 #    `           00 00 60
@@ -730,14 +817,14 @@ def High_Precision_Systemtime(
 #    `           00 00 40
 #    ` 140f148a3 0f 45 c2   CMOVNZ  EAX,EDX
 #    ` 140f148a6 48 c7      MOV     qword ptr [RSP + local_148],0x0
-#    `           44 24 
-#    `           30 00 
+#    `           44 24
+#    `           30 00
 #    `           00 00 00
 #    ` 140f148af 89 44      MOV     dword ptr [RSP + local_150],EAX
 #    `           24 28
 #    ` 140f148b3 c7 44      MOV     dword ptr [RSP + local_158],0x3
-#    `           24 20 
-#    `           03 00 
+#    `           24 20
+#    `           03 00
 #    `           00 00
 #    ` 140f148bb 45 33 c9   XOR     R9D,R9D
 #    ` 140f148be ba 00      MOV     EDX,0x80000000
@@ -745,79 +832,79 @@ def High_Precision_Systemtime(
 #    ` 140f148c3 45 8d      LEA     R8D,[R9 + 0x1]
 #    `           41 01
 #    ` 140f148c7 ff 15      CALL    qword ptr [->KERNEL32.DLL::Creat
-#    `           63 ab 
+#    `           63 ab
 #    `           48 00
 #
 #    Here, either 0x60000000 or 0x40000000 is conditionally selected and
 #    sent to CreateFile. Edit the 60000000 entry.
 #    '''
-#    
+#
 #    patches.append(Binary_Patch(
 #        file = Settings.X4_exe_name,
 #        ref_code = '''
-#        b8 00   
+#        b8 00
 #        00 00 60
-#        84 d2   
-#        ba 00   
+#        84 d2
+#        ba 00
 #        00 00 40
 #        0f 45 c2
-#        48 c7   
-#        44 24 
-#        30 00 
+#        48 c7
+#        44 24
+#        30 00
 #        00 00 00
-#        89 44   
+#        89 44
 #        24 28
-#        c7 44   
-#        24 20 
-#        03 00 
+#        c7 44
+#        24 20
+#        03 00
 #        00 00
 #        45 33 c9
-#        ba 00   
+#        ba 00
 #        00 00 80
-#        45 8d   
+#        45 8d
 #        41 01
-#        ff 15   
+#        ff 15
 #        ''',
-#        
-#        new_code = ''' 
-#        b8 00   
+#
+#        new_code = '''
+#        b8 00
 #        00 00 40
-#        84 d2   
-#        ba 00   
+#        84 d2
+#        ba 00
 #        00 00 40
 #        0f 45 c2
-#        48 c7   
-#        44 24 
-#        30 00 
+#        48 c7
+#        44 24
+#        30 00
 #        00 00 00
-#        89 44   
+#        89 44
 #        24 28
-#        c7 44   
-#        24 20 
-#        03 00 
+#        c7 44
+#        24 20
+#        03 00
 #        00 00
 #        45 33 c9
-#        ba 00   
+#        ba 00
 #        00 00 80
-#        45 8d   
+#        45 8d
 #        41 01
-#        ff 15   
+#        ff 15
 #        ''',
 #        ))
 #
 #
 #    '''
 #    ` 140f14945 48 c7      MOV     qword ptr [RSP + local_148],0x0
-#    `           44 24 
-#    `           30 00 
+#    `           44 24
+#    `           30 00
 #    `           00 00 00
 #    ` 140f1494e c7 44      MOV     dword ptr [RSP + local_150],0x60...
-#    `           24 28 
-#    `           00 00 
+#    `           24 28
+#    `           00 00
 #    `           00 60
 #    ` 140f14956 c7 44      MOV     dword ptr [RSP + local_158],0x3
-#    `           24 20 
-#    `           03 00 
+#    `           24 20
+#    `           03 00
 #    `           00 00
 #    ` 140f1495e 45 33 c9   XOR     R9D,R9D
 #    ` 140f14961 ba 00      MOV     EDX,0x80000000
@@ -826,56 +913,56 @@ def High_Precision_Systemtime(
 #    `           41 01
 #    ` 140f1496a 48 8b c8   MOV     RCX,RAX
 #    ` 140f1496d ff 15      CALL    qword ptr [->KERNEL32.DLL::Creat...
-#    `           bd aa 
+#    `           bd aa
 #    `           48 00
 #
 #    Very similar to the first patch.
 #    '''
-#    
+#
 #    patches.append(Binary_Patch(
 #        file = Settings.X4_exe_name,
 #        ref_code = '''
-#        48 c7   
-#        44 24 
-#        30 00 
+#        48 c7
+#        44 24
+#        30 00
 #        00 00 00
-#        c7 44   
-#        24 28 
-#        00 00 
+#        c7 44
+#        24 28
+#        00 00
 #        00 60
-#        c7 44   
-#        24 20 
-#        03 00 
+#        c7 44
+#        24 20
+#        03 00
 #        00 00
 #        45 33 c9
-#        ba 00   
+#        ba 00
 #        00 00 80
-#        45 8d   
+#        45 8d
 #        41 01
 #        48 8b c8
-#        ff 15   
+#        ff 15
 #        ''',
-#        
-#        new_code = ''' 
-#        48 c7   
-#        44 24 
-#        30 00 
+#
+#        new_code = '''
+#        48 c7
+#        44 24
+#        30 00
 #        00 00 00
-#        c7 44   
-#        24 28 
-#        00 00 
+#        c7 44
+#        24 28
+#        00 00
 #        00 40
-#        c7 44   
-#        24 20 
-#        03 00 
+#        c7 44
+#        24 20
+#        03 00
 #        00 00
 #        45 33 c9
-#        ba 00   
+#        ba 00
 #        00 00 80
-#        45 8d   
+#        45 8d
 #        41 01
 #        48 8b c8
-#        ff 15   
+#        ff 15
 #        ''',
 #        ))
 #
@@ -884,8 +971,8 @@ def High_Precision_Systemtime(
 #    return
 
 # -Removed; no longer needed after tool update.
-#@Transform_Wrapper()
-#def Remove_Workshop_Tool_Dependency_Check():
+# @Transform_Wrapper()
+# def Remove_Workshop_Tool_Dependency_Check():
 #    '''
 #    From the steam workshop upload tool, remove the dependency check that
 #    requires dependencies start with "ws_" and be present on the workshop.
@@ -904,14 +991,14 @@ def High_Precision_Systemtime(
 #    }
 #
 #    ` 1400e5715 48 8d      LEA     param_1=>local_5c98,[RBP + 0x80]
-#    `           8d 80 
+#    `           8d 80
 #    `           00 00 00
 #    ` 1400e571c e8 2f      CALL    FUN_1400e7c50                     ulonglong FUN_1400e7c5
 #    `           25 00 00
 #    ` 1400e5721 84 c0      TEST    AL,AL
 #    ` 1400e5723 75 0c      JNZ     LAB_1400e5731
 #    ` 1400e5725 48 8d      LEA     param_2,[u_ERROR:_There_are_depe  = u"ERROR: There are d
-#    `           15 c4 
+#    `           15 c4
 #    `           92 03 00
 #    ` 1400e572c e9 6e      JMP     LAB_1400e779f
 #    `           20 00 00
@@ -922,28 +1009,28 @@ def High_Precision_Systemtime(
 #    patch = Binary_Patch(
 #        file = 'WorkshopTool.exe',
 #        ref_code = '''
-#        48 8d   
-#        8d .. 
+#        48 8d
+#        8d ..
 #        .. .. ..
-#        e8 ..   
+#        e8 ..
 #        .. .. ..
-#        84 c0   
-#        75 0c   
-#        48 8d   
-#        .. .. 
+#        84 c0
+#        75 0c
+#        48 8d
+#        .. ..
 #        .. .. ..
-#        e9 ..   
+#        e9 ..
 #        .. .. ..
 #        ''',
 #        # Keep the lea and call, nop the rest.
 #        new_code = '''
-#        48 8d   
-#        8d .. 
+#        48 8d
+#        8d ..
 #        .. .. ..
-#        e8 ..   
+#        e8 ..
 #        .. .. ..
 #        ''' + NOP * 16,
 #        )
-#    
+#
 #    Apply_Binary_Patch(patch)
 #    return
