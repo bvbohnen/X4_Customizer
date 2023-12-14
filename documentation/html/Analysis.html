@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Analysis &#8212; X4_Customizer Source Documentation  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=c135b40c" />
+    
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Classes" href="Classes.html" />
+    <link rel="prev" title="Framework Documentation" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Classes.html" title="Classes"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Framework Documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">X4_Customizer Source Documentation  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Analysis</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="analysis">
+<h1>Analysis<a class="headerlink" href="#analysis" title="Link to this heading">¶</a></h1>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<section id="convert-weapon-edit-tree-view-function">
+<h3>Convert_Weapon_Edit_Tree_View function<a class="headerlink" href="#convert-weapon-edit-tree-view-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Plugins.Analyses.Print_Object_Stats.Convert_Weapon_Edit_Tree_View">
+<span class="sig-prename descclassname"><span class="pre">Plugins.Analyses.Print_Object_Stats.</span></span><span class="sig-name descname"><span class="pre">Convert_Weapon_Edit_Tree_View</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Analyses.Print_Object_Stats.Convert_Weapon_Edit_Tree_View" title="Link to this definition">¶</a></dt>
+<dd><p>Uses the Edit_Tree_View for weapons to construct a list of lists, to be used for file writing.</p>
+</dd></dl>
+
+</section>
+<section id="get-ship-macro-files-function">
+<h3>Get_Ship_Macro_Files function<a class="headerlink" href="#get-ship-macro-files-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Plugins.Analyses.Shared.Get_Ship_Macro_Files">
+<span class="sig-prename descclassname"><span class="pre">Plugins.Analyses.Shared.</span></span><span class="sig-name descname"><span class="pre">Get_Ship_Macro_Files</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Analyses.Shared.Get_Ship_Macro_Files" title="Link to this definition">¶</a></dt>
+<dd><p>Finds and returns all ship macro game files.</p>
+</dd></dl>
+
+</section>
+<section id="print-object-stats-function">
+<h3>Print_Object_Stats function<a class="headerlink" href="#print-object-stats-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Plugins.Analyses.Print_Object_Stats.Print_Object_Stats">
+<span class="sig-prename descclassname"><span class="pre">Plugins.Analyses.Print_Object_Stats.</span></span><span class="sig-name descname"><span class="pre">Print_Object_Stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Analyses.Print_Object_Stats.Print_Object_Stats" title="Link to this definition">¶</a></dt>
+<dd><p>Print out statistics for objects of a given category. This output will be similar to that viewable in the gui live editor pages, except formed into one or more tables. Produces csv and html output. Will include changes from enabled extensions.</p>
+<ul class="simple">
+<li><p>category</p>
+<ul>
+<li><p>String, category name of the objects, eg. ‘weapons’.</p></li>
+</ul>
+</li>
+<li><p>file_name</p>
+<ul>
+<li><p>String, name to use for generated files, without extension.</p></li>
+</ul>
+</li>
+<li><p>version</p>
+<ul>
+<li><p>Optional string, version of the objects to use.</p></li>
+<li><p>One of [‘vanilla’,’patched’,’current’,’edited’].</p></li>
+<li><p>Defaults to ‘current’.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+</section>
+<section id="print-ship-speeds-function">
+<h3>Print_Ship_Speeds function<a class="headerlink" href="#print-ship-speeds-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Plugins.Analyses.Print_Misc.Print_Ship_Speeds">
+<span class="sig-prename descclassname"><span class="pre">Plugins.Analyses.Print_Misc.</span></span><span class="sig-name descname"><span class="pre">Print_Ship_Speeds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_arg_engine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_split_engine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Analyses.Print_Misc.Print_Ship_Speeds" title="Link to this definition">¶</a></dt>
+<dd><p>Prints out speeds of various ships, under given engine assumptions, to the plugin log.</p>
+<ul class="simple">
+<li><p>use_arg_engine</p>
+<ul>
+<li><p>Bool, if True then Argon engines will be assumed for all ships instead of their faction engines.</p></li>
+</ul>
+</li>
+<li><p>use_split_engine</p>
+<ul>
+<li><p>Bool, if True then Split engines will be assumed.</p></li>
+<li><p>This will tend to give high estimates for ship speeds, eg. mk4 engines.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+</section>
+<section id="print-ship-stats-function">
+<h3>Print_Ship_Stats function<a class="headerlink" href="#print-ship-stats-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Plugins.Analyses.Print_Object_Stats.Print_Ship_Stats">
+<span class="sig-prename descclassname"><span class="pre">Plugins.Analyses.Print_Object_Stats.</span></span><span class="sig-name descname"><span class="pre">Print_Ship_Stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ship_stats'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Analyses.Print_Object_Stats.Print_Ship_Stats" title="Link to this definition">¶</a></dt>
+<dd><p>Gather up all ship statistics, and print them out. This is a convenience wrapper around Print_Object_Stats, filling in the category and a default file name.</p>
+<ul class="simple">
+<li><p>file_name</p>
+<ul>
+<li><p>String, name to use for generated files, without extension.</p></li>
+<li><p>Defaults to “ship_stats”.</p></li>
+</ul>
+</li>
+<li><p>version</p>
+<ul>
+<li><p>Optional string, version of the objects to use.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+</section>
+<section id="print-ware-stats-function">
+<h3>Print_Ware_Stats function<a class="headerlink" href="#print-ware-stats-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Plugins.Analyses.Print_Object_Stats.Print_Ware_Stats">
+<span class="sig-prename descclassname"><span class="pre">Plugins.Analyses.Print_Object_Stats.</span></span><span class="sig-name descname"><span class="pre">Print_Ware_Stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ware_stats'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Analyses.Print_Object_Stats.Print_Ware_Stats" title="Link to this definition">¶</a></dt>
+<dd><p>Gather up all ware statistics, and print them out. This is a convenience wrapper around Print_Object_Stats, filling in the category and a default file name.</p>
+<ul class="simple">
+<li><p>file_name</p>
+<ul>
+<li><p>String, name to use for generated files, without extension.</p></li>
+<li><p>Defaults to “ware_stats”.</p></li>
+</ul>
+</li>
+<li><p>version</p>
+<ul>
+<li><p>Optional string, version of the objects to use.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+</section>
+<section id="print-weapon-stats-function">
+<h3>Print_Weapon_Stats function<a class="headerlink" href="#print-weapon-stats-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Plugins.Analyses.Print_Object_Stats.Print_Weapon_Stats">
+<span class="sig-prename descclassname"><span class="pre">Plugins.Analyses.Print_Object_Stats.</span></span><span class="sig-name descname"><span class="pre">Print_Weapon_Stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'weapon_stats'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Analyses.Print_Object_Stats.Print_Weapon_Stats" title="Link to this definition">¶</a></dt>
+<dd><p>Gather up all weapon statistics, and print them out. This is a convenience wrapper around Print_Object_Stats, filling in the category and a default file name.</p>
+<ul class="simple">
+<li><p>file_name</p>
+<ul>
+<li><p>String, name to use for generated files, without extension.</p></li>
+<li><p>Defaults to “weapon_stats”.</p></li>
+</ul>
+</li>
+<li><p>version</p>
+<ul>
+<li><p>Optional string, version of the objects to use.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+</section>
+<section id="table-to-html-function">
+<h3>Table_To_Html function<a class="headerlink" href="#table-to-html-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Plugins.Analyses.Print_Object_Stats.Table_To_Html">
+<span class="sig-prename descclassname"><span class="pre">Plugins.Analyses.Print_Object_Stats.</span></span><span class="sig-name descname"><span class="pre">Table_To_Html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Analyses.Print_Object_Stats.Table_To_Html" title="Link to this definition">¶</a></dt>
+<dd><p>Returns an xml root node holding html style nodes with the contents of the given table (list of lists, first line being the columns headers).</p>
+</dd></dl>
+
+</section>
+<section id="write-tables-function">
+<h3>Write_Tables function<a class="headerlink" href="#write-tables-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Plugins.Analyses.Print_Object_Stats.Write_Tables">
+<span class="sig-prename descclassname"><span class="pre">Plugins.Analyses.Print_Object_Stats.</span></span><span class="sig-name descname"><span class="pre">Write_Tables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">tables</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Analyses.Print_Object_Stats.Write_Tables" title="Link to this definition">¶</a></dt>
+<dd><p>Writes one or more tables (list of lists) to output files.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Table of Contents</a></h3>
+<p class="caption" role="heading"><span class="caption-text">Content:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#convert-weapon-edit-tree-view-function">Convert_Weapon_Edit_Tree_View function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-ship-macro-files-function">Get_Ship_Macro_Files function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#print-object-stats-function">Print_Object_Stats function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#print-ship-speeds-function">Print_Ship_Speeds function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#print-ship-stats-function">Print_Ship_Stats function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#print-ware-stats-function">Print_Ware_Stats function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#print-weapon-stats-function">Print_Weapon_Stats function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#table-to-html-function">Table_To_Html function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#write-tables-function">Write_Tables function</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Common.html">Common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Documentation.html">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File_Manager.html">File_Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GUI.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Live_Editor.html">Live_Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Map_Transforms.html">Map_Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Utilities.html">Utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Classes.html" title="Classes"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Framework Documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">X4_Customizer Source Documentation  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Analysis</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright .
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

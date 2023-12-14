@@ -1,4 +1,7 @@
 
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Transforms')
+
 __all__ = [
     'Remove_Engine_Travel_Bonus',
     'Adjust_Engine_Boost_Duration',

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Framework Documentation &#8212; X4_Customizer Source Documentation  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=c135b40c" />
+    
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Analyses" href="Analyses.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Analyses.html" title="Analyses"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">X4_Customizer Source Documentation  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Framework Documentation</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="framework-documentation">
+<h1>Framework Documentation<a class="headerlink" href="#framework-documentation" title="Link to this heading">¶</a></h1>
+<section id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+</ul>
+</section>
+<section id="module-Framework">
+<span id="project-description"></span><h2>Project Description<a class="headerlink" href="#module-Framework" title="Link to this heading">¶</a></h2>
+<p>X4 Customizer</p>
+<hr class="docutils" />
+<p>This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>GUI to improve accessibility, designed using Qt.</p></li>
+<li><p>Integrated catalog read/write support.</p></li>
+<li><p>XML diff patch read/write support.</p></li>
+<li><p>Automatic detection and loading of enabled extensions.</p></li>
+<li><p>Three layer design: framework, plugins, and control script.</p></li>
+<li><p>Framework handles the file system, plugin management, etc.</p></li>
+<li><p>Plugins include analysis, transforms, and utilities.</p></li>
+<li><p>Plugins operate on a user’s unique mixture of mods, and can easily be rerun after game patches or mod updates.</p></li>
+<li><p>Transforms can dynamically read and alter game files, instead of being limited to static changes like standard extensions.</p></li>
+<li><p>Transforms are parameterized, to adjust their behavior.</p></li>
+<li><p>Analyses can generate customized documentation.</p></li>
+<li><p>Transformed files are written to a new or specified X4 extension.</p></li>
+<li><p>Utilities offer extension error checking and cat pack/unpack support.</p></li>
+</ul>
+</div></blockquote>
+<p>This tool is available as runnable Python source code (tested on 3.7 with the lxml and PyQt5 packages) or as a compiled executable for 64-bit Windows.</p>
+<p>Running the compiled release:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>“Start_Gui.bat”</p>
+<ul>
+<li><p>This starts up the Customizer GUI.</p></li>
+<li><p>Equivelent to running “bin/X4_Customizer.exe”</p></li>
+</ul>
+</li>
+<li><p>“Run_Script.bat [script_name] [args]”</p>
+<ul>
+<li><p>This runs a script directly without loading the GUI.</p></li>
+<li><p>Call from the command line for full options (-h for help), or run directly to execute the default script at “Scripts/Default_Script.py”.</p></li>
+<li><p>Script name may be given without a .py extension, and without a path if it is in the Scripts folder.</p></li>
+</ul>
+</li>
+<li><p>“Clean_Script.bat [script_name] [args]”</p>
+<ul>
+<li><p>Removes files generated in a prior run of the given or default control script.</p></li>
+</ul>
+</li>
+<li><p>“Check_Extensions.bat [args]”</p>
+<ul>
+<li><p>Runs a command line script which will test extensions for errors, focusing on diff patching and dependency checks.</p></li>
+</ul>
+</li>
+<li><p>“Cat_Unpack.bat [args]”</p>
+<ul>
+<li><p>Runs a command line script which unpacks catalog files.</p></li>
+</ul>
+</li>
+<li><p>“Cat_Pack.bat [args]”</p>
+<ul>
+<li><p>Runs a command line script which packs catalog files.</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+<p>Running the Python source code:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>“python FrameworkMain.py [script_name] [args]”</p>
+<ul>
+<li><p>This is the primary entry function for the python source code, and equivalent to X4_Customizer.exe.</p></li>
+<li><p>When no script is given, this launches the GUI.</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+<p>GUI sections:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>“Script” displays the current control script, alongside documentation on available plugins.  Drag plugins to the script window for a fast templated copy.  Scripts can be opened or saved, and default to the Scripts folder.  Syntax is highlighted as Python code. Press “Run Script” to run the current script; other tabs displaying game information will be updated automatically with the script changes.</p></li>
+<li><p>“Config” allows customization of settings. These are saved to a json file in the main tool directory when the window closes.</p></li>
+<li><p>The “Edit” menu opens up tabs with editable tables of game object information. Objects may be displayed individually or in a table. See further below for details. All edits made are saved in a json file in the main tool directory when a script is run or the window closes.</p></li>
+<li><p>The “Utilities” menu currently has one option, the Virtual File System. This shows which game files the Customizer has loaded, patched from other extensions (blue), or modified itself (red). Right click a file for the option to view its contents.</p></li>
+<li><p>The File Viewer tabs display individual file contents, in their pre-diff patch, post-diff patch, and post-customizer versions. Select two versions and press “Compare” to get a summary on lines changed. Press “Reload” to force the file to be reloaded from disk, including any diff patches; this may be used to test customize diff patch files in another extension.</p></li>
+</ul>
+</div></blockquote>
+<p>The control script:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>This tool is primarily controlled by a user supplied python script which will specify the desired plugins to run. Generally this acts as a build script to create a custom extension.</p></li>
+<li><p>The key control script sections are:</p>
+<ul>
+<li><p>“from Plugins import <a href="#id1"><span class="problematic" id="id2">*</span></a>” to make all major functions available.</p></li>
+<li><p>Optionally call Settings() to change paths and set non-default options; this can also be done through a setttings.json file or through the GUI.</p></li>
+<li><p>Call a series of plugins with desired input parameters; see plugin documentation for available options.</p></li>
+<li><p>Call Write_Extension() to write out any modified files, formatted as diff patches.</p></li>
+</ul>
+</li>
+<li><p>Scripts of varying complexity are available in the Scripts folder, and may act as examples.</p></li>
+</ul>
+</div></blockquote>
+<p>GUI based object editing:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>In addition to script selected transforms, game information can be directly edited for select objects on the appropriate edit tabs. Tabs include “weapons”, “wares”, and others as time goes on.</p></li>
+<li><p>Press “Refresh” on the tab to load the game information.</p></li>
+<li><p>The “vanilla” column shows the object field values for the base version of the game files loaded.</p></li>
+<li><p>The “patched” column shows field values after other extensions have had their diff patches applied.</p></li>
+<li><p>The “edited” column is where you may change values manually.</p></li>
+<li><p>Running a script that includes the Apply_Live_Editor_Patches plugin will apply edits to the game files.</p></li>
+<li><p>The “current” column will show the post-script field values, and mainly exists for verification of hand edits as well as other transform changes.</p></li>
+</ul>
+</div></blockquote>
+<p>Writing custom edit code:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>This framework may be used to write custom file editing routines.</p></li>
+<li><p>The general steps are: use Load_File() to obtain the patched file contents, use Get_Root() to obtain the current file root xml (which includes any prior transform changes), make any custom edits with the help of the lxml package, and to put the changes back using Update_Root().</p></li>
+<li><p>Existing plugins offer examples of this approach.</p></li>
+<li><p>Edits made using the framework will automatically support diff patch generation.</p></li>
+<li><p>Non-xml file support is more rudimentary, operating on file binary data pending further support for specific formats.</p></li>
+<li><p>Routines may be written as plugin functions and put up for inclusion in later Customizer releases to share with other users.</p></li>
+</ul>
+</div></blockquote>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Content:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Analyses.html">Analyses</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Analyses.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Analyses.html#convert-weapon-edit-tree-view-function">Convert_Weapon_Edit_Tree_View function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Analyses.html#get-ship-macro-files-function">Get_Ship_Macro_Files function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Analyses.html#print-object-stats-function">Print_Object_Stats function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Analyses.html#print-ship-speeds-function">Print_Ship_Speeds function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Analyses.html#print-ship-stats-function">Print_Ship_Stats function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Analyses.html#print-ware-stats-function">Print_Ware_Stats function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Analyses.html#print-weapon-stats-function">Print_Weapon_Stats function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Analyses.html#table-to-html-function">Table_To_Html function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Analyses.html#write-tables-function">Write_Tables function</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Classes.html">Classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Classes.html#id1">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Classes.html#bomb-class">Bomb class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Classes.html#bullet-class">Bullet class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Classes.html#component-class">Component class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Classes.html#connection-class">Connection class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Classes.html#database-class">Database class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Classes.html#engine-class">Engine class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Classes.html#generic-bullet-class">Generic_Bullet class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Classes.html#macro-class">Macro class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Classes.html#mine-class">Mine class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Classes.html#missile-class">Missile class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Classes.html#physics-properties-class">Physics_Properties class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Classes.html#position-class">Position class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Classes.html#ship-class">Ship class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Classes.html#spline-position-class">Spline_Position class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Classes.html#spline-position-list-class">Spline_Position_List class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Classes.html#storage-class">Storage class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Classes.html#weapon-system-class">Weapon_System class</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Common.html">Common</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Common.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#analysis-wrapper-function">Analysis_Wrapper function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#find-all-matches-function">Find_All_Matches function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#find-match-function">Find_Match function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#fit-equation-function">Fit_equation function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#fit-equation-linear-function">Fit_equation_linear function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#fit-equation-reversed-function">Fit_equation_reversed function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#fit-equation-simple-function">Fit_equation_simple function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#get-linear-scaling-fit-function">Get_Linear_Scaling_Fit function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#get-scaling-fit-function">Get_Scaling_Fit function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#get-scipy-scaling-fit-function">Get_Scipy_Scaling_Fit function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#has-matching-attribute-function">Has_Matching_Attribute function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#insert-after-function">Insert_After function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#plot-fit-function">Plot_Fit function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#plugin-was-run-before-function">Plugin_Was_Run_Before function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#replace-node-function">Replace_Node function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#rescale-vec-function">Rescale_Vec function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#transform-wrapper-function">Transform_Wrapper function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#utility-wrapper-function">Utility_Wrapper function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#plugin-wrapper-function">_Plugin_Wrapper function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#xml-to-unformatted-string-function">_XML_To_Unformatted_String function</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Common.html#classes">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#binary-patch-exception-class">Binary_Patch_Exception class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#cat-hash-exception-class">Cat_Hash_Exception class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#customizer-log-class-class">Customizer_Log_class class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#file-loading-error-exception-class">File_Loading_Error_Exception class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#file-missing-exception-class">File_Missing_Exception class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#gzip-exception-class">Gzip_Exception class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#plugin-log-class-class">Plugin_Log_class class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#print-class-class">Print_class class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#scaling-function-class">Scaling_Function class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#text-patch-exception-class">Text_Patch_Exception class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#unmatched-diff-exception-class">Unmatched_Diff_Exception class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Common.html#xml-patch-exception-class">XML_Patch_Exception class</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Documentation.html">Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Documentation.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Documentation.html#autodoc-markdown-to-rest-function">Autodoc_Markdown_To_Rest function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Documentation.html#categorize-module-contents-function">Categorize_Module_Contents function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Documentation.html#doc-category-function">Doc_Category function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Documentation.html#get-code-line-numbers-function">Get_Code_Line_Numbers function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Documentation.html#get-module-classes-function">Get_Module_Classes function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Documentation.html#get-module-functions-function">Get_Module_Functions function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Documentation.html#get-modules-function">Get_Modules function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Documentation.html#get-sphinx-category-lines-function">Get_Sphinx_Category_Lines function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Documentation.html#get-sphinx-config-lines-function">Get_Sphinx_Config_Lines function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Documentation.html#get-sphinx-index-lines-function">Get_Sphinx_Index_Lines function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Documentation.html#make-sphinx-doc-function">Make_Sphinx_Doc function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Documentation.html#merge-lines-function">Merge_Lines function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Documentation.html#setup-function">setup function</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Documentation.html#classes">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Documentation.html#doc-category-default-class">Doc_Category_Default class</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="File_Manager.html">File_Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="File_Manager.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#apply-patch-function">Apply_Patch function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#fill-node-ids-function">Fill_Node_IDs function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#find-extensions-function">Find_Extensions function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#generate-signatures-function">Generate_Signatures function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#get-hash-string-function">Get_Hash_String function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#is-ns-attribute-function">Is_NS_Attribute function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#lxml-element-depickler-function">LXML_Element_Depickler function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#lxml-element-pickler-function">LXML_Element_Pickler function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#make-patch-function">Make_Patch function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#ns-qualify-function">NS_qualify function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#ns-unqualify-function">NS_unqualify function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#ns-xpath-function">NS_xpath function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#new-game-file-function">New_Game_File function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#print-function">Print function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#sort-attributes-function">Sort_Attributes function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#unit-test-function">Unit_Test function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#verify-patch-function">Verify_Patch function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#apply-patch-op-function">_Apply_Patch_Op function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#get-patch-ops-recursive-function">_Get_Patch_Ops_Recursive function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#get-xpath-recursive-function">_Get_Xpath_Recursive function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#patch-node-constructor-function">_Patch_Node_Constructor function</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="File_Manager.html#classes">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#cat-entry-class">Cat_Entry class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#cat-reader-class">Cat_Reader class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#cat-writer-class">Cat_Writer class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#extension-summary-class">Extension_Summary class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#file-system-class-class">File_System_class class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#game-file-class">Game_File class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#location-source-reader-class">Location_Source_Reader class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#machine-code-file-class">Machine_Code_File class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#misc-file-class">Misc_File class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#signature-file-class">Signature_File class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#source-reader-class-class">Source_Reader_class class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#text-file-class">Text_File class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#xml-file-class">XML_File class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#xml-index-file-class">XML_Index_File class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#xml-text-file-class">XML_Text_File class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="File_Manager.html#xml-wares-file-class">XML_Wares_File class</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="GUI.html">GUI</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="GUI.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#get-highlight-macros-function">Get_Highlight_Macros function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#get-plugin-names-function">Get_Plugin_Names function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#get-style-names-function">Get_Style_Names function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#make-style-function">Make_Style function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#set-background-color-function">Set_Background_Color function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#set-foreground-color-function">Set_Foreground_Color function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#set-icon-function">Set_Icon function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#start-gui-function">Start_GUI function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#init-function">_Init function</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="GUI.html#classes">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#custom-settings-class">Custom_Settings class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#custom-tab-bar-class">Custom_Tab_Bar class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#edit-table-model-class">Edit_Table_Model class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#edit-tree-model-class">Edit_Tree_Model class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#edit-view-window-class">Edit_View_Window class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#extensions-window-class">Extensions_Window class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#file-text-brower-class">File_Text_Brower class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#file-viewer-window-class">File_Viewer_Window class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#gui-main-window-class">GUI_Main_Window class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#highlight-macro-class">Highlight_Macro class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#q-item-group-class">Q_Item_Group class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#script-syntax-highlighter-class">Script_Syntax_Highlighter class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#script-window-class">Script_Window class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#settings-window-class">Settings_Window class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#tab-page-widget-class">Tab_Page_Widget class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#tab-properties-class">Tab_Properties class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#vfs-item-class">VFS_Item class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#vfs-list-model-class">VFS_List_Model class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#vfs-tree-model-class">VFS_Tree_Model class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#vfs-window-class">VFS_Window class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#widget-documentation-class">Widget_Documentation class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#widget-plugins-class">Widget_Plugins class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#widget-script-class">Widget_Script class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#widget-settings-class">Widget_Settings class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#work-request-class">Work_Request class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#worker-thread-handler-class">Worker_Thread_Handler class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GUI.html#xml-syntax-highlighter-class">XML_Syntax_Highlighter class</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Live_Editor.html">Live_Editor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Live_Editor.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#build-object-tree-view-function">Build_Object_Tree_View function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#calc-recharge-time-function">Calc_Recharge_Time function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#create-objects-from-asset-files-function">Create_Objects_From_Asset_Files function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#display-update-bullet-burst-dps-function">Display_Update_Bullet_Burst_DPS function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#display-update-bullet-burst-dps-hull-function">Display_Update_Bullet_Burst_DPS_Hull function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#display-update-bullet-burst-dps-shield-function">Display_Update_Bullet_Burst_DPS_Shield function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#display-update-bullet-range-function">Display_Update_Bullet_Range function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#display-update-bullet-repair-rate-function">Display_Update_Bullet_Repair_Rate function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#display-update-factory-name-function">Display_Update_Factory_Name function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#display-update-missile-dps-function">Display_Update_Missile_DPS function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#display-update-missile-dps-hull-function">Display_Update_Missile_DPS_Hull function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#display-update-missile-dps-shield-function">Display_Update_Missile_DPS_Shield function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#display-update-missile-range-function">Display_Update_Missile_Range function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#display-update-missile-speed-function">Display_Update_Missile_Speed function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#display-update-price-spread-function">Display_Update_Price_Spread function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#display-update-rof-function">Display_Update_RoF function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#display-update-ware-name-function">Display_Update_Ware_Name function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#fill-macro-object-standard-items-function">Fill_Macro_Object_Standard_Items function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#get-component-connection-xpath-function">Get_Component_Connection_Xpath function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#get-macro-component-file-function">Get_Macro_Component_File function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#get-production-macros-function">Get_Production_Macros function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#get-production-ware-macros-function">Get_Production_Ware_Macros function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#live-editor-object-builder-function">Live_Editor_Object_Builder function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#live-editor-tree-view-builder-function">Live_Editor_Tree_View_Builder function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#update-description-function">Update_Description function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#update-name-function">Update_Name function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#build-bullet-object-tree-view-function">_Build_Bullet_Object_Tree_View function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#build-bullet-objects-function">_Build_Bullet_Objects function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#build-cockpit-objects-function">_Build_Cockpit_Objects function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#build-components-object-tree-view-function">_Build_Components_Object_Tree_View function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#build-dockingbay-objects-function">_Build_DockingBay_Objects function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#build-engine-object-tree-view-function">_Build_Engine_Object_Tree_View function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#build-engine-objects-function">_Build_Engine_Objects function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#build-scanner-objects-function">_Build_Scanner_Objects function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#build-shield-object-tree-view-function">_Build_Shield_Object_Tree_View function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#build-shield-objects-function">_Build_Shield_Objects function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#build-ship-object-tree-view-function">_Build_Ship_Object_Tree_View function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#build-storage-objects-function">_Build_Storage_Objects function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#id1">_Build_Storage_Objects function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#build-ware-object-tree-view-function">_Build_Ware_Object_Tree_View function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#build-ware-objects-function">_Build_Ware_Objects function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#build-weapon-object-tree-view-function">_Build_Weapon_Object_Tree_View function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#build-weapon-objects-function">_Build_Weapon_Objects function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#calc-dps-function">_Calc_Dps function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#create-objects-function">_Create_Objects function</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Live_Editor.html#classes">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#custom-patch-class">Custom_Patch class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#display-item-class">Display_Item class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#display-item-macro-class">Display_Item_Macro class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#edit-item-class">Edit_Item class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#edit-item-macro-class">Edit_Item_Macro class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#edit-object-class">Edit_Object class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#edit-table-class">Edit_Table class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#edit-table-group-class">Edit_Table_Group class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#edit-tree-view-class">Edit_Tree_View class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#item-group-macro-class">Item_Group_Macro class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#live-editor-class-class">Live_Editor_class class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#object-view-class">Object_View class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#placeholder-item-class">Placeholder_Item class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Live_Editor.html#base-item-class">_Base_Item class</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Map_Transforms.html">Map_Transforms</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Map_Transforms.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#create-zones-function">Create_Zones function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#place-object-function">Place_Object function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#scale-regions-function">Scale_Regions function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#scale-sector-function">Scale_Sector function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#scale-sector-size-function">Scale_Sector_Size function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#scale-sectors-function">Scale_Sectors function</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Map_Transforms.html#classes">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#cluster-class">Cluster class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#galaxy-class">Galaxy class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#god-object-class">God_Object class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#highway-class">Highway class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#md-gamestart-class">MD_Gamestart class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#md-headquarters-class">MD_Headquarters class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#md-object-class">MD_Object class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#md-placed-object-class">MD_Placed_Object class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#md-gs-split1-battlefield-class">MD_gs_split1_battlefield class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#md-gs-split1-pickupship-class">MD_gs_split1_pickupship class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#map-connection-class">Map_Connection class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#map-macro-class">Map_Macro class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#object-class">Object class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#object-group-class">Object_Group class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#region-class">Region class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#region-macro-class">Region_Macro class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#sector-class">Sector class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#sector-highway-class">Sector_Highway class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#zone-class">Zone class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Map_Transforms.html#zone-highway-class">Zone_Highway class</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Settings.html">Settings</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Settings.html#classes">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Settings.html#settings-class-class">Settings_class class</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Transforms.html">Transforms</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Transforms.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-engine-boost-duration-function">Adjust_Engine_Boost_Duration function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-engine-boost-speed-function">Adjust_Engine_Boost_Speed function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-generic-mult-function">Adjust_Generic_Mult function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-job-count-function">Adjust_Job_Count function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-mission-reward-mod-chance-function">Adjust_Mission_Reward_Mod_Chance function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-mission-rewards-function">Adjust_Mission_Rewards function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-oos-damage-function">Adjust_OOS_Damage function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-ship-cargo-capacity-function">Adjust_Ship_Cargo_Capacity function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-ship-crew-capacity-function">Adjust_Ship_Crew_Capacity function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-ship-drone-storage-function">Adjust_Ship_Drone_Storage function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-ship-hull-function">Adjust_Ship_Hull function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-ship-missile-storage-function">Adjust_Ship_Missile_Storage function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-ship-speed-function">Adjust_Ship_Speed function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-ship-turning-function">Adjust_Ship_Turning function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-ware-price-spread-function">Adjust_Ware_Price_Spread function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-ware-prices-function">Adjust_Ware_Prices function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-weapon-damage-function">Adjust_Weapon_Damage function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-weapon-fire-rate-function">Adjust_Weapon_Fire_Rate function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-weapon-range-function">Adjust_Weapon_Range function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#adjust-weapon-shot-speed-function">Adjust_Weapon_Shot_Speed function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#apply-binary-patch-function">Apply_Binary_Patch function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#apply-binary-patch-group-function">Apply_Binary_Patch_Group function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#apply-live-editor-patches-function">Apply_Live_Editor_Patches function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#color-text-function">Color_Text function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#convert-old-match-to-new-function">Convert_Old_Match_To_New function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#disable-ai-travel-drive-function">Disable_AI_Travel_Drive function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#fill-defaults-function">Fill_Defaults function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#float-to-string-function">Float_to_String function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#gen-wares-matched-to-args-function">Gen_Wares_Matched_To_Args function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#get-match-rule-args-function">Get_Match_Rule_Args function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#group-objects-to-rules-function">Group_Objects_To_Rules function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#high-precision-systemtime-function">High_Precision_Systemtime function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#increase-ai-script-waits-function">Increase_AI_Script_Waits function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#int-to-hex-string-function">Int_To_Hex_String function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#is-match-function">Is_Match function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#id5">Is_Match function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#prep-rules-and-database-function">Prep_Rules_And_Database function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#rebalance-engines-function">Rebalance_Engines function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#remove-engine-travel-bonus-function">Remove_Engine_Travel_Bonus function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#remove-modified-function">Remove_Modified function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#remove-sig-errors-function">Remove_Sig_Errors function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#rescale-ship-speeds-function">Rescale_Ship_Speeds function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#set-default-radar-ranges-function">Set_Default_Radar_Ranges function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#set-ship-radar-ranges-function">Set_Ship_Radar_Ranges function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#standardize-match-rules-function">Standardize_Match_Rules function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#string-to-hex-string-function">String_To_Hex_String function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#update-nodes-by-rules-function">Update_Nodes_By_Rules function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#xml-modify-float-attribute-function">XML_Modify_Float_Attribute function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#xml-modify-int-attribute-function">XML_Modify_Int_Attribute function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#xml-multiply-float-attribute-function">XML_Multiply_Float_Attribute function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#xml-multiply-int-attribute-function">XML_Multiply_Int_Attribute function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#get-matches-function">_Get_Matches function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#string-to-bytes-function">_String_To_Bytes function</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Transforms.html#classes">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Transforms.html#binary-patch-class">Binary_Patch class</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Utilities.html">Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Utilities.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Utilities.html#cat-pack-function">Cat_Pack function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Utilities.html#cat-unpack-function">Cat_Unpack function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Utilities.html#check-all-extensions-function">Check_All_Extensions function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Utilities.html#check-extension-function">Check_Extension function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Utilities.html#element-to-pieces-function">Element_To_Pieces function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Utilities.html#fill-element-hashes-function">Fill_Element_Hashes function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Utilities.html#generate-diff-function">Generate_Diff function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Utilities.html#generate-diffs-function">Generate_Diffs function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Utilities.html#get-text-diff-matches-function">Get_Text_Diff_Matches function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Utilities.html#make-extension-content-xml-function">Make_Extension_Content_XML function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Utilities.html#match-children-function">Match_Children function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Utilities.html#match-trees-function">Match_Trees function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Utilities.html#update-content-xml-dependencies-function">Update_Content_XML_Dependencies function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Utilities.html#write-modified-binaries-function">Write_Modified_Binaries function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Utilities.html#write-to-extension-function">Write_To_Extension function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Utilities.html#pattern-match-function">_Pattern_Match function</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Utilities.html#classes">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Utilities.html#element-piece-class">Element_Piece class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Utilities.html#element-wrap-class">Element_Wrap class</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="#">Table of Contents</a></h3>
+<p class="caption" role="heading"><span class="caption-text">Content:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Analyses.html">Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Common.html">Common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Documentation.html">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File_Manager.html">File_Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GUI.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Live_Editor.html">Live_Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Map_Transforms.html">Map_Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Utilities.html">Utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Analyses.html" title="Analyses"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">X4_Customizer Source Documentation  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Framework Documentation</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright .
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

@@ -1,4 +1,7 @@
 
+from ..Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Live_Editor')
+
 from collections import defaultdict
 from ..File_Manager import Load_File
 from ..Common import Print

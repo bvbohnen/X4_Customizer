@@ -1,4 +1,6 @@
 
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('GUI')
 
 from PyQt5.QtGui import QSyntaxHighlighter, QColor, QTextCharFormat, QTextCursor
 from PyQt5.QtCore import QRegExp

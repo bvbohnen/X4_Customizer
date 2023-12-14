@@ -1,4 +1,7 @@
 
+from ..Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('File_Manager')
+
 from pathlib import Path
 from collections import OrderedDict, defaultdict
 from itertools import chain

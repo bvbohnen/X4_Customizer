@@ -1,4 +1,6 @@
 
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Analyses')
 
 from Framework import Analysis_Wrapper, Plugin_Log
 from ..Classes import *

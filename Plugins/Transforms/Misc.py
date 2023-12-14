@@ -1,4 +1,7 @@
 
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Transforms')
+
 from collections import defaultdict
 from Framework import Transform_Wrapper, Settings, Plugin_Log, Load_File
 from Framework import Live_Editor

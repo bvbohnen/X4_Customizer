@@ -5,7 +5,7 @@
     <ProjectGuid>f321f45f-39ee-4cc8-91e7-bfec28462c97</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>Main.py</StartupFile>
+    <StartupFile>Make_Documentation.py</StartupFile>
     <SearchPath>..\Framework;..\..\X4_Customizer</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -37,6 +37,9 @@
     <Compile Include="Common\XML_Misc.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Documentation\Sphinx_Doc_Gen.py" />
+    <Compile Include="Documentation\Overview.py" />
+    <Compile Include="Documentation\__init__.py" />
     <Compile Include="File_Manager\Cat_Writer.py">
       <SubType>Code</SubType>
     </Compile>
@@ -118,6 +121,7 @@
     <Folder Include="Common\" />
     <Folder Include="File_Manager\" />
     <Folder Include="Live_Editor_Components\" />
+    <Folder Include="Documentation\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

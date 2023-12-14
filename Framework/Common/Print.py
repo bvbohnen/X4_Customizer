@@ -1,4 +1,7 @@
 
+from ..Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Common')
+
 # Note: there are other tricks that can be pulled to redirect prints
 # to the gui, but this is straightforward and somewhat more dynamic.
 class Print_class:

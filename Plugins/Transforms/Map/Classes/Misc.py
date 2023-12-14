@@ -1,4 +1,7 @@
 
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Map_Transforms')
+
 from ....Classes import *
 from .Macros import *
 from ...Support import XML_Modify_Int_Attribute

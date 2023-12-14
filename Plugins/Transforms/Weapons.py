@@ -31,6 +31,9 @@ Notes on reload times:
         -Ingame testing verifies this is a bug.
 
 '''
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Transforms')
+
 __all__ = [
     'Adjust_Weapon_Damage',
     'Adjust_Weapon_Range',

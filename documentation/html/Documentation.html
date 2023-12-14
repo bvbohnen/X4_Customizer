@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Documentation &#8212; X4_Customizer Source Documentation  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=c135b40c" />
+    
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="File_Manager" href="File_Manager.html" />
+    <link rel="prev" title="Common" href="Common.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="File_Manager.html" title="File_Manager"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Common.html" title="Common"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">X4_Customizer Source Documentation  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Documentation</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Link to this heading">¶</a></h1>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<section id="autodoc-markdown-to-rest-function">
+<h3>Autodoc_Markdown_To_Rest function<a class="headerlink" href="#autodoc-markdown-to-rest-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Documentation.Sphinx_Doc_Gen.Autodoc_Markdown_To_Rest">
+<span class="sig-prename descclassname"><span class="pre">Framework.Documentation.Sphinx_Doc_Gen.</span></span><span class="sig-name descname"><span class="pre">Autodoc_Markdown_To_Rest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">what</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lines</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Documentation.Sphinx_Doc_Gen.Autodoc_Markdown_To_Rest" title="Link to this definition">¶</a></dt>
+<dd><p>Convert some limited subset of markdown syntax into restructuredtext syntax for python docstrings. This will also do some misc formatting to avoid unwanted restructuredtext formatting, eg. stopping single space indents from creating large post-format indents.</p>
+</dd></dl>
+
+</section>
+<section id="categorize-module-contents-function">
+<h3>Categorize_Module_Contents function<a class="headerlink" href="#categorize-module-contents-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Documentation.Sphinx_Doc_Gen.Categorize_Module_Contents">
+<span class="sig-prename descclassname"><span class="pre">Framework.Documentation.Sphinx_Doc_Gen.</span></span><span class="sig-name descname"><span class="pre">Categorize_Module_Contents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">module</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#Framework.Documentation.Sphinx_Doc_Gen.Categorize_Module_Contents" title="Link to this definition">¶</a></dt>
+<dd><p>Pulls functions and classes from a group of modules, and categorizes them according to annotation strings. Returns a dict, keyed by category strings, holding a subdict keyed by ‘function’ or ‘class’, holding a list of tuples of (object name, object, module_path) holding the matching objects sorted by name and with the path to their module file as a python style path string.</p>
+</dd></dl>
+
+</section>
+<section id="doc-category-function">
+<h3>Doc_Category function<a class="headerlink" href="#doc-category-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Documentation.Sphinx_Doc_Gen.Doc_Category">
+<span class="sig-prename descclassname"><span class="pre">Framework.Documentation.Sphinx_Doc_Gen.</span></span><span class="sig-name descname"><span class="pre">Doc_Category</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Documentation.Sphinx_Doc_Gen.Doc_Category" title="Link to this definition">¶</a></dt>
+<dd><p>Function and class decorator, allow specification of a documentation category it belongs to. This overrides any module level default.</p>
+</dd></dl>
+
+</section>
+<section id="get-code-line-numbers-function">
+<h3>Get_Code_Line_Numbers function<a class="headerlink" href="#get-code-line-numbers-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Documentation.Sphinx_Doc_Gen.Get_Code_Line_Numbers">
+<span class="sig-prename descclassname"><span class="pre">Framework.Documentation.Sphinx_Doc_Gen.</span></span><span class="sig-name descname"><span class="pre">Get_Code_Line_Numbers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Documentation.Sphinx_Doc_Gen.Get_Code_Line_Numbers" title="Link to this definition">¶</a></dt>
+<dd><p>Finds and returns a list of line numbers, for lines which appears to be part of code blocks.</p>
+<ul class="simple">
+<li><p>line_list:</p>
+<ul>
+<li><p>List of strings, text lines to parse.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+</section>
+<section id="get-module-classes-function">
+<h3>Get_Module_Classes function<a class="headerlink" href="#get-module-classes-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Documentation.Sphinx_Doc_Gen.Get_Module_Classes">
+<span class="sig-prename descclassname"><span class="pre">Framework.Documentation.Sphinx_Doc_Gen.</span></span><span class="sig-name descname"><span class="pre">Get_Module_Classes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">type</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#Framework.Documentation.Sphinx_Doc_Gen.Get_Module_Classes" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a list of (name, class) tuples for a module. This will skip any classes imported into the module.</p>
+</dd></dl>
+
+</section>
+<section id="get-module-functions-function">
+<h3>Get_Module_Functions function<a class="headerlink" href="#get-module-functions-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Documentation.Sphinx_Doc_Gen.Get_Module_Functions">
+<span class="sig-prename descclassname"><span class="pre">Framework.Documentation.Sphinx_Doc_Gen.</span></span><span class="sig-name descname"><span class="pre">Get_Module_Functions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">function</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#Framework.Documentation.Sphinx_Doc_Gen.Get_Module_Functions" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a list of (name, function) tuples for a module. This will skip any functions imported into the module.</p>
+</dd></dl>
+
+</section>
+<section id="get-modules-function">
+<h3>Get_Modules function<a class="headerlink" href="#get-modules-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Documentation.Sphinx_Doc_Gen.Get_Modules">
+<span class="sig-prename descclassname"><span class="pre">Framework.Documentation.Sphinx_Doc_Gen.</span></span><span class="sig-name descname"><span class="pre">Get_Modules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">main_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_folders</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">module</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#Framework.Documentation.Sphinx_Doc_Gen.Get_Modules" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a dict of imported modules in packages in the target directory.  Key is package path in the python style, eg. ‘package’ or ‘package.subpackage’, while the value is a subdict keyed by module name, holding the imported module object.</p>
+</dd></dl>
+
+</section>
+<section id="get-sphinx-category-lines-function">
+<h3>Get_Sphinx_Category_Lines function<a class="headerlink" href="#get-sphinx-category-lines-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Documentation.Sphinx_Doc_Gen.Get_Sphinx_Category_Lines">
+<span class="sig-prename descclassname"><span class="pre">Framework.Documentation.Sphinx_Doc_Gen.</span></span><span class="sig-name descname"><span class="pre">Get_Sphinx_Category_Lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subcategory_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sidebar_base_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#Framework.Documentation.Sphinx_Doc_Gen.Get_Sphinx_Category_Lines" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a list of strings, lines for a module’s rst file. This will insert any wanted class and function headers, skip unwanted items, etc.</p>
+</dd></dl>
+
+</section>
+<section id="get-sphinx-config-lines-function">
+<h3>Get_Sphinx_Config_Lines function<a class="headerlink" href="#get-sphinx-config-lines-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Documentation.Sphinx_Doc_Gen.Get_Sphinx_Config_Lines">
+<span class="sig-prename descclassname"><span class="pre">Framework.Documentation.Sphinx_Doc_Gen.</span></span><span class="sig-name descname"><span class="pre">Get_Sphinx_Config_Lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_search</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copyright</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#Framework.Documentation.Sphinx_Doc_Gen.Get_Sphinx_Config_Lines" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a list of lines holding python code which sphinx will run on startup, configuring its options. This includes adding any neccessary inclusion paths.</p>
+</dd></dl>
+
+</section>
+<section id="get-sphinx-index-lines-function">
+<h3>Get_Sphinx_Index_Lines function<a class="headerlink" href="#get-sphinx-index-lines-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Documentation.Sphinx_Doc_Gen.Get_Sphinx_Index_Lines">
+<span class="sig-prename descclassname"><span class="pre">Framework.Documentation.Sphinx_Doc_Gen.</span></span><span class="sig-name descname"><span class="pre">Get_Sphinx_Index_Lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">module</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categorized_objects_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_search</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#Framework.Documentation.Sphinx_Doc_Gen.Get_Sphinx_Index_Lines" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a list of strings, lines for the main index.rst file that acts as the top level of any html.</p>
+</dd></dl>
+
+</section>
+<section id="make-sphinx-doc-function">
+<h3>Make_Sphinx_Doc function<a class="headerlink" href="#make-sphinx-doc-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Documentation.Sphinx_Doc_Gen.Make_Sphinx_Doc">
+<span class="sig-prename descclassname"><span class="pre">Framework.Documentation.Sphinx_Doc_Gen.</span></span><span class="sig-name descname"><span class="pre">Make_Sphinx_Doc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_folders</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">work_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_search</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copyright</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Documentation.Sphinx_Doc_Gen.Make_Sphinx_Doc" title="Link to this definition">¶</a></dt>
+<dd><p>Generate documentation for all python packages within a given folder, including any subpackages.</p>
+<ul class="simple">
+<li><p>start_folder</p>
+<ul>
+<li><p>Path, path from the working directory to the folder holding the package to create documentation for.</p></li>
+</ul>
+</li>
+<li><p>extra_folders</p>
+<ul>
+<li><p>List of Paths, optional, for any extra packages to include in the documentation. All extras should share the same parent folder as the start_folder.</p></li>
+</ul>
+</li>
+<li><p>work_folder</p>
+<ul>
+<li><p>Path, path to a folder to place temporary files in, such as any generated or copied sphinx input files.</p></li>
+<li><p>Optional; default is to place the files in a ‘sphinx’ folder underneath the current working directory.</p></li>
+<li><p>Must be a folder underneath the start_folder for now, since the sphinx relative path is set to 2 folders up for imports.</p></li>
+<li><p>Due to sphinx bugs, this cannot have spaces in the path.</p></li>
+<li><p>Any .rst files in the work folder will be deleted prior to new ones being generated.</p></li>
+<li><p>Currently, such files are not deleted when done, to preserve them for debug purposes.</p></li>
+</ul>
+</li>
+<li><p>output_folder</p>
+<ul>
+<li><p>Path, path to where the generated documentation should be written.</p></li>
+<li><p>Optional; default is to place it in ‘documentation’ under the start_folder, with an additional nested folder for the documentation type,  eg. ‘html’ by default.</p></li>
+<li><p>Due to sphinx bugs, this cannot have spaces in the path.</p></li>
+</ul>
+</li>
+<li><p>include_search</p>
+<ul>
+<li><p>Bool, if True a search bar will be added to the html.</p></li>
+<li><p>The searchindex file generated is rather large and clutters git, so the search bar will generally be left disabled for the html copy in the repository.</p></li>
+</ul>
+</li>
+<li><p>title</p>
+<ul>
+<li><p>String, high level title of the documentation.</p></li>
+</ul>
+</li>
+<li><p>copyright</p>
+<ul>
+<li><p>String, copyright to add to the documentation.</p></li>
+</ul>
+</li>
+<li><p>version</p>
+<ul>
+<li><p>String, version of the documentation.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+</section>
+<section id="merge-lines-function">
+<h3>Merge_Lines function<a class="headerlink" href="#merge-lines-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Documentation.Sphinx_Doc_Gen.Merge_Lines">
+<span class="sig-prename descclassname"><span class="pre">Framework.Documentation.Sphinx_Doc_Gen.</span></span><span class="sig-name descname"><span class="pre">Merge_Lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text_block_or_lines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#Framework.Documentation.Sphinx_Doc_Gen.Merge_Lines" title="Link to this definition">¶</a></dt>
+<dd><p>To get a better text file from the python docstrings, with proper full lines and wordwrap, do a pass over the text block and do some line joins. General idea is that two lines can merge if:</p>
+<p>-Both have normal text characters (eg. not ‘—‘).</p>
+<p>-Not in a code block (4+ space indent series of lines outside of a list).</p>
+<p>-Second line does not start a sublist (starts with -,*,etc.). Note: markdown merge rules are more complicated, but this should be sufficient for the expected text formats. This should not be called on code blocks. This will also look for and remove &lt;code&gt;&lt;/code&gt; tags, a temporary way to specify in docstrings sections not to be line merged.</p>
+</dd></dl>
+
+</section>
+<section id="setup-function">
+<h3>setup function<a class="headerlink" href="#setup-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Documentation.Sphinx_Doc_Gen.setup">
+<span class="sig-prename descclassname"><span class="pre">Framework.Documentation.Sphinx_Doc_Gen.</span></span><span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Documentation.Sphinx_Doc_Gen.setup" title="Link to this definition">¶</a></dt>
+<dd><p>Setup function for Sphinx to call, used to attach custom extension code.</p>
+</dd></dl>
+
+</section>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<section id="doc-category-default-class">
+<h3>Doc_Category_Default class<a class="headerlink" href="#doc-category-default-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.Documentation.Sphinx_Doc_Gen.Doc_Category_Default">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.Documentation.Sphinx_Doc_Gen.</span></span><span class="sig-name descname"><span class="pre">Doc_Category_Default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Documentation.Sphinx_Doc_Gen.Doc_Category_Default" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Sets the default category for a module. One of these should be instantiated within the module in global scope, given any convenient name beginning with an underscore (to avoid it getting imported into other modules accidentally).</p>
+<p>Example: from .Sphinx_Doc_Gen import Doc_Category_Default _doc_category = Doc_Category_Default(‘Transforms’)</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Table of Contents</a></h3>
+<p class="caption" role="heading"><span class="caption-text">Content:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Analyses.html">Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Common.html">Common</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#autodoc-markdown-to-rest-function">Autodoc_Markdown_To_Rest function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#categorize-module-contents-function">Categorize_Module_Contents function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#doc-category-function">Doc_Category function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-code-line-numbers-function">Get_Code_Line_Numbers function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-module-classes-function">Get_Module_Classes function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-module-functions-function">Get_Module_Functions function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-modules-function">Get_Modules function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-sphinx-category-lines-function">Get_Sphinx_Category_Lines function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-sphinx-config-lines-function">Get_Sphinx_Config_Lines function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-sphinx-index-lines-function">Get_Sphinx_Index_Lines function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#make-sphinx-doc-function">Make_Sphinx_Doc function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#merge-lines-function">Merge_Lines function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setup-function">setup function</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#classes">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#doc-category-default-class">Doc_Category_Default class</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="File_Manager.html">File_Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GUI.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Live_Editor.html">Live_Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Map_Transforms.html">Map_Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Utilities.html">Utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="File_Manager.html" title="File_Manager"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Common.html" title="Common"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">X4_Customizer Source Documentation  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Documentation</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright .
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

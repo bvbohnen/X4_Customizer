@@ -2,6 +2,9 @@
 Object tree view builder functions.
 These generally map to gui display tabs.
 '''
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Live_Editor')
+
 
 from Framework.Live_Editor_Components import *
 

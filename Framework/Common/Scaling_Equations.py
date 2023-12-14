@@ -3,6 +3,9 @@ Code for generation scaling equations, used by various transforms.
 Note: copied from X3 Customizer; may be unused by X4 Customizer.
 '''
 
+from ..Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Common')
+
 '''
 Fit function thoughts, made from the perspective of adjusting bullet speeds:
 

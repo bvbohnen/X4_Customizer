@@ -1,4 +1,7 @@
 
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('GUI')
+
 from time import time
 from itertools import chain
 from collections import OrderedDict

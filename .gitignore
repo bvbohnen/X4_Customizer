@@ -16,6 +16,18 @@ gui_settings.ini
 Release/
 # Ignore anything private.
 private/
+# Ignore work folders.
+work/
+
+# Sphinx doc build files
+sphinx/
+doctrees/
+_sources/
+# Ignore some larger files that aren't important in testing.
+jquery*
+objects.inv
+searchindex.js
+.buildinfo
 
 
 ## Ignore Visual Studio temporary files, build results, and

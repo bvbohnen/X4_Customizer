@@ -1,4 +1,7 @@
 
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Map_Transforms')
+
 from itertools import combinations
 from copy import copy
 

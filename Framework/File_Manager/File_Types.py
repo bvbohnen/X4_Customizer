@@ -1,6 +1,9 @@
 '''
 Classes to represent game files.
 '''
+from ..Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('File_Manager')
+
 __all__ = [
     'New_Game_File',
     'Generate_Signatures',

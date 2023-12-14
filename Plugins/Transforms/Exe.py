@@ -1,6 +1,9 @@
 '''
 Transforms to the raw exe binary.
 '''
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Transforms')
+
 __all__ = [    
     'Remove_Modified',
     'Remove_Sig_Errors',

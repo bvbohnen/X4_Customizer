@@ -2,6 +2,8 @@
 Build misc ship component objects in 'assets/props/'.
 TODO: rename, to avoid confusion with game component vs macro.
 '''
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Live_Editor')
 
 from Framework import File_System
 from Framework.Live_Editor_Components import *

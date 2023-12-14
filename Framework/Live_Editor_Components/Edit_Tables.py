@@ -1,4 +1,7 @@
 
+from ..Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Live_Editor')
+
 from collections import OrderedDict
 from .Edit_Items import Placeholder_Item
 

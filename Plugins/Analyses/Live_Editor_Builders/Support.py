@@ -2,6 +2,9 @@
 Some reusable functions for different object types.
 Intially, mainly aimed at various component file pairs.
 '''
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Live_Editor')
+
 
 from Framework import File_System
 from Framework.Live_Editor_Components import *

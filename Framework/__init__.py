@@ -191,6 +191,8 @@ todo:
 # The Main and various Make_* modules will be left off; those are
 #  desired to be called directly from a command line.
 
+# For use by the doc generator.
+description = __doc__
 
 # Convenience items for input scripts to import.
 

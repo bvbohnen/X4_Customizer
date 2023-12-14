@@ -1,4 +1,7 @@
 
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('GUI')
+
 # TODO: maybe move some functions to here from Widget_Settings.
 
 from pathlib import Path

@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>File_Manager &#8212; X4_Customizer Source Documentation  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=c135b40c" />
+    
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="GUI" href="GUI.html" />
+    <link rel="prev" title="Documentation" href="Documentation.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="GUI.html" title="GUI"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Documentation.html" title="Documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">X4_Customizer Source Documentation  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">File_Manager</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="file-manager">
+<h1>File_Manager<a class="headerlink" href="#file-manager" title="Link to this heading">¶</a></h1>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<section id="apply-patch-function">
+<h3>Apply_Patch function<a class="headerlink" href="#apply-patch-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.XML_Diff.Apply_Patch">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.XML_Diff.</span></span><span class="sig-name descname"><span class="pre">Apply_Patch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.XML_Diff.Apply_Patch" title="Link to this definition">¶</a></dt>
+<dd><p>Apply a diff patch to the target xml node. Returns the modified node, a changed-in-place original_node, or possibly a fully replaced original_node.</p>
+<p>If the patch_node is a ‘diff’, performs diff patching. Otherwise the patch_node must have the same tag as original_node, and its children will be appended to this original_node’s children.</p>
+<ul class="simple">
+<li><p>error_prefix</p>
+<ul>
+<li><p>Optional string, a prefix to put before any error messages.</p></li>
+<li><p>Can be used to indicate the sources for the xml nodes.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+</section>
+<section id="fill-node-ids-function">
+<h3>Fill_Node_IDs function<a class="headerlink" href="#fill-node-ids-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.XML_Diff.Fill_Node_IDs">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.XML_Diff.</span></span><span class="sig-name descname"><span class="pre">Fill_Node_IDs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.XML_Diff.Fill_Node_IDs" title="Link to this definition">¶</a></dt>
+<dd><p>For all elements, fill their tail property with a unique integer node_id. Values remain unique throughput the python session. Ids are unique across xml documents annotated. If an id string is already in the tail, it will be left unchanged, so it should be safe to call this on already annotated xml to fill out ids for new nodes.</p>
+</dd></dl>
+
+</section>
+<section id="find-extensions-function">
+<h3>Find_Extensions function<a class="headerlink" href="#find-extensions-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.Extension_Finder.Find_Extensions">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.Extension_Finder.</span></span><span class="sig-name descname"><span class="pre">Find_Extensions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Extension_Finder.Find_Extensions" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a list of Extension_Summary objects, representing all found extensions, enabled or disabled.</p>
+</dd></dl>
+
+</section>
+<section id="generate-signatures-function">
+<h3>Generate_Signatures function<a class="headerlink" href="#generate-signatures-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Generate_Signatures">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.File_Types.</span></span><span class="sig-name descname"><span class="pre">Generate_Signatures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">game_file_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Generate_Signatures" title="Link to this definition">¶</a></dt>
+<dd><p>Given a list of Game_Files, identifies which are missing signatures and creates them. All sig files are set as modified if their base file is also modified. Returns a list with the new Signature_Files.</p>
+</dd></dl>
+
+</section>
+<section id="get-hash-string-function">
+<h3>Get_Hash_String function<a class="headerlink" href="#get-hash-string-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.Cat_Reader.Get_Hash_String">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.Cat_Reader.</span></span><span class="sig-name descname"><span class="pre">Get_Hash_String</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">binary</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Cat_Reader.Get_Hash_String" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a 128-bit md5 hash as a hex string for the given binary.</p>
+</dd></dl>
+
+</section>
+<section id="is-ns-attribute-function">
+<h3>Is_NS_Attribute function<a class="headerlink" href="#is-ns-attribute-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.XML_Diff.Is_NS_Attribute">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.XML_Diff.</span></span><span class="sig-name descname"><span class="pre">Is_NS_Attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.XML_Diff.Is_NS_Attribute" title="Link to this definition">¶</a></dt>
+<dd><p>Returns True if this lxml attribute uses a namespace.</p>
+</dd></dl>
+
+</section>
+<section id="lxml-element-depickler-function">
+<h3>LXML_Element_Depickler function<a class="headerlink" href="#lxml-element-depickler-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.XML_Diff.LXML_Element_Depickler">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.XML_Diff.</span></span><span class="sig-name descname"><span class="pre">LXML_Element_Depickler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_string</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.XML_Diff.LXML_Element_Depickler" title="Link to this definition">¶</a></dt>
+<dd><p>Depickle an lxml element.</p>
+</dd></dl>
+
+</section>
+<section id="lxml-element-pickler-function">
+<h3>LXML_Element_Pickler function<a class="headerlink" href="#lxml-element-pickler-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.XML_Diff.LXML_Element_Pickler">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.XML_Diff.</span></span><span class="sig-name descname"><span class="pre">LXML_Element_Pickler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.XML_Diff.LXML_Element_Pickler" title="Link to this definition">¶</a></dt>
+<dd><p>Pickle an lxml element.</p>
+</dd></dl>
+
+</section>
+<section id="make-patch-function">
+<h3>Make_Patch function<a class="headerlink" href="#make-patch-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.XML_Diff.Make_Patch">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.XML_Diff.</span></span><span class="sig-name descname"><span class="pre">Make_Patch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forced_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shorten_xpaths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.XML_Diff.Make_Patch" title="Link to this definition">¶</a></dt>
+<dd><p>Returns an xml diff node, suitable for converting from original_node to modified_node. Expects Fill_Node_IDs to have been run on the original_node, and node_ids to have been originally carried into modified_node.</p>
+<ul class="simple">
+<li><p>forced_attributes</p>
+<ul>
+<li><p>String or list of strings, optional, list of attributes (comma separated if string) which will always be included in the xpath for elements which have them.</p></li>
+</ul>
+</li>
+<li><p>verify</p>
+<ul>
+<li><p>Bool, if True the patch will verified, and an exception raised on apparent error.</p></li>
+</ul>
+</li>
+<li><p>maximal</p>
+<ul>
+<li><p>Bool, if True then make a maximal diff patch, replacing the original root with the modified root.</p></li>
+<li><p>Used for testing of other functions.</p></li>
+</ul>
+</li>
+<li><p>shorten_xpaths</p>
+<ul>
+<li><p>Bool, if True (and not maximal) then use // syntax to shorten xpaths.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+</section>
+<section id="ns-qualify-function">
+<h3>NS_qualify function<a class="headerlink" href="#ns-qualify-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.XML_Diff.NS_qualify">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.XML_Diff.</span></span><span class="sig-name descname"><span class="pre">NS_qualify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.XML_Diff.NS_qualify" title="Link to this definition">¶</a></dt>
+<dd><p>Qualify a name using namespace replacement (eg. expand it), suitable for use with lxml attributes.</p>
+</dd></dl>
+
+</section>
+<section id="ns-unqualify-function">
+<h3>NS_unqualify function<a class="headerlink" href="#ns-unqualify-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.XML_Diff.NS_unqualify">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.XML_Diff.</span></span><span class="sig-name descname"><span class="pre">NS_unqualify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.XML_Diff.NS_unqualify" title="Link to this definition">¶</a></dt>
+<dd><p>Unqualify (eg. re-encode) namespaces in the term, since the normal xpath() search function cannot handle qualified names.</p>
+</dd></dl>
+
+</section>
+<section id="ns-xpath-function">
+<h3>NS_xpath function<a class="headerlink" href="#ns-xpath-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.XML_Diff.NS_xpath">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.XML_Diff.</span></span><span class="sig-name descname"><span class="pre">NS_xpath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xpath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.XML_Diff.NS_xpath" title="Link to this definition">¶</a></dt>
+<dd><p>Returns result of an xpath() lookup on the given node, after unqualifying the provided xpath string.</p>
+</dd></dl>
+
+</section>
+<section id="new-game-file-function">
+<h3>New_Game_File function<a class="headerlink" href="#new-game-file-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.New_Game_File">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.File_Types.</span></span><span class="sig-name descname"><span class="pre">New_Game_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">binary</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.New_Game_File" title="Link to this definition">¶</a></dt>
+<dd><p>Creates and returns a Game_File, picking an appropriate subclass based on the virtual_path.  For use with ‘binary’ input data. All inputs should be given as keyword args.</p>
+</dd></dl>
+
+</section>
+<section id="print-function">
+<h3>Print function<a class="headerlink" href="#print-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.XML_Diff.Print">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.XML_Diff.</span></span><span class="sig-name descname"><span class="pre">Print</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.XML_Diff.Print" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the prettyprinted string for the xml_node. Handles suppression of the node_id strings. Any kwargs are passed to ET.tostring.</p>
+</dd></dl>
+
+</section>
+<section id="sort-attributes-function">
+<h3>Sort_Attributes function<a class="headerlink" href="#sort-attributes-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.XML_Diff.Sort_Attributes">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.XML_Diff.</span></span><span class="sig-name descname"><span class="pre">Sort_Attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr_names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.XML_Diff.Sort_Attributes" title="Link to this definition">¶</a></dt>
+<dd><p>Sort attribute names, placing the highest priority first, to aid in making more human-pleasing diff xpaths.</p>
+</dd></dl>
+
+</section>
+<section id="unit-test-function">
+<h3>Unit_Test function<a class="headerlink" href="#unit-test-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.XML_Diff.Unit_Test">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.XML_Diff.</span></span><span class="sig-name descname"><span class="pre">Unit_Test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_tests</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edits_per_test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rand_seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.XML_Diff.Unit_Test" title="Link to this definition">¶</a></dt>
+<dd><p>Performs a test of the diff patch code by making random edits to test_node and trying to patch them. Raises an exception on patch failure.</p>
+<ul class="simple">
+<li><p>test_node</p>
+<ul>
+<li><p>The xml node to play around with. Preferably not too large.</p></li>
+</ul>
+</li>
+<li><p>num_tests</p>
+<ul>
+<li><p>Int, how many test edits to perform.</p></li>
+</ul>
+</li>
+<li><p>edits_per_test</p>
+<ul>
+<li><p>Int, how many edits to make to the xml per test.</p></li>
+</ul>
+</li>
+<li><p>rand_seed</p>
+<ul>
+<li><p>Int, optional, seed for the rng.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+</section>
+<section id="verify-patch-function">
+<h3>Verify_Patch function<a class="headerlink" href="#verify-patch-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.XML_Diff.Verify_Patch">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.XML_Diff.</span></span><span class="sig-name descname"><span class="pre">Verify_Patch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.XML_Diff.Verify_Patch" title="Link to this definition">¶</a></dt>
+<dd><p>Verify that the patch applied to the original recreates the modified xml node. Returns True on success, False on failure.</p>
+</dd></dl>
+
+</section>
+<section id="apply-patch-op-function">
+<h3>_Apply_Patch_Op function<a class="headerlink" href="#apply-patch-op-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.XML_Diff._Apply_Patch_Op">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.XML_Diff.</span></span><span class="sig-name descname"><span class="pre">_Apply_Patch_Op</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optype</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.XML_Diff._Apply_Patch_Op" title="Link to this definition">¶</a></dt>
+<dd><p>Apply a diff patch operation (add/remove/replace) on the target node. Raises an Exception on any error.</p>
+</dd></dl>
+
+</section>
+<section id="get-patch-ops-recursive-function">
+<h3>_Get_Patch_Ops_Recursive function<a class="headerlink" href="#get-patch-ops-recursive-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.XML_Diff._Get_Patch_Ops_Recursive">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.XML_Diff.</span></span><span class="sig-name descname"><span class="pre">_Get_Patch_Ops_Recursive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.XML_Diff._Get_Patch_Ops_Recursive" title="Link to this definition">¶</a></dt>
+<dd><p>Recursive function which will return a list of patch operation elements to convert from the original_node to the modified_node. Returns a list of elements (add, remove, or replace). Input nodes are expected to have the same tail property. The original_node will be edited according to the patch op as this progresses, to ensure xpaths update accordingly mid patching.</p>
+</dd></dl>
+
+</section>
+<section id="get-xpath-recursive-function">
+<h3>_Get_Xpath_Recursive function<a class="headerlink" href="#get-xpath-recursive-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.XML_Diff._Get_Xpath_Recursive">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.XML_Diff.</span></span><span class="sig-name descname"><span class="pre">_Get_Xpath_Recursive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.XML_Diff._Get_Xpath_Recursive" title="Link to this definition">¶</a></dt>
+<dd><p>Construct and return an xpath to select the given node. Recursively gets called on parent nodes, using their xpaths as prefixes.</p>
+</dd></dl>
+
+</section>
+<section id="patch-node-constructor-function">
+<h3>_Patch_Node_Constructor function<a class="headerlink" href="#patch-node-constructor-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.File_Manager.XML_Diff._Patch_Node_Constructor">
+<span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.XML_Diff.</span></span><span class="sig-name descname"><span class="pre">_Patch_Node_Constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.XML_Diff._Patch_Node_Constructor" title="Link to this definition">¶</a></dt>
+<dd><p>Small support function for creating patch operation. Returns a single Element, or None if the patch is rejected due to namespace usage. The patch operation is applied automatically to the target node.</p>
+<ul class="simple">
+<li><p>op</p>
+<ul>
+<li><p>String, one of [‘add’,’remove’,’replace’].</p></li>
+</ul>
+</li>
+<li><p>type</p>
+<ul>
+<li><p>String, one of [‘text’,’attrib’,’node’].</p></li>
+</ul>
+</li>
+<li><p>target</p>
+<ul>
+<li><p>The node being edited (added to, removed, or replaced).</p></li>
+</ul>
+</li>
+<li><p>name</p>
+<ul>
+<li><p>For ‘attrib’, the attribute name being changed.</p></li>
+</ul>
+</li>
+<li><p>value</p>
+<ul>
+<li><p>For ‘attrib’ and ‘text’, the new value to use (string).</p></li>
+<li><p>For ‘node’, a list of elements to add or replace with.</p></li>
+</ul>
+</li>
+<li><p>pos</p>
+<ul>
+<li><p>For ‘node’/’add’, the ‘pos’ value to use.</p></li>
+<li><p>One of [‘prepend’,’before’,’after’].</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+</section>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<section id="cat-entry-class">
+<h3>Cat_Entry class<a class="headerlink" href="#cat-entry-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.File_Manager.Cat_Reader.Cat_Entry">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.Cat_Reader.</span></span><span class="sig-name descname"><span class="pre">Cat_Entry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cat_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_byte</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Cat_Reader.Cat_Entry" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Framework.File_Manager.Cat_Reader.Cat_Entry.cat_path">
+<span class="sig-name descname"><span class="pre">cat_path</span></span><a class="headerlink" href="#Framework.File_Manager.Cat_Reader.Cat_Entry.cat_path" title="Link to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Framework.File_Manager.Cat_Reader.Cat_Entry.hash_str">
+<span class="sig-name descname"><span class="pre">hash_str</span></span><a class="headerlink" href="#Framework.File_Manager.Cat_Reader.Cat_Entry.hash_str" title="Link to this definition">¶</a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Framework.File_Manager.Cat_Reader.Cat_Entry.num_bytes">
+<span class="sig-name descname"><span class="pre">num_bytes</span></span><a class="headerlink" href="#Framework.File_Manager.Cat_Reader.Cat_Entry.num_bytes" title="Link to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Framework.File_Manager.Cat_Reader.Cat_Entry.start_byte">
+<span class="sig-name descname"><span class="pre">start_byte</span></span><a class="headerlink" href="#Framework.File_Manager.Cat_Reader.Cat_Entry.start_byte" title="Link to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Framework.File_Manager.Cat_Reader.Cat_Entry.timestamp">
+<span class="sig-name descname"><span class="pre">timestamp</span></span><a class="headerlink" href="#Framework.File_Manager.Cat_Reader.Cat_Entry.timestamp" title="Link to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="cat-reader-class">
+<h3>Cat_Reader class<a class="headerlink" href="#cat-reader-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.File_Manager.Cat_Reader.Cat_Reader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.Cat_Reader.</span></span><span class="sig-name descname"><span class="pre">Cat_Reader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cat_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Cat_Reader.Cat_Reader" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Parsed catalog file contents.</p>
+<p>Attributes:</p>
+<ul class="simple">
+<li><p>cat_path</p>
+<ul>
+<li><p>String, the full path to the cat file.</p></li>
+<li><p>TODO: track <a href="#id3"><span class="problematic" id="id4">ext_</span></a> vs <a href="#id5"><span class="problematic" id="id6">subst_</span></a> cats in a convenient way.</p></li>
+</ul>
+</li>
+<li><p>dat_path</p>
+<ul>
+<li><p>String, the full path to corresponding dat file, as specified in the cat file.</p></li>
+<li><p>This is expected to be in the same directory as the cat file.</p></li>
+<li><p>Generated from cat_path automatically.</p></li>
+</ul>
+</li>
+<li><p>cat_entries</p>
+<ul>
+<li><p>Dict of Cat_Entry objects holding the parsed file information, keyed by the virtual path (lower case).</p></li>
+<li><p>A Cat_Entry itself will have an original case path.</p></li>
+</ul>
+</li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Cat_Reader.Cat_Reader.Get_Cat_Entries">
+<span class="sig-name descname"><span class="pre">Get_Cat_Entries</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Cat_Reader.Cat_Reader.Get_Cat_Entries" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a dict of Cat_Entry objects, keyed by cat_path (expected to be the same as virtual_path).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Cat_Reader.Cat_Reader.Get_File_Names">
+<span class="sig-name descname"><span class="pre">Get_File_Names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Cat_Reader.Cat_Reader.Get_File_Names" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a list of virtual names of files in this catalog, in sorted order.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Cat_Reader.Cat_Reader.Read">
+<span class="sig-name descname"><span class="pre">Read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">virtual_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_if_not_found</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_md5_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Cat_Reader.Cat_Reader.Read" title="Link to this definition">¶</a></dt>
+<dd><p>Read an entry in the corresponding dat file, based on the provided file name (including internal path).</p>
+<ul class="simple">
+<li><p>virtual_path</p>
+<ul>
+<li><p>String, path of the file to look up in cat format.</p></li>
+</ul>
+</li>
+<li><p>error_if_not_found</p>
+<ul>
+<li><p>Bool, if True and the name is not recorded in this cat, then an exception will be thrown, otherwise returns None.</p></li>
+</ul>
+</li>
+<li><p>allow_md5_error</p>
+<ul>
+<li><p>Bool, if True then the md5 check will be suppressed and errors allowed. May still print a warning message.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="cat-writer-class">
+<h3>Cat_Writer class<a class="headerlink" href="#cat-writer-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.File_Manager.Cat_Writer.Cat_Writer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.Cat_Writer.</span></span><span class="sig-name descname"><span class="pre">Cat_Writer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cat_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Cat_Writer.Cat_Writer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Support class for collecting modified files into a single catalog. Initial functionality will not gzip the files.</p>
+<p>Attributes:</p>
+<ul class="simple">
+<li><p>cat_path</p>
+<ul>
+<li><p>Path, the full path to the cat file.</p></li>
+</ul>
+</li>
+<li><p>dat_path</p>
+<ul>
+<li><p>Path, the full path to corresponding dat file.</p></li>
+<li><p>Set automatically to match the cat_path index.</p></li>
+</ul>
+</li>
+<li><p>game_files</p>
+<ul>
+<li><p>List of Game_File objects to be written.</p></li>
+</ul>
+</li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Cat_Writer.Cat_Writer.Add_File">
+<span class="sig-name descname"><span class="pre">Add_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">game_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Cat_Writer.Cat_Writer.Add_File" title="Link to this definition">¶</a></dt>
+<dd><p>Add a Game_File to be recorded into the catalog. Machine_Code_File will be rejected.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Cat_Writer.Cat_Writer.Write">
+<span class="sig-name descname"><span class="pre">Write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generate_sigs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">separate_sigs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Cat_Writer.Cat_Writer.Write" title="Link to this definition">¶</a></dt>
+<dd><p>Write the contents to a cat/dat file pair. Any existing files will be overwritten.</p>
+<ul class="simple">
+<li><p>generate_sigs</p>
+<ul>
+<li><p>Bool, if True then dummy signature files will be created.</p></li>
+</ul>
+</li>
+<li><p>separate_sigs</p>
+<ul>
+<li><p>Bool, if True then any signatures will be moved to a second cat/dat pair suffixed with .sig. This may result in an empty dat.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="extension-summary-class">
+<h3>Extension_Summary class<a class="headerlink" href="#extension-summary-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.File_Manager.Extension_Finder.Extension_Summary">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.Extension_Finder.</span></span><span class="sig-name descname"><span class="pre">Extension_Summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content_xml_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Extension_Finder.Extension_Summary" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to summarize a found extension, and some picked out details.</p>
+<p>Attributes:</p>
+<ul class="simple">
+<li><p>content_xml_path</p>
+<ul>
+<li><p>Path to the content.xml file for the extension.</p></li>
+</ul>
+</li>
+<li><p>content_xml</p>
+<ul>
+<li><p>XML Element holding the contents of content.xml, used in some misc lookup methods.</p></li>
+</ul>
+</li>
+<li><p>extension_name</p>
+<ul>
+<li><p>String, name of the containing folder, lowercase.</p></li>
+<li><p>Should be unique across extensions.</p></li>
+</ul>
+</li>
+<li><p>ext_id</p>
+<ul>
+<li><p>ID of this extension, as found in the content.xml id attribute.</p></li>
+<li><p>May be non-unique across extensions, though in x4 this leads to bugs with dependencies (only the last ID match found will be considered dependent) and with enabling/disabling mods (only the last ID match can be flipped out of its default state).</p></li>
+<li><p>Is case sensitive in X4.</p></li>
+</ul>
+</li>
+<li><p>display_name</p>
+<ul>
+<li><p>String, the name to display for the extension.</p></li>
+</ul>
+</li>
+<li><p>enabled</p>
+<ul>
+<li><p>Bool, True if this extensions is enabled, else False.</p></li>
+</ul>
+</li>
+<li><p>default_enabled</p>
+<ul>
+<li><p>Bool, if the extension is enabled by default.</p></li>
+</ul>
+</li>
+<li><p>ignore</p>
+<ul>
+<li><p>Bool, if the extension should be ignored due to Settings whitelist or blacklist settings.</p></li>
+</ul>
+</li>
+<li><p>is_current_output</p>
+<ul>
+<li><p>Bool, True if this extension is the customizer output.</p></li>
+</ul>
+</li>
+<li><p>soft_dependencies</p>
+<ul>
+<li><p>List of ids of other extensions this extension has a soft (non-error if missing) dependency on.</p></li>
+</ul>
+</li>
+<li><p>hard_dependencies</p>
+<ul>
+<li><p>As above, but dependencies that will throw an error if missing.</p></li>
+</ul>
+</li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Extension_Finder.Extension_Summary.Get_Attribute">
+<span class="sig-name descname"><span class="pre">Get_Attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Extension_Finder.Extension_Summary.Get_Attribute" title="Link to this definition">¶</a></dt>
+<dd><p>Return the string value of a given attribute. This will search the language node first, then the root node. If not found, returns an empty string.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Extension_Finder.Extension_Summary.Get_Bool_Attribute">
+<span class="sig-name descname"><span class="pre">Get_Bool_Attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Extension_Finder.Extension_Summary.Get_Bool_Attribute" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a bool value of a given attribute.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="file-system-class-class">
+<h3>File_System_class class<a class="headerlink" href="#file-system-class-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.File_System.</span></span><span class="sig-name descname"><span class="pre">File_System_class</span></span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Primary handler for all loaded files, including both read and write functionality. Also supports some parsing of xml content for easier lookups of file groups.</p>
+<p>Attributes:</p>
+<ul class="simple">
+<li><p>game_file_dict</p>
+<ul>
+<li><p>Dict, keyed by virtual path, holding loaded Game_File objects.</p></li>
+</ul>
+</li>
+<li><p>old_log</p>
+<ul>
+<li><p>Customizer_Log_class holding information from the prior customizer run.</p></li>
+</ul>
+</li>
+<li><p>init_complete</p>
+<ul>
+<li><p>Bool, set True after the delayed init function has completed.</p></li>
+</ul>
+</li>
+<li><p>source_reader</p>
+<ul>
+<li><p>Source_Reader object.</p></li>
+</ul>
+</li>
+<li><p>asset_class_dict</p>
+<ul>
+<li><p>Dict of dicts of lists holding XML_File objects, organized according to asset properties.</p></li>
+<li><p>Outer key is the root node tag for supported tags, currently one of [‘macros’,’components’].</p></li>
+<li><p>Inner key is the “class” attribute of the first child node, eg. <a class="reference external" href="mailto:macros/macro/&#37;&#52;&#48;class">macros/macro/<span>&#64;</span>class</a> or <a class="reference external" href="mailto:components/component/&#37;&#52;&#48;class">components/component/<span>&#64;</span>class</a>.</p></li>
+<li><p>Example: asset_class_dict[‘macros’][‘bullet’] to get all loaded bullet macro files.</p></li>
+<li><p>Filled in as files are loaded or created; use Load_Pattern to fill in files on paths that hold the classes of  interest.</p></li>
+</ul>
+</li>
+<li><p>asset_name_dict</p>
+<ul>
+<li><p>Dict of XML_File objects keyed by their “name” attribute.</p></li>
+<li><p>Similar to asset_class_dict, except set up to satisfy the way x4 files can reference each other by “name” attribute without clarifying tag or “class”.</p></li>
+</ul>
+</li>
+<li><p>_patterns_loaded</p>
+<ul>
+<li><p>Set of strings, virtual path name patterns that have been loaded and, when macros, added to class_macro_dict.</p></li>
+</ul>
+</li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Add_File">
+<span class="sig-name descname"><span class="pre">Add_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">game_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Add_File" title="Link to this definition">¶</a></dt>
+<dd><p>Record a new a Game_File object, keyed by its virtual path. Returns the game_file, for convenience.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Add_Source_Folder_Copies">
+<span class="sig-name descname"><span class="pre">Add_Source_Folder_Copies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Add_Source_Folder_Copies" title="Link to this definition">¶</a></dt>
+<dd><p>Adds Misc_File objects which copy files from the user source folders to the game folders. This should only be called after transforms have been completed, to avoid adding a copy of a file that was already loaded and edited. All source folder files, loaded here or earlier, will be flagged as modified.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Cleanup">
+<span class="sig-name descname"><span class="pre">Cleanup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Cleanup" title="Link to this definition">¶</a></dt>
+<dd><p>Handles cleanup of old transform files. This is done blindly for now, regardless of it this run intends to follow up by applying another renaming and writing new files in place of the ones removed. This should preceed a call to any call to Write_Files, though can be run standalone to do a generic cleaning. Preferably do this late in a run, so that files from a prior run are not removed if the new run had an error during a transform.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Copy_File">
+<span class="sig-name descname"><span class="pre">Copy_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_virtual_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest_virtual_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Copy_File" title="Link to this definition">¶</a></dt>
+<dd><p>Suport function to copy a file from a source folder under this project, to a dest folder. Typically used for scripts, objects, etc. Note: this simply creates a Game_File object, and the file write will occur during normal output.</p>
+<ul class="simple">
+<li><p>source_virtual_path</p>
+<ul>
+<li><p>Virtual path for the source file, which matches the folder structure in the project source folder.</p></li>
+</ul>
+</li>
+<li><p>dest_virtual_path</p>
+<ul>
+<li><p>Virtual path for the dest location.</p></li>
+<li><p>If None, this defaults to match the source_virtual_path.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Delayed_Init">
+<span class="sig-name descname"><span class="pre">Delayed_Init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Delayed_Init" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize the file system and finalize Settings paths.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.File_Is_Loaded">
+<span class="sig-name descname"><span class="pre">File_Is_Loaded</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">virtual_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.File_Is_Loaded" title="Link to this definition">¶</a></dt>
+<dd><p>Returns True if a file of the given virtual_path has been loaded, else False.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Gen_All_Virtual_Paths">
+<span class="sig-name descname"><span class="pre">Gen_All_Virtual_Paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Gen_All_Virtual_Paths" title="Link to this definition">¶</a></dt>
+<dd><p>Generator which yields all virtual_path names of all discovered files, optionally filtered by a wildcard pattern.</p>
+<ul class="simple">
+<li><p>pattern</p>
+<ul>
+<li><p>String, optional, wildcard pattern to use for matching names.</p></li>
+<li><p>Lowercased internally.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Get_All_Indexed_Files">
+<span class="sig-name descname"><span class="pre">Get_All_Indexed_Files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Get_All_Indexed_Files" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a list of Game_Files found on paths in the given index matching the given pattern. Loads the files as needed. Broken links are skipped. Duplicate links are ignored. Can be followed by Get_Asset_Files_By_Class if extra class checking safety is wanted.</p>
+<ul class="simple">
+<li><p>index</p>
+<ul>
+<li><p>String, one of ‘macros’,’components’.</p></li>
+</ul>
+</li>
+<li><p>pattern</p>
+<ul>
+<li><p>Name pattern to look up, with wildcards, without path or extension; lowercased internally.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Get_Asset_File">
+<span class="sig-name descname"><span class="pre">Get_Asset_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Get_Asset_File" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a loaded asset XML_File object with the corresponding “name” (as found in the xml).  Error if not found. The returned file may contain other assets.</p>
+<p>Example: Get_Asset_File(‘weapon_tel_l_beam_01_mk1’)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Get_Asset_Files_By_Class">
+<span class="sig-name descname"><span class="pre">Get_Asset_Files_By_Class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">class_names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Get_Asset_Files_By_Class" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the list of loaded asset XML_Files matching the given tag and class_names. Accepts multiple class names. Returns an empty list if no matching files are loaded yet. Can preceed with Load_Files for expected file names.</p>
+<p>Example: Get_Asset_Files(‘macros’,’bullet’,’missile’)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Get_Date">
+<span class="sig-name descname"><span class="pre">Get_Date</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Get_Date" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the current date, as a string.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Get_Extension_Names">
+<span class="sig-name descname"><span class="pre">Get_Extension_Names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Get_Extension_Names" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a list of names of all enabled extensions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Get_Indexed_File">
+<span class="sig-name descname"><span class="pre">Get_Indexed_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Get_Indexed_File" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a Game_File found on a path read from the given index matching the given name. Loads the file if needed.</p>
+<ul class="simple">
+<li><p>index</p>
+<ul>
+<li><p>String, one of ‘macros’,’components’.</p></li>
+</ul>
+</li>
+<li><p>name</p>
+<ul>
+<li><p>Name to look up, without path or extension.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Get_Loaded_Files">
+<span class="sig-name descname"><span class="pre">Get_Loaded_Files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Get_Loaded_Files" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a list of Game_File objects that are currently loaded. Optionally, loads only files with virtual_paths matching the given pattern (lowercased internally).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Get_Source_Reader">
+<span class="sig-name descname"><span class="pre">Get_Source_Reader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Get_Source_Reader" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the current Source_Reader.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Load_File">
+<span class="sig-name descname"><span class="pre">Load_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">virtual_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_if_not_found</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_if_unmatched_diff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_load</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Load_File" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a Game_File subclass object for the given file, according to its extension. If the file has not been loaded yet, reads from the expected source file. Files which are XML macros or components be recorded according to their “class” attribute.</p>
+<ul class="simple">
+<li><p>virtual_path</p>
+<ul>
+<li><p>Name of the file, using the cat_path style (forward slashes, relative to X4 base directory).</p></li>
+<li><p>May have mixed case and reverse slashes, but will be lowercased and forward slashed internally.</p></li>
+</ul>
+</li>
+<li><p>error_if_not_found</p>
+<ul>
+<li><p>Bool, if True and the file is not found, raises an exception, else returns None.</p></li>
+</ul>
+</li>
+<li><p>error_if_unmatched_diff</p>
+<ul>
+<li><p>Bool, if True a Unmatched_Diff_Exception will be thrown if the assumed base file is found to be a diff patch.</p></li>
+<li><p>Default is to log an error and return None.</p></li>
+</ul>
+</li>
+<li><p>test_load</p>
+<ul>
+<li><p>Bool, if True then the file will be loaded regardless of any currently tracked version of it, and the results will not be recorded.</p></li>
+<li><p>When in use, None is returned.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Load_Files">
+<span class="sig-name descname"><span class="pre">Load_Files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Load_Files" title="Link to this definition">¶</a></dt>
+<dd><p>Searches for and loads in xml files following the given virtual_path wildcard pattern (lowercased internally). Returns a list of files loaded.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Read_Text">
+<span class="sig-name descname"><span class="pre">Read_Text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">page</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Read_Text" title="Link to this definition">¶</a></dt>
+<dd><p>Reads and returns the text at the given {page,id}. Recursively expands nested references. Removes comments in parentheses. Returns None if no text found.</p>
+<ul class="simple">
+<li><p>text</p>
+<ul>
+<li><p>String, including any internal ‘{page,id}’ terms.</p></li>
+</ul>
+</li>
+<li><p>page, id</p>
+<ul>
+<li><p>Int or string, page and id separated; give for direct dereference instead of a full text string.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Reset">
+<span class="sig-name descname"><span class="pre">Reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Reset" title="Link to this definition">¶</a></dt>
+<dd><p>Resets the file system, clearing out prior loaded files, returning to non-initialized state, etc. This will also reset the Live_Editor, since it is out of date.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Reset_File">
+<span class="sig-name descname"><span class="pre">Reset_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">virtual_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Reset_File" title="Link to this definition">¶</a></dt>
+<dd><p>Reset a single file, if loaded. Any later Load_File calls will pull a fresh copy from the known source locations. Note: this does not clear out any existing references to the file object that may have been recorded elsewhere.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Write_Files">
+<span class="sig-name descname"><span class="pre">Write_Files</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Write_Files" title="Link to this definition">¶</a></dt>
+<dd><p>Write output files for all source file content used or created by transforms, either to loose files or to a catalog depending on settings.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_System.File_System_class.Write_Non_Ext_Files">
+<span class="sig-name descname"><span class="pre">Write_Non_Ext_Files</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_System.File_System_class.Write_Non_Ext_Files" title="Link to this definition">¶</a></dt>
+<dd><p>Write out only binary/exe edited files, that are not part of an extension. Does not generate a log file. Overwrites anything with a name conflict.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="game-file-class">
+<h3>Game_File class<a class="headerlink" href="#game-file-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Game_File">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.File_Types.</span></span><span class="sig-name descname"><span class="pre">Game_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">virtual_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_source_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edit_in_place</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Game_File" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class to represent a source file. This may be read from the source folder or a cat/dat pair. In either case, this will capture some properties of the file for organization purposes.</p>
+<p>Attributes:</p>
+<ul class="simple">
+<li><p>name</p>
+<ul>
+<li><p>String, name of the file, without pathing.</p></li>
+<li><p>Automatically parsed from virtual_path.</p></li>
+</ul>
+</li>
+<li><p>virtual_path</p>
+<ul>
+<li><p>String, the path to the file in the game’s virtual file system, using forward slash separators, including name.</p></li>
+<li><p>This is the same as used in transform requirements and loads.</p></li>
+</ul>
+</li>
+<li><p>suffix</p>
+<ul>
+<li><p>The name suffix, with dot, eg. “.xml”, or None if no suffix found.</p></li>
+</ul>
+</li>
+<li><p>file_source_path</p>
+<ul>
+<li><p>String, sys path where the file’s original contents were read from, either a loose file or a cat file.</p></li>
+<li><p>None for generated files.</p></li>
+</ul>
+</li>
+<li><p>is_substitution</p>
+<ul>
+<li><p>Bool, if True then this file came from a “subst_##.cat” style of catalog file, and is meant to replace any file that came before it.</p></li>
+<li><p>False for core game files or other extension files.</p></li>
+</ul>
+</li>
+<li><p>modified</p>
+<ul>
+<li><p>Bool, if True then this file should be treated as modified, to be written out.</p></li>
+<li><p>Files only read should leave this flag False.</p></li>
+<li><p>Pending development; defaults False for now.</p></li>
+</ul>
+</li>
+<li><p>from_source</p>
+<ul>
+<li><p>Bool, if True then this file originates from some source on disk (cat, loose, etc.).</p></li>
+<li><p>If False (default), this is is generated by the customizer.</p></li>
+<li><p>Has some impact on write format, eg. xml diff patching.</p></li>
+<li><p>If loading a file from disk but wanting to overwrite it during writeback, leave this as False.</p></li>
+</ul>
+</li>
+<li><p>edit_in_place</p>
+<ul>
+<li><p>Bool, if True then this file originates from some loose file source and is being edited, where the original will be overwritten.</p></li>
+<li><p>Intended just for use with an existing content.xml in the output extension folder.</p></li>
+<li><p>Such files will not be recorded in the customizer log of written files.</p></li>
+</ul>
+</li>
+<li><p>extension_name</p>
+<ul>
+<li><p>String, optional, name of the extension this file was read from.</p></li>
+</ul>
+</li>
+<li><p>source_extension_names</p>
+<ul>
+<li><p>List of strings, the names of the extensions that contributed to this file’s contents, either directly or through patching.</p></li>
+<li><p>Will always include extension_name if given.</p></li>
+<li><p>Empty if this is just a vanilla file.</p></li>
+</ul>
+</li>
+<li><p>written</p>
+<ul>
+<li><p>Bool, if this file has had its changes written back out.</p></li>
+<li><p>Used selectively by the file writeback system.</p></li>
+</ul>
+</li>
+<li><p>load_error</p>
+<ul>
+<li><p>Bool, True if this file experienced a load error.</p></li>
+<li><p>Generally, error files should be skipped.</p></li>
+<li><p>Primarily used for empty xml files.</p></li>
+</ul>
+</li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Game_File.Copy">
+<span class="sig-name descname"><span class="pre">Copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Game_File.Copy" title="Link to this definition">¶</a></dt>
+<dd><p>Make a copy of this game file, with the new virtual path. Does not automatically add to the file system; use Add_File. Does not update the index component or macro file with a reference.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Game_File.Delayed_Init">
+<span class="sig-name descname"><span class="pre">Delayed_Init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Game_File.Delayed_Init" title="Link to this definition">¶</a></dt>
+<dd><p>Placeholder function for running any post-merging init.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Game_File.Get_Index_Path">
+<span class="sig-name descname"><span class="pre">Get_Index_Path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Game_File.Get_Index_Path" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a path string matching the form used in index files, using backward slashes and no extension. TODO: somehow automate an extension prefix?</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Game_File.Get_Output_Path">
+<span class="sig-name descname"><span class="pre">Get_Output_Path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Game_File.Get_Output_Path" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the full path to be used when writing out this file after any modifications, including file name.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Game_File.Get_Source_Names">
+<span class="sig-name descname"><span class="pre">Get_Source_Names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Game_File.Get_Source_Names" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a sorted list of source extension names, or [] if there are none.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Game_File.Is_Modified">
+<span class="sig-name descname"><span class="pre">Is_Modified</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Game_File.Is_Modified" title="Link to this definition">¶</a></dt>
+<dd><p>Returns True if this file has been modified by the customizer.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Game_File.Is_Patched">
+<span class="sig-name descname"><span class="pre">Is_Patched</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Game_File.Is_Patched" title="Link to this definition">¶</a></dt>
+<dd><p>Returns True if this file is partly or wholy from an extension, else False. It will be considered ‘patched’ if it was overwritten.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Game_File.Merge">
+<span class="sig-name descname"><span class="pre">Merge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Game_File.Merge" title="Link to this definition">¶</a></dt>
+<dd><p>Merge another file into this file, during loading. Returns the merged file, which may differ from this file. Substitutions will overwrite this file, xml files will be patched, other files will be ignored.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Game_File.Needs_Subst">
+<span class="sig-name descname"><span class="pre">Needs_Subst</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Game_File.Needs_Subst" title="Link to this definition">¶</a></dt>
+<dd><p>Returns True if this file needs to be placed in a subst catalog due to replacing some original file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Game_File.Set_Modified">
+<span class="sig-name descname"><span class="pre">Set_Modified</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Game_File.Set_Modified" title="Link to this definition">¶</a></dt>
+<dd><p>Sets this file as modified by the customizer.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Game_File.Standardize_Binary_Newlines">
+<span class="sig-name descname"><span class="pre">Standardize_Binary_Newlines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">binary</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Game_File.Standardize_Binary_Newlines" title="Link to this definition">¶</a></dt>
+<dd><p>If the given binary represents text, has newlines, and does not have carriage returns, this method adds the carriage returns and passed back the modified binary.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Game_File.Substitute">
+<span class="sig-name descname"><span class="pre">Substitute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Game_File.Substitute" title="Link to this definition">¶</a></dt>
+<dd><p>Replace this file with the other_file, maybe copying over some properties. Returns the modified other_file. Subclasses should replace this with their own function as needed.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="location-source-reader-class">
+<h3>Location_Source_Reader class<a class="headerlink" href="#location-source-reader-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.File_Manager.Source_Reader_Local.Location_Source_Reader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.Source_Reader_Local.</span></span><span class="sig-name descname"><span class="pre">Location_Source_Reader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension_summary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Source_Reader_Local.Location_Source_Reader" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class used to look up source files from a single location, such as the base X4 folder, the loose source folder, or an extension folder. Note: all virtual_paths stored here are relative to the location being read, and may not match up with the full game virtual paths after extension prefixing.</p>
+<p>Attributes:</p>
+<ul class="simple">
+<li><p>location</p>
+<ul>
+<li><p>Path to the location being sourced from.</p></li>
+<li><p>If not given, auto detection of cat files will be skipped.</p></li>
+</ul>
+</li>
+<li><p>folder_name_lower</p>
+<ul>
+<li><p>Name of the final folder of the location, lower cased.</p></li>
+<li><p>To be used in ordering extensions.</p></li>
+</ul>
+</li>
+<li><p>is_extension</p>
+<ul>
+<li><p>Bool, True if this is an extension.</p></li>
+<li><p>May be set explicitly if a summary is not available, else will be set based on the presence of extension_summary.</p></li>
+</ul>
+</li>
+<li><p>extension_summary</p>
+<ul>
+<li><p>Extension_Summary object, if this is for an extension.</p></li>
+</ul>
+</li>
+<li><p>extension_name</p>
+<ul>
+<li><p>String, name of the folder holding the extension, if an extension.</p></li>
+</ul>
+</li>
+<li><p>catalog_file_dict</p>
+<ul>
+<li><p>OrderedDict of Cat_Reader objects, keyed by virtual_path relative to the location, ordered by priority, where the first entry is the highest priority cat.</p></li>
+<li><p>Inner dict entries are initially None, and get replaced with Catalog_Files as the cats are searched.</p></li>
+<li><p>This collects all catalogs together, of any prefix.</p></li>
+</ul>
+</li>
+<li><p>source_file_path_dict</p>
+<ul>
+<li><p>Dict, keyed by virtual_path, holding the system path for where the file is located, for loose files at the location folder.</p></li>
+<li><p>The key will always be lowercased, though the path may not be.</p></li>
+</ul>
+</li>
+<li><p>cat_path_entry_dict</p>
+<ul>
+<li><p>Dict, keyed by virtual_path, holding Cat_Entry objects taken from each of the catalog readers.</p></li>
+</ul>
+</li>
+<li><p>all_virtual_paths</p>
+<ul>
+<li><p>Set of all virtual paths in the catalogs or loose files.</p></li>
+</ul>
+</li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Add_Catalog">
+<span class="sig-name descname"><span class="pre">Add_Catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Add_Catalog" title="Link to this definition">¶</a></dt>
+<dd><p>Adds a catalog entry for the cat file on the given path. The new catalog is given low priority.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Find_Catalogs">
+<span class="sig-name descname"><span class="pre">Find_Catalogs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Find_Catalogs" title="Link to this definition">¶</a></dt>
+<dd><p>Find and record all catalog files at the given location, according to the X4 naming convention.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Find_Loose_Files">
+<span class="sig-name descname"><span class="pre">Find_Loose_Files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Find_Loose_Files" title="Link to this definition">¶</a></dt>
+<dd><p>Finds all loose files at the location folder, recording them into self.source_file_path_dict.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Get_All_Loose_Files">
+<span class="sig-name descname"><span class="pre">Get_All_Loose_Files</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Get_All_Loose_Files" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a dict of absolute paths to all loose files at this location, keyed by virtual path, skipping those at the top directory level (eg. other cat files, the content file, etc.). Files in subfolders not used by x4 are ignored.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Get_Cat_Entries">
+<span class="sig-name descname"><span class="pre">Get_Cat_Entries</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Get_Cat_Entries" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a dict of Cat_Entry objects, keyed by virtual_path, taken from all catalog readers, using the highest priority one when a file is repeated.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Get_Catalog_Reader">
+<span class="sig-name descname"><span class="pre">Get_Catalog_Reader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cat_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Get_Catalog_Reader" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the Cat_Reader object for the given cat_path, creating it if necessary.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Get_Virtual_Paths">
+<span class="sig-name descname"><span class="pre">Get_Virtual_Paths</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Get_Virtual_Paths" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a set of all virtual paths used at this location by catalogs or loose files, relative to the location. These may need prefixing for extension files that are not present at the base x4 location.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Read">
+<span class="sig-name descname"><span class="pre">Read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">virtual_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_loose_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_if_not_found</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_md5_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Read" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a Game_File intialized with the contents read from a loose file or unpacked from a cat file. If the file contents are empty, this returns None.</p>
+<ul class="simple">
+<li><p>virtual_path</p>
+<ul>
+<li><p>String, virtual path of the file to look up.</p></li>
+<li><p>For files which may be gzipped into a pck file, give the expected non-zipped extension (.xml, .txt, etc.).</p></li>
+</ul>
+</li>
+<li><p>include_loose_files</p>
+<ul>
+<li><p>Bool, if True then loose files are searched.</p></li>
+</ul>
+</li>
+<li><p>cat_prefix</p>
+<ul>
+<li><p>Optional string, prefix of catalog files to search.</p></li>
+<li><p>Eg. ‘subst’ to look only at ‘subst_#.cat’ files.</p></li>
+</ul>
+</li>
+<li><p>error_if_not_found</p>
+<ul>
+<li><p>Bool, if True an exception will be thrown if the file cannot be found, otherwise None is returned.</p></li>
+</ul>
+</li>
+<li><p>allow_md5_error</p>
+<ul>
+<li><p>Bool, if True then the md5 check will be suppressed and errors allowed. May still print a warning message.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Read_Catalog_File">
+<span class="sig-name descname"><span class="pre">Read_Catalog_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">virtual_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_md5_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Read_Catalog_File" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a tuple of (cat_path, file_binary) for a cat/dat entry matching the given virtual_path. If no file found, returns (attempted_cat_path, None). Input virtual_path should be lowercase.</p>
+<ul class="simple">
+<li><p>cat_prefix</p>
+<ul>
+<li><p>Optional string, prefix of catalog files to search.</p></li>
+</ul>
+</li>
+<li><p>allow_md5_error</p>
+<ul>
+<li><p>Bool, if True then the md5 check will be suppressed.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Read_Loose_File">
+<span class="sig-name descname"><span class="pre">Read_Loose_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">virtual_path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Source_Reader_Local.Location_Source_Reader.Read_Loose_File" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a tuple of (file_path, file_binary) for a loose file matching the given virtual_path. If no file found, returns (None, None). Note: returned file_path includes original case. Input virtual_path should be lowercase.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="machine-code-file-class">
+<h3>Machine_Code_File class<a class="headerlink" href="#machine-code-file-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Machine_Code_File">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.File_Types.</span></span><span class="sig-name descname"><span class="pre">Machine_Code_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">binary</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Machine_Code_File" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#Framework.File_Manager.File_Types.Game_File" title="Framework.File_Manager.File_Types.Game_File"><code class="xref py py-class docutils literal notranslate"><span class="pre">Game_File</span></code></a></p>
+<p>Contents of an exe or dll file, holding the binary data. These files are not packed into cats/dats, and may have some other special handling.</p>
+<p>Attributes:</p>
+<ul class="simple">
+<li><p>binary</p>
+<ul>
+<li><p>Bytearray object holding the machine binary (may be given as bytes).</p></li>
+</ul>
+</li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Machine_Code_File.Get_Output_Path">
+<span class="sig-name descname"><span class="pre">Get_Output_Path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Machine_Code_File.Get_Output_Path" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a path back to the X4 main folder to write to, using a modified file name. Avoids overwriting the original.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Machine_Code_File.Needs_Subst">
+<span class="sig-name descname"><span class="pre">Needs_Subst</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Machine_Code_File.Needs_Subst" title="Link to this definition">¶</a></dt>
+<dd><p>Machine code never goes in catalogs, so does not need subst.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Machine_Code_File.Write_File">
+<span class="sig-name descname"><span class="pre">Write_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Machine_Code_File.Write_File" title="Link to this definition">¶</a></dt>
+<dd><p>Write these contents to the target file_path.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="misc-file-class">
+<h3>Misc_File class<a class="headerlink" href="#misc-file-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Misc_File">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.File_Types.</span></span><span class="sig-name descname"><span class="pre">Misc_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Misc_File" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#Framework.File_Manager.File_Types.Game_File" title="Framework.File_Manager.File_Types.Game_File"><code class="xref py py-class docutils literal notranslate"><span class="pre">Game_File</span></code></a></p>
+<p>Generic container for misc file types transforms may generate. This will only support file writing.</p>
+<p>Attributes:</p>
+<ul class="simple">
+<li><p>text</p>
+<ul>
+<li><p>String, raw text for the file.</p></li>
+<li><p>Optional if binary is present.</p></li>
+</ul>
+</li>
+<li><p>binary</p>
+<ul>
+<li><p>Bytearray object holding the binary (may be given as bytes).</p></li>
+<li><p>Optional if text is present.</p></li>
+</ul>
+</li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Misc_File.Get_Binary">
+<span class="sig-name descname"><span class="pre">Get_Binary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">for_cat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Misc_File.Get_Binary" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a bytearray with the file contents. Does not currently support distinguishing vanilla from patched files.</p>
+<ul class="simple">
+<li><p>for_cat</p>
+<ul>
+<li><p>Bool, set True if this binary is going to be placed in a catalog file. Changes newline handling (simple linefeed) for text.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Misc_File.Get_Text">
+<span class="sig-name descname"><span class="pre">Get_Text</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Misc_File.Get_Text" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the text for this file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Misc_File.Set_Text">
+<span class="sig-name descname"><span class="pre">Set_Text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Misc_File.Set_Text" title="Link to this definition">¶</a></dt>
+<dd><p>Overwrites the text for this file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Misc_File.Write_File">
+<span class="sig-name descname"><span class="pre">Write_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Misc_File.Write_File" title="Link to this definition">¶</a></dt>
+<dd><p>Write these contents to the target file_path.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="signature-file-class">
+<h3>Signature_File class<a class="headerlink" href="#signature-file-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Signature_File">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.File_Types.</span></span><span class="sig-name descname"><span class="pre">Signature_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Signature_File" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#Framework.File_Manager.File_Types.Misc_File" title="Framework.File_Manager.File_Types.Misc_File"><code class="xref py py-class docutils literal notranslate"><span class="pre">Misc_File</span></code></a></p>
+<p>Small file holding the 1024-byte signature (or 0-byte dummy) of some other file. This is an alias of Misc_File.</p>
+</dd></dl>
+
+</section>
+<section id="source-reader-class-class">
+<h3>Source_Reader_class class<a class="headerlink" href="#source-reader-class-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.File_Manager.Source_Reader.Source_Reader_class">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.Source_Reader.</span></span><span class="sig-name descname"><span class="pre">Source_Reader_class</span></span><a class="headerlink" href="#Framework.File_Manager.Source_Reader.Source_Reader_class" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class used to find and read the highest priority source files, and handle merging of extension xml with base xml. Create this only after Settings have been filled in.</p>
+<p>Attributes:</p>
+<ul class="simple">
+<li><p>base_x4_source_reader</p>
+<ul>
+<li><p>Location_Source_Reader for the base X4 folder.</p></li>
+</ul>
+</li>
+<li><p>loose_source_reader</p>
+<ul>
+<li><p>Location_Source_Reader for the optional user source folder.</p></li>
+<li><p>Takes priority over the base X4 folder.</p></li>
+</ul>
+</li>
+<li><p>extension_source_readers</p>
+<ul>
+<li><p>OrderedDict of Location_Source_Reader objects pointing at enabled extensions, keyed by lowercase extension folder name.</p></li>
+<li><p>Earlier extensions in the list satisfy dependencies from later extensions in the list, so xml patching should be done from first entry to last entry.</p></li>
+</ul>
+</li>
+<li><p>ext_currently_patching</p>
+<ul>
+<li><p>String, during xml patch application this is the name (folder) of the extension sourcing the patch.</p></li>
+<li><p>For use by monitoring code.</p></li>
+</ul>
+</li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Source_Reader.Source_Reader_class.Gen_All_Virtual_Paths">
+<span class="sig-name descname"><span class="pre">Gen_All_Virtual_Paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Source_Reader.Source_Reader_class.Gen_All_Virtual_Paths" title="Link to this definition">¶</a></dt>
+<dd><p>Generator which yields all virtual_path names of all discovered files, optionally filtered by a wildcard pattern.</p>
+<ul class="simple">
+<li><p>pattern</p>
+<ul>
+<li><p>String, optional, wildcard pattern to use for matching names.</p></li>
+<li><p>Pattern is lowercased internally.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Source_Reader.Source_Reader_class.Gen_Extension_Virtual_Paths">
+<span class="sig-name descname"><span class="pre">Gen_Extension_Virtual_Paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ext_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Source_Reader.Source_Reader_class.Gen_Extension_Virtual_Paths" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the virtual paths for the given extension. Paths will be prefixed with ‘extension/name/’ for files that do not match any at the base x4 location or another extension. If the name doesn’t match a known extension, this returns an empty list.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Source_Reader.Source_Reader_class.Get_All_Loose_Source_Files">
+<span class="sig-name descname"><span class="pre">Get_All_Loose_Source_Files</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Source_Reader.Source_Reader_class.Get_All_Loose_Source_Files" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a dict of absolute paths to all loose files in the loose source folder, keyed by virtual path.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Source_Reader.Source_Reader_class.Get_Extension_Names">
+<span class="sig-name descname"><span class="pre">Get_Extension_Names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Source_Reader.Source_Reader_class.Get_Extension_Names" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a list of names of all enabled extensions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Source_Reader.Source_Reader_class.Init_From_Settings">
+<span class="sig-name descname"><span class="pre">Init_From_Settings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Source_Reader.Source_Reader_class.Init_From_Settings" title="Link to this definition">¶</a></dt>
+<dd><p>Initializes the source reader by creating Location_Source_Reader children for all locations being sourced from. This should be run after paths have been set up in Settings.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Source_Reader.Source_Reader_class.Read">
+<span class="sig-name descname"><span class="pre">Read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">virtual_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_if_not_found</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_if_unmatched_diff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Source_Reader.Source_Reader_class.Read" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a Game_File intialized with the contents read from a loose file or unpacked from a cat file. Extension xml files will be automatically merged with any base files. If the file contents are empty, this returns None. May trigger a File_Loading_Error_Exception if a found file has trouble during loading.</p>
+<ul class="simple">
+<li><p>virtual_path</p>
+<ul>
+<li><p>String, virtual path of the file to look up.</p></li>
+<li><p>For files which may be gzipped into a pck file, give the expected non-zipped extension (.xml, .txt, etc.).</p></li>
+</ul>
+</li>
+<li><p>error_if_not_found</p>
+<ul>
+<li><p>Bool, if True a File_Missing_Exception will be thrown if the file cannot be found, otherwise None is returned.</p></li>
+</ul>
+</li>
+<li><p>error_if_unmatched_diff</p>
+<ul>
+<li><p>Bool, if True a Unmatched_Diff_Exception will be thrown if the assumed base file is found to be a diff patch.</p></li>
+<li><p>Default is to log an error and return None.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.Source_Reader.Source_Reader_class.Sort_Extensions">
+<span class="sig-name descname"><span class="pre">Sort_Extensions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priorities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.Source_Reader.Source_Reader_class.Sort_Extensions" title="Link to this definition">¶</a></dt>
+<dd><p>Sort the found extensions so that all dependencies are satisfied. Optionally, allow setting of sorting priority. When dependencies are otherwise satisfied, extensions are sorted by alphabetical lowercase folder name. This will print warnings and errors to the Plugin_Log for missing dependencies or duplicated IDs.</p>
+<p>TODO: split out the error checks/messages to another function. TODO: move some of this id/dependency setup code into the extension_finder. TODO: maybe try to match better to the game; eg. does the game go through all extensions in alphabetical order and load those with satisfied dependencies, looping, or does it restart the order whenever an extension is loaded, or does it split out extensions based on dependency depth (depth of highest dependendee +1) and load in depth order, or what?</p>
+<ul class="simple">
+<li><p>priorities</p>
+<ul>
+<li><p>Dict, keyed by extension name, holding an integer priority.</p></li>
+<li><p>Default priority is 0.</p></li>
+<li><p>Negative priority loads an extension earlier, positive later.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="text-file-class">
+<h3>Text_File class<a class="headerlink" href="#text-file-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Text_File">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.File_Types.</span></span><span class="sig-name descname"><span class="pre">Text_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Text_File" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#Framework.File_Manager.File_Types.Misc_File" title="Framework.File_Manager.File_Types.Misc_File"><code class="xref py py-class docutils literal notranslate"><span class="pre">Misc_File</span></code></a></p>
+<p>File holding text.  Eg. shader c-style code. Mostly a dummy class.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.Text_File.Needs_Subst">
+<span class="sig-name descname"><span class="pre">Needs_Subst</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.Text_File.Needs_Subst" title="Link to this definition">¶</a></dt>
+<dd><p>Returns True if this file needs to be placed in a subst catalog due to replacing some original file.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="xml-file-class">
+<h3>XML_File class<a class="headerlink" href="#xml-file-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_File">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.File_Types.</span></span><span class="sig-name descname"><span class="pre">XML_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xml_root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_File" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#Framework.File_Manager.File_Types.Game_File" title="Framework.File_Manager.File_Types.Game_File"><code class="xref py py-class docutils literal notranslate"><span class="pre">Game_File</span></code></a></p>
+<p>XML file contents. This will keep a record of the original xml intitialized with, returns a copy of it for editing, and interfaces with the diff patch module for both applying and creating patches.</p>
+<p>Parameters:</p>
+<ul class="simple">
+<li><p>binary</p>
+<ul>
+<li><p>Bytes object holding the xml binary.</p></li>
+<li><p>Optional if xml_root given.</p></li>
+</ul>
+</li>
+<li><p>xml_root</p>
+<ul>
+<li><p>Element holding the root node.</p></li>
+<li><p>Optional if binary given.</p></li>
+</ul>
+</li>
+</ul>
+<p>Attributes:</p>
+<ul class="simple">
+<li><p>original_root</p>
+<ul>
+<li><p>Element holding the original parsed xml, pre-patches, pre-transforms.</p></li>
+</ul>
+</li>
+<li><p>patched_root</p>
+<ul>
+<li><p>Element holding the diff patched root, pre-transforms.</p></li>
+</ul>
+</li>
+<li><p>modified_root</p>
+<ul>
+<li><p>Element holding transformed xml, suitable for generating new diff patches.</p></li>
+</ul>
+</li>
+<li><p>root_tag</p>
+<ul>
+<li><p>Tag name of the root node, for convenient referencing.</p></li>
+<li><p>This is never expected to change across diff patches or transforms.</p></li>
+</ul>
+</li>
+<li><p>asset_class_name_dict</p>
+<ul>
+<li><p>Dict, keyed by asset class as defined in the xml, holding a list of names of the asset nodes of the class type.</p></li>
+<li><p>Does not include assets using a ‘ref’ to another asset instead of defining a class.</p></li>
+<li><p>None if this xml doesn’t contain asset nodes.</p></li>
+<li><p>Example keys: ‘weapon’, ‘missile’, etc.</p></li>
+<li><p>Often or always holds a single name that matches the last component of the virtual_path, without suffix.</p></li>
+<li><p>TODO: maybe move this to an xml file subclass.</p></li>
+</ul>
+</li>
+<li><p>forced_xpath_attributes</p>
+<ul>
+<li><p>String, similar to the option in Settings, these attributes or child xpath checks are added to any taken from Settings.</p></li>
+</ul>
+</li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_File.Add_Forced_Xpath_Attributes">
+<span class="sig-name descname"><span class="pre">Add_Forced_Xpath_Attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">forced_xpath_attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_File.Add_Forced_Xpath_Attributes" title="Link to this definition">¶</a></dt>
+<dd><p>Add a string of additional forced xpath attributes to any already present for this file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_File.Copy">
+<span class="sig-name descname"><span class="pre">Copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_File.Copy" title="Link to this definition">¶</a></dt>
+<dd><p>Make a copy of this game file, with the new virtual path. Does not automatically add to the file system; use Add_File.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_File.Delayed_Init">
+<span class="sig-name descname"><span class="pre">Delayed_Init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_File.Delayed_Init" title="Link to this definition">¶</a></dt>
+<dd><p>Fills in node ids for the patched_root, and any other delayed setup that needs to account for diff patches. This should be called once after all patching is finished.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_File.Get_Asset_Xpath">
+<span class="sig-name descname"><span class="pre">Get_Asset_Xpath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_File.Get_Asset_Xpath" title="Link to this definition">¶</a></dt>
+<dd><p>Returns an xpath which will look up the base node for an asset. Used to distinguish between assets when multiple are present in a single file. This does not verify that the name or xpath are valid. Returns None if this is not an asset file.</p>
+<ul class="simple">
+<li><p>name</p>
+<ul>
+<li><p>String, name of the asset (macro or component) as defined in the xml.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_File.Get_Binary">
+<span class="sig-name descname"><span class="pre">Get_Binary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'current'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_diff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">for_cat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_File.Get_Binary" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a bytearray with the full modified_root.</p>
+<ul class="simple">
+<li><p>version</p>
+<ul>
+<li><p>Version of the file to return binary for.</p></li>
+</ul>
+</li>
+<li><p>no_diff</p>
+<ul>
+<li><p>Bool, set False to suppress diff packing and get the fully expanded binary.</p></li>
+<li><p>Note: only edited source files, current version, return diff files normally; others will always have full binary.</p></li>
+</ul>
+</li>
+<li><p>for_cat</p>
+<ul>
+<li><p>Bool, set True if this binary is going to be placed in a catalog file. Changes newline handling (simple linefeed).</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_File.Get_Diff">
+<span class="sig-name descname"><span class="pre">Get_Diff</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_File.Get_Diff" title="Link to this definition">¶</a></dt>
+<dd><p>Generates an xml tree holding a diff patch, will convert from the original tree to the modified tree.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_File.Get_Root">
+<span class="sig-name descname"><span class="pre">Get_Root</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_File.Get_Root" title="Link to this definition">¶</a></dt>
+<dd><p>Return an Element object with a copy of the current modified xml. The first call of this should occur after all initial patching is complete, as that is when the patched_root is first annotated and copied.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_File.Get_Root_Readonly">
+<span class="sig-name descname"><span class="pre">Get_Root_Readonly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_File.Get_Root_Readonly" title="Link to this definition">¶</a></dt>
+<dd><p>Returns an Element object with the current modified xml, or patched xml if no modifications made. It should not be written to, only read.</p>
+<ul class="simple">
+<li><p>version</p>
+<ul>
+<li><p>String, optional version of the root to return.</p></li>
+<li><p>‘vanilla’: returns the original root, pre-patching.</p></li>
+<li><p>‘patched’: returns the patched root, pre-transforms.</p></li>
+<li><p>‘current’: Default, returns the current modified root.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_File.Get_Xpath_Nodes">
+<span class="sig-name descname"><span class="pre">Get_Xpath_Nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'current'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_File.Get_Xpath_Nodes" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a list of read-only nodes found using the given xpath on the given version of the xml root. Defaults to the ‘current’ version. Nodes should not be modified. Subclasses may offer special handling of this to speed up xpath searches on large xml files with regular structure for doing value lookups.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_File.Needs_Subst">
+<span class="sig-name descname"><span class="pre">Needs_Subst</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_File.Needs_Subst" title="Link to this definition">¶</a></dt>
+<dd><p>Returns False for xml files, True for other extensions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_File.Patch">
+<span class="sig-name descname"><span class="pre">Patch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_xml_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_File.Patch" title="Link to this definition">¶</a></dt>
+<dd><p>Merge another xml_file into this one. Changes the patched_root, and does not flag this file as modified.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_File.Substitute">
+<span class="sig-name descname"><span class="pre">Substitute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_File.Substitute" title="Link to this definition">¶</a></dt>
+<dd><p>Replace this file with the other_file, this version’s vanilla code into the other_file, and verifying tags match.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_File.Update_Root">
+<span class="sig-name descname"><span class="pre">Update_Root</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_root</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_File.Update_Root" title="Link to this definition">¶</a></dt>
+<dd><p>Update the current modified xml from an xml node, either Element or ElementTree. Flags this file as modified. Requires the root element type be unchanged.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_File.Write_File">
+<span class="sig-name descname"><span class="pre">Write_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_File.Write_File" title="Link to this definition">¶</a></dt>
+<dd><p>Write these contents to the target file_path.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_File.valid_asset_tags">
+<span class="sig-name descname"><span class="pre">valid_asset_tags</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'components':</span> <span class="pre">'component',</span> <span class="pre">'macros':</span> <span class="pre">'macro'}</span></em><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_File.valid_asset_tags" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="xml-index-file-class">
+<h3>XML_Index_File class<a class="headerlink" href="#xml-index-file-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_Index_File">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.File_Types.</span></span><span class="sig-name descname"><span class="pre">XML_Index_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_Index_File" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#Framework.File_Manager.File_Types.XML_File" title="Framework.File_Manager.File_Types.XML_File"><code class="xref py py-class docutils literal notranslate"><span class="pre">XML_File</span></code></a></p>
+<p>XML file holding a an index (effectively dict) of name:path pairs. Expected to be used for macros, components, and mousecursors. This will append a ‘.xml’ extension to the looked up paths, since it is missing from the x4 source file paths.</p>
+<p>Attributes:</p>
+<ul class="simple">
+<li><p>name_path_dict</p>
+<ul>
+<li><p>Dict, keyed by entry name, with the virtual_path to an xml source file.</p></li>
+<li><p>Paths will be lower cased; name is kept in original case.</p></li>
+</ul>
+</li>
+<li><p>requests_until_refresh</p>
+<ul>
+<li><p>Int, how many text lookup requests may occurred since the last page_text_dict reset (due to modification) before an automatic refresh is triggerred.</p></li>
+<li><p>Used to prevent refreshing too often when fine grain modifications occur.</p></li>
+</ul>
+</li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_Index_File.Find">
+<span class="sig-name descname"><span class="pre">Find</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_Index_File.Find" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the indexed path matching the given name, or None if the name is not found. Name is case sensitive.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_Index_File.Findall">
+<span class="sig-name descname"><span class="pre">Findall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_Index_File.Findall" title="Link to this definition">¶</a></dt>
+<dd><p>Find and returns a set of all values matching the given key pattern, with wildcard support. Eg. Findall(‘ship_*’) is expected to find every ship file path. Duplicates are ignored.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_Index_File.Refresh_Cache">
+<span class="sig-name descname"><span class="pre">Refresh_Cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_Index_File.Refresh_Cache" title="Link to this definition">¶</a></dt>
+<dd><p>Reads the xml and sets up the name_path_dict. This will need a rerun when the xml gets modified and a new Get is requested, if it is to be beneficial.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_Index_File.Update_Root">
+<span class="sig-name descname"><span class="pre">Update_Root</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_Index_File.Update_Root" title="Link to this definition">¶</a></dt>
+<dd><p>Clears the page_text_dict when root is updated.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_Index_File.requests_until_refresh_limit">
+<span class="sig-name descname"><span class="pre">requests_until_refresh_limit</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_Index_File.requests_until_refresh_limit" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="xml-text-file-class">
+<h3>XML_Text_File class<a class="headerlink" href="#xml-text-file-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_Text_File">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.File_Types.</span></span><span class="sig-name descname"><span class="pre">XML_Text_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_Text_File" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#Framework.File_Manager.File_Types.XML_File" title="Framework.File_Manager.File_Types.XML_File"><code class="xref py py-class docutils literal notranslate"><span class="pre">XML_File</span></code></a></p>
+<p>XML file holding game text. This provides functionality for looking up text references.</p>
+<p>Attributes:</p>
+<ul class="simple">
+<li><p>page_text_dict</p>
+<ul>
+<li><p>Dict, keyed by ‘page[id]’ then ‘t[id]’, holding the current text values. Keys are kept as strings.</p></li>
+<li><p>Added to speed up performance compared to looking up text each time in the xml with xpath.</p></li>
+</ul>
+</li>
+<li><p>requests_until_refresh</p>
+<ul>
+<li><p>Int, how many text lookup requests may occurred since the last page_text_dict reset (due to modification) before an automatic refresh is triggerred.</p></li>
+<li><p>Used to prevent refreshing too often when fine grain modifications occur.</p></li>
+</ul>
+</li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_Text_File.Read">
+<span class="sig-name descname"><span class="pre">Read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">page</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_Text_File.Read" title="Link to this definition">¶</a></dt>
+<dd><p>Reads and returns the text at the given {page,id}. Returns None if no text found, or if an error occurs.</p>
+<ul class="simple">
+<li><p>text</p>
+<ul>
+<li><p>String, including any internal ‘{page,id}’ terms.</p></li>
+</ul>
+</li>
+<li><p>page, id</p>
+<ul>
+<li><p>Int or string, page and id separated; give for direct dereference instead of a full text string.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_Text_File.Refresh_Cache">
+<span class="sig-name descname"><span class="pre">Refresh_Cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_Text_File.Refresh_Cache" title="Link to this definition">¶</a></dt>
+<dd><p>Reads the xml and sets up the page_text_dict. This will need a rerun when the xml gets modified and a new Read is requested, if it is to be beneficial.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_Text_File.Update_Root">
+<span class="sig-name descname"><span class="pre">Update_Root</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_Text_File.Update_Root" title="Link to this definition">¶</a></dt>
+<dd><p>Clears the page_text_dict when root is updated.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_Text_File.requests_until_refresh_limit">
+<span class="sig-name descname"><span class="pre">requests_until_refresh_limit</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></em><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_Text_File.requests_until_refresh_limit" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="xml-wares-file-class">
+<h3>XML_Wares_File class<a class="headerlink" href="#xml-wares-file-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_Wares_File">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.File_Manager.File_Types.</span></span><span class="sig-name descname"><span class="pre">XML_Wares_File</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_Wares_File" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#Framework.File_Manager.File_Types.XML_File" title="Framework.File_Manager.File_Types.XML_File"><code class="xref py py-class docutils literal notranslate"><span class="pre">XML_File</span></code></a></p>
+<p>The libraries/wares.xml file. This has some functionality for speeding up xpath reads.</p>
+<p>Attributes:</p>
+<ul class="simple">
+<li><p>version_ware_node_dict</p>
+<ul>
+<li><p>Dict, keyed by version then by ‘ware[id]’, holding the node for each ware.</p></li>
+<li><p>Added to speed up performance compared to looking up nodes each time in the xml with xpath, when the xpaths have ware id qualifiers.</p></li>
+</ul>
+</li>
+<li><p>requests_until_refresh</p>
+<ul>
+<li><p>Int, how many text lookup requests may occurred since the last ware_node_dict reset (due to modification) before an automatic refresh is triggerred.</p></li>
+<li><p>Used to prevent refreshing too often when fine grain modifications occur.</p></li>
+</ul>
+</li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_Wares_File.Get_Xpath_Nodes">
+<span class="sig-name descname"><span class="pre">Get_Xpath_Nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'current'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_Wares_File.Get_Xpath_Nodes" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a list of nodes found using the given xpath on the given version of the xml root. Defaults to the ‘current’ version. Nodes should be considered read only.</p>
+<p>If the xpath starts with the pattern ‘./ware[&#64;id=”*”]/<a href="#id1"><span class="problematic" id="id2">*</span></a>’, its lookup will be accelerated.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_Wares_File.Refresh_Cache">
+<span class="sig-name descname"><span class="pre">Refresh_Cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_Wares_File.Refresh_Cache" title="Link to this definition">¶</a></dt>
+<dd><p>Reads the xml and sets up the ware_node_dict. This will need a rerun when the xml gets modified and a new Get_Xpath_Nodes is requested, if it is to be beneficial. The ‘vanilla’ and ‘patched’ versions will be filled once and never cleared.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_Wares_File.Update_Root">
+<span class="sig-name descname"><span class="pre">Update_Root</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_Wares_File.Update_Root" title="Link to this definition">¶</a></dt>
+<dd><p>Clears version_ware_node_dict[‘current’] when root is updated.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Framework.File_Manager.File_Types.XML_Wares_File.requests_until_refresh_limit">
+<span class="sig-name descname"><span class="pre">requests_until_refresh_limit</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#Framework.File_Manager.File_Types.XML_Wares_File.requests_until_refresh_limit" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Table of Contents</a></h3>
+<p class="caption" role="heading"><span class="caption-text">Content:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Analyses.html">Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Common.html">Common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Documentation.html">Documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">File_Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#apply-patch-function">Apply_Patch function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fill-node-ids-function">Fill_Node_IDs function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#find-extensions-function">Find_Extensions function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generate-signatures-function">Generate_Signatures function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-hash-string-function">Get_Hash_String function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#is-ns-attribute-function">Is_NS_Attribute function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lxml-element-depickler-function">LXML_Element_Depickler function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lxml-element-pickler-function">LXML_Element_Pickler function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#make-patch-function">Make_Patch function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ns-qualify-function">NS_qualify function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ns-unqualify-function">NS_unqualify function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ns-xpath-function">NS_xpath function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#new-game-file-function">New_Game_File function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#print-function">Print function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sort-attributes-function">Sort_Attributes function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#unit-test-function">Unit_Test function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#verify-patch-function">Verify_Patch function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#apply-patch-op-function">_Apply_Patch_Op function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-patch-ops-recursive-function">_Get_Patch_Ops_Recursive function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-xpath-recursive-function">_Get_Xpath_Recursive function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#patch-node-constructor-function">_Patch_Node_Constructor function</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#classes">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cat-entry-class">Cat_Entry class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cat-reader-class">Cat_Reader class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cat-writer-class">Cat_Writer class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#extension-summary-class">Extension_Summary class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#file-system-class-class">File_System_class class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#game-file-class">Game_File class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#location-source-reader-class">Location_Source_Reader class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#machine-code-file-class">Machine_Code_File class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#misc-file-class">Misc_File class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#signature-file-class">Signature_File class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#source-reader-class-class">Source_Reader_class class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#text-file-class">Text_File class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#xml-file-class">XML_File class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#xml-index-file-class">XML_Index_File class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#xml-text-file-class">XML_Text_File class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#xml-wares-file-class">XML_Wares_File class</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="GUI.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Live_Editor.html">Live_Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Map_Transforms.html">Map_Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Utilities.html">Utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="GUI.html" title="GUI"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Documentation.html" title="Documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">X4_Customizer Source Documentation  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">File_Manager</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright .
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

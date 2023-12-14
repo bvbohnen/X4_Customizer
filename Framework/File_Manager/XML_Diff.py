@@ -3,6 +3,9 @@ XML Diff patch support functions.
 Aims to (roughly) support a common subset of RFC 5261.
 https://tools.ietf.org/html/rfc5261
 '''
+from ..Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('File_Manager')
+
 '''
 Side note: Python xml libraries (lxml and ElementTree) xpath operations
 are always with reference to the file root node, eg. "macros", which

@@ -1,4 +1,7 @@
 
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Utilities')
+
 from pathlib import Path
 # Note: re was looked at, but deemed overkill when just regular
 # wildcard expressions are good enough for all expected uses.

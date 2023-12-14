@@ -1,4 +1,7 @@
 
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Utilities')
+
 from pathlib import Path
 from itertools import zip_longest
 import difflib

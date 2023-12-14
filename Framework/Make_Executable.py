@@ -86,9 +86,9 @@ from pathlib import Path # TODO: complete switchover to pathlib.
 # Conditional import of pyinstaller, checking if it is available.
 try:
     import PyInstaller
-except Exception:
-    print('Error: PyInstaller not found.')
-    sys.exit()
+except ImportError:
+    print('PyInstaller not found; customizer->executable generation disabled')
+    PyInstaller = None
 
 import subprocess
 
@@ -176,6 +176,9 @@ def Make(*args):
     # in VS when its default args are still set for Main.
     parsed_args, remainder = argparser.parse_known_args(args)
 
+    # Check for pyinstaller.
+    if PyInstaller is None:
+        raise RuntimeError(f'PyInstaller not found')
 
     # Set the output folder names.
     # Note: changing the pyinstaller build and dist folder names is

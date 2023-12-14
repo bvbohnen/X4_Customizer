@@ -1,3 +1,7 @@
+
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('GUI')
+
 '''
 Note: due to sluggish performance, the highlighter will be broken
 up into a Qt element and the regex processing block. The regex part

@@ -1,4 +1,7 @@
 
+from ..Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Common')
+
 from .Settings import Settings
 from .Print import Print
 

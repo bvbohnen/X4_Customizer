@@ -1,6 +1,8 @@
 '''
 Container for exception messages.
 '''
+from ..Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Common')
 
 class File_Missing_Exception(Exception):
     '''

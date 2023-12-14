@@ -4,6 +4,9 @@ Simplified from X3_Customizer, dropping support for file renaming
 and hash comparisons, since all generated files should be safely
 in their own extension folder.
 '''
+from ..Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Common')
+
 import os
 from pathlib import Path
 import json

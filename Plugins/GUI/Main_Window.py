@@ -10,6 +10,9 @@ Notes:
     and this direct import will work since the sys path is setup
     already.
 '''
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('GUI')
+
 from pathlib import Path
 
 # Needed modules are kinda scattered all over, and get moved around

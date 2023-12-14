@@ -1,4 +1,7 @@
 
+from ..Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Live_Editor')
+
 import inspect
 from collections import OrderedDict, defaultdict
 from collections import namedtuple

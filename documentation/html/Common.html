@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Common &#8212; X4_Customizer Source Documentation  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=c135b40c" />
+    
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Documentation" href="Documentation.html" />
+    <link rel="prev" title="Classes" href="Classes.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Documentation.html" title="Documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Classes.html" title="Classes"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">X4_Customizer Source Documentation  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Common</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="common">
+<h1>Common<a class="headerlink" href="#common" title="Link to this heading">¶</a></h1>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<section id="analysis-wrapper-function">
+<h3>Analysis_Wrapper function<a class="headerlink" href="#analysis-wrapper-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.Plugin_Manager.Analysis_Wrapper">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.Plugin_Manager.</span></span><span class="sig-name descname"><span class="pre">Analysis_Wrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Plugin_Manager.Analysis_Wrapper" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="find-all-matches-function">
+<h3>Find_All_Matches function<a class="headerlink" href="#find-all-matches-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.XML_Misc.Find_All_Matches">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.XML_Misc.</span></span><span class="sig-name descname"><span class="pre">Find_All_Matches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.XML_Misc.Find_All_Matches" title="Link to this definition">¶</a></dt>
+<dd><p>Searches an xml node’s contents to find a match to a given reference node. Will match node type, all attributes, and all children recursively. Returns a list of matching child nodes of base_node, possibly empty with no matches.</p>
+</dd></dl>
+
+</section>
+<section id="find-match-function">
+<h3>Find_Match function<a class="headerlink" href="#find-match-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.XML_Misc.Find_Match">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.XML_Misc.</span></span><span class="sig-name descname"><span class="pre">Find_Match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.XML_Misc.Find_Match" title="Link to this definition">¶</a></dt>
+<dd><p>Searches an xml node’s contents to find a match to a given reference node. Will match node type, all attributes, and all children recursively. Returns the corresponding child of base_node if found, else returns None. Error if there are 0 or multiple matches.</p>
+</dd></dl>
+
+</section>
+<section id="fit-equation-function">
+<h3>Fit_equation function<a class="headerlink" href="#fit-equation-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.Scaling_Equations.Fit_equation">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.Scaling_Equations.</span></span><span class="sig-name descname"><span class="pre">Fit_equation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Scaling_Equations.Fit_equation" title="Link to this definition">¶</a></dt>
+<dd><p>Standard smoothed scaling equation, for scipy optimization</p>
+</dd></dl>
+
+</section>
+<section id="fit-equation-linear-function">
+<h3>Fit_equation_linear function<a class="headerlink" href="#fit-equation-linear-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.Scaling_Equations.Fit_equation_linear">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.Scaling_Equations.</span></span><span class="sig-name descname"><span class="pre">Fit_equation_linear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_max</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Scaling_Equations.Fit_equation_linear" title="Link to this definition">¶</a></dt>
+<dd><p>More advanced linear scaling equation.</p>
+</dd></dl>
+
+</section>
+<section id="fit-equation-reversed-function">
+<h3>Fit_equation_reversed function<a class="headerlink" href="#fit-equation-reversed-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.Scaling_Equations.Fit_equation_reversed">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.Scaling_Equations.</span></span><span class="sig-name descname"><span class="pre">Fit_equation_reversed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Scaling_Equations.Fit_equation_reversed" title="Link to this definition">¶</a></dt>
+<dd><p>Reversed smoothed scaling equation, for scipy optimization</p>
+</dd></dl>
+
+</section>
+<section id="fit-equation-simple-function">
+<h3>Fit_equation_simple function<a class="headerlink" href="#fit-equation-simple-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.Scaling_Equations.Fit_equation_simple">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.Scaling_Equations.</span></span><span class="sig-name descname"><span class="pre">Fit_equation_simple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Scaling_Equations.Fit_equation_simple" title="Link to this definition">¶</a></dt>
+<dd><p>Super simple linear scaling equation.</p>
+</dd></dl>
+
+</section>
+<section id="get-linear-scaling-fit-function">
+<h3>Get_Linear_Scaling_Fit function<a class="headerlink" href="#get-linear-scaling-fit-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.Scaling_Equations.Get_Linear_Scaling_Fit">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.Scaling_Equations.</span></span><span class="sig-name descname"><span class="pre">Get_Linear_Scaling_Fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_vec</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Scaling_Equations.Get_Linear_Scaling_Fit" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a function-like Scaling_Function class object, using a simple linear equation.</p>
+</dd></dl>
+
+</section>
+<section id="get-scaling-fit-function">
+<h3>Get_Scaling_Fit function<a class="headerlink" href="#get-scaling-fit-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.Scaling_Equations.Get_Scaling_Fit">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.Scaling_Equations.</span></span><span class="sig-name descname"><span class="pre">Get_Scaling_Fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_vec</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Scaling_Equations.Get_Scaling_Fit" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a function-like Scaling_Function class object. If (y &lt; x) in general, a diminishing formula is used, otherwise and increasing formula is used. If the largest changes occur near the low x, smallest changes at high x, a reversed scaling formula is used. If scipy is selected in settings and importable, a smooth function will be used for scaling, else a linear function is used.</p>
+</dd></dl>
+
+</section>
+<section id="get-scipy-scaling-fit-function">
+<h3>Get_Scipy_Scaling_Fit function<a class="headerlink" href="#get-scipy-scaling-fit-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.Scaling_Equations.Get_Scipy_Scaling_Fit">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.Scaling_Equations.</span></span><span class="sig-name descname"><span class="pre">Get_Scipy_Scaling_Fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_vec</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Scaling_Equations.Get_Scipy_Scaling_Fit" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a function-like Scaling_Function class object, using scipy for a smooth equation.</p>
+</dd></dl>
+
+</section>
+<section id="has-matching-attribute-function">
+<h3>Has_Matching_Attribute function<a class="headerlink" href="#has-matching-attribute-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.XML_Misc.Has_Matching_Attribute">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.XML_Misc.</span></span><span class="sig-name descname"><span class="pre">Has_Matching_Attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.XML_Misc.Has_Matching_Attribute" title="Link to this definition">¶</a></dt>
+<dd><p>Checks if the given node, or any of its children recursively, contains a given attribute and value. In a special case, a ‘tag’ or ‘tags’ attribute will check the value against any space separated term in the attribute ‘tags’. Returns True on match, False on mismatch.</p>
+<ul class="simple">
+<li><p>parent</p>
+<ul>
+<li><p>Parent xml element.</p></li>
+</ul>
+</li>
+<li><p>attr</p>
+<ul>
+<li><p>String, name of the attribute.</p></li>
+<li><p>If ‘*’, checks all attribute values.</p></li>
+</ul>
+</li>
+<li><p>value</p>
+<ul>
+<li><p>String, value looked for.</p></li>
+<li><p>If ‘*’, matches on any value if the attribute is found.</p></li>
+</ul>
+</li>
+<li><p>partial</p>
+<ul>
+<li><p>Bool, if True then a partial value string match is allowed.</p></li>
+<li><p>Note: with ‘tags’, this will do a partial match on the whole element value string without space separation.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+</section>
+<section id="insert-after-function">
+<h3>Insert_After function<a class="headerlink" href="#insert-after-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.XML_Misc.Insert_After">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.XML_Misc.</span></span><span class="sig-name descname"><span class="pre">Insert_After</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.XML_Misc.Insert_After" title="Link to this definition">¶</a></dt>
+<dd><p>Insert a new node after an old child node under the parent.</p>
+</dd></dl>
+
+</section>
+<section id="plot-fit-function">
+<h3>Plot_Fit function<a class="headerlink" href="#plot-fit-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.Scaling_Equations.Plot_Fit">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.Scaling_Equations.</span></span><span class="sig-name descname"><span class="pre">Plot_Fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fit_equation</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Scaling_Equations.Plot_Fit" title="Link to this definition">¶</a></dt>
+<dd><p>Make a plot of this fit.</p>
+</dd></dl>
+
+</section>
+<section id="plugin-was-run-before-function">
+<h3>Plugin_Was_Run_Before function<a class="headerlink" href="#plugin-was-run-before-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.Plugin_Manager.Plugin_Was_Run_Before">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.Plugin_Manager.</span></span><span class="sig-name descname"><span class="pre">Plugin_Was_Run_Before</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Plugin_Manager.Plugin_Was_Run_Before" title="Link to this definition">¶</a></dt>
+<dd><p>Returns True if the named plugin has been run.</p>
+</dd></dl>
+
+</section>
+<section id="replace-node-function">
+<h3>Replace_Node function<a class="headerlink" href="#replace-node-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.XML_Misc.Replace_Node">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.XML_Misc.</span></span><span class="sig-name descname"><span class="pre">Replace_Node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.XML_Misc.Replace_Node" title="Link to this definition">¶</a></dt>
+<dd><p>Replace a child node of the parent.</p>
+</dd></dl>
+
+</section>
+<section id="rescale-vec-function">
+<h3>Rescale_Vec function<a class="headerlink" href="#rescale-vec-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.Scaling_Equations.Rescale_Vec">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.Scaling_Equations.</span></span><span class="sig-name descname"><span class="pre">Rescale_Vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vec</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Scaling_Equations.Rescale_Vec" title="Link to this definition">¶</a></dt>
+<dd><p>Scale a vector so that its values are centered around 1.</p>
+</dd></dl>
+
+</section>
+<section id="transform-wrapper-function">
+<h3>Transform_Wrapper function<a class="headerlink" href="#transform-wrapper-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.Plugin_Manager.Transform_Wrapper">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.Plugin_Manager.</span></span><span class="sig-name descname"><span class="pre">Transform_Wrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Plugin_Manager.Transform_Wrapper" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="utility-wrapper-function">
+<h3>Utility_Wrapper function<a class="headerlink" href="#utility-wrapper-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.Plugin_Manager.Utility_Wrapper">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.Plugin_Manager.</span></span><span class="sig-name descname"><span class="pre">Utility_Wrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Plugin_Manager.Utility_Wrapper" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="plugin-wrapper-function">
+<h3>_Plugin_Wrapper function<a class="headerlink" href="#plugin-wrapper-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.Plugin_Manager._Plugin_Wrapper">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.Plugin_Manager.</span></span><span class="sig-name descname"><span class="pre">_Plugin_Wrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uses_paths_from_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doc_priority</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shared_docs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Plugin_Manager._Plugin_Wrapper" title="Link to this definition">¶</a></dt>
+<dd><p>Wrapper function for plugins.</p>
+<ul class="simple">
+<li><p>plugin_type</p>
+<ul>
+<li><p>String, type of this plugin.</p></li>
+<li><p>Currently one of [‘Analysis’,’Transform’,’Utility’].</p></li>
+</ul>
+</li>
+<li><p>category</p>
+<ul>
+<li><p>String, category of the plugin; if not given, category is set to the name of the containing module.</p></li>
+<li><p>Subpackages of plugins should set this explicitly.</p></li>
+</ul>
+</li>
+<li><p>uses_paths_from_settings</p>
+<ul>
+<li><p>Bool, if True (default) then the Settings module will be undergo delayed init automatically to check paths and setup the output folder for logging.</p></li>
+<li><p>Not required if a plugin doesn’t use any paths from Settings, and does not try to write to a log.</p></li>
+</ul>
+</li>
+<li><p>doc_priority</p>
+<ul>
+<li><p>Int, indicates how early in documentation this should be printed relative to other plugins of the same type and category.</p></li>
+<li><p>Defaults 0; positive numbers print earlier.</p></li>
+<li><p>At the same priority, plugins print in alphabetical order.</p></li>
+</ul>
+</li>
+<li><p>shared_docs</p>
+<ul>
+<li><p>List of strings, shared documentation text that is also used by other plugins in this category.</p></li>
+<li><p>Printouts will aim to print this once when listing multiple plugins with the same shared_doc, or per-plugin when they are printed individually.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+</section>
+<section id="xml-to-unformatted-string-function">
+<h3>_XML_To_Unformatted_String function<a class="headerlink" href="#xml-to-unformatted-string-function" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="Framework.Common.XML_Misc._XML_To_Unformatted_String">
+<span class="sig-prename descclassname"><span class="pre">Framework.Common.XML_Misc.</span></span><span class="sig-name descname"><span class="pre">_XML_To_Unformatted_String</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.XML_Misc._XML_To_Unformatted_String" title="Link to this definition">¶</a></dt>
+<dd><p>Convert an xml node (with attributes, children, etc.) to a string, omitting whitespace from the ‘text’ and ‘tail’ fields. Attributes are sorted.</p>
+</dd></dl>
+
+</section>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<section id="binary-patch-exception-class">
+<h3>Binary_Patch_Exception class<a class="headerlink" href="#binary-patch-exception-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.Common.Exceptions.Binary_Patch_Exception">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.Common.Exceptions.</span></span><span class="sig-name descname"><span class="pre">Binary_Patch_Exception</span></span><a class="headerlink" href="#Framework.Common.Exceptions.Binary_Patch_Exception" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Exception raised when a binary patch fails to find a matching reference pattern.</p>
+</dd></dl>
+
+</section>
+<section id="cat-hash-exception-class">
+<h3>Cat_Hash_Exception class<a class="headerlink" href="#cat-hash-exception-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.Common.Exceptions.Cat_Hash_Exception">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.Common.Exceptions.</span></span><span class="sig-name descname"><span class="pre">Cat_Hash_Exception</span></span><a class="headerlink" href="#Framework.Common.Exceptions.Cat_Hash_Exception" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Exception raised when a catalog being unpacked fails to verify an md5 hash.</p>
+</dd></dl>
+
+</section>
+<section id="customizer-log-class-class">
+<h3>Customizer_Log_class class<a class="headerlink" href="#customizer-log-class-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.Common.Logs.Customizer_Log_class">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.Common.Logs.</span></span><span class="sig-name descname"><span class="pre">Customizer_Log_class</span></span><a class="headerlink" href="#Framework.Common.Logs.Customizer_Log_class" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Container for logged information from the customizer framework, from a prior run or to be saved at the end of the current run. Separate logs should be used for each.</p>
+<p>Attributes:</p>
+<ul class="simple">
+<li><p>version</p>
+<ul>
+<li><p>String, version of the customizer.</p></li>
+</ul>
+</li>
+<li><p>file_paths_written</p>
+<ul>
+<li><p>List of relative paths of files written out by the customizer.</p></li>
+<li><p>Relative to the output extension folder.</p></li>
+<li><p>When from an older run, these files should be removed or overwritten by the newer run.</p></li>
+</ul>
+</li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Logs.Customizer_Log_class.Get_File_Paths_From_Last_Run">
+<span class="sig-name descname"><span class="pre">Get_File_Paths_From_Last_Run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Logs.Customizer_Log_class.Get_File_Paths_From_Last_Run" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a list of paths to files which were written on the last run.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Logs.Customizer_Log_class.Load">
+<span class="sig-name descname"><span class="pre">Load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Logs.Customizer_Log_class.Load" title="Link to this definition">¶</a></dt>
+<dd><p>Load information from an existing log json file. Clears any existing information. If a log file is not found, nothing will be changed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Logs.Customizer_Log_class.Record_File_Path_Written">
+<span class="sig-name descname"><span class="pre">Record_File_Path_Written</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Logs.Customizer_Log_class.Record_File_Path_Written" title="Link to this definition">¶</a></dt>
+<dd><p>Record the path of a file written by the customizer.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Logs.Customizer_Log_class.Store">
+<span class="sig-name descname"><span class="pre">Store</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Logs.Customizer_Log_class.Store" title="Link to this definition">¶</a></dt>
+<dd><p>Store the current log information to a log json file. Overwrites any prior file.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="file-loading-error-exception-class">
+<h3>File_Loading_Error_Exception class<a class="headerlink" href="#file-loading-error-exception-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.Common.Exceptions.File_Loading_Error_Exception">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.Common.Exceptions.</span></span><span class="sig-name descname"><span class="pre">File_Loading_Error_Exception</span></span><a class="headerlink" href="#Framework.Common.Exceptions.File_Loading_Error_Exception" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Exception raised when File_Manager.Load_File runs into an exception when loading a found file, eg. bad xml syntax or similar.</p>
+</dd></dl>
+
+</section>
+<section id="file-missing-exception-class">
+<h3>File_Missing_Exception class<a class="headerlink" href="#file-missing-exception-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.Common.Exceptions.File_Missing_Exception">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.Common.Exceptions.</span></span><span class="sig-name descname"><span class="pre">File_Missing_Exception</span></span><a class="headerlink" href="#Framework.Common.Exceptions.File_Missing_Exception" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Exception raised when File_Manager.Load_File doesn’t find the file, or the file is empty.</p>
+</dd></dl>
+
+</section>
+<section id="gzip-exception-class">
+<h3>Gzip_Exception class<a class="headerlink" href="#gzip-exception-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.Common.Exceptions.Gzip_Exception">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.Common.Exceptions.</span></span><span class="sig-name descname"><span class="pre">Gzip_Exception</span></span><a class="headerlink" href="#Framework.Common.Exceptions.Gzip_Exception" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Exception raised when gzip runs into a problem decompressing a file.</p>
+</dd></dl>
+
+</section>
+<section id="plugin-log-class-class">
+<h3>Plugin_Log_class class<a class="headerlink" href="#plugin-log-class-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.Common.Logs.Plugin_Log_class">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.Common.Logs.</span></span><span class="sig-name descname"><span class="pre">Plugin_Log_class</span></span><a class="headerlink" href="#Framework.Common.Logs.Plugin_Log_class" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Container for logs generated by plugins.</p>
+<p>Attributes:</p>
+<ul class="simple">
+<li><p>log_file</p>
+<ul>
+<li><p>File object for the log, opened on the first write.</p></li>
+</ul>
+</li>
+<li><p>logging_function</p>
+<ul>
+<li><p>Optional function which will be called by Print instead of doing the normal file write. The function should accept one argument, the message string.</p></li>
+</ul>
+</li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Logs.Plugin_Log_class.Close">
+<span class="sig-name descname"><span class="pre">Close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Logs.Plugin_Log_class.Close" title="Link to this definition">¶</a></dt>
+<dd><p>Close the log file safely; the next Print will overwrite it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Logs.Plugin_Log_class.Print">
+<span class="sig-name descname"><span class="pre">Print</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Logs.Plugin_Log_class.Print" title="Link to this definition">¶</a></dt>
+<dd><p>Write a line to the summary file.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="print-class-class">
+<h3>Print_class class<a class="headerlink" href="#print-class-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.Common.Print.Print_class">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.Common.Print.</span></span><span class="sig-name descname"><span class="pre">Print_class</span></span><a class="headerlink" href="#Framework.Common.Print.Print_class" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Console printer. Supports redirection when wanted, but otherwise acts like a normal print. Primarily added for cleaner GUI support.</p>
+<p>Attributes:</p>
+<ul class="simple">
+<li><p>logging_function</p>
+<ul>
+<li><p>Optional function which will be called by Print instead of sending to the console. The function should accept one argument, the message string.</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+</section>
+<section id="scaling-function-class">
+<h3>Scaling_Function class<a class="headerlink" href="#scaling-function-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.Common.Scaling_Equations.Scaling_Function">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.Common.Scaling_Equations.</span></span><span class="sig-name descname"><span class="pre">Scaling_Function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaling_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_scaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_scaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Scaling_Equations.Scaling_Function" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Scaling function wrapper class. Records the base equation, coefficients, and valid range. May be called like a normal function, providing the input to scale.</p>
+</dd></dl>
+
+</section>
+<section id="text-patch-exception-class">
+<h3>Text_Patch_Exception class<a class="headerlink" href="#text-patch-exception-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.Common.Exceptions.Text_Patch_Exception">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.Common.Exceptions.</span></span><span class="sig-name descname"><span class="pre">Text_Patch_Exception</span></span><a class="headerlink" href="#Framework.Common.Exceptions.Text_Patch_Exception" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Exception raised when an text patch (often xml) fails to find a matching reference line.</p>
+</dd></dl>
+
+</section>
+<section id="unmatched-diff-exception-class">
+<h3>Unmatched_Diff_Exception class<a class="headerlink" href="#unmatched-diff-exception-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.Common.Exceptions.Unmatched_Diff_Exception">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.Common.Exceptions.</span></span><span class="sig-name descname"><span class="pre">Unmatched_Diff_Exception</span></span><a class="headerlink" href="#Framework.Common.Exceptions.Unmatched_Diff_Exception" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Exception raised when File_Manager.Load_File finds a diff patch as the base version of a file.</p>
+</dd></dl>
+
+</section>
+<section id="xml-patch-exception-class">
+<h3>XML_Patch_Exception class<a class="headerlink" href="#xml-patch-exception-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.Common.Exceptions.XML_Patch_Exception">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.Common.Exceptions.</span></span><span class="sig-name descname"><span class="pre">XML_Patch_Exception</span></span><a class="headerlink" href="#Framework.Common.Exceptions.XML_Patch_Exception" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Exception raised when failing during verification of a generated xml patch.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Table of Contents</a></h3>
+<p class="caption" role="heading"><span class="caption-text">Content:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Analyses.html">Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Classes.html">Classes</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Common</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#analysis-wrapper-function">Analysis_Wrapper function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#find-all-matches-function">Find_All_Matches function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#find-match-function">Find_Match function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fit-equation-function">Fit_equation function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fit-equation-linear-function">Fit_equation_linear function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fit-equation-reversed-function">Fit_equation_reversed function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fit-equation-simple-function">Fit_equation_simple function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-linear-scaling-fit-function">Get_Linear_Scaling_Fit function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-scaling-fit-function">Get_Scaling_Fit function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-scipy-scaling-fit-function">Get_Scipy_Scaling_Fit function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#has-matching-attribute-function">Has_Matching_Attribute function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#insert-after-function">Insert_After function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plot-fit-function">Plot_Fit function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plugin-was-run-before-function">Plugin_Was_Run_Before function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#replace-node-function">Replace_Node function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rescale-vec-function">Rescale_Vec function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transform-wrapper-function">Transform_Wrapper function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#utility-wrapper-function">Utility_Wrapper function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plugin-wrapper-function">_Plugin_Wrapper function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#xml-to-unformatted-string-function">_XML_To_Unformatted_String function</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#classes">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#binary-patch-exception-class">Binary_Patch_Exception class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cat-hash-exception-class">Cat_Hash_Exception class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#customizer-log-class-class">Customizer_Log_class class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#file-loading-error-exception-class">File_Loading_Error_Exception class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#file-missing-exception-class">File_Missing_Exception class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gzip-exception-class">Gzip_Exception class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plugin-log-class-class">Plugin_Log_class class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#print-class-class">Print_class class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scaling-function-class">Scaling_Function class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#text-patch-exception-class">Text_Patch_Exception class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#unmatched-diff-exception-class">Unmatched_Diff_Exception class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#xml-patch-exception-class">XML_Patch_Exception class</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Documentation.html">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File_Manager.html">File_Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GUI.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Live_Editor.html">Live_Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Map_Transforms.html">Map_Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Utilities.html">Utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Documentation.html" title="Documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Classes.html" title="Classes"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">X4_Customizer Source Documentation  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Common</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright .
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

@@ -2,6 +2,9 @@
 Support for reading source files, including unpacking from cat/dat files.
 Includes File_Missing_Exception for when a file is not found.
 '''
+from ..Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('File_Manager')
+
 '''
 X4 virtual path determination:
 

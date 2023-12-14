@@ -1,4 +1,7 @@
 
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('GUI')
+
 from collections import defaultdict
 
 from PyQt5.QtWidgets import QTreeWidgetItem, QTreeWidget

@@ -2,6 +2,9 @@
 Support function(s) shared by analysis and transforms.
 Initially just used for ship file loading.
 '''
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Analyses')
+
 from Framework import File_System
 
 def Get_Ship_Macro_Files():

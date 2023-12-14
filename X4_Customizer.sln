@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.8
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34316.72
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Framework", "Framework\Framework.pyproj", "{F321F45F-39EE-4CC8-91E7-BFEC28462C97}"
 EndProject
@@ -11,6 +11,7 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Scripts", "Scripts\Scripts.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{74B55FE2-2F3B-4352-99B9-1B549902956D}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
 		Documentation.md = Documentation.md
 		README.md = README.md
 	EndProjectSection

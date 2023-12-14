@@ -1,4 +1,7 @@
 
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('GUI')
+
 from PyQt5.QtWidgets import QTextBrowser
 from Framework.Make_Documentation import Merge_Lines, Remove_Line_Indents
 

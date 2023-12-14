@@ -1,6 +1,9 @@
 '''
 Various shared support functions for the transforms.
 '''
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Transforms')
+
 
 import inspect
 # This function will convert hex strings to bytes objects.

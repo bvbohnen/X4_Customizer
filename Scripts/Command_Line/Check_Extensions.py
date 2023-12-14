@@ -7,7 +7,7 @@ Note: not for running from the GUI.
 import argparse, sys
 from Plugins import Check_Extension, Check_All_Extensions
 from Plugins import Settings
-from Framework import Get_Version, File_System
+from Framework import Get_Version, File_System, Print
 
 def Run():
     

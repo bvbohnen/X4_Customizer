@@ -13,6 +13,9 @@ pretty similar).
 Side note: windows_nt style does not allow coloring the labels
 in a table; try to default to Fusion if available.
 '''
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('GUI')
+
 from PyQt5 import QtWidgets
 
 # Can get the available system styles from QStyleFactory.

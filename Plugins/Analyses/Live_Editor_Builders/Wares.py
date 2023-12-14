@@ -4,6 +4,9 @@ Due to the xml file size, this has some problems with long runtime.
 Extra complexity added to multithread and to dynamically detect
 some fields.
 '''
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Live_Editor')
+
 
 from multiprocessing import Pool, cpu_count
 import time

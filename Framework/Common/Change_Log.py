@@ -265,6 +265,8 @@ Change Log:
    - Removed warning for duplicate xac file paths (common in dlcs).
    - Removed warnings on classless macros (common in dlcs).
    - Check_Extension will only check xml files.
+ * 1.24.11
+   - Added html documentation of the source code.
 '''
 # Note: changes moved here for organization, and to make them easier to
 # break out during documentation generation.

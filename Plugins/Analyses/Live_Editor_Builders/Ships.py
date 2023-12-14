@@ -1,4 +1,7 @@
 
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Live_Editor')
+
 from Framework import File_System
 from Framework.Live_Editor_Components import *
 # Convenience macro renaming.

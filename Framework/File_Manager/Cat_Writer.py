@@ -13,6 +13,9 @@ Note on newlines:
     about the extension not loading.)
     X Tools does not add newlines between text files.
 '''
+from ..Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('File_Manager')
+
 import gzip
 import time
 import hashlib

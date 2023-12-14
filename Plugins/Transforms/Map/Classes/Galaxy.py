@@ -1,4 +1,7 @@
 
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Map_Transforms')
+
 from collections import defaultdict
 from lxml import etree
 from lxml.etree import Element

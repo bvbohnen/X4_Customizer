@@ -39,17 +39,30 @@ from collections import OrderedDict, defaultdict
 
 # To support packages cross-referencing each other, set up this
 #  top level as a package, findable on the sys path.
-parent_dir = Path(__file__).resolve().parent.parent
-if str(parent_dir) not in sys.path:
-    sys.path.append(str(parent_dir))
+this_dir = Path(__file__).resolve().parent
+package_dir = this_dir.parent
+if str(package_dir) not in sys.path:
+    sys.path.append(str(package_dir))
 
-import Framework
+from Framework import description, Change_Log, Settings
+from Framework.Documentation import Make_Sphinx_Doc
 import Plugins
 
-# TODO: swap to Path.
-this_dir = os.path.normpath(os.path.dirname(__file__))
-
 def Make(*args):
+    # Detailed code documentation, based on doc category names in the
+    # related source files.
+    Make_Sphinx_Doc(
+        start_folder = package_dir / 'Framework',
+        extra_folders = [package_dir / 'Plugins'],
+        output_folder = package_dir / 'Documentation',
+        title = f'X4_Customizer Source Documentation'
+        )
+    # Overview is hardcoded to handle framework and plugins.
+    Make_Overview_Doc()
+    return
+
+
+def Make_Overview_Doc():
 
     # TODO:
     # Make a variation on the simple doc which has some formatting for
@@ -180,9 +193,9 @@ def Make(*args):
 
     # Grab the main docstring.
     # Add in the version number.
-    main_doc = Framework.__doc__.replace(
+    main_doc = description.replace(
         'X4 Customizer', 
-        'X4 Customizer {}'.format(Framework.Change_Log.Get_Version()),
+        'X4 Customizer {}'.format(Change_Log.Get_Version()),
         # Only change the first spot, the title line.
         1)
     # TODO: figure out how to split off the example tree.
@@ -202,8 +215,7 @@ def Make(*args):
     # Need a newline before the code, otherwise the code block
     #  isn't made right away (the file header gets lumped with the above).
     Add_Line('')
-    with open(os.path.join(this_dir,'..','Scripts','Examples',
-                           'Ex_Using_Transforms.py'), 'r') as file:
+    with open(package_dir/'Scripts/Examples/Ex_Using_Transforms.py', 'r') as file:
         # Put in 4 indents to make a code block.
         Add_Lines(file.read(), indent_level = 2)
 
@@ -215,7 +227,7 @@ def Make(*args):
     Add_Line('* Settings:', include_in_simple = False)
     Add_Line('', include_in_simple = False)
     Record_Text_Block(
-        Framework.Settings.__doc__, 
+        Settings.__doc__, 
         indent_level = 1,
         include_in_simple = False
         )
@@ -295,7 +307,7 @@ def Make(*args):
     # Only do this for the full documenation now, after it got too
     # long for the egosoft forums.
     Make_Horizontal_Line()
-    Add_Lines(Framework.Change_Log.__doc__, merge_lines = True,
+    Add_Lines(Change_Log.__doc__, merge_lines = True,
                   include_in_simple = False)
 
     # Print out the license.
@@ -323,15 +335,15 @@ def Make(*args):
     
     # Write out the full doc.
     # Put these 1 directory up to separate from the code.
-    with open(os.path.join(this_dir,'..','Documentation.md'), 'w') as file:
+    with open(package_dir/'Documentation.md', 'w') as file:
         file.write('\n'.join(doc_lines))
 
     # Write out the simpler readme.
-    with open(os.path.join(this_dir,'..','README.md'), 'w') as file:
+    with open(package_dir/'README.md', 'w') as file:
         file.write('\n'.join(doc_short_lines))
         
     # Write out the BB version, suitable for copy/paste.
-    with open(os.path.join(this_dir,'..','for_egosoft_forum.txt'), 'w') as file:
+    with open(package_dir/'for_egosoft_forum.txt', 'w') as file:
         file.write('\n'.join(doc_bb_lines))
 
     return

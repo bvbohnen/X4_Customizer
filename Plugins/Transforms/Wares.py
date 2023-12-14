@@ -1,6 +1,9 @@
 '''
 Transforms to wares.
 '''
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Transforms')
+
 from fnmatch import fnmatch
 from Framework import Transform_Wrapper, Load_File
 from .Support import *

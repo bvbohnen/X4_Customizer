@@ -3,6 +3,9 @@ XML helper functions, for use by transforms.
 TODO: remove the ones that aren't useful anymore after switching
 to lxml.
 '''
+from ..Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Common')
+
 #import xml.etree.ElementTree as ET
 #from xml.dom import minidom
 

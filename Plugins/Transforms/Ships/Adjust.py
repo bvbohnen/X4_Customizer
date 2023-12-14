@@ -1,4 +1,7 @@
 
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Transforms')
+
 __all__ = [
     'Adjust_Ship_Speed',
     'Adjust_Ship_Turning',

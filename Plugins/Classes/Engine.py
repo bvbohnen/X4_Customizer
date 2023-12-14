@@ -1,4 +1,7 @@
 
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Classes')
+
 from .Macro import Macro
 from .Connection import Connection
 from .Component  import Component

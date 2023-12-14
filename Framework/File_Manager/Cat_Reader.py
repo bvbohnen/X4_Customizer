@@ -30,6 +30,9 @@ Note on case:
     Here, paths will be handled in lower case generally, but the original
     case will be preserved for lookup when needed.
 '''
+from ..Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('File_Manager')
+
 from pathlib import Path
 import hashlib
 from collections import namedtuple

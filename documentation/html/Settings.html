@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Settings &#8212; X4_Customizer Source Documentation  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=c135b40c" />
+    
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Transforms" href="Transforms.html" />
+    <link rel="prev" title="Map_Transforms" href="Map_Transforms.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Transforms.html" title="Transforms"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Map_Transforms.html" title="Map_Transforms"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">X4_Customizer Source Documentation  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Settings</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="settings">
+<h1>Settings<a class="headerlink" href="#settings" title="Link to this heading">¶</a></h1>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<section id="settings-class-class">
+<h3>Settings_class class<a class="headerlink" href="#settings-class-class" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.Common.Settings.</span></span><span class="sig-name descname"><span class="pre">Settings_class</span></span><a class="headerlink" href="#Framework.Common.Settings.Settings_class" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This holds general settings and paths to control the customizer. Adjust these settings as needed prior to running the first plugin, using direct writes to attributes.</p>
+<p>Settings may be updated individually, or as arguments of a call to Settings, or through a “settings.json” file in the top X4 Customizer folder (eg. where documentation resides). Any json settings will overwrite defaults, and be overwritten by settings in the control script. Changes made using the GUI will be applied to the json settings.</p>
+<p>Examples:</p>
+<ul>
+<li><p>In the control script (prefix paths with ‘r’ to support backslashes):</p>
+<blockquote>
+<div><p>Settings.path_to_x4_folder   = r’C:...’
+Settings.path_to_user_folder = r’C:...’
+Settings(</p>
+<blockquote>
+<div><p>path_to_x4_folder   = r’C:...’,
+path_to_user_folder = r’C:...’
+)</p>
+</div></blockquote>
+</div></blockquote>
+</li>
+<li><p>In settings.json (sets defaults for all scripts):</p>
+<blockquote>
+<div><dl class="simple">
+<dt>{</dt><dd><p>“path_to_x4_folder”        : “C:...”,
+“path_to_user_folder”      : “C:...”,
+“output_to_user_extensions”: “true”</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+</li>
+</ul>
+<p>Paths:</p>
+<ul class="simple">
+<li><p>path_to_x4_folder</p>
+<ul>
+<li><p>Path to the main x4 folder.</p></li>
+<li><p>Defaults to HOMEDRIVE/”Steam/steamapps/common/X4 Foundations”</p></li>
+</ul>
+</li>
+<li><p>path_to_user_folder</p>
+<ul>
+<li><p>Path to the folder where user files are located.</p></li>
+<li><p>Should include config.xml, content.xml, etc.</p></li>
+<li><p>Defaults to HOMEPATH/”Documents/Egosoft/X4” or a subfolder with an 8-digit name.</p></li>
+</ul>
+</li>
+<li><p>path_to_source_folder</p>
+<ul>
+<li><p>Optional path to a source folder that holds high priority source files, which will be used instead of reading the x4 cat/dat files.</p></li>
+<li><p>For use when running plugins on manually edited files.</p></li>
+<li><p>Not needed in general use.</p></li>
+<li><p>All files from the source folder will be copied into the extension.</p></li>
+<li><p>Defaults to None</p></li>
+</ul>
+</li>
+<li><p>allow_path_error</p>
+<ul>
+<li><p>Bool, if True and the x4 or user folder path looks wrong, the customizer will still attempt to run (with a warning).</p></li>
+<li><p>Defaults to False</p></li>
+</ul>
+</li>
+</ul>
+<p>Input:</p>
+<ul class="simple">
+<li><p>prefer_single_files</p>
+<ul>
+<li><p>Bool, if True then loose files will be used before those in cat/dat files, otherwise cat/dat takes precedence.</p></li>
+<li><p>Only applies within a single search location, eg. within an extension, within the source folder, or within the base X4 folder; a loose file in the source folder will still be used over those in the X4 folder regardless of setting.</p></li>
+<li><p>Defaults to False</p></li>
+</ul>
+</li>
+<li><p>ignore_extensions</p>
+<ul>
+<li><p>Bool, if True then all extensions will be ignored, and files are only sourced from the source_folder or x4_folder.</p></li>
+<li><p>Defaults to False</p></li>
+</ul>
+</li>
+<li><p>extension_whitelist</p>
+<ul>
+<li><p>String, optional, semicolon separated list of lowercase extension folder names to consider loading (if found and enabled).</p></li>
+<li><p>If not given, all extension folders are checked, except those in the blacklist.</p></li>
+</ul>
+</li>
+<li><p>extension_blacklist</p>
+<ul>
+<li><p>String, optional, semicolon separated list of lowercase extension folder names to always ignore.</p></li>
+</ul>
+</li>
+<li><p>allow_cat_md5_errors</p>
+<ul>
+<li><p>Bool, if True then when files extracted from cat/dat fail to verify their md5 hash, no exception will be thrown.</p></li>
+<li><p>Defaults to False; consider setting True if needing to unpack incorrectly assembled catalogs.</p></li>
+</ul>
+</li>
+<li><p>ignore_output_extension</p>
+<ul>
+<li><p>Bool, if True, the target extension being generated will have its prior content ignored (this run works on the original files, and not those changes made last run).</p></li>
+<li><p>Defaults to True; should only be set False if not running transforms and wanting to analyse prior output.</p></li>
+</ul>
+</li>
+<li><p>X4_exe_name</p>
+<ul>
+<li><p>String, name of the X4.exe file, to be used when sourcing the file for any exe transforms (if used), assumed to be in the x4 folder.</p></li>
+<li><p>Defaults to “X4.exe”, but may be useful to change based on the source exe file for transforms, eg. “X4_nonsteam.exe”, “X4_steam.exe”, or similar.</p></li>
+<li><p>Note: the modified exe is written to the x4 folder with a “.mod.exe” extension, and will not be removed on subsequent runs even if they do not select any exe editing transforms. If wanting this to work with steam, then the X4.exe may need to be replaced with this modified exe manually.</p></li>
+</ul>
+</li>
+</ul>
+<p>Output:</p>
+<ul class="simple">
+<li><p>extension_name</p>
+<ul>
+<li><p>String, name of the extension being generated.</p></li>
+<li><p>Spaces will be replaced with underscores for the extension id.</p></li>
+<li><p>A lowercase version of this will be used for the output folder name.</p></li>
+<li><p>Defaults to ‘x4_customizer’</p></li>
+</ul>
+</li>
+<li><p>output_to_user_extensions</p>
+<ul>
+<li><p>Bool, if True then the generated extension holding output files will be under &lt;path_to_user_folder/extensions&gt;.</p></li>
+<li><p>Warning: any prior output on the original path will still exist, and is not cleaned out automatically at the time of this note.</p></li>
+<li><p>Defaults to False, writing to &lt;path_to_x4_folder/extensions&gt;</p></li>
+</ul>
+</li>
+<li><p>path_to_output_folder</p>
+<ul>
+<li><p>Optional, Path to the location to write the extension files to, instead of the usual X4 or user documents extensions folders.</p></li>
+<li><p>This is the parent directory to the extension_name folder.</p></li>
+</ul>
+</li>
+<li><p>output_to_catalog</p>
+<ul>
+<li><p>Bool, if True then the modified files will be written to a single cat/dat pair, otherwise they are written as loose files.</p></li>
+<li><p>Defaults to False</p></li>
+</ul>
+</li>
+<li><p>generate_sigs</p>
+<ul>
+<li><p>Bool, if True then dummy signature files will be created.</p></li>
+<li><p>Defaults to True.</p></li>
+</ul>
+</li>
+<li><p>make_maximal_diffs</p>
+<ul>
+<li><p>Bool, if True then generated xml diff patches will do the maximum full tree replacement instead of using the algorithm to find and patch only edited nodes.</p></li>
+<li><p>Turn on to more easily view xml changes.</p></li>
+<li><p>Defaults to False.</p></li>
+</ul>
+</li>
+<li><p>forced_xpath_attributes</p>
+<ul>
+<li><p>String, optional comma separate list of XML node attributes which, if found when constructing xpaths for output diffs, will be included in the xpath regardless of if they are needed.</p></li>
+<li><p>Example: “id,name” will always include “id” and “name” attributes of elements in the xpath.</p></li>
+<li><p>Also supports child node or attributes referenced using a relative xpath. Example: “parts/part/uv_animations/uv_animation” to require a uv_animation great-great-grandchild element, or “<a class="reference external" href="mailto:component/&#37;&#52;&#48;ref">component/<span>&#64;</span>ref</a>” to include the “ref” attribute of a “component” child.</p></li>
+<li><p>Can be used to make xpaths more specific, and more likely to break if an unknown extension is applied before the output extension (eg. when the customizer output is distributed to other users).</p></li>
+<li><p>Can also be used in cases where a partial xpath matches multiple nodes, to clarify a child/attribute check instead of falling back on indexing.</p></li>
+</ul>
+</li>
+<li><p>shorten_xpaths</p>
+<ul>
+<li><p>Bool, if True then xpaths will be shortened using “//” syntax, at the cost of possibly matching unwanted nodes if the diff patch is applied to a modified source file.</p></li>
+<li><p>Only attempts to use // for the xpath prefix currently.</p></li>
+<li><p>May result in measurably longer x4 loading times if used often in large files.</p></li>
+</ul>
+</li>
+<li><p>root_file_tag</p>
+<ul>
+<li><p>String, extra tag added to names of modified files in the root folder and not placed in an extension, eg. X4.exe, to avoid overwriting the originals.</p></li>
+<li><p>Defaults to “.mod”, eg. “X4.mod.exe”.</p></li>
+</ul>
+</li>
+</ul>
+<p>Logging:</p>
+<ul class="simple">
+<li><p>live_editor_log_file_name</p>
+<ul>
+<li><p>String, name a json file which the live editor (tracking hand edits in the gui) will save patches to, and reload from.</p></li>
+<li><p>Patches will capture any hand edits made by the user.</p></li>
+<li><p>File is located in the output extension folder.</p></li>
+<li><p>Defaults to ‘live_editor_log.json’</p></li>
+</ul>
+</li>
+<li><p>plugin_log_file_name</p>
+<ul>
+<li><p>String, name of a text file to write plugin output messages to; content depends on plugins run.</p></li>
+<li><p>File is located in the output extension folder.</p></li>
+<li><p>Defaults to ‘plugin_log.txt’</p></li>
+</ul>
+</li>
+<li><p>customizer_log_file_name</p>
+<ul>
+<li><p>String, name a json file to write customizer log information to, including a list of files written, information that will be loaded on the next run to guide the file handling logic.</p></li>
+<li><p>File is located in the output extension folder.</p></li>
+<li><p>Defaults to ‘customizer_log.json’</p></li>
+</ul>
+</li>
+<li><p>log_source_paths</p>
+<ul>
+<li><p>Bool, if True then the path for any source files read will be printed in the plugin log.</p></li>
+<li><p>Defaults to False</p></li>
+</ul>
+</li>
+<li><p>verbose</p>
+<ul>
+<li><p>Bool, if True some extra status messages may be printed to the console.</p></li>
+<li><p>Defaults to True</p></li>
+</ul>
+</li>
+</ul>
+<p>Behavior:</p>
+<ul class="simple">
+<li><p>show_tab_close_button</p>
+<ul>
+<li><p>Bool, if True then a gui tab close button will be shown.</p></li>
+</ul>
+</li>
+<li><p>disable_cleanup_and_writeback</p>
+<ul>
+<li><p>Bool, if True then cleanup from a prior run and any final writes will be skipped.</p></li>
+<li><p>For use when testing plugins without modifying files.</p></li>
+<li><p>Defaults to False</p></li>
+</ul>
+</li>
+<li><p>skip_all_plugins</p>
+<ul>
+<li><p>Bool, if True all plugins will be skipped.</p></li>
+<li><p>For use during cleaning mode.</p></li>
+<li><p>Defaults to False</p></li>
+</ul>
+</li>
+<li><p>developer</p>
+<ul>
+<li><p>Bool, if True then enable some behavior meant just for development, such as leaving exceptions uncaught.</p></li>
+<li><p>Defaults to False</p></li>
+</ul>
+</li>
+<li><p>profile</p>
+<ul>
+<li><p>Bool, if True then some extra profiling of customizer operations is performed, and times printed. For use during development.</p></li>
+<li><p>Defaults to False.</p></li>
+</ul>
+</li>
+<li><p>disable_threading</p>
+<ul>
+<li><p>Bool, if True then threads will not be used in the gui to call scripts and plugins. Will cause the gui to lock up during processing.</p></li>
+<li><p>Intended for development use, to enable breakpoints during calls.</p></li>
+<li><p>Defaults to False</p></li>
+</ul>
+</li>
+<li><p>use_scipy_for_scaling_equations</p>
+<ul>
+<li><p>Bool, if True then scipy will be used to optimize scaling equations, for smoother curves between the boundaries.</p></li>
+<li><p>If False or scipy is not found, then a simple linear scaling will be used instead.</p></li>
+<li><p>May be unused currently.</p></li>
+<li><p>Defaults to True</p></li>
+</ul>
+</li>
+<li><p>show_scaling_plots</p>
+<ul>
+<li><p>Bool, if True and matplotlib and numpy are available, any generated scaling equations will be plotted (and their x and y vectors printed for reference). Close the plot window manually to continue plugin processing.</p></li>
+<li><p>Primarily for development use.</p></li>
+<li><p>May be unused currently.</p></li>
+<li><p>Defaults to False</p></li>
+</ul>
+</li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Delayed_Init">
+<span class="sig-name descname"><span class="pre">Delayed_Init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Delayed_Init" title="Link to this definition">¶</a></dt>
+<dd><p>Checks the current paths for errors (not existing, etc.), converts them to Path objects, creates the output extension folder, etc. Raises AssertionError on any critical problem, and may raise other exceptions on misc problems. Sets _init_complete if no errors are found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_Categorized_Fields">
+<span class="sig-name descname"><span class="pre">Get_Categorized_Fields</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Categorized_Fields" title="Link to this definition">¶</a></dt>
+<dd><p>Returns an OrderedDict, keyed by category, with a list of fields in their preferred display order. Parses the docstring to determine this ordering.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_Customizer_Log_Path">
+<span class="sig-name descname"><span class="pre">Get_Customizer_Log_Path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Customizer_Log_Path" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the path to the customizer log file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_Defaults">
+<span class="sig-name descname"><span class="pre">Get_Defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Defaults" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a dict holding fields and their default values. Does some dynamic compute to determine default paths, so this could potentially change across calls.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_Live_Editor_Log_Path">
+<span class="sig-name descname"><span class="pre">Get_Live_Editor_Log_Path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Live_Editor_Log_Path" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the path to the live editor log file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_Output_Folder">
+<span class="sig-name descname"><span class="pre">Get_Output_Folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Output_Folder" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the path to the output extension folder. Creates it if it does not exist.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_Plugin_Log_Path">
+<span class="sig-name descname"><span class="pre">Get_Plugin_Log_Path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Plugin_Log_Path" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the path to the plugin log file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_Source_Folder">
+<span class="sig-name descname"><span class="pre">Get_Source_Folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Source_Folder" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the path to the Source folder.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_User_Content_XML_Path">
+<span class="sig-name descname"><span class="pre">Get_User_Content_XML_Path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_User_Content_XML_Path" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the path to the user content.xml file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_User_Folder">
+<span class="sig-name descname"><span class="pre">Get_User_Folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_User_Folder" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the path to the user folder.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_X4_Folder">
+<span class="sig-name descname"><span class="pre">Get_X4_Folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_X4_Folder" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the path to the X4 base folder.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Load_Json">
+<span class="sig-name descname"><span class="pre">Load_Json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Load_Json" title="Link to this definition">¶</a></dt>
+<dd><p>Look for a “settings.json” file in the main x4 customizer directory, and load defaults from it. Returns a list of field names updated.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Paths_Are_Valid">
+<span class="sig-name descname"><span class="pre">Paths_Are_Valid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Paths_Are_Valid" title="Link to this definition">¶</a></dt>
+<dd><p>Returns True if all paths appear to be valid and ready for game file reading and output writing, else False.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Reset">
+<span class="sig-name descname"><span class="pre">Reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Reset" title="Link to this definition">¶</a></dt>
+<dd><p>Resets the settings, such that Delayed_Init will be run again. For use when paths may be changed since a prior run.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Save_Json">
+<span class="sig-name descname"><span class="pre">Save_Json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields_to_save</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Save_Json" title="Link to this definition">¶</a></dt>
+<dd><p>Save the given settings fields to settings.json. This should preferably only save non-default settings.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Table of Contents</a></h3>
+<p class="caption" role="heading"><span class="caption-text">Content:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Analyses.html">Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Common.html">Common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Documentation.html">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="File_Manager.html">File_Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GUI.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Live_Editor.html">Live_Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Map_Transforms.html">Map_Transforms</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Settings</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#classes">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#settings-class-class">Settings_class class</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Utilities.html">Utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Transforms.html" title="Transforms"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Map_Transforms.html" title="Map_Transforms"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">X4_Customizer Source Documentation  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Settings</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright .
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

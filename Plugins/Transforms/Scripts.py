@@ -1,4 +1,7 @@
 
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Transforms')
+
 from fnmatch import fnmatch
 from lxml.etree import Element
 from Framework import Transform_Wrapper, Load_File, Load_Files, Plugin_Log

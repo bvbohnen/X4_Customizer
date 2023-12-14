@@ -1,4 +1,7 @@
 
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Analyses')
+
 from collections import defaultdict, OrderedDict
 from lxml import etree as ET
 

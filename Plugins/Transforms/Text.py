@@ -1,4 +1,6 @@
 
+from Framework.Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Transforms')
 
 from Framework import Transform_Wrapper, Settings, Load_File, File_System
 

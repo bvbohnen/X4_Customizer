@@ -4,6 +4,9 @@ Import as:
     from Settings import Settings
 
 '''
+from ..Documentation import Doc_Category_Default
+_doc_category = Doc_Category_Default('Settings')
+
 import os
 from pathlib import Path
 import json
