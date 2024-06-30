@@ -35,6 +35,11 @@ def Make(*args):
         '-uncompress', 
         action='store_true',
         help = 'Leaves the output zip file uncompressed.')
+    
+    argparser.add_argument(
+        '-verbose', 
+        action='store_true',
+        help = 'Print extra status messages.')
 
     #argparser.add_argument(
     #    '-doc_refresh', 
@@ -162,10 +167,12 @@ def Make(*args):
 
     # Add all files to the zip, with an extra nesting folder so
     # that the files don't sprawl out when unpacked.
+    # TODO: maybe move the bin folder up one level, so exes are at the
+    # top level.    
     for path in file_paths:
-        print(path)
         relative_path = path.relative_to(parent_dir)
-        print (f'{version_name}\\{relative_path}')
+        if parsed_args.verbose:
+            print (f'{version_name}\\{relative_path}  <-  {path}')
         zip_file.write(
             # Give a full path.
             path,

@@ -1,3 +1,4 @@
+from __future__ import annotations
 
 from Framework.Documentation import Doc_Category_Default
 _doc_category = Doc_Category_Default('Classes')
@@ -32,6 +33,10 @@ class Macro:
       - Name of the base component
     * component
       - Component, filled in by Get_Component.
+    * ref
+      - String, optional name of an ref macro. Default is None.
+    * ref_macro
+      - Macro associated with the ref name.
     '''
     def __init__(self, xml_node, database = None):
         self.xml_node = xml_node
@@ -51,8 +56,25 @@ class Macro:
             key = (conn.name, conn.ref)
             assert key not in self.conns
             self.conns[key] = conn
-
+            
+        self.ref = xml_node.get('ref')
         return
+    
+
+    @property
+    def ref_macro(self) -> Macro:
+        # Delayed lookup of the ref macro, since it may not be available
+        # at init. Also delay adding the cached field, since it could
+        # be None.
+        if not hasattr(self, '_ref_macro'):
+            if self.ref is None:
+                self._ref_macro = None
+            else:
+                self._ref_macro = self.database.Get_Macro(self.ref)
+                # TODO: maybe look for cases where the macro was not found;
+                # for now just ignore failed lookups.
+        return self._ref_macro
+
 
     def Replace_XML(self, replacements):
         '''
@@ -64,14 +86,24 @@ class Macro:
             conn.Replace_XML(replacements)
         return
 
-    def Get(self, xpath, attr, default = None):
+    def Get(self, xpath, attr, default = None, follow_ref = False):
         '''
-        Return an attribute or element matching the given xpath and attribute.
+        Return an attribute or element matching the given xpath and attribute,
+        optionally checking a ref if the attribute is not found here.
         '''
+        value = None
         node = self.xml_node.find(xpath)
-        if node != None:
-            return node.get(attr)
-        return default
+        if node is not None:
+            value = node.get(attr)
+        # Check a ref macro is the value was not found.
+        if value is None and follow_ref and self.ref_macro is not None:
+            # TODO: maybe allow ref chaining, but only expect one level
+            # for now.
+            value = self.ref_macro.Get(xpath, attr, default)
+        # Fall back on a default.
+        if value is None:
+            value = default
+        return value
     
     def Set(self, xpath, attr, value):
         '''

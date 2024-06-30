@@ -49,16 +49,16 @@ class Generic_Bullet(Macro):
     Parent class for bullet, missile, bomb.
     '''
     def Get_Ammo_Reload_Time(self):
-        value = self.Get('./properties/ammunition','reload')
+        value = self.Get('./properties/ammunition','reload', follow_ref = True)
         return float(value) if value else None
     def Get_Ammo_Rounds(self):
-        value = self.Get('./properties/ammunition','value')
+        value = self.Get('./properties/ammunition','value', follow_ref = True)
         return float(value) if value else None
     def Get_Reload_Time(self):
-        value = self.Get('./properties/reload','time')
+        value = self.Get('./properties/reload','time', follow_ref = True)
         return float(value) if value else None
     def Get_Reload_Rate(self):
-        value = self.Get('./properties/reload','rate')
+        value = self.Get('./properties/reload','rate', follow_ref = True)
         return float(value) if value else None
     
     def Set_Ammo_Reload_Time(self, value):
@@ -76,6 +76,12 @@ class Generic_Bullet(Macro):
         ammo_rounds = self.Get_Ammo_Rounds()
         reload_time = self.Get_Reload_Time()
         reload_rate = self.Get_Reload_Rate()
+        
+        # TODO: if a bullet ref, what to do? Some or all of the above
+        # fields would be None. Ideally the ref can be followed and
+        # fields grabbed from here or the ref.
+
+        rof = None
 
         # Reload rate and time seem to be alternatives to each other.
         # Standardize to rate.
@@ -84,30 +90,32 @@ class Generic_Bullet(Macro):
 
         # If not an ammo weapon, use the above.
         if not ammo_reload_time:
-            return reload_rate
-        
-        # If this is set up for bursting but only 1 shot per burst,
-        #  it may not have a reload_rate; default reload_rate to 1
-        #  in this case so something can be computed easily below.
-        if ammo_rounds == 1 and not reload_rate:
-            reload_rate = 1
+            rof = reload_rate
+        else:
+            # If this is set up for bursting but only 1 shot per burst,
+            #  it may not have a reload_rate; default reload_rate to 1
+            #  in this case so something can be computed easily below.
+            if ammo_rounds == 1 and not reload_rate:
+                reload_rate = 1
 
-        # If reload_rate and ammo_reload_time available, mix them
-        # for a burst weapon.
-        if (reload_rate and ammo_reload_time and ammo_rounds):
-            # Note: game calculates this wrongly as of ~1.5, multiplying
-            # the ammo_rounds-1 by reload_rate instead of 1/reload_rate.
-            # This will do it correctly (hopefully).
-            # Update: in 3.0 game computes ammo_rounds/reload_rate instead of
-            # subtracting one round, again incorrect.
-            # Test: 1 round burst, 1 reload_rate, 1 reload_time => 1 round/sec, enc says 1.
-            # Test: 2 round burst, 1 reload_rate, 2 reload_time => 2 round/3 sec, enc says 0.5
-            # So, this calc is correct, enc is wrong (in latter case).
-            burst_time = 1/reload_rate * (ammo_rounds -1)
-            time = ammo_reload_time + burst_time
-            return ammo_rounds / time
+            # If reload_rate and ammo_reload_time available, mix them
+            # for a burst weapon.
+            if (reload_rate and ammo_reload_time and ammo_rounds):
+                # Note: game calculates this wrongly as of ~1.5, multiplying
+                # the ammo_rounds-1 by reload_rate instead of 1/reload_rate.
+                # This will do it correctly (hopefully).
+                # Update: in 3.0 game computes ammo_rounds/reload_rate instead of
+                # subtracting one round, again incorrect.
+                # Test: 1 round burst, 1 reload_rate, 1 reload_time => 1 round/sec, enc says 1.
+                # Test: 2 round burst, 1 reload_rate, 2 reload_time => 2 round/3 sec, enc says 0.5
+                # So, this calc is correct, enc is wrong (in latter case).
+                burst_time = 1/reload_rate * (ammo_rounds -1)
+                time = ammo_reload_time + burst_time
+                rof = ammo_rounds / time
 
-        raise Exception()
+        if rof is None:
+            raise RuntimeError(f'Failed to calculate rate of fire for {self.name}')
+        return rof
 
         
     def Set_Rate_Of_Fire(self, new_rof):
@@ -148,7 +156,7 @@ class Generic_Bullet(Macro):
 
         # Bullet fields. Missiles won't use these.
         for field in ['value', 'shield', 'hull', 'repair']:
-            value = self.Get('./properties/damage', field)
+            value = self.Get('./properties/damage', field, follow_ref = True)
             if not value:
                 continue
             value = float(value)
@@ -158,7 +166,7 @@ class Generic_Bullet(Macro):
         # Missile fields. Also for bombs/mines.
         # Possible bullets might use these?  Unknown.
         for field in ['value', 'shield', 'hull']:
-            value = self.Get('./properties/explosiondamage', field)
+            value = self.Get('./properties/explosiondamage', field, follow_ref = True)
             if not value:
                 continue
             value = float(value)
@@ -170,7 +178,7 @@ class Generic_Bullet(Macro):
     # TODO: should this method be only for bullets?
     def Adjust_Heat(self, multiplier):
         'Adjust heat produced.'
-        value = self.Get('./properties/heat', 'value')
+        value = self.Get('./properties/heat', 'value', follow_ref = True)
         if not value:
             return
         value = float(value)
@@ -186,8 +194,8 @@ class Generic_Bullet(Macro):
         # - Missiles have range and lifetime; edit lifetime?
         # - Others have lifetime and speed; edit speed and adjust lifetime.
         for tag in ['bullet','missile']:
-            range    = self.Get(f'./properties/{tag}', 'range')
-            lifetime = self.Get(f'./properties/{tag}', 'lifetime')
+            range    = self.Get(f'./properties/{tag}', 'range', follow_ref = True)
+            lifetime = self.Get(f'./properties/{tag}', 'lifetime', follow_ref = True)
 
             # If it has range, edit that.
             if range:
@@ -210,10 +218,10 @@ class Bullet(Generic_Bullet):
     '''    
     def Adjust_Speed(self, multiplier):
         'Change bullet speed.'
-        #range    = self.Get('./properties/bullet', 'range')
-        lifetime = self.Get('./properties/bullet', 'lifetime')
+        #range    = self.Get('./properties/bullet', 'range', follow_ref = True)
+        lifetime = self.Get('./properties/bullet', 'lifetime', follow_ref = True)
         # Note: missiles are more complex, with a thrust and such; TODO
-        speed    = self.Get('./properties/bullet', 'speed')
+        speed    = self.Get('./properties/bullet', 'speed', follow_ref = True)
 
         # Check for speed and lifetime, indicating a beam.
         if speed and lifetime:
@@ -229,7 +237,11 @@ class Bullet(Generic_Bullet):
             # Edit just speed.
             self.Set(f'./properties/bullet', 'speed', f'{speed * multiplier:.3f}')
         else:
-            assert False
+            # This may have a ref to another bullet without overwriting the
+            # speed or lifetime properties.
+            # TODO: should a message be printed?
+            raise RuntimeError(f'Failed to calculate bullet speed for {self.name}')
+        return
 
     
 class Missile(Generic_Bullet, Physics_Properties):

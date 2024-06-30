@@ -13,11 +13,13 @@ version.  Split off from other modules for easier imports.
 # In short, a 'frozen' attribute is added to sys by pyinstaller,
 #  which can be checked to know if this is running in post-installer mode,
 #  in which case _MEIPASS will hold the app base folder.
+# Update: pyinstaller 6.0 changed meipass to be the _internal folder
+#  instead of the exe folder.
 # TODO: check if this is still needed in the latest pyinstaller.
 import sys
 from pathlib import Path
 if getattr(sys, 'frozen', False):
-    # This appears to be the folder with Main, so go up 1 level.
-    home_path = Path(sys._MEIPASS).parent
+    # This is the _internal folder, so go up 2 levels.
+    home_path = Path(sys._MEIPASS).parents[1]
 else:
     home_path = Path(__file__).resolve().parents[2]

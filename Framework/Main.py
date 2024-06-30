@@ -13,11 +13,11 @@ from multiprocessing import Process, freeze_support
 
 # To support packages cross-referencing each other, set up this
 # top level as a package, findable on the sys path.
-# TODO: this is a little redundant with Home_Path, but it is unclear
+# Note: this is a little redundant with Home_Path, but it is unclear
 # on how to import home_path before this is done, so just repeat
 # the effort for now.
 if getattr(sys, 'frozen', False):
-    home_path = Path(sys._MEIPASS).parent
+    home_path = Path(sys._MEIPASS).parents[1]
 else:
     home_path = Path(__file__).resolve().parents[1]
 if str(home_path) not in sys.path:

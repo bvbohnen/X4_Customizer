@@ -1,17 +1,18 @@
+
 <!DOCTYPE html>
 
-<html lang="en" data-content_root="./">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>Settings &#8212; X4_Customizer Source Documentation  documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=c135b40c" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
     
-    <script src="_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -44,14 +45,14 @@
           <div class="body" role="main">
             
   <section id="settings">
-<h1>Settings<a class="headerlink" href="#settings" title="Link to this heading">¶</a></h1>
+<h1>Settings<a class="headerlink" href="#settings" title="Permalink to this heading">¶</a></h1>
 <section id="classes">
-<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<h2>Classes<a class="headerlink" href="#classes" title="Permalink to this heading">¶</a></h2>
 <section id="settings-class-class">
-<h3>Settings_class class<a class="headerlink" href="#settings-class-class" title="Link to this heading">¶</a></h3>
+<h3>Settings_class class<a class="headerlink" href="#settings-class-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.Common.Settings.</span></span><span class="sig-name descname"><span class="pre">Settings_class</span></span><a class="headerlink" href="#Framework.Common.Settings.Settings_class" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Framework.Common.Settings.</span></span><span class="sig-name descname"><span class="pre">Settings_class</span></span><a class="headerlink" href="#Framework.Common.Settings.Settings_class" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>This holds general settings and paths to control the customizer. Adjust these settings as needed prior to running the first plugin, using direct writes to attributes.</p>
 <p>Settings may be updated individually, or as arguments of a call to Settings, or through a “settings.json” file in the top X4 Customizer folder (eg. where documentation resides). Any json settings will overwrite defaults, and be overwritten by settings in the control script. Changes made using the GUI will be applied to the json settings.</p>
@@ -319,91 +320,91 @@ path_to_user_folder = r’C:...’
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Delayed_Init">
-<span class="sig-name descname"><span class="pre">Delayed_Init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Delayed_Init" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Delayed_Init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Delayed_Init" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks the current paths for errors (not existing, etc.), converts them to Path objects, creates the output extension folder, etc. Raises AssertionError on any critical problem, and may raise other exceptions on misc problems. Sets _init_complete if no errors are found.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_Categorized_Fields">
-<span class="sig-name descname"><span class="pre">Get_Categorized_Fields</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Categorized_Fields" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Get_Categorized_Fields</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Categorized_Fields" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns an OrderedDict, keyed by category, with a list of fields in their preferred display order. Parses the docstring to determine this ordering.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_Customizer_Log_Path">
-<span class="sig-name descname"><span class="pre">Get_Customizer_Log_Path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Customizer_Log_Path" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Get_Customizer_Log_Path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Customizer_Log_Path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the path to the customizer log file.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_Defaults">
-<span class="sig-name descname"><span class="pre">Get_Defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Defaults" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Get_Defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Defaults" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a dict holding fields and their default values. Does some dynamic compute to determine default paths, so this could potentially change across calls.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_Live_Editor_Log_Path">
-<span class="sig-name descname"><span class="pre">Get_Live_Editor_Log_Path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Live_Editor_Log_Path" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Get_Live_Editor_Log_Path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Live_Editor_Log_Path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the path to the live editor log file.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_Output_Folder">
-<span class="sig-name descname"><span class="pre">Get_Output_Folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Output_Folder" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Get_Output_Folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Output_Folder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the path to the output extension folder. Creates it if it does not exist.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_Plugin_Log_Path">
-<span class="sig-name descname"><span class="pre">Get_Plugin_Log_Path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Plugin_Log_Path" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Get_Plugin_Log_Path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Plugin_Log_Path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the path to the plugin log file.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_Source_Folder">
-<span class="sig-name descname"><span class="pre">Get_Source_Folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Source_Folder" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Get_Source_Folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_Source_Folder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the path to the Source folder.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_User_Content_XML_Path">
-<span class="sig-name descname"><span class="pre">Get_User_Content_XML_Path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_User_Content_XML_Path" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Get_User_Content_XML_Path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_User_Content_XML_Path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the path to the user content.xml file.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_User_Folder">
-<span class="sig-name descname"><span class="pre">Get_User_Folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_User_Folder" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Get_User_Folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_User_Folder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the path to the user folder.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Get_X4_Folder">
-<span class="sig-name descname"><span class="pre">Get_X4_Folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_X4_Folder" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Get_X4_Folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Get_X4_Folder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the path to the X4 base folder.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Load_Json">
-<span class="sig-name descname"><span class="pre">Load_Json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Load_Json" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Load_Json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Load_Json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Look for a “settings.json” file in the main x4 customizer directory, and load defaults from it. Returns a list of field names updated.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Paths_Are_Valid">
-<span class="sig-name descname"><span class="pre">Paths_Are_Valid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Paths_Are_Valid" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Paths_Are_Valid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Paths_Are_Valid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if all paths appear to be valid and ready for game file reading and output writing, else False.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Reset">
-<span class="sig-name descname"><span class="pre">Reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Reset" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Reset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Resets the settings, such that Delayed_Init will be run again. For use when paths may be changed since a prior run.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Framework.Common.Settings.Settings_class.Save_Json">
-<span class="sig-name descname"><span class="pre">Save_Json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields_to_save</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Save_Json" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Save_Json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields_to_save</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Framework.Common.Settings.Settings_class.Save_Json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save the given settings fields to settings.json. This should preferably only save non-default settings.</p>
 </dd></dl>
 
@@ -490,8 +491,8 @@ path_to_user_folder = r’C:...’
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-    &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+        &#169; Copyright .
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>
 </html>

@@ -81,7 +81,9 @@ import argparse
 import sys
 import os
 import shutil
+import subprocess
 from pathlib import Path # TODO: complete switchover to pathlib.
+This_dir = Path(__file__).parent
 
 # Conditional import of pyinstaller, checking if it is available.
 try:
@@ -90,9 +92,22 @@ except ImportError:
     print('PyInstaller not found; customizer->executable generation disabled')
     PyInstaller = None
 
-import subprocess
+# Note: as of pyinstaller ~6.8 and python 3.11 and conda 24.5, 
+# pyinstaller fails to find the various package dlls (eg. from qt)
+# that are in the conda Library/bin folder.
+# This needs to be added to the os dll paths at the top level of a module
+# that is among those being packed by pyinstaller (other methods failed,
+# eg. putting it in the spec file or adding it to pathex).
+# Framework init will import this module, hence the dll path can be
+# added here. Only need to do this on the unfrozen version.
+if not getattr(sys, 'frozen', False):
+    # Note: sys.prefix will be the folder with python, eg. the
+    # conda directory if this is conda python.
+    extra_bin_path = Path(sys.prefix) / 'Library/bin'
+    # Skip this if the folder doesn't exist, otherwise an error is thrown.
+    if extra_bin_path.is_dir():
+        os.add_dll_directory(extra_bin_path)
 
-This_dir = Path(__file__).parent
 
 def Clear_Dir(dir_path):
     '''
@@ -108,7 +123,6 @@ def Clear_Dir(dir_path):
                 continue
             break
     return
-
 
 def Make(*args):
 
@@ -217,7 +231,7 @@ def Make(*args):
     #  to have the same permission error pyinstaller gets).
     if not parsed_args.bats_only and dist_folder.exists():
         Clear_Dir(dist_folder)
-
+        
 
     # To be able to support direct command line calls (with responses)
     #  as well as gui launching, the only workable solution appears
@@ -253,6 +267,7 @@ def Make(*args):
         # Note: most places where paths may be used should be set as
         #  raw strings, so the os.path forward slashes will get treated
         #  as escapes when python parses them again otherwise.
+        
 
         # Analysis block specifies details of the source files to process.
         spec_lines += [
@@ -265,7 +280,7 @@ def Make(*args):
             '    ],',
 
             # Relative path to work in; just use here.
-            '    pathex = [r"{}"],'.format(str(This_dir)),
+            f'    pathex = [r"{This_dir}"],',
             # Misc external binaries; unnecessary.
             '    binaries = [],',
             # Misc data files. While the source/patches folders could be
@@ -301,7 +316,7 @@ def Make(*args):
             '    hookspath = [],',
             # Extra python files to run when the exe starts up.
             '    runtime_hooks = [',
-            '        r"{}",'.format(str(hook_file_path)),
+            f'        r"{hook_file_path}",',
             '    ],',
 
             # Exclude scipy, since it adds 500 MB to the 12 MB compile.
@@ -312,6 +327,7 @@ def Make(*args):
             '        r"scipy",',
             '        r"numpy",',
             '        r"matplotlib",',
+            '        r"sphinx",',
             '        r"Plugins",', # Make sure the plugins aren't compiled.
             '    ],',
 
@@ -333,17 +349,17 @@ def Make(*args):
             'exe = EXE(pyz,',
             '    a.scripts,',
             '    exclude_binaries = True,',
-            '    name = "{}",'.format(program_name),
+            f'    name = "{program_name}",',
             '    debug = False,',
             '    strip = False,',
             '    upx = True,',
             # Need console=True to capture responses with |more, but this
             # causes a console to stay open behind the window, so...
             # make this mode based.
-            '    console = {},'.format('True' if mode == 'console' else 'False'),
+            f'    console = {"True" if mode == "console" else "False"},',
             # To avoid having to use "|more" for the console version,
             # disable windowed mode for it.
-            '    windowed = {},'.format('True' if mode == 'gui' else 'False'),
+            f'    windowed = {"True" if mode == "gui" else "False"},',
             ')',
             '',
         ]
@@ -355,7 +371,7 @@ def Make(*args):
             '    a.datas,',
             '    strip = False,',
             '    upx = True,',
-            '    name = "{}",'.format(program_name),
+            f'    name = "{program_name}",',
             ')',
             '',
         ]

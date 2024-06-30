@@ -1,17 +1,18 @@
+
 <!DOCTYPE html>
 
-<html lang="en" data-content_root="./">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>Map_Transforms &#8212; X4_Customizer Source Documentation  documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=c135b40c" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
     
-    <script src="_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -44,50 +45,50 @@
           <div class="body" role="main">
             
   <section id="map-transforms">
-<h1>Map_Transforms<a class="headerlink" href="#map-transforms" title="Link to this heading">¶</a></h1>
+<h1>Map_Transforms<a class="headerlink" href="#map-transforms" title="Permalink to this heading">¶</a></h1>
 <section id="functions">
-<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading">¶</a></h2>
 <section id="create-zones-function">
-<h3>Create_Zones function<a class="headerlink" href="#create-zones-function" title="Link to this heading">¶</a></h3>
+<h3>Create_Zones function<a class="headerlink" href="#create-zones-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Scaling.Create_Zones">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Scaling.</span></span><span class="sig-name descname"><span class="pre">Create_Zones</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">galaxy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objects</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Scaling.Create_Zones" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Scaling.</span></span><span class="sig-name descname"><span class="pre">Create_Zones</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">galaxy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objects</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Scaling.Create_Zones" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create additional zones in this sector. New zones are packed into objects and appended to the given objects list directly.</p>
 </dd></dl>
 
 </section>
 <section id="place-object-function">
-<h3>Place_Object function<a class="headerlink" href="#place-object-function" title="Link to this heading">¶</a></h3>
+<h3>Place_Object function<a class="headerlink" href="#place-object-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Scaling.Place_Object">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Scaling.</span></span><span class="sig-name descname"><span class="pre">Place_Object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other_objects</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sector_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Scaling.Place_Object" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Scaling.</span></span><span class="sig-name descname"><span class="pre">Place_Object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other_objects</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sector_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Scaling.Place_Object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Place an object in the sector within the max_distance of the given location, outside the radius of any other object. The object sector_pos is updated directly.</p>
 </dd></dl>
 
 </section>
 <section id="scale-regions-function">
-<h3>Scale_Regions function<a class="headerlink" href="#scale-regions-function" title="Link to this heading">¶</a></h3>
+<h3>Scale_Regions function<a class="headerlink" href="#scale-regions-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Scaling.Scale_Regions">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Scaling.</span></span><span class="sig-name descname"><span class="pre">Scale_Regions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">galaxy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sector_scaling_factors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Scaling.Scale_Regions" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Scaling.</span></span><span class="sig-name descname"><span class="pre">Scale_Regions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">galaxy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sector_scaling_factors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Scaling.Scale_Regions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Scale all regions up if scaling_factor.</p>
 </dd></dl>
 
 </section>
 <section id="scale-sector-function">
-<h3>Scale_Sector function<a class="headerlink" href="#scale-sector-function" title="Link to this heading">¶</a></h3>
+<h3>Scale_Sector function<a class="headerlink" href="#scale-sector-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Scaling.Scale_Sector">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Scaling.</span></span><span class="sig-name descname"><span class="pre">Scale_Sector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">galaxy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision_steps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Scaling.Scale_Sector" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Scaling.</span></span><span class="sig-name descname"><span class="pre">Scale_Sector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">galaxy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision_steps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Scaling.Scale_Sector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Scale a single sector to roughly match the scaling factor.</p>
 </dd></dl>
 
 </section>
 <section id="scale-sector-size-function">
-<h3>Scale_Sector_Size function<a class="headerlink" href="#scale-sector-size-function" title="Link to this heading">¶</a></h3>
+<h3>Scale_Sector_Size function<a class="headerlink" href="#scale-sector-size-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Scale_Sector_Size.Scale_Sector_Size">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Scale_Sector_Size.</span></span><span class="sig-name descname"><span class="pre">Scale_Sector_Size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_factor_2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transition_size_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transition_size_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recenter_sectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_ring_highways</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_nonring_highways</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_scaling_for_removed_highways</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_regions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">move_free_ships</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Scale_Sector_Size.Scale_Sector_Size" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Scale_Sector_Size.</span></span><span class="sig-name descname"><span class="pre">Scale_Sector_Size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_factor_2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transition_size_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transition_size_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recenter_sectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_ring_highways</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_nonring_highways</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_scaling_for_removed_highways</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_regions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">move_free_ships</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Scale_Sector_Size.Scale_Sector_Size" title="Permalink to this definition">¶</a></dt>
 <dd><p>Change the size of the maps by moving contents (zones, etc.) closer together or further apart. Note: this will require a new game to take effect, as positions become part of a save file.</p>
 <ul class="simple">
 <li><p>scaling_factor</p>
@@ -172,32 +173,32 @@
 
 </section>
 <section id="scale-sectors-function">
-<h3>Scale_Sectors function<a class="headerlink" href="#scale-sectors-function" title="Link to this heading">¶</a></h3>
+<h3>Scale_Sectors function<a class="headerlink" href="#scale-sectors-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Scaling.Scale_Sectors">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Scaling.</span></span><span class="sig-name descname"><span class="pre">Scale_Sectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">galaxy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sector_scaling_factors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision_steps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Scaling.Scale_Sectors" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Scaling.</span></span><span class="sig-name descname"><span class="pre">Scale_Sectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">galaxy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sector_scaling_factors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision_steps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Scaling.Scale_Sectors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Scale all sectors to roughly match the scaling factor.</p>
 </dd></dl>
 
 </section>
 </section>
 <section id="classes">
-<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<h2>Classes<a class="headerlink" href="#classes" title="Permalink to this heading">¶</a></h2>
 <section id="cluster-class">
-<h3>Cluster class<a class="headerlink" href="#cluster-class" title="Link to this heading">¶</a></h3>
+<h3>Cluster class<a class="headerlink" href="#cluster-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Cluster">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Macros.</span></span><span class="sig-name descname"><span class="pre">Cluster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Cluster" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Macros.</span></span><span class="sig-name descname"><span class="pre">Cluster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Cluster" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#Plugins.Transforms.Map.Classes.Macros.Map_Macro" title="Plugins.Transforms.Map.Classes.Macros.Map_Macro"><code class="xref py py-class docutils literal notranslate"><span class="pre">Map_Macro</span></code></a></p>
 <p>Information on a cluster of sectors. Often just has one sector.</p>
 </dd></dl>
 
 </section>
 <section id="galaxy-class">
-<h3>Galaxy class<a class="headerlink" href="#galaxy-class" title="Link to this heading">¶</a></h3>
+<h3>Galaxy class<a class="headerlink" href="#galaxy-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Galaxy.Galaxy">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Galaxy.</span></span><span class="sig-name descname"><span class="pre">Galaxy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gamefile_roots</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recenter_sectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">move_free_ships</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Galaxy.Galaxy" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Galaxy.</span></span><span class="sig-name descname"><span class="pre">Galaxy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gamefile_roots</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recenter_sectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">move_free_ships</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Galaxy.Galaxy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Primary class for holding galaxy/sector/zone/etc. information parsed from xml files, and providing transform methods.</p>
 <ul class="simple">
@@ -256,13 +257,13 @@
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Galaxy.Galaxy.Create_Zone">
-<span class="sig-name descname"><span class="pre">Create_Zone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Galaxy.Galaxy.Create_Zone" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Create_Zone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Galaxy.Galaxy.Create_Zone" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a new, empty zone in the given sector, placed at 0,0,0. Returns the Zone object.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Galaxy.Galaxy.Update_XML">
-<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Galaxy.Galaxy.Update_XML" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Galaxy.Galaxy.Update_XML" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the xml nodes to reflect the current positions.</p>
 </dd></dl>
 
@@ -270,10 +271,10 @@
 
 </section>
 <section id="god-object-class">
-<h3>God_Object class<a class="headerlink" href="#god-object-class" title="Link to this heading">¶</a></h3>
+<h3>God_Object class<a class="headerlink" href="#god-object-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.God_Object">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Misc.</span></span><span class="sig-name descname"><span class="pre">God_Object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.God_Object" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Misc.</span></span><span class="sig-name descname"><span class="pre">God_Object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.God_Object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Object defined in god.xml.</p>
 <ul class="simple">
@@ -329,40 +330,40 @@
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.God_Object.Scale">
-<span class="sig-name descname"><span class="pre">Scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.God_Object.Scale" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.God_Object.Scale" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set ths scaling factor for this object, and immediately update the core range. Should only be called once.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.God_Object.Scale_Range">
-<span class="sig-name descname"><span class="pre">Scale_Range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.God_Object.Scale_Range" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Scale_Range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.God_Object.Scale_Range" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply the scaling to the core range min and max. If scaling_factor is &gt; 1, this will do nothing, on the assumption the ranges will scale properly with sector coresize (which only hits a min when trying to shrink).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.God_Object.Set_Macro">
-<span class="sig-name descname"><span class="pre">Set_Macro</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">macro</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.God_Object.Set_Macro" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Set_Macro</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">macro</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.God_Object.Set_Macro" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fill the Sector or Zone macro holding this object.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.God_Object.Update_XML">
-<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.God_Object.Update_XML" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.God_Object.Update_XML" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.God_Object.obj_macro_sizes">
-<span class="sig-name descname"><span class="pre">obj_macro_sizes</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'landmarks_gen_old_ringstation_macro':</span> <span class="pre">100000,</span> <span class="pre">'landmarks_par_monument_01_macro':</span> <span class="pre">20000,</span> <span class="pre">'landmarks_xen_aqueduct_01_macro':</span> <span class="pre">10000,</span> <span class="pre">'landmarks_xen_aqueduct_02_macro':</span> <span class="pre">10000,</span> <span class="pre">'landmarks_xen_aqueduct_03_macro':</span> <span class="pre">10000,</span> <span class="pre">'landmarks_xen_aqueduct_04_macro':</span> <span class="pre">10000,</span> <span class="pre">'landmarks_xen_aqueduct_05_macro':</span> <span class="pre">10000,</span> <span class="pre">'landmarks_xen_aqueduct_06_macro':</span> <span class="pre">10000,</span> <span class="pre">'landmarks_xen_aqueduct_07_macro':</span> <span class="pre">10000}</span></em><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.God_Object.obj_macro_sizes" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">obj_macro_sizes</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'landmarks_gen_old_ringstation_macro':</span> <span class="pre">100000,</span> <span class="pre">'landmarks_par_monument_01_macro':</span> <span class="pre">20000,</span> <span class="pre">'landmarks_xen_aqueduct_01_macro':</span> <span class="pre">10000,</span> <span class="pre">'landmarks_xen_aqueduct_02_macro':</span> <span class="pre">10000,</span> <span class="pre">'landmarks_xen_aqueduct_03_macro':</span> <span class="pre">10000,</span> <span class="pre">'landmarks_xen_aqueduct_04_macro':</span> <span class="pre">10000,</span> <span class="pre">'landmarks_xen_aqueduct_05_macro':</span> <span class="pre">10000,</span> <span class="pre">'landmarks_xen_aqueduct_06_macro':</span> <span class="pre">10000,</span> <span class="pre">'landmarks_xen_aqueduct_07_macro':</span> <span class="pre">10000}</span></em><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.God_Object.obj_macro_sizes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </section>
 <section id="highway-class">
-<h3>Highway class<a class="headerlink" href="#highway-class" title="Link to this heading">¶</a></h3>
+<h3>Highway class<a class="headerlink" href="#highway-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Highways.Highway">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Highways.</span></span><span class="sig-name descname"><span class="pre">Highway</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Highway" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Highways.</span></span><span class="sig-name descname"><span class="pre">Highway</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Highway" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#Plugins.Transforms.Map.Classes.Macros.Map_Macro" title="Plugins.Transforms.Map.Classes.Macros.Map_Macro"><code class="xref py py-class docutils literal notranslate"><span class="pre">Map_Macro</span></code></a></p>
 <p>Parent class for zone highways and sector highways.</p>
 <ul class="simple">
@@ -375,24 +376,24 @@
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Highways.Highway.Contains_Gate_Or_Highway">
-<span class="sig-name descname"><span class="pre">Contains_Gate_Or_Highway</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Highway.Contains_Gate_Or_Highway" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Contains_Gate_Or_Highway</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Highway.Contains_Gate_Or_Highway" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Highways.Highway.Get_Splines_With_Dummies">
-<span class="sig-name descname"><span class="pre">Get_Splines_With_Dummies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Highway.Get_Splines_With_Dummies" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Get_Splines_With_Dummies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Highway.Get_Splines_With_Dummies" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list with all splinepositions, along with a set of dummy splinepositions interpolated along the path every radius stepping.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Highways.Highway.Update_Splines">
-<span class="sig-name descname"><span class="pre">Update_Splines</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Highway.Update_Splines" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Update_Splines</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Highway.Update_Splines" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adjust splines for tx/ty/tz/inlength/outlength</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Highways.Highway.Update_XML">
-<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Highway.Update_XML" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Highway.Update_XML" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update xml, including adjusting spline positions based on endpoint positions.</p>
 </dd></dl>
 
@@ -400,10 +401,10 @@
 
 </section>
 <section id="md-gamestart-class">
-<h3>MD_Gamestart class<a class="headerlink" href="#md-gamestart-class" title="Link to this heading">¶</a></h3>
+<h3>MD_Gamestart class<a class="headerlink" href="#md-gamestart-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.MD_Gamestart">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Misc.</span></span><span class="sig-name descname"><span class="pre">MD_Gamestart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Gamestart" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Misc.</span></span><span class="sig-name descname"><span class="pre">MD_Gamestart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Gamestart" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#Plugins.Transforms.Map.Classes.Misc.MD_Object" title="Plugins.Transforms.Map.Classes.Misc.MD_Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">MD_Object</span></code></a></p>
 <p>Gamestart position, expected to line up with md script and region pos, so rescaled.</p>
 <ul class="simple">
@@ -415,17 +416,17 @@
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.MD_Gamestart.Update_XML">
-<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Gamestart.Update_XML" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Gamestart.Update_XML" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </section>
 <section id="md-headquarters-class">
-<h3>MD_Headquarters class<a class="headerlink" href="#md-headquarters-class" title="Link to this heading">¶</a></h3>
+<h3>MD_Headquarters class<a class="headerlink" href="#md-headquarters-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.MD_Headquarters">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Misc.</span></span><span class="sig-name descname"><span class="pre">MD_Headquarters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Headquarters" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Misc.</span></span><span class="sig-name descname"><span class="pre">MD_Headquarters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Headquarters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#Plugins.Transforms.Map.Classes.Misc.MD_Object" title="Plugins.Transforms.Map.Classes.Misc.MD_Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">MD_Object</span></code></a></p>
 <p>Player headquarters.</p>
 <ul class="simple">
@@ -434,17 +435,17 @@
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.MD_Headquarters.Update_XML">
-<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Headquarters.Update_XML" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Headquarters.Update_XML" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </section>
 <section id="md-object-class">
-<h3>MD_Object class<a class="headerlink" href="#md-object-class" title="Link to this heading">¶</a></h3>
+<h3>MD_Object class<a class="headerlink" href="#md-object-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.MD_Object">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Misc.</span></span><span class="sig-name descname"><span class="pre">MD_Object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Object" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Misc.</span></span><span class="sig-name descname"><span class="pre">MD_Object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Parent class for generic MD created objects, with a sector and position. Each particular object is expected to have its own unique xml to deal with.</p>
 <ul class="simple">
@@ -482,23 +483,23 @@
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.MD_Object.Set_Sector">
-<span class="sig-name descname"><span class="pre">Set_Sector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Object.Set_Sector" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Set_Sector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Object.Set_Sector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fill the Sector holding this object.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.MD_Object.Update_XML">
-<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Object.Update_XML" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Object.Update_XML" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </section>
 <section id="md-placed-object-class">
-<h3>MD_Placed_Object class<a class="headerlink" href="#md-placed-object-class" title="Link to this heading">¶</a></h3>
+<h3>MD_Placed_Object class<a class="headerlink" href="#md-placed-object-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.MD_Placed_Object">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Misc.</span></span><span class="sig-name descname"><span class="pre">MD_Placed_Object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Placed_Object" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Misc.</span></span><span class="sig-name descname"><span class="pre">MD_Placed_Object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Placed_Object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#Plugins.Transforms.Map.Classes.Misc.MD_Object" title="Plugins.Transforms.Map.Classes.Misc.MD_Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">MD_Object</span></code></a></p>
 <p>Object from PlacedObjects: ships, data vaults.</p>
 <ul class="simple">
@@ -510,12 +511,12 @@
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.MD_Placed_Object.Update_XML">
-<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Placed_Object.Update_XML" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Placed_Object.Update_XML" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.MD_Placed_Object.sector_name">
-<span class="sig-name descname"><span class="pre">sector_name</span></span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Placed_Object.sector_name" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">sector_name</span></span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_Placed_Object.sector_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Syntax on ships is: &lt;find_sector macro=”macro.cluster_27_sector001_macro” …/&gt; &lt;do_if … &lt;create_ship …&gt; &lt;position …</p>
 </dd></dl>
 
@@ -523,10 +524,10 @@
 
 </section>
 <section id="md-gs-split1-battlefield-class">
-<h3>MD_gs_split1_battlefield class<a class="headerlink" href="#md-gs-split1-battlefield-class" title="Link to this heading">¶</a></h3>
+<h3>MD_gs_split1_battlefield class<a class="headerlink" href="#md-gs-split1-battlefield-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.MD_gs_split1_battlefield">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Misc.</span></span><span class="sig-name descname"><span class="pre">MD_gs_split1_battlefield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_gs_split1_battlefield" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Misc.</span></span><span class="sig-name descname"><span class="pre">MD_gs_split1_battlefield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_gs_split1_battlefield" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#Plugins.Transforms.Map.Classes.Misc.MD_Object" title="Plugins.Transforms.Map.Classes.Misc.MD_Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">MD_Object</span></code></a></p>
 <p>Split start battlefield location, used to spawn defense fleet, player, ref position for rescue ship (which should also be moved closer).</p>
 <ul class="simple">
@@ -534,17 +535,17 @@
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.MD_gs_split1_battlefield.Update_XML">
-<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_gs_split1_battlefield.Update_XML" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_gs_split1_battlefield.Update_XML" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </section>
 <section id="md-gs-split1-pickupship-class">
-<h3>MD_gs_split1_pickupship class<a class="headerlink" href="#md-gs-split1-pickupship-class" title="Link to this heading">¶</a></h3>
+<h3>MD_gs_split1_pickupship class<a class="headerlink" href="#md-gs-split1-pickupship-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.MD_gs_split1_pickupship">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Misc.</span></span><span class="sig-name descname"><span class="pre">MD_gs_split1_pickupship</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_gs_split1_pickupship" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Misc.</span></span><span class="sig-name descname"><span class="pre">MD_gs_split1_pickupship</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_gs_split1_pickupship" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#Plugins.Transforms.Map.Classes.Misc.MD_Object" title="Plugins.Transforms.Map.Classes.Misc.MD_Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">MD_Object</span></code></a></p>
 <p>Split start rescue ship location.</p>
 <ul class="simple">
@@ -552,17 +553,17 @@
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Misc.MD_gs_split1_pickupship.Update_XML">
-<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_gs_split1_pickupship.Update_XML" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Misc.MD_gs_split1_pickupship.Update_XML" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </section>
 <section id="map-connection-class">
-<h3>Map_Connection class<a class="headerlink" href="#map-connection-class" title="Link to this heading">¶</a></h3>
+<h3>Map_Connection class<a class="headerlink" href="#map-connection-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Map_Connection">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Macros.</span></span><span class="sig-name descname"><span class="pre">Map_Connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Map_Connection" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Macros.</span></span><span class="sig-name descname"><span class="pre">Map_Connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Map_Connection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="Classes.html#Plugins.Classes.Connection.Connection" title="Plugins.Classes.Connection.Connection"><code class="xref py py-class docutils literal notranslate"><span class="pre">Connection</span></code></a></p>
 <p>Connection subtype for map connections.</p>
 <ul class="simple">
@@ -579,13 +580,13 @@
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Map_Connection.Get_Offset">
-<span class="sig-name descname"><span class="pre">Get_Offset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Map_Connection.Get_Offset" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Get_Offset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Map_Connection.Get_Offset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a Position offset between the current position and original xml position.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Map_Connection.Update_XML">
-<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Map_Connection.Update_XML" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Map_Connection.Update_XML" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the xml node position, if an xml_node attached.</p>
 </dd></dl>
 
@@ -593,10 +594,10 @@
 
 </section>
 <section id="map-macro-class">
-<h3>Map_Macro class<a class="headerlink" href="#map-macro-class" title="Link to this heading">¶</a></h3>
+<h3>Map_Macro class<a class="headerlink" href="#map-macro-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Map_Macro">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Macros.</span></span><span class="sig-name descname"><span class="pre">Map_Macro</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Map_Macro" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Macros.</span></span><span class="sig-name descname"><span class="pre">Map_Macro</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Map_Macro" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="Classes.html#Plugins.Classes.Macro.Macro" title="Plugins.Classes.Macro.Macro"><code class="xref py py-class docutils literal notranslate"><span class="pre">Macro</span></code></a></p>
 <p>Macro subtype for map macros.</p>
 <ul class="simple">
@@ -613,19 +614,19 @@
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Map_Macro.Contains_Gate">
-<span class="sig-name descname"><span class="pre">Contains_Gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Map_Macro.Contains_Gate" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Contains_Gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Map_Macro.Contains_Gate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dummy function returns False, for easy of use with zones.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Map_Macro.Is_Damage_Region">
-<span class="sig-name descname"><span class="pre">Is_Damage_Region</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Map_Macro.Is_Damage_Region" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Is_Damage_Region</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Map_Macro.Is_Damage_Region" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convenience function to match up with Region verion; normally False.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Map_Macro.Update_XML">
-<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Map_Macro.Update_XML" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Map_Macro.Update_XML" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the xml node positions of all connections. May be wrapped by subclasses to fill in extra changes.</p>
 </dd></dl>
 
@@ -633,10 +634,10 @@
 
 </section>
 <section id="object-class">
-<h3>Object class<a class="headerlink" href="#object-class" title="Link to this heading">¶</a></h3>
+<h3>Object class<a class="headerlink" href="#object-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Objects.Object">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Objects.</span></span><span class="sig-name descname"><span class="pre">Object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sector_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">md_object</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">god_object</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spline_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Objects.Object" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Objects.</span></span><span class="sig-name descname"><span class="pre">Object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sector_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">md_object</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">god_object</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spline_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Objects.Object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Object to be moved around in the sector.</p>
 <ul class="simple">
@@ -706,7 +707,7 @@
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Objects.Object.Should_Merge_With">
-<span class="sig-name descname"><span class="pre">Should_Merge_With</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sector_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Objects.Object.Should_Merge_With" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Should_Merge_With</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sector_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Objects.Object.Should_Merge_With" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if this object should merge with another object that is too close.</p>
 </dd></dl>
 
@@ -714,10 +715,10 @@
 
 </section>
 <section id="object-group-class">
-<h3>Object_Group class<a class="headerlink" href="#object-group-class" title="Link to this heading">¶</a></h3>
+<h3>Object_Group class<a class="headerlink" href="#object-group-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Objects.Object_Group">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Objects.</span></span><span class="sig-name descname"><span class="pre">Object_Group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">objects</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Objects.Object_Group" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Objects.</span></span><span class="sig-name descname"><span class="pre">Object_Group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">objects</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Objects.Object_Group" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Groups of objects to reposition. Initially there will be 1 object per group; over time groups will merge together as they get too close.</p>
 <ul class="simple">
@@ -750,13 +751,13 @@
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Objects.Object_Group.Scale_Pos">
-<span class="sig-name descname"><span class="pre">Scale_Pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Objects.Object_Group.Scale_Pos" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Scale_Pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Objects.Object_Group.Scale_Pos" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adjust the pos of this group to be multiplied by scaling. All internal objects will get the same fixed offset.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Objects.Object_Group.Should_Merge_With">
-<span class="sig-name descname"><span class="pre">Should_Merge_With</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sector_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Objects.Object_Group.Should_Merge_With" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Should_Merge_With</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sector_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Objects.Object_Group.Should_Merge_With" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if this group should merge with the other group based on internal objects between groups getting too close.</p>
 </dd></dl>
 
@@ -764,10 +765,10 @@
 
 </section>
 <section id="region-class">
-<h3>Region class<a class="headerlink" href="#region-class" title="Link to this heading">¶</a></h3>
+<h3>Region class<a class="headerlink" href="#region-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Region.Region">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Region.</span></span><span class="sig-name descname"><span class="pre">Region</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Region.Region" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Region.</span></span><span class="sig-name descname"><span class="pre">Region</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Region.Region" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Region, read from region_definitions. Note: not a macro.</p>
 <ul class="simple">
@@ -807,25 +808,25 @@
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Region.Region.Get_Splines_With_Dummies">
-<span class="sig-name descname"><span class="pre">Get_Splines_With_Dummies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Region.Region.Get_Splines_With_Dummies" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Get_Splines_With_Dummies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Region.Region.Get_Splines_With_Dummies" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list with all splinepositions, along with a set of dummy splinepositions interpolated along the path every radius stepping.  Empty list if no splines in use.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Region.Region.Scale">
-<span class="sig-name descname"><span class="pre">Scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Region.Region.Scale" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Region.Region.Scale" title="Permalink to this definition">¶</a></dt>
 <dd><p>Scale the size of this region by the scaling factor. Very small regions are unmodified. Since regions may have issues when shrinking, any reductions will be limited in some way. Regions with splines will not move the splines, just adjust thickness. Should be called before adjusting sector sizing, so it can reflect the new size. Changes the xml directly.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Region.Region.Update_Radius">
-<span class="sig-name descname"><span class="pre">Update_Radius</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Region.Region.Update_Radius" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Update_Radius</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Region.Region.Update_Radius" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fills in the radius from the xml_node, adjusts for damage, and sets inner_radius. Used at init and after scaling. Note: regions with splines are not well represented by this radius.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Region.Region.Update_XML">
-<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Region.Region.Update_XML" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Region.Region.Update_XML" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update xml, adjusting spline positions.</p>
 </dd></dl>
 
@@ -833,10 +834,10 @@
 
 </section>
 <section id="region-macro-class">
-<h3>Region_Macro class<a class="headerlink" href="#region-macro-class" title="Link to this heading">¶</a></h3>
+<h3>Region_Macro class<a class="headerlink" href="#region-macro-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Region_Macro">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Macros.</span></span><span class="sig-name descname"><span class="pre">Region_Macro</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Region_Macro" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Macros.</span></span><span class="sig-name descname"><span class="pre">Region_Macro</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Region_Macro" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#Plugins.Transforms.Map.Classes.Macros.Map_Macro" title="Plugins.Transforms.Map.Classes.Macros.Map_Macro"><code class="xref py py-class docutils literal notranslate"><span class="pre">Map_Macro</span></code></a></p>
 <p>Special region dummy. These don’t have connections like other macros. Regions are defined in Clusters, but associated with sectors later.</p>
 <ul class="simple">
@@ -853,25 +854,25 @@
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Region_Macro.Is_Damage_Region">
-<span class="sig-name descname"><span class="pre">Is_Damage_Region</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Region_Macro.Is_Damage_Region" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Is_Damage_Region</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Region_Macro.Is_Damage_Region" title="Permalink to this definition">¶</a></dt>
 <dd><p>True if this region does damage.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Region_Macro.Set_Region">
-<span class="sig-name descname"><span class="pre">Set_Region</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">region</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Region_Macro.Set_Region" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Set_Region</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">region</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Region_Macro.Set_Region" title="Permalink to this definition">¶</a></dt>
 <dd><p>Link a region to this region macro.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Region_Macro.Set_Sector">
-<span class="sig-name descname"><span class="pre">Set_Sector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Region_Macro.Set_Sector" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Set_Sector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Region_Macro.Set_Sector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Associate this region with the given sector.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Region_Macro.Update_XML">
-<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Region_Macro.Update_XML" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Region_Macro.Update_XML" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the connection for this region in the cluster, as well as the region itself (splines/etc.).</p>
 </dd></dl>
 
@@ -879,10 +880,10 @@
 
 </section>
 <section id="sector-class">
-<h3>Sector class<a class="headerlink" href="#sector-class" title="Link to this heading">¶</a></h3>
+<h3>Sector class<a class="headerlink" href="#sector-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Sector">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Macros.</span></span><span class="sig-name descname"><span class="pre">Sector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Macros.</span></span><span class="sig-name descname"><span class="pre">Sector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#Plugins.Transforms.Map.Classes.Macros.Map_Macro" title="Plugins.Transforms.Map.Classes.Macros.Map_Macro"><code class="xref py py-class docutils literal notranslate"><span class="pre">Map_Macro</span></code></a></p>
 <p>Information on a cluster of sectors. Often just has one sector.</p>
 <ul class="simple">
@@ -909,19 +910,19 @@
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Sector.Get_Center">
-<span class="sig-name descname"><span class="pre">Get_Center</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector.Get_Center" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Get_Center</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector.Get_Center" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the center point of this sector, based on gate zones, or all zones if there is only one gate.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Sector.Get_Gate_Distance">
-<span class="sig-name descname"><span class="pre">Get_Gate_Distance</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector.Get_Gate_Distance" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Get_Gate_Distance</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector.Get_Gate_Distance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the maximum distance between any two gates, accelerators, or highways.  If there is just one, returns 0.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Sector.Get_Size">
-<span class="sig-name descname"><span class="pre">Get_Size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">apply_minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector.Get_Size" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Get_Size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">apply_minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector.Get_Size" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns approximate sector size, as a diamater, based on distances between zones in the sector, prioritizing gates and highways. Size will have a minimum based on the scaling factor.</p>
 <ul class="simple">
 <li><p>apply_minimum</p>
@@ -934,37 +935,37 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Sector.Has_Nonring_Highway">
-<span class="sig-name descname"><span class="pre">Has_Nonring_Highway</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector.Has_Nonring_Highway" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Has_Nonring_Highway</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector.Has_Nonring_Highway" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if this sector has a non-ring highway.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Sector.Has_Ring_Highway">
-<span class="sig-name descname"><span class="pre">Has_Ring_Highway</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector.Has_Ring_Highway" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Has_Ring_Highway</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector.Has_Ring_Highway" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if this sector has a ring highway.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Sector.Remove_Nonring_Highways">
-<span class="sig-name descname"><span class="pre">Remove_Nonring_Highways</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector.Remove_Nonring_Highways" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Remove_Nonring_Highways</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector.Remove_Nonring_Highways" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove non-ring highway connections.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Sector.Remove_Ring_Highways">
-<span class="sig-name descname"><span class="pre">Remove_Ring_Highways</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector.Remove_Ring_Highways" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Remove_Ring_Highways</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector.Remove_Ring_Highways" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove ring highway connections.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Sector.Set_Scaling_Factor">
-<span class="sig-name descname"><span class="pre">Set_Scaling_Factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector.Set_Scaling_Factor" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Set_Scaling_Factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector.Set_Scaling_Factor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the scaling factor for this sector, possibly used in some runtime calculations. Has no direct effects.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Sector.Update_XML">
-<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector.Update_XML" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Update_XML</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Sector.Update_XML" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the xml node positions of all connections. May be wrapped by subclasses to fill in extra changes.</p>
 </dd></dl>
 
@@ -972,21 +973,21 @@
 
 </section>
 <section id="sector-highway-class">
-<h3>Sector_Highway class<a class="headerlink" href="#sector-highway-class" title="Link to this heading">¶</a></h3>
+<h3>Sector_Highway class<a class="headerlink" href="#sector-highway-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Highways.Sector_Highway">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Highways.</span></span><span class="sig-name descname"><span class="pre">Sector_Highway</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Sector_Highway" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Highways.</span></span><span class="sig-name descname"><span class="pre">Sector_Highway</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Sector_Highway" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#Plugins.Transforms.Map.Classes.Highways.Highway" title="Plugins.Transforms.Map.Classes.Highways.Highway"><code class="xref py py-class docutils literal notranslate"><span class="pre">Highway</span></code></a></p>
 <p>Information on sector highway.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Highways.Sector_Highway.Contains_Gate">
-<span class="sig-name descname"><span class="pre">Contains_Gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Sector_Highway.Contains_Gate" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Contains_Gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Sector_Highway.Contains_Gate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dummy function returns False, for easy of use with zones.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Highways.Sector_Highway.Update_Splines">
-<span class="sig-name descname"><span class="pre">Update_Splines</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Sector_Highway.Update_Splines" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Update_Splines</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Sector_Highway.Update_Splines" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adjust spline positions based on endpoint positions.</p>
 </dd></dl>
 
@@ -994,10 +995,10 @@
 
 </section>
 <section id="zone-class">
-<h3>Zone class<a class="headerlink" href="#zone-class" title="Link to this heading">¶</a></h3>
+<h3>Zone class<a class="headerlink" href="#zone-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Zone">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Macros.</span></span><span class="sig-name descname"><span class="pre">Zone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Zone" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Macros.</span></span><span class="sig-name descname"><span class="pre">Zone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Zone" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#Plugins.Transforms.Map.Classes.Macros.Map_Macro" title="Plugins.Transforms.Map.Classes.Macros.Map_Macro"><code class="xref py py-class docutils literal notranslate"><span class="pre">Map_Macro</span></code></a></p>
 <p>Basic zone info. Note: zone objects can be up to 50km or so away from the zone center.</p>
 <ul class="simple">
@@ -1024,37 +1025,37 @@
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Zone.Contains_Gate">
-<span class="sig-name descname"><span class="pre">Contains_Gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Zone.Contains_Gate" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Contains_Gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Zone.Contains_Gate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if this zone has a gate (including accelerator or zone highway).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Zone.Contains_Gate_Or_Highway">
-<span class="sig-name descname"><span class="pre">Contains_Gate_Or_Highway</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Zone.Contains_Gate_Or_Highway" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Contains_Gate_Or_Highway</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Zone.Contains_Gate_Or_Highway" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if this zone has a gate or highway entry/exit.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Zone.Get_Center">
-<span class="sig-name descname"><span class="pre">Get_Center</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Zone.Get_Center" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Get_Center</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Zone.Get_Center" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the center point of this zone, based on connections and god objects.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Zone.Get_Sector_Conn">
-<span class="sig-name descname"><span class="pre">Get_Sector_Conn</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Zone.Get_Sector_Conn" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Get_Sector_Conn</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Zone.Get_Sector_Conn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the parent Sector Connection.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Zone.Get_Size">
-<span class="sig-name descname"><span class="pre">Get_Size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Zone.Get_Size" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Get_Size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Zone.Get_Size" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns approximate zone size, as a diamater.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Macros.Zone.Update_Radius">
-<span class="sig-name descname"><span class="pre">Update_Radius</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Zone.Update_Radius" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Update_Radius</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Macros.Zone.Update_Radius" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the radius.  Call this if a new object was added.</p>
 </dd></dl>
 
@@ -1062,10 +1063,10 @@
 
 </section>
 <section id="zone-highway-class">
-<h3>Zone_Highway class<a class="headerlink" href="#zone-highway-class" title="Link to this heading">¶</a></h3>
+<h3>Zone_Highway class<a class="headerlink" href="#zone-highway-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Highways.Zone_Highway">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Highways.</span></span><span class="sig-name descname"><span class="pre">Zone_Highway</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Zone_Highway" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Transforms.Map.Classes.Highways.</span></span><span class="sig-name descname"><span class="pre">Zone_Highway</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Zone_Highway" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#Plugins.Transforms.Map.Classes.Highways.Highway" title="Plugins.Transforms.Map.Classes.Highways.Highway"><code class="xref py py-class docutils literal notranslate"><span class="pre">Highway</span></code></a></p>
 <p>Information on zone highway.</p>
 <ul class="simple">
@@ -1077,7 +1078,7 @@
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="Plugins.Transforms.Map.Classes.Highways.Zone_Highway.Update_Splines">
-<span class="sig-name descname"><span class="pre">Update_Splines</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Zone_Highway.Update_Splines" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Update_Splines</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Transforms.Map.Classes.Highways.Zone_Highway.Update_Splines" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adjust spline positions based on endpoint positions.</p>
 </dd></dl>
 
@@ -1217,8 +1218,8 @@
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-    &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+        &#169; Copyright .
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>
 </html>

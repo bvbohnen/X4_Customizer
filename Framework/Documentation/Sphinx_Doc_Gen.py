@@ -67,6 +67,7 @@ def Make_Sphinx_Doc(
         title : str = None,
         copyright : str = None,
         version : str = None,
+        #cleanup : bool = True,
     ):
     '''
     Generate documentation for all python packages within a given folder,
@@ -109,6 +110,12 @@ def Make_Sphinx_Doc(
       - String, copyright to add to the documentation.
     * version
       - String, version of the documentation.
+    '''
+    '''
+    TODO:
+    * cleanup
+      - Bool, if True (default) then intermediate sphynx files will be
+        removed when finished.
     '''
     # Return early if sphinx not found.
     try:

@@ -118,9 +118,21 @@ def Adjust_Generic_Mult(scaling_rules, adjust_method_name):
             bullet_new_mults[bullet].append(multiplier)
 
     # Average for each bullet.
-    for bullet, mults in bullet_new_mults.items():
-        mult = sum(mults) / len(mults)
-        getattr(bullet, adjust_method_name)(mult)
+    # Note: visit all non-ref bullets first, then the bullets with refs,
+    # so the latter can correctly consider the modifications to their
+    # ref'd macro.
+    for ref_pass in [False, True]:
+        for bullet, mults in bullet_new_mults.items():
+            # Check bullet ref and skip if not the right pass.
+            if ((bullet.ref is None and ref_pass is True)
+            or (bullet.ref is not None and ref_pass is False)):
+                continue
+            mult = sum(mults) / len(mults)
+            try:
+                getattr(bullet, adjust_method_name)(mult)
+            except RuntimeError as ex:
+                Plugin_Log.Print(
+                    f'Skipping {bullet.name} due to error: {ex}')
         
     # Apply the xml changes.
     database.Update_XML()
@@ -263,8 +275,13 @@ def Adjust_Weapon_Fire_Rate(
             bullet = weapon.Get_Bullet()
 
             # Prior overall rof.
-            rof = bullet.Get_Rate_Of_Fire()
-
+            try:
+                rof = bullet.Get_Rate_Of_Fire()
+            except RuntimeError as ex:
+                Plugin_Log.Print(
+                    f'Skipping {bullet.name} due to error: {ex}')
+                continue
+                
             # Scale, and limit to min.
             new_rof = rof * multiplier
             if min:
@@ -279,16 +296,24 @@ def Adjust_Weapon_Fire_Rate(
 
 
     # Average the bullet rofs and apply.
-    for bullet, new_rofs in bullet_new_rofs.items():
-        old_rof = bullet.Get_Rate_Of_Fire()
-        new_rof = sum(new_rofs) / len(new_rofs)
-        bullet.Set_Rate_Of_Fire(new_rof)
+    # Similar to further above, handle non-refs first, then refs.        
+    for ref_pass in [False, True]:
+        for bullet, new_rofs in bullet_new_rofs.items():
+            
+            # Check bullet ref and skip if not the right pass.
+            if ((bullet.ref is None and ref_pass is True)
+            or (bullet.ref is not None and ref_pass is False)):
+                continue
+            
+            old_rof = bullet.Get_Rate_Of_Fire()
+            new_rof = sum(new_rofs) / len(new_rofs)
+            bullet.Set_Rate_Of_Fire(new_rof)
 
-        # Adjust damage and heat to counter this change, eg. half damage
-        # at double rof.
-        multiplier = new_rof / old_rof
-        bullet.Adjust_Damage(1 / multiplier)
-        bullet.Adjust_Heat(1 / multiplier)
+            # Adjust damage and heat to counter this change, eg. half damage
+            # at double rof.
+            multiplier = new_rof / old_rof
+            bullet.Adjust_Damage(1 / multiplier)
+            bullet.Adjust_Heat(1 / multiplier)
         
     # Apply the xml changes.
     database.Update_XML()

@@ -14,7 +14,7 @@ this_dir = Path(__file__).resolve().parents[1]
 Settings(
     extension_name = 'test_customizer',
     path_to_x4_folder = r'D:\Games\Steam\SteamApps\common\X4 Foundations',
-    extension_whitelist = 'ego_dlc_split;ego_dlc_terran;ego_dlc_pirate;ego_dlc_boron',
+    extension_whitelist = 'ego_dlc_split;ego_dlc_terran;ego_dlc_pirate;ego_dlc_boron;ego_dlc_timelines',
     developer = 1,
     )
 
@@ -257,6 +257,11 @@ if 0 or test_all:
         ('tags small standard weapon'   , 2),
         ('tags missile'                 , 2),
         )
+    
+if 0 or test_all:
+    # Tests some bullets that use refs in the timelines dlc.
+    Adjust_Weapon_Fire_Rate(('tags combat', 4))
+    Adjust_Weapon_Shot_Speed(('tags combat', 4))
 
 # Weapon transforms and printout.
 if 0 or test_all:

@@ -1,17 +1,18 @@
+
 <!DOCTYPE html>
 
-<html lang="en" data-content_root="./">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>Utilities &#8212; X4_Customizer Source Documentation  documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=c135b40c" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
     
-    <script src="_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -40,14 +41,14 @@
           <div class="body" role="main">
             
   <section id="utilities">
-<h1>Utilities<a class="headerlink" href="#utilities" title="Link to this heading">¶</a></h1>
+<h1>Utilities<a class="headerlink" href="#utilities" title="Permalink to this heading">¶</a></h1>
 <section id="functions">
-<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading">¶</a></h2>
 <section id="cat-pack-function">
-<h3>Cat_Pack function<a class="headerlink" href="#cat-pack-function" title="Link to this heading">¶</a></h3>
+<h3>Cat_Pack function<a class="headerlink" href="#cat-pack-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Utilities.Catalog.Cat_Pack">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Catalog.</span></span><span class="sig-name descname"><span class="pre">Cat_Pack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_dir_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest_cat_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generate_sigs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">separate_sigs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Catalog.Cat_Pack" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Catalog.</span></span><span class="sig-name descname"><span class="pre">Cat_Pack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_dir_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest_cat_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generate_sigs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">separate_sigs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Catalog.Cat_Pack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Packs all files in subdirectories of the given directory into a new catalog file.  Only subdirectories matching those used in the X4 file system are considered.</p>
 <ul class="simple">
 <li><p>source_dir_path</p>
@@ -90,10 +91,10 @@
 
 </section>
 <section id="cat-unpack-function">
-<h3>Cat_Unpack function<a class="headerlink" href="#cat-unpack-function" title="Link to this heading">¶</a></h3>
+<h3>Cat_Unpack function<a class="headerlink" href="#cat-unpack-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Utilities.Catalog.Cat_Unpack">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Catalog.</span></span><span class="sig-name descname"><span class="pre">Cat_Unpack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_cat_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest_dir_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_md5_errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Catalog.Cat_Unpack" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Catalog.</span></span><span class="sig-name descname"><span class="pre">Cat_Unpack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_cat_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest_dir_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_md5_errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Catalog.Cat_Unpack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unpack a single catalog file, or a group if a folder given. When a file is in multiple catalogs, the latest one in the list will be used. If a file is already present at the destination, it is compared to the catalog version and skipped if the same.</p>
 <ul class="simple">
 <li><p>source_cat_path</p>
@@ -131,19 +132,19 @@
 
 </section>
 <section id="check-all-extensions-function">
-<h3>Check_All_Extensions function<a class="headerlink" href="#check-all-extensions-function" title="Link to this heading">¶</a></h3>
+<h3>Check_All_Extensions function<a class="headerlink" href="#check-all-extensions-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Utilities.Check_Extension.Check_All_Extensions">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Check_Extension.</span></span><span class="sig-name descname"><span class="pre">Check_All_Extensions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Check_Extension.Check_All_Extensions" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Check_Extension.</span></span><span class="sig-name descname"><span class="pre">Check_All_Extensions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Check_Extension.Check_All_Extensions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calls Check_Extension on all enabled extensions, looking for errors. Returns True if no errors found, else False.</p>
 </dd></dl>
 
 </section>
 <section id="check-extension-function">
-<h3>Check_Extension function<a class="headerlink" href="#check-extension-function" title="Link to this heading">¶</a></h3>
+<h3>Check_Extension function<a class="headerlink" href="#check-extension-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Utilities.Check_Extension.Check_Extension">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Check_Extension.</span></span><span class="sig-name descname"><span class="pre">Check_Extension</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extension_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_other_orderings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_log_messages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Check_Extension.Check_Extension" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Check_Extension.</span></span><span class="sig-name descname"><span class="pre">Check_Extension</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extension_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_other_orderings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_log_messages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Check_Extension.Check_Extension" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks an extension for xml diff patch errors and dependency errors. Problems are printed to the console. Returns True if no errors found, else False.</p>
 <p>Performs up to three passes that adjust extension loading order: in alphabetical folder order, as early as possible (after its dependencies), and as late as possible (after all other extensions that can go before it).</p>
 <ul class="simple">
@@ -172,29 +173,29 @@
 
 </section>
 <section id="element-to-pieces-function">
-<h3>Element_To_Pieces function<a class="headerlink" href="#element-to-pieces-function" title="Link to this heading">¶</a></h3>
+<h3>Element_To_Pieces function<a class="headerlink" href="#element-to-pieces-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Utilities.Generate_Diffs.Element_To_Pieces">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Generate_Diffs.</span></span><span class="sig-name descname"><span class="pre">Element_To_Pieces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Generate_Diffs.Element_To_Pieces" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Generate_Diffs.</span></span><span class="sig-name descname"><span class="pre">Element_To_Pieces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Generate_Diffs.Element_To_Pieces" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of Element_Pieces for a given xml node.</p>
 </dd></dl>
 
 </section>
 <section id="fill-element-hashes-function">
-<h3>Fill_Element_Hashes function<a class="headerlink" href="#fill-element-hashes-function" title="Link to this heading">¶</a></h3>
+<h3>Fill_Element_Hashes function<a class="headerlink" href="#fill-element-hashes-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Utilities.Generate_Diffs.Fill_Element_Hashes">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Generate_Diffs.</span></span><span class="sig-name descname"><span class="pre">Fill_Element_Hashes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr_hash_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_attr_hash_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Generate_Diffs.Fill_Element_Hashes" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Generate_Diffs.</span></span><span class="sig-name descname"><span class="pre">Fill_Element_Hashes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr_hash_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_attr_hash_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Generate_Diffs.Fill_Element_Hashes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a pair of dicts matching each xml element to a hash string, where the hash accounts for the node tag, attributes, and the hashes of all child nodes in order.</p>
 <p>The first dict includes node attributes in the hash; the second does not include attributes (of this node or any children).</p>
 </dd></dl>
 
 </section>
 <section id="generate-diff-function">
-<h3>Generate_Diff function<a class="headerlink" href="#generate-diff-function" title="Link to this heading">¶</a></h3>
+<h3>Generate_Diff function<a class="headerlink" href="#generate-diff-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Utilities.Generate_Diffs.Generate_Diff">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Generate_Diffs.</span></span><span class="sig-name descname"><span class="pre">Generate_Diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified_file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_unchanged</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Generate_Diffs.Generate_Diff" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Generate_Diffs.</span></span><span class="sig-name descname"><span class="pre">Generate_Diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified_file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_unchanged</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Generate_Diffs.Generate_Diff" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a diff of changes between two xml files, creating a diff patch.</p>
 <ul class="simple">
 <li><p>original_file_path</p>
@@ -228,10 +229,10 @@
 
 </section>
 <section id="generate-diffs-function">
-<h3>Generate_Diffs function<a class="headerlink" href="#generate-diffs-function" title="Link to this heading">¶</a></h3>
+<h3>Generate_Diffs function<a class="headerlink" href="#generate-diffs-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Utilities.Generate_Diffs.Generate_Diffs">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Generate_Diffs.</span></span><span class="sig-name descname"><span class="pre">Generate_Diffs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_dir_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified_dir_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_unchanged</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Generate_Diffs.Generate_Diffs" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Generate_Diffs.</span></span><span class="sig-name descname"><span class="pre">Generate_Diffs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_dir_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified_dir_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_unchanged</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Generate_Diffs.Generate_Diffs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate diffs for changes between two xml containing folders, creating diff patches.</p>
 <ul class="simple">
 <li><p>original_dir_path</p>
@@ -265,19 +266,19 @@
 
 </section>
 <section id="get-text-diff-matches-function">
-<h3>Get_Text_Diff_Matches function<a class="headerlink" href="#get-text-diff-matches-function" title="Link to this heading">¶</a></h3>
+<h3>Get_Text_Diff_Matches function<a class="headerlink" href="#get-text-diff-matches-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Utilities.Generate_Diffs.Get_Text_Diff_Matches">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Generate_Diffs.</span></span><span class="sig-name descname"><span class="pre">Get_Text_Diff_Matches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified_root</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Generate_Diffs.Get_Text_Diff_Matches" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Generate_Diffs.</span></span><span class="sig-name descname"><span class="pre">Get_Text_Diff_Matches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified_root</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Generate_Diffs.Get_Text_Diff_Matches" title="Permalink to this definition">¶</a></dt>
 <dd><p>Identify modifications with the help of a text diff library. Returns a dict matching original elements to modified elements that appear to be the same, along with a bool “changed” flag indicating if any changes were found.</p>
 </dd></dl>
 
 </section>
 <section id="make-extension-content-xml-function">
-<h3>Make_Extension_Content_XML function<a class="headerlink" href="#make-extension-content-xml-function" title="Link to this heading">¶</a></h3>
+<h3>Make_Extension_Content_XML function<a class="headerlink" href="#make-extension-content-xml-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Utilities.Write_Mod_Files.Make_Extension_Content_XML">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Write_Mod_Files.</span></span><span class="sig-name descname"><span class="pre">Make_Extension_Content_XML</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">author</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sync</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Write_Mod_Files.Make_Extension_Content_XML" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Write_Mod_Files.</span></span><span class="sig-name descname"><span class="pre">Make_Extension_Content_XML</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">author</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sync</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Write_Mod_Files.Make_Extension_Content_XML" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds an xml file object defining the content.xml for the top of the extension.  Common fields can be specified, or left as defaults.</p>
 <ul class="simple">
 <li><p>name</p>
@@ -321,47 +322,47 @@
 
 </section>
 <section id="match-children-function">
-<h3>Match_Children function<a class="headerlink" href="#match-children-function" title="Link to this heading">¶</a></h3>
+<h3>Match_Children function<a class="headerlink" href="#match-children-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Utilities.Generate_Diffs.Match_Children">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Generate_Diffs.</span></span><span class="sig-name descname"><span class="pre">Match_Children</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr_hash_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_attr_hash_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_based_node_matches</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Generate_Diffs.Match_Children" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Generate_Diffs.</span></span><span class="sig-name descname"><span class="pre">Match_Children</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr_hash_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_attr_hash_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_based_node_matches</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Generate_Diffs.Match_Children" title="Permalink to this definition">¶</a></dt>
 <dd><p>Search the children of the given pair of elements, and copy tags from the original elements to the modified elements where matches are found.</p>
 </dd></dl>
 
 </section>
 <section id="match-trees-function">
-<h3>Match_Trees function<a class="headerlink" href="#match-trees-function" title="Link to this heading">¶</a></h3>
+<h3>Match_Trees function<a class="headerlink" href="#match-trees-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Utilities.Generate_Diffs.Match_Trees">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Generate_Diffs.</span></span><span class="sig-name descname"><span class="pre">Match_Trees</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified_root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_based_node_matches</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Generate_Diffs.Match_Trees" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Generate_Diffs.</span></span><span class="sig-name descname"><span class="pre">Match_Trees</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modified_root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_based_node_matches</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Generate_Diffs.Match_Trees" title="Permalink to this definition">¶</a></dt>
 <dd><p>Manually compare nodes between the xml trees, and try to find matches. Updates modified_root tail ids directly.</p>
 </dd></dl>
 
 </section>
 <section id="update-content-xml-dependencies-function">
-<h3>Update_Content_XML_Dependencies function<a class="headerlink" href="#update-content-xml-dependencies-function" title="Link to this heading">¶</a></h3>
+<h3>Update_Content_XML_Dependencies function<a class="headerlink" href="#update-content-xml-dependencies-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Utilities.Write_Mod_Files.Update_Content_XML_Dependencies">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Write_Mod_Files.</span></span><span class="sig-name descname"><span class="pre">Update_Content_XML_Dependencies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Write_Mod_Files.Update_Content_XML_Dependencies" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Write_Mod_Files.</span></span><span class="sig-name descname"><span class="pre">Update_Content_XML_Dependencies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Write_Mod_Files.Update_Content_XML_Dependencies" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the dependencies in the content xml file, based on which other extensions touched files modified by the current script. If applied to an existing content.xml (not one created here), existing dependencies are kept, and only customizer dependencies are updated.</p>
 <p>Note: an existing xml file may loose custom formatting.</p>
 </dd></dl>
 
 </section>
 <section id="write-modified-binaries-function">
-<h3>Write_Modified_Binaries function<a class="headerlink" href="#write-modified-binaries-function" title="Link to this heading">¶</a></h3>
+<h3>Write_Modified_Binaries function<a class="headerlink" href="#write-modified-binaries-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Utilities.Write_Mod_Files.Write_Modified_Binaries">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Write_Mod_Files.</span></span><span class="sig-name descname"><span class="pre">Write_Modified_Binaries</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Write_Mod_Files.Write_Modified_Binaries" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Write_Mod_Files.</span></span><span class="sig-name descname"><span class="pre">Write_Modified_Binaries</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Write_Mod_Files.Write_Modified_Binaries" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write out any modified binaries.  These are placed in the main x4 folder, not in an extension.</p>
 </dd></dl>
 
 </section>
 <section id="write-to-extension-function">
-<h3>Write_To_Extension function<a class="headerlink" href="#write-to-extension-function" title="Link to this heading">¶</a></h3>
+<h3>Write_To_Extension function<a class="headerlink" href="#write-to-extension-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Utilities.Write_Mod_Files.Write_To_Extension">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Write_Mod_Files.</span></span><span class="sig-name descname"><span class="pre">Write_To_Extension</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skip_content</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Write_Mod_Files.Write_To_Extension" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Write_Mod_Files.</span></span><span class="sig-name descname"><span class="pre">Write_To_Extension</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skip_content</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Write_Mod_Files.Write_To_Extension" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write all currently modified game files to the extension folder. Existing files at the location written on a prior call will be cleared out. Content.xml will have dependencies added for files modified from existing extensions.</p>
 <ul class="simple">
 <li><p>skip_content</p>
@@ -376,10 +377,10 @@
 
 </section>
 <section id="pattern-match-function">
-<h3>_Pattern_Match function<a class="headerlink" href="#pattern-match-function" title="Link to this heading">¶</a></h3>
+<h3>_Pattern_Match function<a class="headerlink" href="#pattern-match-function" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="Plugins.Utilities.Catalog._Pattern_Match">
-<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Catalog.</span></span><span class="sig-name descname"><span class="pre">_Pattern_Match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_patterns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_patterns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Catalog._Pattern_Match" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Catalog.</span></span><span class="sig-name descname"><span class="pre">_Pattern_Match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_patterns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_patterns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Catalog._Pattern_Match" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks a name against the given patterns. Returns True on match, False on mismatch.</p>
 <ul class="simple">
 <li><p>include_patterns</p>
@@ -399,12 +400,12 @@
 </section>
 </section>
 <section id="classes">
-<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<h2>Classes<a class="headerlink" href="#classes" title="Permalink to this heading">¶</a></h2>
 <section id="element-piece-class">
-<h3>Element_Piece class<a class="headerlink" href="#element-piece-class" title="Link to this heading">¶</a></h3>
+<h3>Element_Piece class<a class="headerlink" href="#element-piece-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Utilities.Generate_Diffs.Element_Piece">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Generate_Diffs.</span></span><span class="sig-name descname"><span class="pre">Element_Piece</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xml</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Generate_Diffs.Element_Piece" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Generate_Diffs.</span></span><span class="sig-name descname"><span class="pre">Element_Piece</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xml</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Generate_Diffs.Element_Piece" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>For better difflib matching, this will be just a piece of an xml element.</p>
 <ul class="simple">
@@ -428,10 +429,10 @@
 
 </section>
 <section id="element-wrap-class">
-<h3>Element_Wrap class<a class="headerlink" href="#element-wrap-class" title="Link to this heading">¶</a></h3>
+<h3>Element_Wrap class<a class="headerlink" href="#element-wrap-class" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="Plugins.Utilities.Generate_Diffs.Element_Wrap">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Generate_Diffs.</span></span><span class="sig-name descname"><span class="pre">Element_Wrap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Generate_Diffs.Element_Wrap" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Plugins.Utilities.Generate_Diffs.</span></span><span class="sig-name descname"><span class="pre">Element_Wrap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Plugins.Utilities.Generate_Diffs.Element_Wrap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Wrapper on xml elements with custom comparison rules.</p>
 </dd></dl>
@@ -551,8 +552,8 @@
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-    &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+        &#169; Copyright .
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     </div>
   </body>
 </html>

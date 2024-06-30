@@ -5,7 +5,7 @@
     <ProjectGuid>f321f45f-39ee-4cc8-91e7-bfec28462c97</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>Make_Documentation.py</StartupFile>
+    <StartupFile>Main.py</StartupFile>
     <SearchPath>..\Framework;..\..\X4_Customizer</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>

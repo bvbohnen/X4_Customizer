@@ -220,6 +220,10 @@ from .Live_Editor_Components import Live_Editor
 from . import Main
 from . import Make_Documentation
 
+# Exe maker needs to be imported to work around a pyinstaller issue (see
+# that module for more comments).
+from . import Make_Executable
+
 def _Init():
     '''
     One-time setup, not to be part of * imports.

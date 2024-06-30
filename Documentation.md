@@ -1,4 +1,4 @@
-X4 Customizer 1.24.11
+X4 Customizer 1.24.12
 -----------------
 
 This tool offers a framework for modding the X4 and extension game files programmatically, guided by user selected plugins (analyses, transforms, utilities). Features include:
@@ -1375,3 +1375,5 @@ Change Log:
    - Check_Extension will only check xml files.
  * 1.24.11
    - Added html documentation of the source code.
+ * 1.24.12
+   - Added some support for weapon macros using refs, as occurs in the timelines dlc.
